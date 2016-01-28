@@ -147,5 +147,12 @@ SmallMatrix<Scalar> operator*(SmallMatrix<Scalar> m, Scalar s) {
     return s * m;
 }
 
+template <typename Scalar>
+SmallMatrix<Scalar> operator+(SmallMatrix<Scalar> m,
+                              const SmallMatrix<Scalar>& n) {
+    m += n;
+    return m;
+}
+
 }  // liblinalg
 #endif

@@ -129,6 +129,7 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
     /**
      * See documentation of Matrix_i function of the same name.
      */
+    // TODO comment: this is expensive for products of more than 2 lazy matrices
     virtual void fill(size_type start_row, size_type start_col,
                       SmallMatrix<scalar_type>& block, bool add = false,
                       scalar_type c_this = Constants<scalar_type>::one) const {

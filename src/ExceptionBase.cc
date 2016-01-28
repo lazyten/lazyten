@@ -5,7 +5,7 @@
 #include <cstring>
 #include <sstream>
 
-#ifdef HAVE_GLIBC_STACKTRACE
+#ifdef LINALGWRAP_HAVE_GLIBC_STACKTRACE
 #include <execinfo.h>
 #endif
 
@@ -34,7 +34,7 @@ void ExceptionBase::add_exc_data(const char* file, int line,
     m_function = function;
     m_failed_condition = failed_condition;
 
-#ifdef HAVE_GLIBC_STACKTRACE
+#ifdef LINALGWRAP_HAVE_GLIBC_STACKTRACE
     // If the system supports it, get a stacktrace how we got here
     // We defer the symbol lookup via backtrace_symbols() since
     // this loads external libraries which can take up to seconds
@@ -70,7 +70,7 @@ void ExceptionBase::print_stacktrace(std::ostream& out) const {
     // return if no stracktrace frames
     if (m_n_stacktrace_frames <= 0) return;
 
-#ifdef HAVE_GLIBC_STACKTRACE
+#ifdef LINALGWRAP_HAVE_GLIBC_STACKTRACE
     // We have deferred the symbol lookup to this point to avoid costly
     // runtime penalties due to linkage of external libraries by
     // backtrace_symbols.
@@ -129,7 +129,7 @@ void ExceptionBase::print_stacktrace(std::ostream& out) const {
         // print the file name:
         out << file;
 
-#ifdef HAVE_LIBSTDCXX_DEMANGLER
+#ifdef LINALGWRAP_HAVE_LIBSTDCXX_DEMANGLER
         // try to demangle the function name:
         int status;
         char* p = abi::__cxa_demangle(functionname.c_str(), 0, 0, &status);

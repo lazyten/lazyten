@@ -1,12 +1,6 @@
 #ifndef LINALGWRAP_EXCEPTION_BASE_H_
 #define LINALGWRAP_EXCEPTION_BASE_H_
 
-// TODO this is hard coded
-//      make it dynamic via a cmake check
-#define HAVE_GLIBC_STACKTRACE
-#define HAVE_LIBSTDCXX_DEMANGLER
-// NOTE: this requires the linker flag -rdynamic
-
 #include <exception>
 #include <ostream>
 #include <string>
@@ -68,7 +62,7 @@ class ExceptionBase : public std::exception {
      */
     int m_n_stacktrace_frames;
 
-#ifdef HAVE_GLIBC_STACKTRACE
+#ifdef LINALGWRAP_HAVE_GLIBC_STACKTRACE
     /**
      *   array of pointers that contains the raw stack trace
      */
