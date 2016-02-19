@@ -29,7 +29,7 @@ if (LINALGWRAP_WITH_EXTERNAL_RAPIDCHECK)
 else()
 	# We need to compile rapidcheck further down in the externals
 	# add it to the dependencies right here:
-	set(LINALGWRAP_DEPENDENCIES_TEST ${LINALGWRAP_DEPENDENCIES_TEST} rapidcheck rapidcheck_catch)
+	set(LINALGWRAP_DEPENDENCIES_TEST ${LINALGWRAP_DEPENDENCIES_TEST} rapidcheck catch)
 endif()
 
 

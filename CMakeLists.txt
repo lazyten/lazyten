@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 2.8.8)
 
+# Setup options, has to be done BEFORE project definition.
+include(cmake/setup_options.cmake)
+
 if (CMAKE_VERSION VERSION_LESS "3.0.0")
 	# work around the new version feature introduced
 	# for cmake 3.0.0
@@ -13,9 +16,6 @@ endif()
 
 # enable testing of this project
 enable_testing()
-
-# Setup options
-include(cmake/setup_options.cmake)
 
 ##########################################################################
 # Setup compiler and dependencies:

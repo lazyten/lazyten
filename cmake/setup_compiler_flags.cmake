@@ -13,6 +13,10 @@
 #	CMAKE_STATIC_LINKER_FLAGS_DEBUG		Extra flags for the debug build
 #	CMAKE_STATIC_LINKER_FLAGS_RELEASE	Extra flags for the release build
 #
+#	CMAKE_EXE_LINKER_FLAGS			Flags for linking executables, all builds
+#	CMAKE_EXE_LINKER_FLAGS_DEBUG		Extra flags for the debug build
+#	CMAKE_EXE_LINKER_FLAGS_RELEASE		Extra flags for the release build
+#
 #	LINALGWRAP_DEFINITIONS			Extra definitions for all builds
 #	LINALGWRAP_DEFINITIONS_DEBUG		Extra definitions for debug builds
 # 	LINALGWRAP_DEFINITIONS_RELEASE		Extra definitions for release builds
