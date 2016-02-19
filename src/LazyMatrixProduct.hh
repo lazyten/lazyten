@@ -43,6 +43,7 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
 
         swap(first.m_coefficient, second.m_coefficient);
         swap(first.m_factors, second.m_factors);
+        swap(static_cast<base_type&>(first), static_cast<base_type&>(second));
     }
 
     //

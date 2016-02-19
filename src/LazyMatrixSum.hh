@@ -31,6 +31,7 @@ class LazyMatrixExpression;
     }
 
 /** Class to represent the sum of different MatrixProducts
+ * It may include stored terms as well.
  */
 template <typename StoredMatrix>
 class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
@@ -50,6 +51,10 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
      *
      * Stores a reference to a stored matrix (by the means of a
      * subscription pointer) and a coefficient.
+     *
+     * @note: This implies that changing the stored matrix after
+     *        enwrapping it in this term structure changes the
+     *        value of this term as well!
      */
     class StoredTerm {
       public:
@@ -86,6 +91,7 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
         swap(first.m_n_cols, second.m_n_cols);
         swap(first.m_lazy_terms, second.m_lazy_terms);
         swap(first.m_stored_terms, second.m_stored_terms);
+        swap(static_cast<base_type&>(first), static_cast<base_type&>(second));
     }
 
     //
