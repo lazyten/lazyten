@@ -22,20 +22,8 @@ class SubscriptionPointer {
     friend void swap(SubscriptionPointer& first, SubscriptionPointer& second) {
         using std::swap;
 
-        swap(first.m_subscriber_id, second.m_subscriber_id);
-        swap(first.m_subscribable_ptr, second.m_subscribable_ptr);
-    }
-
-    /** Create a Subscription pointer from a Subscribable Class and an
-     * identifier
-     *
-     * \param subscriber_id  identifier used for subscription
-     * \param s object to subscribe to
-     * */
-    SubscriptionPointer(const std::string& subscriber_id, T& s)
-          : m_subscriber_id(subscriber_id), m_subscribable_ptr(nullptr) {
-        // Register this subscription
-        register_at(&s);
+        swap(first.m_subscriber_id_ptr, second.m_subscriber_id_ptr);
+        swap(first.m_subscribed_obj_ptr, second.m_subscribed_obj_ptr);
     }
 
     /** \brief Create an empty Subscription pointer pointing to no object at all
@@ -45,7 +33,20 @@ class SubscriptionPointer {
      * \param subscriber_id Id used for the subscription.
      * */
     explicit SubscriptionPointer(const std::string& subscriber_id)
-          : m_subscriber_id(subscriber_id), m_subscribable_ptr(nullptr) {}
+          : m_subscriber_id_ptr(new std::string(subscriber_id)),
+            m_subscribed_obj_ptr(nullptr) {}
+
+    /** Create a Subscription pointer from a Subscribable Class and an
+     * identifier
+     *
+     * \param subscriber_id  identifier used for subscription
+     * \param s object to subscribe to
+     * */
+    SubscriptionPointer(const std::string& subscriber_id, T& s)
+          : SubscriptionPointer(subscriber_id) {
+        // Register this subscription
+        register_at(&s);
+    }
 
     /** Destructor */
     ~SubscriptionPointer() {
@@ -55,19 +56,22 @@ class SubscriptionPointer {
 
     /** Copy constructor */
     SubscriptionPointer(const SubscriptionPointer& other)
-          : m_subscriber_id(other.m_subscriber_id),
-            m_subscribable_ptr(nullptr) {
+          : m_subscriber_id_ptr(new std::string(*(other.m_subscriber_id_ptr))),
+            m_subscribed_obj_ptr(nullptr) {
 
         // Register the subscription
-        register_at(other.m_subscribable_ptr);
+        register_at(other.m_subscribed_obj_ptr);
     }
 
     /** Move constructor */
     SubscriptionPointer(SubscriptionPointer&& other)
-          : m_subscriber_id(std::move(other.m_subscriber_id)),
-            m_subscribable_ptr(other.m_subscribable_ptr) {
-        // set pointer to nullptr just to be sure:
-        other.m_subscribable_ptr = nullptr;
+          : m_subscriber_id_ptr(new std::string(*other.m_subscriber_id_ptr)),
+            m_subscribed_obj_ptr(nullptr) {
+        // Register us:
+        register_at(other.m_subscribed_obj_ptr);
+
+        // Unregister the other object:
+        other.register_at(nullptr);
     }
 
     /** Assignment operator */
@@ -89,39 +93,61 @@ class SubscriptionPointer {
     void reset() { register_at(nullptr); }
 
     /** \brief Check if this object is empty or not */
-    explicit operator bool() const { return m_subscribable_ptr != nullptr; }
+    explicit operator bool() const { return m_subscribed_obj_ptr != nullptr; }
 
     /** \brief Raw access to the inner pointer */
-    T* get() const { return m_subscribable_ptr; }
+    T* get() const { return m_subscribed_obj_ptr; }
 
     /** Dereference object */
-    T& operator*() const { return *m_subscribable_ptr; }
+    T& operator*() const { return *m_subscribed_obj_ptr; }
 
     /** Dereference object member */
-    T* operator->() const { return m_subscribable_ptr; }
+    T* operator->() const { return m_subscribed_obj_ptr; }
+
+    const std::string& subscriber_id() { return *m_subscriber_id_ptr; }
 
   private:
     /** Register at the given object */
     void register_at(T* object_ptr) {
-        if (m_subscribable_ptr) {
+        if (m_subscribed_obj_ptr) {
             // Unregister subscription of this pointer from old object
-            m_subscribable_ptr->unsubscribe(m_subscriber_id);
-            m_subscribable_ptr = nullptr;
+            m_subscribed_obj_ptr->unsubscribe(m_subscriber_id_ptr);
+            m_subscribed_obj_ptr = nullptr;
         }
 
         if (object_ptr) {
             // Register subscription at new object
-            object_ptr->subscribe(m_subscriber_id);
-            m_subscribable_ptr = object_ptr;
+            object_ptr->subscribe(m_subscriber_id_ptr);
+            m_subscribed_obj_ptr = object_ptr;
         }
     }
 
-    const std::string m_subscriber_id;
-    T* m_subscribable_ptr;
+    // Use a unique_ptr of string here.
+    std::shared_ptr<const std::string> m_subscriber_id_ptr;
+    T* m_subscribed_obj_ptr;
 };
 
+// TODO improve subscribable - subscription system and remove
+//      some of the problems mentioned below.
 /**
- * Convenience wrapper for making subscription pointers
+ * \brief Convenience wrapper for making subscription pointers
+ * and subscribing to objects
+ *
+ * When making subscriptions to a reference in this
+ * way, the mechanism protects you from deallocating
+ * the referenced object and leaving a dangling pointer
+ * behind.
+ *
+ * It does *not* protect you from doing silly things to
+ * the actual memory, however. So if you move the object
+ * somewhere else, i.e. invalidate its memory while
+ * still holding subscriptions to it, this mechanism
+ * does not detect and complain about this.
+ *
+ * Similarly if you make changes to the object after
+ * having made these subscriptions, these changes are
+ * of course also seen from the Subscription pointers
+ * which hold a subscription to said object.
  */
 template <typename T>
 inline SubscriptionPointer<T> make_subscription(
