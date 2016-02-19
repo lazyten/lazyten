@@ -481,12 +481,14 @@ struct CreateObjectPointer
         // we expect from the model.
         model.assert_all_ids_in(sut);
 
+#ifdef DEBUG
         // Check that the object made note of us:
         auto obj_subscribers = sut.objects[obj_index].subscribers();
         auto res = std::any_of(
               std::begin(obj_subscribers), std::end(obj_subscribers),
               [&](const std::string& oid) { return oid == id; });
         RC_ASSERT(res);
+#endif
 
         // check that the other pointers have not changed.
         model.assert_all_pointer_in(sut);
@@ -601,6 +603,7 @@ struct RedirectPointer
         // Check that we point to the right thing
         RC_ASSERT(sut.pointers[ptr_index].get() == &sut.objects[obj_index]);
 
+#ifdef DEBUG
         // Check that the object we pointed to does not
         // contain our id any more.
         // Only do this if we point to something
@@ -619,8 +622,7 @@ struct RedirectPointer
               [&](const std::string& oid) { return oid == pm.id; });
         RC_ASSERT(res);
 
-// Check that the subscriptions agree
-#ifdef DEBUG
+        // Check that the subscriptions agree
         auto assertion_on_pair =
               [&](const typename model_type::subscribable_model& mod_obj,
                   const SubscribableType& sut_obj) {
@@ -844,6 +846,7 @@ struct CopyRemovePointer
             // we expect from the model.
             model.assert_all_ids_in(sut);
 
+#ifdef DEBUG
             if (model.pointers[ptr_index].object_index !=
                 model_type::invalid_index) {
                 // Extract object index:
@@ -859,6 +862,7 @@ struct CopyRemovePointer
                 });
                 RC_ASSERT(res == 2);
             }
+#endif
 
             // check that the other pointers have not changed.
             model.assert_pointer_equal_to(sut);
@@ -921,6 +925,7 @@ struct AssignRemovePointer
             // we expect from the model.
             model.assert_all_ids_in(sut);
 
+#ifdef DEBUG
             if (model.pointers[ptr_index].object_index !=
                 model_type::invalid_index) {
                 // Extract object index:
@@ -936,6 +941,7 @@ struct AssignRemovePointer
                 });
                 RC_ASSERT(res == 2);
             }
+#endif
 
             // check that the other pointers have not changed.
             model.assert_pointer_equal_to(sut);
