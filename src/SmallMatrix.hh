@@ -32,6 +32,7 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
     friend void swap(SmallMatrix& first, SmallMatrix& second) {
         using std::swap;
         first.m_arma.swap(second.m_arma);
+        swap(static_cast<base_type&>(first), static_cast<base_type&>(second));
     }
 
     //
@@ -48,24 +49,47 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
     explicit SmallMatrix(arma::mat inner) : m_arma(inner) {}
 
     //
-    // Operators
+    // Scalar operators
     //
-    // TODO
+    /** Scale matrix by a scalar value */
     SmallMatrix& operator*=(scalar_type s) {
         m_arma *= s;
         return *this;
     }
 
+    /** Divide all matrix entries by a scalar value */
+    SmallMatrix& operator/=(scalar_type s) {
+        m_arma /= s;
+        return *this;
+    }
+
+    /** Multiply two small matrices */
     friend SmallMatrix operator*(const SmallMatrix& lhs,
                                  const SmallMatrix& rhs) {
         arma::mat res = lhs.m_arma * rhs.m_arma;
         return SmallMatrix(res);
     }
 
+    /* Add a small matrix to this one */
     SmallMatrix& operator+=(const SmallMatrix& other) {
         m_arma += other.m_arma;
         return *this;
     }
+
+    /* Subtract a small matrix from this one */
+    SmallMatrix& operator-=(const SmallMatrix& other) {
+        m_arma -= other.m_arma;
+        return *this;
+    }
+
+    //
+    // Relational operatiors
+    //
+    bool operator==(const SmallMatrix& other) const {
+        return (m_arma == other.m_arma);
+    }
+
+    bool operator!=(const SmallMatrix& other) const { !operator==(other); }
 
     //
     // matrix_i interface
@@ -136,6 +160,9 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
     arma::mat m_arma;
 };
 
+//
+// Multiply by Scalar
+//
 template <typename Scalar>
 SmallMatrix<Scalar> operator*(Scalar s, SmallMatrix<Scalar> m) {
     m *= s;
@@ -148,10 +175,26 @@ SmallMatrix<Scalar> operator*(SmallMatrix<Scalar> m, Scalar s) {
 }
 
 template <typename Scalar>
-SmallMatrix<Scalar> operator+(SmallMatrix<Scalar> m,
-                              const SmallMatrix<Scalar>& n) {
-    m += n;
+SmallMatrix<Scalar> operator/(SmallMatrix<Scalar> m, Scalar s) {
+    m /= s;
     return m;
+}
+
+//
+// Add and subtract small matrices
+//
+template <typename Scalar>
+SmallMatrix<Scalar> operator-(SmallMatrix<Scalar> lhs,
+                              const SmallMatrix<Scalar>& rhs) {
+    lhs -= rhs;
+    return lhs;
+}
+
+template <typename Scalar>
+SmallMatrix<Scalar> operator+(SmallMatrix<Scalar> lhs,
+                              const SmallMatrix<Scalar>& rhs) {
+    lhs += rhs;
+    return lhs;
 }
 
 }  // liblinalg
