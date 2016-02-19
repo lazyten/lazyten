@@ -52,7 +52,7 @@ TEST_CASE("Exception system", "[exception]") {
             // Classify according to upper property
             RC_CLASSIFY(should_catch_something, "Assertion failed");
 
-#if DEBUG
+#ifdef DEBUG
             if (should_catch_something) {
                 // sometimes we catch something in debug mode.
                 RC_ASSERT_THROWS_AS(
@@ -81,7 +81,7 @@ TEST_CASE("Exception system", "[exception]") {
             // Classify according to upper property
             RC_CLASSIFY(should_catch_something, "Assertion failed");
 
-#if DEBUG
+#ifdef DEBUG
             if (should_catch_something) {
                 // sometimes we catch something in debug mode.
                 RC_ASSERT_THROWS_AS(assert_lower_bound(value, lower_bound),
@@ -109,7 +109,7 @@ TEST_CASE("Exception system", "[exception]") {
             // Classify according to upper property
             RC_CLASSIFY(should_catch_something, "Assertion failed");
 
-#if DEBUG
+#ifdef DEBUG
             if (should_catch_something) {
                 // sometimes we catch something in debug mode.
                 RC_ASSERT_THROWS_AS(assert_upper_bound(value, upper_bound),
@@ -136,7 +136,7 @@ TEST_CASE("Exception system", "[exception]") {
             // Classify according to upper property
             RC_CLASSIFY(should_catch_something, "Assertion failed");
 
-#if DEBUG
+#ifdef DEBUG
             if (should_catch_something) {
                 // sometimes we catch something in debug mode.
                 RC_ASSERT_THROWS_AS(assert_size(size1, size2), ExcSizeMismatch);
