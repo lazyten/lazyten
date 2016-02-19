@@ -2,7 +2,7 @@
 
 #include <SmallMatrix.hh>
 #include <rapidcheck.h>
-#include "../tests_configuration.hh"
+#include "../TestConstants.hh"
 
 namespace rc {
 template <typename Scalar>
@@ -14,8 +14,8 @@ struct Arbitrary<::linalgwrap::SmallMatrix<Scalar>> {
             typedef typename small_matrix_type::size_type size_type;
             typedef typename small_matrix_type::scalar_type scalar_type;
 
-            const scalar_type maxsize =
-                  ::linalgwrap::tests::tests_constants::max_matrix_size + 1;
+            const size_type maxsize =
+                  ::linalgwrap::tests::TestConstants::max_matrix_size + 1;
 
             const auto n_rows = *gen::inRange<size_type>(1, maxsize);
             const auto n_cols = *gen::inRange<size_type>(1, maxsize);
