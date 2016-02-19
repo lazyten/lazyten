@@ -7,6 +7,8 @@
 #include <string>
 #include "Exceptions.hh"
 #include "Constants.hh"
+#include <iostream>
+#include <iomanip>
 
 namespace linalgwrap {
 
@@ -83,5 +85,26 @@ class Matrix_i {
     void transpose() { assert_dbg(false, ExcNotImplemented()); }
     */
 };
+
+/** \brief Simple output operator, that plainly shows all entries of
+ *  the Matrix one by one.
+ *
+ *  Rows are seperated by a newline and entries by spaces.
+ *  The last row is not terminated by a newline character.
+ *  */
+template <typename Scalar>
+void operator<<(std::ostream& o, const Matrix_i<Scalar>& m) {
+    typedef typename Matrix_i<Scalar>::size_type size_type;
+
+    for (size_type i = 0; i < m.n_rows(); ++i) {
+        for (size_type j = 0; j < m.n_cols(); ++j) {
+            o << std::setw(15) << m(i, j);
+        }
+
+        if (i == m.n_rows() - 1) break;
+        o << std::endl;
+    }
+}
+
 }  // namespace linalg
 #endif  // LINALG_MATRIX_I_HPP_
