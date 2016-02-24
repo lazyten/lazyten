@@ -19,16 +19,17 @@ struct NumComp {
      */
     template <typename Scalar>
     class NumEqual {
-        // TODO derive this off binary functor!
-
       public:
+        typedef Scalar first_argument_type;
+        typedef Scalar second_argument_type;
+        typedef bool result_type;
+
         NumEqual(double tolerance = TestConstants::default_num_tol)
               : m_tolerance(tolerance) {}
 
         bool operator()(const Scalar& lhs, const Scalar& rhs) const {
             // TODO Make a constexpr in C++1y
-            auto min = std::min(lhs, rhs);
-            auto minabs = std::fabs(min);
+            auto minabs = std::min(std::fabs(lhs), std::fabs(rhs));
 
             if (minabs < m_tolerance) {
                 // We are comparing against zero
@@ -48,7 +49,9 @@ struct NumComp {
     /* Specialisation of NumEqual for Matrices. */
     template <typename Scalar>
     class NumEqualMatrix {
-        // TODO derive off binary functor as well.
+        typedef Matrix_i<Scalar> first_argument_type;
+        typedef Matrix_i<Scalar> second_argument_type;
+        typedef bool result_type;
 
       public:
         NumEqualMatrix(double tolerance = TestConstants::default_num_tol)
@@ -68,8 +71,11 @@ struct NumComp {
             size_type entries = lhs.n_rows() * lhs.n_cols();
 
             // Check all entries:
-            for (size_type i = 0; i < entries; ++i) {
-                if (!is_equal(lhs[i], rhs[i], m_tolerance)) return false;
+            for (size_type i = 0; i < lhs.n_rows(); ++i) {
+                for (size_type j = 0; j < lhs.n_cols(); ++j) {
+                    if (!is_equal(lhs(i, j), rhs(i, j), m_tolerance))
+                        return false;
+                }
             }
 
             return true;

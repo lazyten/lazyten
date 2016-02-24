@@ -3,6 +3,8 @@
 
 // Generators for neccessary matrices
 #include "generators.hh"
+
+// Numerical equality and comparison
 #include "NumComp.hh"
 
 namespace linalgwrap {
@@ -10,7 +12,10 @@ namespace tests {
 using namespace rc;
 
 TEST_CASE("SmallMatrix class", "[SmallMatrix]") {
-    // Test the basic interface first ...
+#ifdef DEBUG
+    // Make sure that the program does not get aborted
+    exceptions::assert_dbg_effect = exceptions::ExceptionEffect::THROW;
+#endif
 
     typedef double scalar_type;
     typedef typename Matrix_i<scalar_type>::size_type size_type;

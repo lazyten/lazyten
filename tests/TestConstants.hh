@@ -13,7 +13,7 @@ struct TestConstants {
      * computed values for equality. Usually comparison
      * operations will interpret this as tolerance towards
      * the *relative* error */
-    static constexpr double default_num_tol = 1e-13;
+    static constexpr double default_num_tol = 1e-12;
 };
 }
 }
