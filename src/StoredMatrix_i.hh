@@ -48,12 +48,15 @@ class StoredMatrix_i : public Matrix_i<Scalar>, public Subscribable {
 
     /** \brief Read-write access to vectorised matrix object
      *
-     * It is advisible to overload this in order to get a more performant
-     * implementation.
+     * Access the element in row-major ordering (i.e. the matrix is
+     * traversed row by row)
      */
     virtual scalar_type& operator[](size_type i) {
-        size_type i_row = i / this->n_rows();
-        size_type i_col = i % this->n_rows();
+        // Check that we do not overshoot.
+        assert_upper_bound(i, this->n_cols() * this->n_rows());
+
+        const size_type i_row = i / this->n_cols();
+        const size_type i_col = i % this->n_cols();
         return (*this)(i_row, i_col);
     }
 

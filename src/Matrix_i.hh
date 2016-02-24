@@ -55,6 +55,10 @@ class Matrix_i {
      * implementation.
      */
     virtual scalar_type operator()(size_type row, size_type col) const {
+        // Check that we do not overshoot.
+        assert_upper_bound(row, n_rows());
+        assert_upper_bound(col, n_cols());
+
         SmallMatrix<scalar_type> block(1, 1, false);
         fill(row, col, block);
         return block(0, 0);
@@ -62,12 +66,15 @@ class Matrix_i {
 
     /** \brief return an element of the vectorised matrix object
      *
-     * It is advisible to overload this in order to get a more performant
-     * implementation.
+     * Access the element in row-major ordering (i.e. the matrix is
+     * traversed row by row)
      */
     virtual scalar_type operator[](size_type i) const {
-        size_type i_row = i / n_rows();
-        size_type i_col = i % n_rows();
+        // Check that we do not overshoot.
+        assert_upper_bound(i, n_cols() * n_rows());
+
+        const size_type i_row = i / n_cols();
+        const size_type i_col = i % n_cols();
         return (*this)(i_row, i_col);
     }
 

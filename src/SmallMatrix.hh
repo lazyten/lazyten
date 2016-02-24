@@ -64,9 +64,8 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
     }
 
     /** Multiply two small matrices */
-    friend SmallMatrix operator*(const SmallMatrix& lhs,
-                                 const SmallMatrix& rhs) {
-        arma::mat res = lhs.m_arma * rhs.m_arma;
+    SmallMatrix operator*(const SmallMatrix& other) const {
+        arma::mat res = m_arma * other.m_arma;
         return SmallMatrix(res);
     }
 
@@ -97,9 +96,9 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
     /**
      * See documentation of Matrix_i function of the same name.
      */
-    virtual void fill(size_type start_row, size_type start_col,
-                      SmallMatrix<scalar_type>& block, bool add = false,
-                      scalar_type c_this = Constants<scalar_type>::one) const {
+    void fill(size_type start_row, size_type start_col,
+              SmallMatrix<scalar_type>& block, bool add = false,
+              scalar_type c_this = Constants<scalar_type>::one) const override {
         // check that we do not overshoot the row index
         assert_upper_bound(start_row + block.n_rows() - 1, n_rows());
 
@@ -122,39 +121,37 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
 
     /** \brief Number of rows of the matrix i
      */
-    virtual size_type n_rows() const { return m_arma.n_rows; }
+    size_type n_rows() const override { return m_arma.n_rows; }
 
     /** \brief Number of columns of the matrix
      */
-    virtual size_type n_cols() const { return m_arma.n_cols; }
+    size_type n_cols() const override { return m_arma.n_cols; }
 
-    virtual scalar_type operator()(size_type row, size_type col) const {
+    scalar_type operator()(size_type row, size_type col) const override {
         assert_upper_bound(row, n_rows());
         assert_upper_bound(col, n_cols());
-        return m_arma(row, col);
+        return m_arma.at(row, col);
     }
 
-    scalar_type operator[](size_type i) const {
-        assert_upper_bound(i, n_rows() * n_cols());
-        return m_arma[i];
-    }
+    // Note: operator[] is taken as the default implementation
+    // since arma matrices are column-major, but our interface
+    // is row-major
 
     //
     // StoredMatrix_i interface
     //
     /** Set all elements to zero */
-    void set_zero() { m_arma.zeros(); }
+    void set_zero() override { m_arma.zeros(); }
 
-    scalar_type& operator()(size_type row, size_type col) {
+    scalar_type& operator()(size_type row, size_type col) override {
         assert_upper_bound(row, n_rows());
         assert_upper_bound(col, n_cols());
-        return m_arma(row, col);
+        return m_arma.at(row, col);
     }
 
-    scalar_type& operator[](size_type i) {
-        assert_upper_bound(i, n_rows() * n_cols());
-        return m_arma[i];
-    }
+    // Note: operator[] is taken as the default implementation
+    // since arma matrices are column-major, but our interface
+    // is row-major
 
   private:
     arma::mat m_arma;
