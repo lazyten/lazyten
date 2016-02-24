@@ -5,6 +5,7 @@ set(LINALGWRAP_TESTS_SOURCES
 	ExceptionTests.cpp
 	SubscriptionTests.cpp
 	SmallMatrixTests.cpp
+	LazyMatrixWrapperTests.cpp
 	main.cpp
 )
 
