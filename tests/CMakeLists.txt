@@ -3,13 +3,13 @@
 #
 set(LINALGWRAP_TESTS_SOURCES
 	NumComp.cc
-	ExceptionTests.cpp
-	SubscriptionTests.cpp
-	SmallMatrixTests.cpp
-	LazyMatrixWrapperTests.cpp
-	main.cpp
-	LazyMatrixProductTests.cpp
+	ExceptionTests.cc
+	SubscriptionTests.cc
+	SmallMatrixTests.cc
+	LazyMatrixWrapperTests.cc
+	LazyMatrixProductTests.cc
 	LazyMatrixSumTests.cc
+	main.cc
 )
 
 # 
