@@ -41,6 +41,7 @@ TEST_CASE("LazyMatrixWrapper class", "[LazyMatrixWrapper]") {
 
     // TODO - Test the other constructors
     //      - Test the other functionality of LazyMatrixWrapper.
+    //        (using the matrix_test_utils)
 }
 
 }  // tests

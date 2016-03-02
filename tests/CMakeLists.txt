@@ -2,11 +2,14 @@
 # The sources for the test executable
 #
 set(LINALGWRAP_TESTS_SOURCES
+	NumComp.cc
 	ExceptionTests.cpp
 	SubscriptionTests.cpp
 	SmallMatrixTests.cpp
 	LazyMatrixWrapperTests.cpp
 	main.cpp
+	LazyMatrixProductTests.cpp
+	LazyMatrixSumTests.cc
 )
 
 # 
