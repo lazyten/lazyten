@@ -100,7 +100,7 @@ class Matrix_i {
  *  The last row is not terminated by a newline character.
  *  */
 template <typename Scalar>
-void operator<<(std::ostream& o, const Matrix_i<Scalar>& m) {
+std::ostream& operator<<(std::ostream& o, const Matrix_i<Scalar>& m) {
     typedef typename Matrix_i<Scalar>::size_type size_type;
 
     for (size_type i = 0; i < m.n_rows(); ++i) {
@@ -111,6 +111,8 @@ void operator<<(std::ostream& o, const Matrix_i<Scalar>& m) {
         if (i == m.n_rows() - 1) break;
         o << std::endl;
     }
+
+    return o;
 }
 
 }  // namespace linalg
