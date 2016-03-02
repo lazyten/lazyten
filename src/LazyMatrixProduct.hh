@@ -213,7 +213,7 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
 
         // Deal with last factor:
         auto it = m_factors.rbegin();
-        stored_matrix_type res = *(*it) * m;
+        stored_matrix_type res = m_coefficient * (*(*it) * m);
         ++it;
 
         // Deal with all others:
