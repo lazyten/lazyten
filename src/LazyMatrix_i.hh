@@ -30,6 +30,13 @@ class LazyMatrix_i : public LazyMatrixExpression<StoredMatrix> {
     typedef typename base_type::lazy_matrix_expression_ptr_type
           lazy_matrix_expression_ptr_type;
 
+    // Swapping:
+    friend void swap(LazyMatrix_i& first, LazyMatrix_i& second) {
+        using std::swap;
+        swap(first.m_name, second.m_name);
+        swap(static_cast<base_type&>(first), static_cast<base_type&>(second));
+    }
+
     //
     // Partial implementation of the interface of a LazyMatrixExpression
     //

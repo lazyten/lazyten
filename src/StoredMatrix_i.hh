@@ -7,6 +7,10 @@
 
 namespace linalgwrap {
 
+// Forward-declare the interface class
+template <typename Scalar>
+class Matrix_i;
+
 /** \brief Interface class for a matrix which is actually stored in memory
  * in some way
  *
@@ -20,6 +24,12 @@ class StoredMatrix_i : public Matrix_i<Scalar>, public Subscribable {
     typedef Matrix_i<Scalar> base_type;
     typedef typename base_type::scalar_type scalar_type;
     typedef typename base_type::size_type size_type;
+
+    // Swapping:
+    friend void swap(StoredMatrix_i& first, StoredMatrix_i& second) {
+        using std::swap;
+        swap(first.m_name, second.m_name);
+    }
 
     //
     // Assignment, construction, destruction
@@ -73,6 +83,10 @@ class StoredMatrix_i : public Matrix_i<Scalar>, public Subscribable {
             }
         }
     }
+
+    // TODO
+    //   function to get stl-compatible iterator
+    //   function to get number of non-zero entries
 
   protected:
     //! some name identifying the matrix, or empty

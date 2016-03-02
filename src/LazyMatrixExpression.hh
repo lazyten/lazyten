@@ -43,6 +43,11 @@ class LazyMatrixExpression
     typedef std::shared_ptr<LazyMatrixExpression<StoredMatrix>>
           lazy_matrix_expression_ptr_type;
 
+    // Swapping:
+    friend void swap(LazyMatrixExpression&, LazyMatrixExpression&) {
+        // nothing
+    }
+
     //
     // Extra interface for expressions:
     //
@@ -50,7 +55,10 @@ class LazyMatrixExpression
     virtual void print_tree(std::ostream& o) const = 0;
 
     /** \brief Update the internal data of all objects in this expression
-     * given a set of args */
+     * given a set of args
+     *
+     * TODO Cannot be a template since it needs to be virtual
+     * */
     template <typename... Args>
     void update(Args...) {
         assert_dbg(false, ExcNotImplemented());
