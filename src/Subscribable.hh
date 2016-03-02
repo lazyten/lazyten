@@ -45,12 +45,12 @@ class Subscribable {
     //
 
     /** Exception to indicate that Subscribable is still used */
-    DefException3(ExcStillUsed, std::string&, size_t, std::string&,
+    DefException3(ExcStillUsed, std::string, size_t, std::string,
                   << "Object of type " << arg1 << " is still used by " << arg2
                   << " other objects, which are (from new to old): " << arg3);
 
     /** Exception to indicate that Subscriber is not known. */
-    DefException2(ExcUnknownSubscriberId, std::string&, std::string&,
+    DefException2(ExcUnknownSubscriberId, std::string, std::string,
                   << "No subscriber with identifier " << arg1
                   << " is known to have subscribed to the class " << arg2
                   << ".");
