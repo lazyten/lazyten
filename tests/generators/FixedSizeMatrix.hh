@@ -5,7 +5,7 @@
 namespace rc {
 
 template <typename Matrix>
-struct FixedSize {
+struct FixedSizeMatrix {
     static_assert(
           std::is_base_of<
                 ::linalgwrap::StoredMatrix_i<typename Matrix::scalar_type>,
@@ -22,7 +22,7 @@ struct FixedSize {
 
             // set to arbitrary values
             for (size_type i = 0; i < m.n_rows() * m.n_cols(); ++i) {
-                m[i] = *rc::gen::arbitrary<scalar_type>();
+                m[i] = *MatrixElement<scalar_type>::matrix_element();
             }
 
             return m;
