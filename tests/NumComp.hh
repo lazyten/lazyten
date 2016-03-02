@@ -9,14 +9,35 @@
 namespace linalgwrap {
 namespace tests {
 
+/** Exception raised by the NumComp operations if the objects are not
+ *  numerically equal. */
+struct NumCompException : public std::exception {
+  public:
+    NumCompException(double lhs_, double rhs_, double error_, double tolerance_,
+                     const std::string description_) noexcept;
+    const char* what() const noexcept;
+
+    //! The value of the lhs
+    double lhs;
+
+    //! The value of the rhs
+    double rhs;
+
+    //! The error that was obtained
+    double error;
+
+    //! The tolerance we applied
+    double tolerance;
+
+    //! The description that was addititonally supplied
+    const std::string description;
+
+  private:
+    mutable std::string what_str;
+};
+
 /* Do numeric-error aware comparison of certain objects. */
 struct NumComp {
-    /** \brief Functor to check that two values are numerically equal
-     *
-     * \param tolerance    The tolerance in absolute error
-     *                     (if we are comparing against zero)
-     *                     or relative error (else).
-     */
     template <typename Scalar>
     class NumEqual {
       public:
@@ -24,26 +45,52 @@ struct NumComp {
         typedef Scalar second_argument_type;
         typedef bool result_type;
 
-        NumEqual(double tolerance = TestConstants::default_num_tol)
-              : m_tolerance(tolerance) {}
+        /** \brief Functor to check that two values are numerically equal
+         *
+         * \param tolerance    The tolerance in absolute error
+         *                     (if we are comparing against zero)
+         *                     or relative error (else).
+         *
+         * \param do_throw    Should the comparison throw an exception
+         *                    if its not valid or just return false.
+         *                    (default is true)
+         *
+         */
+        NumEqual(double tolerance = TestConstants::default_num_tol,
+                 bool do_throw = true)
+              : m_tolerance(tolerance), m_throw(do_throw) {}
 
         bool operator()(const Scalar& lhs, const Scalar& rhs) const {
             // TODO Make a constexpr in C++1y
-            auto minabs = std::min(std::fabs(lhs), std::fabs(rhs));
+            const Scalar minabs = std::min(std::fabs(lhs), std::fabs(rhs));
 
-            if (minabs < m_tolerance) {
-                // We are comparing against zero
-                // Check absolute error
-                return std::fabs(lhs - rhs) < m_tolerance;
-            } else {
-                // We are comparing two number:
-                // Check relative error
-                return (std::fabs(lhs - rhs) < m_tolerance * minabs);
+            // Do we compare against zero?
+            const bool compare_zero = minabs < m_tolerance;
+
+            // Absolute error between the two numbers
+            const double abserror = std::fabs(lhs - rhs);
+
+            // Error value used to qualify the agreement between the numbers
+            // (absolute for comparing against zero, else relative)
+            const double error = abserror / (compare_zero ? 1. : minabs);
+
+            // Are the numbers equal (including numerical tolerance?
+            bool equal = compare_zero ?
+                                      // Check absolute error
+                               abserror < m_tolerance
+                                      :
+                                      // Check relative error
+                               abserror < (m_tolerance * minabs);
+
+            if (!equal && m_throw) {
+                throw NumCompException(lhs, rhs, error, m_tolerance, "");
             }
+            return equal;
         }
 
       private:
-        double m_tolerance;
+        const double m_tolerance;
+        const bool m_throw;
     };
 
     /* Specialisation of NumEqual for Matrices. */
@@ -54,8 +101,17 @@ struct NumComp {
         typedef bool result_type;
 
       public:
-        NumEqualMatrix(double tolerance = TestConstants::default_num_tol)
-              : m_tolerance(tolerance) {}
+        /** Construct a NumEqualMatrix object
+         *
+         * \param tolerance   The tolerance to compare with
+         * \param do_throw    Should the comparison throw an exception
+         *                    if its not valid or just return false.
+         *                    (default is true)
+         *
+         */
+        NumEqualMatrix(double tolerance = TestConstants::default_num_tol,
+                       bool do_throw = true)
+              : m_tolerance(tolerance), m_throw(do_throw) {}
 
         bool operator()(const Matrix_i<Scalar>& lhs,
                         const Matrix_i<Scalar>& rhs) const {
@@ -67,22 +123,27 @@ struct NumComp {
             if (lhs.n_rows() != rhs.n_rows()) return false;
             if (lhs.n_cols() != rhs.n_cols()) return false;
 
-            // Calculate number of entries:
-            size_type entries = lhs.n_rows() * lhs.n_cols();
-
             // Check all entries:
-            for (size_type i = 0; i < lhs.n_rows(); ++i) {
-                for (size_type j = 0; j < lhs.n_cols(); ++j) {
-                    if (!is_equal(lhs(i, j), rhs(i, j), m_tolerance))
-                        return false;
+            // TODO use matrix iterator
+            try {
+                for (size_type i = 0; i < lhs.n_rows(); ++i) {
+                    for (size_type j = 0; j < lhs.n_cols(); ++j) {
+                        if (!is_equal(lhs(i, j), rhs(i, j), m_tolerance,
+                                      m_throw))
+                            return false;
+                    }
                 }
+            } catch (const NumCompException& e) {
+                throw NumCompException(e.lhs, e.rhs, e.error, e.tolerance,
+                                       "Matrix entry not equal.");
             }
 
             return true;
         }
 
       private:
-        double m_tolerance;
+        const double m_tolerance;
+        const bool m_throw;
     };
 
     /** \brief Check that two values are numerically equal
@@ -91,12 +152,16 @@ struct NumComp {
      *                     (if we are comparing floating point
      *                     entries against zero)
      *                     or relative error (else).
+     * \param do_throw    Should the comparison throw an exception
+     *                    if its not valid or just return false.
+     *                    (default is true)
      */
     template <typename Scalar>
     static bool is_equal(
           const Scalar& lhs, const Scalar& rhs,
-          const double tolerance = TestConstants::default_num_tol) {
-        NumEqual<Scalar> eq_comp(tolerance);
+          const double tolerance = TestConstants::default_num_tol,
+          const bool do_throw = true) {
+        NumEqual<Scalar> eq_comp(tolerance, do_throw);
         return eq_comp(lhs, rhs);
     }
 
@@ -108,8 +173,9 @@ struct NumComp {
     template <typename Scalar>
     static bool is_equal_matrix(
           const Matrix_i<Scalar>& lhs, const Matrix_i<Scalar>& rhs,
-          const double tolerance = TestConstants::default_num_tol) {
-        NumEqualMatrix<Scalar> eq_comp(tolerance);
+          const double tolerance = TestConstants::default_num_tol,
+          const bool do_throw = true) {
+        NumEqualMatrix<Scalar> eq_comp(tolerance, do_throw);
         return eq_comp(lhs, rhs);
     }
 };
