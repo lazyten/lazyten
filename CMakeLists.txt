@@ -7,11 +7,11 @@ if (CMAKE_VERSION VERSION_LESS "3.0.0")
 	# work around the new version feature introduced
 	# for cmake 3.0.0
 	project(linalgwrap)
-	set(PROJECT_VERSION "0.0.0")
+	set(PROJECT_VERSION "0.1.0")
 else()
 	# enable the new feature:
 	cmake_policy(SET CMP0048 NEW)
-	project(linalgwrap VERSION 0.0.0)
+	project(linalgwrap VERSION 0.1.0)
 endif()
 
 # enable testing of this project

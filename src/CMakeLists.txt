@@ -3,6 +3,7 @@
 #
 set(LINALGWRAP_SOURCES
 	ExceptionBase.cc
+	version.cc
 )	
 
 #
