@@ -437,7 +437,8 @@ struct CreateObjectPointer
     size_t obj_index;  //< object we point to
     CreateObjectPointer(const model_type& model)
           : id{model.unused_pointer_id()},
-            obj_index{*gen::inRange<size_t>(0, model.objects.size() - 1)} {};
+            // RHS of inRange is exclusive
+            obj_index{*gen::inRange<size_t>(0, model.objects.size())} {};
 
     void apply(model_type& model) const override {
         // Make sure id has not been used yet
@@ -564,8 +565,8 @@ struct RedirectPointer
     size_t ptr_index;  //< pointer we change
     size_t obj_index;  //< new object we point to
     RedirectPointer(const model_type& model)
-          : ptr_index{*gen::inRange<size_t>(0, model.pointers.size() - 1)},
-            obj_index{*gen::inRange<size_t>(0, model.objects.size() - 1)} {};
+          : ptr_index{*gen::inRange<size_t>(0, model.pointers.size())},
+            obj_index{*gen::inRange<size_t>(0, model.objects.size())} {};
 
     void apply(model_type& model) const override {
         // check we have enough pointers to remove this one:
@@ -670,7 +671,7 @@ struct ResetPointer
 
     size_t ptr_index;
     ResetPointer(const model_type& model)
-          : ptr_index{*gen::inRange<size_t>(0, model.pointers.size() - 1)} {};
+          : ptr_index{*gen::inRange<size_t>(0, model.pointers.size())} {};
 
     void apply(model_type& model) const override {
         // check we have enough pointers to remove this one:
@@ -739,7 +740,7 @@ struct RemovePointer
 
     size_t ptr_index;
     RemovePointer(const model_type& model)
-          : ptr_index{*gen::inRange<size_t>(0, model.pointers.size() - 1)} {};
+          : ptr_index{*gen::inRange<size_t>(0, model.pointers.size())} {};
 
     void apply(model_type& model) const override {
         // check we have enough pointers to remove this one:
@@ -813,7 +814,7 @@ struct CopyRemovePointer
 
     size_t ptr_index;
     CopyRemovePointer(const model_type& model)
-          : ptr_index{*gen::inRange<size_t>(0, model.pointers.size() - 1)} {};
+          : ptr_index{*gen::inRange<size_t>(0, model.pointers.size())} {};
 
     void apply(model_type& model) const override {
         // check we have enough pointers to copy this one:
@@ -892,7 +893,7 @@ struct AssignRemovePointer
 
     size_t ptr_index;
     AssignRemovePointer(const model_type& model)
-          : ptr_index{*gen::inRange<size_t>(0, model.pointers.size() - 1)} {};
+          : ptr_index{*gen::inRange<size_t>(0, model.pointers.size())} {};
 
     void apply(model_type& model) const override {
         // check we have enough pointers to copy this one:
