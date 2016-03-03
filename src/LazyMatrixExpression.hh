@@ -64,6 +64,30 @@ class LazyMatrixExpression
         assert_dbg(false, ExcNotImplemented());
     }
 
+    /** \brief Convert the expression to a stored matrix
+     *
+     * This is achieved naively by calling fill for the
+     * whole matrix and copying the data over to the
+     * stored_matrix_type
+     *
+     * \note Later one would probably like to incorporate the
+     *       sparsity pattern somehow as well if stored_matrix_type
+     *       is a CRS matrix.
+     */
+    virtual explicit operator stored_matrix_type() const {
+        // initialise a SmallMatrix
+        SmallMatrix<scalar_type> sm(this->n_rows(), this->n_cols(), false);
+
+        // Fill it:
+        this->fill(0, 0, sm);
+
+        // Copy to stored:
+        stored_matrix_type res(sm);
+
+        // Return
+        return res;
+    }
+
     /** \brief Multiplication with a stored matrix */
     virtual stored_matrix_type operator*(
           const stored_matrix_type& in) const = 0;

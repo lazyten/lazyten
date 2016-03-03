@@ -17,6 +17,21 @@ class Matrix_i;
  * This interface and hence all classes derived from it are subscribable using
  * the SubscriptionPointer class. This should be used very little and only when
  * other means (e.g. using shared pointers) is not possible.
+ *
+ * We expect any implementing class to also provide the following constructors:
+ * - Construct matrix of fixed size and optionally fill with zeros or leave
+ *   memory unassigned:
+ *   ```
+ *   StoredMatrix_i(n_rows, n_cols, fill_zero);
+ *   ```
+ * - Construct a matrix of the same size as a SmallMatrix and copy all entries
+ *   from the SmallMatrix over, optionally providing a tolerance below which
+ *   the entries are considered to be zero (The latter is useful for CRS
+ *   matrices)
+ *   ```
+ *   StoredMatrix_i(const SmallMatrix&)
+ *   StoredMatrix_i(const SmallMatrix&, scalar_type tolerance)
+ *   ```
  */
 template <typename Scalar>
 class StoredMatrix_i : public Matrix_i<Scalar>, public Subscribable {
@@ -37,9 +52,6 @@ class StoredMatrix_i : public Matrix_i<Scalar>, public Subscribable {
 
     /** Default destructor */
     virtual ~StoredMatrix_i() = default;
-
-    // We expect the following constructors to be implemented:
-    //     - StoredMatrix_i(n_rows, n_cols, fill_zero)
 
     //
     // Stored matrices can have a name

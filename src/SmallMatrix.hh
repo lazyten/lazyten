@@ -38,11 +38,31 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
     //
     // Constructors, destructors and assignment
     //
+    /** Construct a matrix of fixed size and optionally set the entries to zero
+     */
     SmallMatrix(size_type n_rows, size_type n_cols, bool fill_zero = true)
           : m_arma(n_rows, n_cols, arma::fill::none) {
         if (fill_zero) {
             // set all elements to zero
             m_arma.zeros();
+        }
+    }
+
+    /** Construct a small matrix and copy all entries from ``mat`` which are
+     *  not below the tolerance threshold.
+     */
+    SmallMatrix(const SmallMatrix& mat, scalar_type tolerance)
+          : SmallMatrix(mat.n_rows(), mat.n_cols(), false) {
+        // TODO use iterator
+        for (size_type i = 0; i < mat.n_rows(); ++i) {
+            for (size_type j = 0; j < mat.n_cols(); ++j) {
+                if (std::fabs(mat(i, j)) < tolerance) {
+                    (*this)(i, j) = Constants<scalar_type>::zero();
+                } else {
+
+                    (*this)(i, j) = mat(i, j);
+                }
+            }
         }
     }
 

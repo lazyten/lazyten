@@ -80,6 +80,7 @@ struct LazyMatrixTestingPolicy {
      * */
     static void extra_tests(const model_type& model, const sut_type& sut) {
         test_mult_by_stored(model, sut);
+        test_convert_to_stored(model, sut);
         test_fill(model, sut);
     }
 
@@ -124,6 +125,14 @@ struct LazyMatrixTestingPolicy {
                 RC_ASSERT(NumComp::is_equal(model(i, j), sut.matrix(i, j)));
             }
         }
+    }
+
+    static void test_convert_to_stored(const model_type& model,
+                                       const sut_type& sut) {
+        stored_matrix_type sm = static_cast<stored_matrix_type>(sut.matrix);
+
+        // Check that it is equivalent to the model:
+        RC_ASSERT(NumComp::is_equal_matrix(sm, model));
     }
 };
 
