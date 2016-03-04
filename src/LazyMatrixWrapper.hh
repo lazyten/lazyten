@@ -92,12 +92,12 @@ class LazyMatrixWrapper : public LazyMatrixExpression<StoredMatrix> {
     //
     // LazyMatrixExpression interface
     //
-    /** \brief call the update routine of all lazy matrices with the
-     *         specified arguments
-     */
-    template <typename... Args>
-    void update(Args...) {
-        // Nothing to do here, since static object.
+    /** \brief Update the internal data
+     *
+     *  In this case does nothing.
+     * */
+    void update(const ParameterMap&) override {
+        // Do nothing.
     }
 
     /** \brief Multiplication with a stored matrix */

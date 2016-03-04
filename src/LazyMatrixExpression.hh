@@ -5,6 +5,7 @@
 #include "Matrix_i.hh"
 #include "LazyMatrixSum.hh"
 #include "LazyMatrixProduct.hh"
+#include "ParameterMap.hh"
 #include <ostream>
 #include <memory>
 
@@ -55,14 +56,9 @@ class LazyMatrixExpression
     virtual void print_tree(std::ostream& o) const = 0;
 
     /** \brief Update the internal data of all objects in this expression
-     * given a set of args
-     *
-     * TODO Cannot be a template since it needs to be virtual
+     * given the ParameterMap
      * */
-    template <typename... Args>
-    void update(Args...) {
-        assert_dbg(false, ExcNotImplemented());
-    }
+    virtual void update(const ParameterMap& map) = 0;
 
     /** \brief Convert the expression to a stored matrix
      *

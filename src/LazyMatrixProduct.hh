@@ -1,6 +1,7 @@
 #ifndef LINALG_MATRIX_PRODUCT_HPP_
 #define LINALG_MATRIX_PRODUCT_HPP_
 
+#include "ParameterMap.hh"
 #include "LazyMatrixExpression.hh"
 #include "Constants.hh"
 #include <memory>
@@ -196,14 +197,13 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
     //
     // LazyMatrixExpression interface
     //
-    /** \brief call the update routine of all lazy matrices with the
-     *         specified arguments
-     */
-    template <typename... Args>
-    void update(Args... args) {
+    /** \brief Update the internal data of all objects in this expression
+     *         given the ParameterMap
+     * */
+    void update(const ParameterMap& map) override {
         // Pass the call onto all factors:
         for (auto& expression : m_factors) {
-            expression->update(args...);
+            expression->update(map);
         }
     }
 

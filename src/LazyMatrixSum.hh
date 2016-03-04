@@ -94,10 +94,10 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
         swap(static_cast<base_type&>(first), static_cast<base_type&>(second));
     }
 
+  public:
     //
     // Constructors, destructors and assignment
     //
-  public:
     /** \brief Create a matrix sum object
      *
      * @param term   The first matrix expression term
@@ -258,14 +258,13 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
     //
     // LazyMatrixExpression interface
     //
-    /** \brief call the update routine of all lazy matrices with the
-     *         specified arguments
-     */
-    template <typename... Args>
-    void update(Args... args) {
-        // Pass the call onto all lazy matrix terms:
+    /** \brief Update the internal data of all objects in this expression
+     *         given the ParameterMap
+     * */
+    void update(const ParameterMap& map) override {
+        // Pass the call onto all factors:
         for (auto& expression : m_lazy_terms) {
-            expression->update(args...);
+            expression.update(map);
         }
     }
 
