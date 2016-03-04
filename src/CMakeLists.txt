@@ -2,6 +2,7 @@
 # set the source files.
 #
 set(LINALGWRAP_SOURCES
+	ParameterMap.cc
 	ExceptionBase.cc
 	version.cc
 )	

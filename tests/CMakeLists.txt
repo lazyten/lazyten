@@ -6,6 +6,7 @@ set(LINALGWRAP_TESTS_SOURCES
 	ExceptionTests.cc
 	SubscriptionTests.cc
 	SmallMatrixTests.cc
+	ParameterMapTests.cc
 	LazyMatrixWrapperTests.cc
 	LazyMatrixProductTests.cc
 	LazyMatrixSumTests.cc
