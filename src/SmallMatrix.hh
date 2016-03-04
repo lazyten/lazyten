@@ -105,7 +105,13 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
     // Relational operatiors
     //
     bool operator==(const SmallMatrix& other) const {
-        return (m_arma == other.m_arma);
+        // does not work for some crazy arma reason
+        // return (m_arma == other.m_arma);
+
+        for (size_type i = 0; i < n_rows() * n_cols(); ++i) {
+            if (m_arma[i] != other.m_arma[i]) return false;
+        }
+        return true;
     }
 
     bool operator!=(const SmallMatrix& other) const { !operator==(other); }
