@@ -97,6 +97,28 @@ class LazyMatrixExpression
 };
 
 //
+// CallUpadateIfAvail class
+//
+/** \brief Call the update function of a lazy matrix if it is
+ *         available. Else give rise to an InvalidState exception
+ */
+template <typename Matrix, bool = std::is_const<Matrix>::value>
+struct CallUpdateIfAvail {
+    void operator()(Matrix&, const ParameterMap&) const {
+        assert_dbg(true,
+                   ExcInvalidState("Update not available for const matrix"));
+    }
+};
+
+// Specialisation of the above class
+template <typename Matrix>
+struct CallUpdateIfAvail<Matrix, false> {
+    void operator()(Matrix& matrix, const ParameterMap& map) const {
+        matrix.update(map);
+    }
+};
+
+//
 // Multiplication
 //
 /** Multiply two lazy matrix expressions */
@@ -111,6 +133,23 @@ LazyMatrixProduct<StoredMatrix> operator*(
     // add the other factor and return the result.
     prod.push_factor(rhs);
     return prod;
+}
+
+/** Multiply stored times lazy */
+template <typename StoredMatrix>
+StoredMatrix operator*(const StoredMatrix& lhs,
+                       const LazyMatrixExpression<StoredMatrix>& rhs) {
+    assert_dbg(
+          false,
+          ExcDiabled(
+                "The operation \"StoredMatrix * LazyMatrixExpression\" is "
+                "disabled because it is usually pretty expensive. "
+                "Use \"StoredMatrix * LazyMatrixExpression * StoredMatrix\" "
+                "instead if possible. Otherwise you can enforce"
+                "\"StoredMatrix * LazyMatrixExpression\" by explicitly "
+                "converting the LazyMatrixExpression into a StoredMatrix, "
+                "i.e. \"lhs * static_cast<StoredMatrix>(rhs)\""));
+    return lhs * static_cast<StoredMatrix>(rhs);
 }
 
 /** Scale a lazy matrix expression */
