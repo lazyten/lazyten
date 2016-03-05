@@ -101,8 +101,9 @@ DefExceptionMsg(ExcNotInitialised,
 /**
  * The object is in a state not suitable for this operation.
  */
-DefExceptionMsg(ExcInvalidState,
-                "The object you attempt to use is not in a valid state.");
+DefException1(ExcInvalidState, char *,
+              << "The object you attempt to use is not in a valid state: "
+              << arg1);
 
 /**
  * Internal error ocurred inside a routine
@@ -110,6 +111,13 @@ DefExceptionMsg(ExcInvalidState,
 DefExceptionMsg(ExcInternalError,
                 "An assertion inside an internal routine has failed. "
                 "This is a bug and should not have happened.");
+
+/**
+ * The calling of this function was deliberately disabled for some reason (which
+ * is given here).
+ */
+DefException1(ExcDiabled, char *,
+              << "The method you attempt to call has been disabled: " << arg1);
 
 //
 // IO and interaction with OS
@@ -144,14 +152,6 @@ DefException1(ExcFileNotOpen, char *, << "Could not open file " << arg1);
 //                    "a chunk of memory that is simply beyond all reasonable "
 //                    "size, for example because the size of the object has "
 //                    "been computed incorrectly.");
-//
-//  /**
-//   * A memory handler reached a point where all allocated objects should have
-//   * been released. Since this exception is thrown, some were still allocated.
-//   */
-//  DeclException1 (ExcMemoryLeak, int,
-//                  << "Destroying memory handler while " << arg1
-//                  << " objects are still allocated");
 //
 //  /**
 //   * The object should have been filled with something before this member
