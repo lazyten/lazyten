@@ -40,9 +40,10 @@ class LazyMatrix_i : public LazyMatrixExpression<StoredMatrix> {
     //
     // Partial implementation of the interface of a LazyMatrixExpression
     //
-    /** \brief Update the internal data given a set of args */
-    template <typename... Args>
-    void update(Args...) {
+    /** \brief Update the internal data of all objects in this expression
+     *         given the ParameterMap
+     * */
+    virtual void update(const ParameterMap&) override {
         assert_dbg(false, ExcNotImplemented());
     }
 
