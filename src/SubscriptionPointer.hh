@@ -104,7 +104,7 @@ class SubscriptionPointer {
     /** Dereference object member */
     T* operator->() const { return m_subscribed_obj_ptr; }
 
-    const std::string& subscriber_id() { return *m_subscriber_id_ptr; }
+    const std::string& subscriber_id() const { return *m_subscriber_id_ptr; }
 
   private:
     /** Register at the given object */
