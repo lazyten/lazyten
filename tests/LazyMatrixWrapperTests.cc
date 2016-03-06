@@ -13,11 +13,8 @@ namespace tests {
 using namespace rc;
 
 TEST_CASE("LazyMatrixWrapper class", "[LazyMatrixWrapper]") {
-#ifdef DEBUG
-    // Put this is some global context.
     // Make sure that the program does not get aborted
     exceptions::assert_dbg_effect = exceptions::ExceptionEffect::THROW;
-#endif
 
     typedef double scalar_type;
     typedef SmallMatrix<scalar_type> small_matrix_type;

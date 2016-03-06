@@ -9,10 +9,8 @@ namespace tests {
 using namespace rc;
 
 TEST_CASE("ParameterMap tests", "[parametermap]") {
-#ifdef DEBUG
     // Make sure that the program does not get aborted
     exceptions::assert_dbg_effect = exceptions::ExceptionEffect::THROW;
-#endif
 
     // Some data:
     int i = 5;

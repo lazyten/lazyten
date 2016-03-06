@@ -10,6 +10,10 @@ namespace tests {
 using namespace rc;
 
 TEST_CASE("LazyMatrixProduct", "[LazyMatrixProduct]") {
+    // Make sure that the program does not get aborted
+    linalgwrap::exceptions::assert_dbg_effect =
+          linalgwrap::exceptions::ExceptionEffect::THROW;
+
     // TODO  Test swap function
     // TODO  Test constructors
 

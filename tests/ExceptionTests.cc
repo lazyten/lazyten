@@ -7,11 +7,12 @@ namespace tests {
 using namespace rc;
 
 TEST_CASE("Exception system", "[exception]") {
+    // Make sure that the program does not get aborted
+    linalgwrap::exceptions::assert_dbg_effect =
+          linalgwrap::exceptions::ExceptionEffect::THROW;
+
     SECTION("Test throw or raise mechanism") {
 #ifdef DEBUG
-        // Make sure that the program does not get aborted
-        exceptions::assert_dbg_effect = exceptions::ExceptionEffect::THROW;
-
         // Test if an ExcNotImplemented exception would be thrown:
         REQUIRE_THROWS_AS(assert_dbg(false, ExcNotImplemented()),
                           ExcNotImplemented);

@@ -12,10 +12,8 @@ namespace tests {
 using namespace rc;
 
 TEST_CASE("SmallMatrix class", "[SmallMatrix]") {
-#ifdef DEBUG
     // Make sure that the program does not get aborted
     exceptions::assert_dbg_effect = exceptions::ExceptionEffect::THROW;
-#endif
 
     typedef double scalar_type;
     typedef typename Matrix_i<scalar_type>::size_type size_type;
