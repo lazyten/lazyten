@@ -11,12 +11,7 @@
 #include <vector>
 #include <algorithm>
 
-// TODO tmp
-#include <iterator>
-
 namespace linalgwrap {
-
-// TODO what happens if a subscribable gets copied?
 
 // forwand declare SubscriptionPointer
 template <typename Subscribable>
