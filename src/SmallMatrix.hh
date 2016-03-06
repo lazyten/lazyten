@@ -73,12 +73,15 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
     //
     /** Scale matrix by a scalar value */
     SmallMatrix& operator*=(scalar_type s) {
+        assert_finite(s);
         m_arma *= s;
         return *this;
     }
 
     /** Divide all matrix entries by a scalar value */
     SmallMatrix& operator/=(scalar_type s) {
+        assert_dbg(s == 0, ExcDevideByZero());
+        assert_finite(s);
         m_arma /= s;
         return *this;
     }

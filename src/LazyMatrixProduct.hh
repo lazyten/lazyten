@@ -123,7 +123,10 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
     //
     /** \brief Scale the whole matrix_factor by the scalar \p c
      */
-    void scale(const scalar_type c) { m_coefficient *= c; }
+    void scale(const scalar_type c) {
+        assert_finite(c);
+        m_coefficient *= c;
+    }
 
     //
     // Matrix_i interface
@@ -243,11 +246,14 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
     /** \brief scale a matrix using a scalar
      */
     LazyMatrixProduct& operator*=(scalar_type c) {
+        assert_finite(c);
         this->scale(c);
         return *this;
     }
 
     LazyMatrixProduct& operator/=(scalar_type c) {
+        assert_finite(c);
+        assert_dbg(c == 0, ExcDevideByZero());
         this->scale(Constants<scalar_type>::one / c);
         return *this;
     }

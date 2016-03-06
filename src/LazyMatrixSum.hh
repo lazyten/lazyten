@@ -208,6 +208,8 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
     //
     /** \brief scale the whole sum by the scalar \p c */
     void scale(const scalar_type c) {
+        assert_finite(c);
+
         for (auto& term : m_stored_terms) {
             term *= c;
         }
@@ -310,6 +312,7 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
     /** \brief scale a matrix using a scalar
      */
     LazyMatrixSum& operator*=(scalar_type c) {
+        assert_finite(c);
         this->scale(c);
         return *this;
     }
@@ -317,6 +320,8 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
     /** \brief scale a matrix using a scalar
      */
     LazyMatrixSum& operator/=(scalar_type c) {
+        assert_finite(c);
+        assert_dbg(c == 0, ExcDevideByZero());
         this->scale(Constants<scalar_type>::one / c);
         return *this;
     }
