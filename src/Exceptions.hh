@@ -119,6 +119,15 @@ DefExceptionMsg(ExcInternalError,
 DefException1(ExcDiabled, char *,
               << "The method you attempt to call has been disabled: " << arg1);
 
+/**
+ * This is thrown if an iterator should be incremented, decremented
+ * or used, but it is already at its final state.
+ */
+DefExceptionMsg(ExcIteratorPastEnd,
+                "You are trying to use an iterator, which is pointing past "
+                "the end of its range of valid elements. It is not valid to "
+                "dereference or use an iterator in such a case.");
+
 //
 // IO and interaction with OS
 //
@@ -136,70 +145,6 @@ DefExceptionMsg(ExcIO, "An input/output error has occurred.");
  * file.
  */
 DefException1(ExcFileNotOpen, char *, << "Could not open file " << arg1);
-
-//
-// Stuff from deal.ii
-//
-//
-//  /**
-//   * Trying to allocate a new object failed due to lack of free memory.
-//   */
-//  DeclExceptionMsg (ExcOutOfMemory,
-//                    "Your program tried to allocate some memory but this "
-//                    "allocation failed. Typically, this either means that "
-//                    "you simply do not have enough memory in your system, "
-//                    "or that you are (erroneously) trying to allocate "
-//                    "a chunk of memory that is simply beyond all reasonable "
-//                    "size, for example because the size of the object has "
-//                    "been computed incorrectly.");
-//
-//  /**
-//   * The object should have been filled with something before this member
-//   * function is called.
-//   */
-//  DeclExceptionMsg(ExcEmptyObject,
-//                   "The object you are trying to access is empty but it makes
-//                   "
-//                   "no sense to attempt the operation you are trying on an "
-//                   "empty object.");
-//
-//  /**
-//   * This exception is thrown if the iterator you access has corrupted data.
-//   * It might for instance be, that the container it refers does not have an
-//   * entry at the point the iterator refers.
-//   *
-//   * Typically, this will be an internal error of deal.II, because the
-//   * increment and decrement operators should never yield an invalid iterator.
-//   */
-//  DeclExceptionMsg (ExcInvalidIterator,
-//                    "You are trying to use an iterator, but the iterator is "
-//                    "in an invalid state. This may indicate that the iterator
-//                    "
-//                    "object has not been initialized, or that it has been "
-//                    "moved beyond the end of the range of valid elements.");
-//
-//  /**
-//   * This exception is thrown if the iterator you incremented or decremented
-//   * was already at its final state.
-//   */
-//  DeclExceptionMsg (ExcIteratorPastEnd,
-//                    "You are trying to use an iterator, but the iterator is "
-//                    "pointing past the end of the range of valid elements. "
-//                    "It is not valid to dereference the iterator in this "
-//                    "case.");
-//
-//  /**
-//   * Some of our numerical classes allow for setting all entries to zero
-//   * using the assignment operator <tt>=</tt>.
-//   *
-//   * In many cases, this assignment operator makes sense <b>only</b> for the
-//   * argument zero. In other cases, this exception is thrown.
-//   */
-//  DeclExceptionMsg (ExcScalarAssignmentOnlyForZeroValue,
-//                    "You are trying an operation of the form 'vector=s' with "
-//                    "a nonzero scalar value 's'. However, such assignments "
-//                    "are only allowed if the right hand side is zero.");
-
 }  // exceptions
 
 // Import exceptions namespace
@@ -273,6 +218,12 @@ using namespace exceptions;
             assert_size(vsize, it->size());                          \
         }                                                            \
     }
+
+/**
+ * Assert that a value is finite
+ */
+#define assert_finite(value) \
+    { assert_dbg(std::isfinite(value), ExcNumberNotFinite(value)) }
 
 }  // linalgwrap
 
