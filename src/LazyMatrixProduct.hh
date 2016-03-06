@@ -253,7 +253,7 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
 
     LazyMatrixProduct& operator/=(scalar_type c) {
         assert_finite(c);
-        assert_dbg(c == 0, ExcDevideByZero());
+        assert_dbg(c != 0, ExcDevideByZero());
         this->scale(Constants<scalar_type>::one / c);
         return *this;
     }
