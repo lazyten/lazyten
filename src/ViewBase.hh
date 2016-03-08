@@ -13,6 +13,7 @@ namespace view {
  */
 template <typename Matrix>
 class BaseViewMatrixContainer {
+  public:
     typedef Matrix inner_matrix_type;
 
     /** A swap function for ViewMatrixContainer */
@@ -34,14 +35,12 @@ class BaseViewMatrixContainer {
 
   protected:
     /** Access the inner matrix as a reference */
-    inner_matrix_type& inner_matrix() override { return *m_inner_ptr; }
+    inner_matrix_type& inner_matrix() { return *m_inner_ptr; }
 
     /** Access the inner matrix as a const reference */
-    const inner_matrix_type& inner_matrix() const override {
-        return *m_inner_ptr;
-    }
+    const inner_matrix_type& inner_matrix() const { return *m_inner_ptr; }
 
-    std::string indentifier() const { return m_inner_ptr.subscriber_id(); }
+    std::string identifier() const { return m_inner_ptr.subscriber_id(); }
 
   private:
     //! Store a copy of the inner lazy matrix expression:
@@ -115,7 +114,7 @@ class ViewBase
     /** \brief Print the expression tree to this outstream
      * */
     void print_tree(std::ostream& o) const override {
-        o << container_type::indentifier() << " of ";
+        o << container_type::identifier() << " of ";
         container_type::inner_matrix().print_tree(o);
     }
 };
