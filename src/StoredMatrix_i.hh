@@ -2,7 +2,6 @@
 #define LINALG_STORED_MATRIX_I_HPP_
 
 #include "Matrix_i.hh"
-#include "Subscribable.hh"
 #include "Constants.hh"
 
 namespace linalgwrap {
@@ -32,9 +31,13 @@ class Matrix_i;
  *   StoredMatrix_i(const SmallMatrix&)
  *   StoredMatrix_i(const SmallMatrix&, scalar_type tolerance)
  *   ```
+ *
+ * Note that the operator() functions in derived classes are expected to return
+ * zero even if an element is known to be zero by some sparsity pattern or
+ * similar.
  */
 template <typename Scalar>
-class StoredMatrix_i : public Matrix_i<Scalar>, public Subscribable {
+class StoredMatrix_i : public Matrix_i<Scalar> {
   public:
     typedef Matrix_i<Scalar> base_type;
     typedef typename base_type::scalar_type scalar_type;

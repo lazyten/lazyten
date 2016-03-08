@@ -6,7 +6,6 @@
 #include "LazyMatrixSum.hh"
 #include "LazyMatrixProduct.hh"
 #include "ParameterMap.hh"
-#include "Subscribable.hh"
 #include <ostream>
 #include <memory>
 
@@ -28,8 +27,7 @@ class LazyMatrixProduct;
  * */
 template <typename StoredMatrix>
 class LazyMatrixExpression
-      : public Matrix_i<typename StoredMatrix::scalar_type>,
-        public Subscribable {
+      : public Matrix_i<typename StoredMatrix::scalar_type> {
     static_assert(
           std::is_base_of<StoredMatrix_i<typename StoredMatrix::scalar_type>,
                           StoredMatrix>::value,

@@ -9,6 +9,7 @@
 #include "Constants.hh"
 #include <iostream>
 #include <iomanip>
+#include "Subscribable.hh"
 
 namespace linalgwrap {
 
@@ -17,7 +18,7 @@ class SmallMatrix;
 
 /** \brief Abstract matrix interface class */
 template <typename Scalar>
-class Matrix_i {
+class Matrix_i : public Subscribable {
   public:
     typedef size_t size_type;
     typedef Scalar scalar_type;
