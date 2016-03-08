@@ -114,6 +114,24 @@ TEST_CASE("SmallMatrix class", "[SmallMatrix]") {
               rc::check("Multiplication of small matrices", with_small_matrix));
     }
 
+    SECTION("Const Iterator") {
+        // Tests const_iterator
+
+        auto test_iterator = [](small_matrix_type m) {
+            auto it_const = m.cbegin();
+            auto it = m.begin();
+
+            for (size_type i = 0; i < m.n_rows(); ++i) {
+                for (size_type j = 0; j < m.n_cols(); ++j, ++it, ++it_const) {
+                    RC_ASSERT(NumComp::is_equal(m(i, j), *it));
+                    RC_ASSERT(NumComp::is_equal(m(i, j), *it_const));
+                }
+            }
+        };
+
+        REQUIRE(rc::check("Iterator of small matrices", test_iterator));
+    }
+
     // TODO test equality and inequality operators
 }
 
