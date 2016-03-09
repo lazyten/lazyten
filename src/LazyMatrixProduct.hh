@@ -140,7 +140,7 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
     virtual void extract_block(
           size_type start_row, size_type start_col,
           SmallMatrix<scalar_type>& block, bool add = false,
-          scalar_type c_this = Constants<scalar_type>::one) const {
+          scalar_type c_this = Constants<scalar_type>::one) const override {
         // check that we do not overshoot the row index
         assert_upper_bound(start_row + block.n_rows() - 1, n_rows());
 
@@ -187,14 +187,14 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
     }
 
     /** \brief Number of rows of the matrix */
-    virtual size_type n_rows() const {
+    virtual size_type n_rows() const override {
         // The number of rows of the product
         // equals the number of rows of the first element in the product.
         return m_factors.front()->n_rows();
     }
 
     /** \brief Number of columns of the matrix  */
-    virtual size_type n_cols() const {
+    virtual size_type n_cols() const override {
         // The number of columns of the product
         // equals the nuber of columns of the last element in the product.
         return m_factors.back()->n_cols();
@@ -214,7 +214,8 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
     }
 
     /** \brief Multiplication with a stored matrix */
-    virtual stored_matrix_type operator*(const stored_matrix_type& m) const {
+    virtual stored_matrix_type operator*(
+          const stored_matrix_type& m) const override {
         assert_size(n_cols(), m.n_rows());
 
         // Deal with last factor:
@@ -233,12 +234,12 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
 
     /** \brief Print the expression tree to this outstream
      * */
-    virtual void print_tree(std::ostream& o) const {
+    virtual void print_tree(std::ostream& o) const override {
         // TODO to be implemented
     }
 
     /** \brief Clone the expression */
-    lazy_matrix_expression_ptr_type clone() const {
+    lazy_matrix_expression_ptr_type clone() const override {
         // return a copy enwrapped in the pointer type
         return lazy_matrix_expression_ptr_type(new LazyMatrixProduct(*this));
     }

@@ -231,7 +231,7 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
     virtual void extract_block(
           size_type start_row, size_type start_col,
           SmallMatrix<scalar_type>& block, bool add = false,
-          scalar_type c_this = Constants<scalar_type>::one) const {
+          scalar_type c_this = Constants<scalar_type>::one) const override {
         // check that we do not overshoot the row index
         assert_upper_bound(start_row + block.n_rows() - 1, n_rows());
 
@@ -257,10 +257,10 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
     }
 
     /** \brief Number of rows of the matrix      */
-    virtual size_type n_rows() const { return m_n_rows; }
+    virtual size_type n_rows() const override { return m_n_rows; }
 
     /** \brief Number of columns of the matrix     */
-    virtual size_type n_cols() const { return m_n_cols; }
+    virtual size_type n_cols() const override { return m_n_cols; }
 
     //
     // LazyMatrixExpression interface
@@ -276,7 +276,8 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
     }
 
     /** \brief Multiplication with a stored matrix */
-    virtual stored_matrix_type operator*(const stored_matrix_type& m) const {
+    virtual stored_matrix_type operator*(
+          const stored_matrix_type& m) const override {
         assert_size(n_cols(), m.n_rows());
 
         // Allocate storage for the return and fill with zero
@@ -301,12 +302,12 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
 
     /** \brief Print the expression tree to this outstream
      * */
-    virtual void print_tree(std::ostream& o) const {
+    virtual void print_tree(std::ostream& o) const override {
         // TODO to be implemented
     }
 
     /** \brief Clone the expression */
-    lazy_matrix_expression_ptr_type clone() const {
+    lazy_matrix_expression_ptr_type clone() const override {
         // return a copy enwrapped in the pointer type
         return lazy_matrix_expression_ptr_type(new LazyMatrixSum(*this));
     }

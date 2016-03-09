@@ -155,11 +155,11 @@ class MatrixIteratorDefaultCore
   protected:
     /** Obtain value of current element. */
     typename std::conditional<Constness, value_type, reference>::type value()
-          const;
+          const override;
 
     /** Return a pointer to the currently pointed-to value */
     typename std::conditional<Constness, const pointer, pointer>::type
-    ptr_to_value() const;
+    ptr_to_value() const override;
 
     //
     // Seeking and increment:
