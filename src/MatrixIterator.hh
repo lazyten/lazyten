@@ -1,41 +1,31 @@
 #pragma once
-#include "Matrix_i.hh"
-#include "MatrixIteratorBase.hh"
+#include "MatrixIteratorCore.hh"
 
 namespace linalgwrap {
-// forward declaration
-template <typename Scalar>
-class Matrix_i;
-
-/** \brief Iterate over the elements of a Matrix_i object
- *         row-by-row.
+/** \brief The matrix iterator enwrapping a MatrixIteratorCore
  *
- * This implementation does not make any assumptions about
- * the inner matrix apart from the requirement that it should
- * satisfy the Matrix_i interface. It uses operator() of the
- * matrixto obtain values for the matrix entries and it does
- * not allow modification of the matrix entries at all.
- *
- * No attempt to skip elements based on sparsity or similar is
- * made, so a more specialised iterator should be used for
- * matrices with sparsity.
- *
- * TODO perhaps it is sensible to cache the value of
- *      operator(row,col) of the matrix and just return it on
- *      dereference of the iterator.
- */
-template <typename Scalar>
-class MatrixIterator
-      : public FullMatrixIteratorBase<const Matrix_i<Scalar>, true> {
+ * The resulting object has the required interface for an
+ * STL-compatible iterator and traverses the elements of the
+ * matrix in the way the core dictates.
+ * */
+template <typename IteratorCore>
+class MatrixIterator : private IteratorCore {
   public:
-    typedef FullMatrixIteratorBase<const Matrix_i<Scalar>, true> base_type;
+    typedef IteratorCore base_type;
+    typedef typename base_type::original_matrix_type original_matrix_type;
     typedef typename base_type::matrix_type matrix_type;
     typedef typename base_type::size_type size_type;
-    typedef typename base_type::scalar_type scalar_type;
     typedef typename base_type::index_type index_type;
     typedef typename base_type::value_type value_type;
     typedef typename base_type::reference reference;
     typedef typename base_type::pointer pointer;
+
+    static_assert(
+          std::is_base_of<
+                MatrixIteratorCoreBase<original_matrix_type,
+                                       IteratorCore::is_const_iterator>,
+                IteratorCore>::value,
+          "The IteratorCore should be a subclass of MatrixIteratorCoreBase");
 
     //
     // Constructor, destructor and assignment
@@ -43,17 +33,31 @@ class MatrixIterator
     /** Default constructor */
     MatrixIterator();
 
-    /** \brief Constructor from matrix reference and index of
-     *  the element the iterator should point to
+    /** \brief Constructor of a Matrix iterator pointing to
+     *  the past-the-end position.
      *
-     * In general it is assumed that the element index provided
-     * is valid in the sense that it points to a proper matrix
-     * element. There are exceptions however:
-     * - The ``index_type`` value ``invalid_pos`` indicates an
-     *   iterator-past-the-end of the matrix and should be used
-     *   only in the end() function of a matrix.
-     */
+     *  In other words this constructor constructs an iterator
+     *  in the state past-the-end. */
+    MatrixIterator(matrix_type& mat);
+
+    /** \brief Construct an iterator giving the initial value
+     * it should point to. */
     MatrixIterator(matrix_type& mat, index_type start_index);
+
+    //
+    // Iterator information
+    //
+    /** Get row of the currently pointed to element
+     *  or invalid_pos.first if this is an iterator-past-the-end*/
+    size_type row() const;
+
+    /** Get column of currently pointed to element or invalid_pos.second
+     * if this is an iterator-past-the-end.*/
+    size_type col() const;
+
+    /** Return the tuple of indices of the currently pointed to element
+     * or invalid_pos if this is an iterator-past-the-end.*/
+    index_type indices() const;
 
     //
     // Increment and seek
@@ -73,61 +77,121 @@ class MatrixIterator
     //
     // Element access
     //
-    /** Return the value of the element we point to if this is a const
-     *  iterator, else a reference to the element.
-     */
-    value_type operator*() const override;
+    /** Return the value of the element we point to. */
+    auto operator*() const -> decltype(base_type::value());
 
     /** Access the members of the element we point to. */
-    const pointer operator->() const override;
+    auto operator -> () const -> decltype(base_type::ptr_to_value());
 
-  private:
-    //! Some dummy variable required for operator->
-    mutable scalar_type dummy = Constants<scalar_type>::invalid;
+    //
+    // Comparison
+    //
+    /** \brief check if two iterators are equal
+     *
+     * Matrix iterators are equal if they point to the same element
+     */
+    bool operator==(const MatrixIterator& other) const;
+
+    /** \brief Check whether two iterators are unequal
+     *
+     * Matrix iterators are unequal if they point to different elements
+     */
+    bool operator!=(const MatrixIterator& other) const;
 };
 
+//! The default matrix iterator
+template <typename Matrix>
+using DefaultMatrixIterator =
+      MatrixIterator<MatrixIteratorDefaultCore<Matrix, false>>;
+
+//! The default matrix const iterator
+template <typename Matrix>
+using DefaultMatrixConstIterator =
+      MatrixIterator<MatrixIteratorDefaultCore<Matrix, true>>;
+
 //
-// MatrixIterator
+// ----------------------------------------------------------------
 //
 
-template <typename Scalar>
-MatrixIterator<Scalar>::MatrixIterator()
+template <typename IteratorCore>
+MatrixIterator<IteratorCore>::MatrixIterator()
       : base_type{} {}
 
-template <typename Scalar>
-MatrixIterator<Scalar>::MatrixIterator(matrix_type& mat, index_type start_index)
-      : base_type{mat, start_index} {}
+template <typename IteratorCore>
+MatrixIterator<IteratorCore>::MatrixIterator(matrix_type& mat)
+      : base_type{mat} {}
 
-template <typename Scalar>
-MatrixIterator<Scalar>& MatrixIterator<Scalar>::seek_to(index_type element) {
+template <typename IteratorCore>
+MatrixIterator<IteratorCore>::MatrixIterator(matrix_type& mat,
+                                             index_type start_index)
+      : base_type{mat, start_index} {
+    base_type::assert_valid_state();
+}
+
+template <typename IteratorCore>
+typename MatrixIterator<IteratorCore>::size_type
+MatrixIterator<IteratorCore>::row() const {
+    return base_type::row();
+}
+
+template <typename IteratorCore>
+typename MatrixIterator<IteratorCore>::size_type
+MatrixIterator<IteratorCore>::col() const {
+    return base_type::col();
+}
+
+template <typename IteratorCore>
+typename MatrixIterator<IteratorCore>::index_type
+MatrixIterator<IteratorCore>::indices() const {
+    return base_type::indices();
+}
+
+template <typename IteratorCore>
+MatrixIterator<IteratorCore>& MatrixIterator<IteratorCore>::seek_to(
+      index_type element) {
+    base_type::assert_valid_state();
     base_type::seek_to_element(element);
     return *this;
 }
 
-template <typename Scalar>
-MatrixIterator<Scalar>& MatrixIterator<Scalar>::operator++() {
+template <typename IteratorCore>
+MatrixIterator<IteratorCore>& MatrixIterator<IteratorCore>::operator++() {
+    base_type::assert_valid_state();
     base_type::seek_next_element();
     return *this;
 }
 
-template <typename Scalar>
-MatrixIterator<Scalar> MatrixIterator<Scalar>::operator++(int) {
+template <typename IteratorCore>
+MatrixIterator<IteratorCore> MatrixIterator<IteratorCore>::operator++(int) {
     MatrixIterator copy{*this};
     ++(*this);
     return copy;
 }
 
-template <typename Scalar>
-typename MatrixIterator<Scalar>::value_type MatrixIterator<Scalar>::operator*()
-      const {
-    return base_type::matrix()(base_type::row(), base_type::col());
+template <typename IteratorCore>
+auto MatrixIterator<IteratorCore>::operator*() const
+      -> decltype(base_type::value()) {
+    base_type::assert_valid_state();
+    return base_type::value();
 }
 
-template <typename Scalar>
-const typename MatrixIterator<Scalar>::pointer MatrixIterator<Scalar>::
-operator->() const {
-    dummy = *(*this);
-    return &dummy;
+template <typename IteratorCore>
+auto MatrixIterator<IteratorCore>::operator -> () const
+      -> decltype(base_type::ptr_to_value()) {
+    base_type::assert_valid_state();
+    return base_type::ptr_to_value();
+}
+
+template <typename IteratorCore>
+bool MatrixIterator<IteratorCore>::operator==(
+      const MatrixIterator& other) const {
+    return other.indices() == indices();
+}
+
+template <typename IteratorCore>
+bool MatrixIterator<IteratorCore>::operator!=(
+      const MatrixIterator& other) const {
+    return !((*this) == other);
 }
 
 }  // linalgwrap

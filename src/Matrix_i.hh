@@ -19,8 +19,11 @@ namespace linalgwrap {
 template <typename Scalar>
 class SmallMatrix;
 
-template <typename Scalar>
+template <typename IteratorCore>
 class MatrixIterator;
+
+template <typename Matrix, bool Constness>
+class MatrixIteratorDefaultCore;
 
 /** \brief Abstract matrix interface class
  *
@@ -33,8 +36,11 @@ class Matrix_i : public Subscribable {
     typedef size_t size_type;
     typedef Scalar scalar_type;
 
-    typedef MatrixIterator<Scalar> iterator;
-    typedef MatrixIterator<Scalar> const_iterator;
+    //! The iterator type (a const iterator)
+    typedef DefaultMatrixConstIterator<Matrix_i<Scalar>> iterator;
+
+    //! The const iterator type
+    typedef DefaultMatrixConstIterator<Matrix_i<Scalar>> const_iterator;
 
     /** \brief Destructor */
     virtual ~Matrix_i() = default;
@@ -99,22 +105,22 @@ class Matrix_i : public Subscribable {
     // Iterators
     //
     /** Return an iterator to the beginning */
-    virtual iterator begin();
+    iterator begin();
 
     /** Return a const_iterator to the beginning */
-    virtual const_iterator begin() const;
+    const_iterator begin() const;
 
     /** Return a const_iterator to the beginning */
-    virtual const_iterator cbegin() const;
+    const_iterator cbegin() const;
 
     /** Return an iterator to the end */
-    virtual iterator end();
+    iterator end();
 
     /** Return a const_iterator to the end */
-    virtual const_iterator end() const;
+    const_iterator end() const;
 
     /** Return a const_iterator to the end */
-    virtual const_iterator cend() const;
+    const_iterator cend() const;
 
     //
     // Operations --- or maybe out of scope
@@ -184,7 +190,7 @@ typename Matrix_i<Scalar>::const_iterator Matrix_i<Scalar>::cbegin() const {
 
 template <typename Scalar>
 typename Matrix_i<Scalar>::iterator Matrix_i<Scalar>::end() {
-    return iterator(*this, iterator::invalid_pos);
+    return iterator(*this);
 }
 
 template <typename Scalar>
@@ -194,7 +200,7 @@ typename Matrix_i<Scalar>::const_iterator Matrix_i<Scalar>::end() const {
 
 template <typename Scalar>
 typename Matrix_i<Scalar>::const_iterator Matrix_i<Scalar>::cend() const {
-    return const_iterator(*this, const_iterator::invalid_pos);
+    return const_iterator(*this);
 }
 
 //
