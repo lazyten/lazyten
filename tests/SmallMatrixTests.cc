@@ -127,6 +127,40 @@ TEST_CASE("SmallMatrix class", "[SmallMatrix]") {
                     RC_ASSERT(NumComp::is_equal(m(i, j), *it_const));
                 }
             }
+
+            for (auto it = std::begin(m); it != std::end(m); ++it) {
+                RC_ASSERT(NumComp::is_equal(*it, m(it.row(), it.col())));
+            }
+        };
+
+        REQUIRE(rc::check("Const iterator of small matrices", test_iterator));
+    }
+
+    SECTION("Iterator") {
+        // Test iterator
+
+        auto test_iterator = [](small_matrix_type m) {
+            auto modify_row = *gen::inRange<size_t>(0, m.n_rows());
+            auto modify_col = *gen::inRange<size_t>(0, m.n_cols());
+            auto value = *gen::arbitrary<double>();
+
+            for (auto it = m.begin(); it != m.end(); ++it) {
+                if (it.row() == modify_row && it.col() == modify_col) {
+                    *it = value;
+                    break;
+                }
+            }
+
+            auto it = std::begin(m);
+            for (size_type i = 0; i < m.n_rows(); ++i) {
+                for (size_type j = 0; j < m.n_cols(); ++j, ++it) {
+                    if (i == modify_row && j == modify_col) {
+                        RC_ASSERT(NumComp::is_equal(m(i, j), value));
+                    } else {
+                        RC_ASSERT(NumComp::is_equal(m(i, j), *it));
+                    }
+                }
+            }
         };
 
         REQUIRE(rc::check("Iterator of small matrices", test_iterator));

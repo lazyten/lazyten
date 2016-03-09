@@ -3,12 +3,19 @@
 
 #include "Matrix_i.hh"
 #include "Constants.hh"
+#include "MatrixIterator.hh"
 
 namespace linalgwrap {
 
 // Forward-declare the interface class
 template <typename Scalar>
 class Matrix_i;
+
+template <typename IteratorCore>
+class MatrixIterator;
+
+template <typename Matrix, bool Constness>
+class MatrixIteratorDefaultCore;
 
 /** \brief Interface class for a matrix which is actually stored in memory
  * in some way
@@ -42,6 +49,9 @@ class StoredMatrix_i : public Matrix_i<Scalar> {
     typedef Matrix_i<Scalar> base_type;
     typedef typename base_type::scalar_type scalar_type;
     typedef typename base_type::size_type size_type;
+
+    //! The iterator type
+    typedef DefaultMatrixIterator<StoredMatrix_i<Scalar>> iterator;
 
     // Swapping:
     friend void swap(StoredMatrix_i& first, StoredMatrix_i& second) {
@@ -99,14 +109,36 @@ class StoredMatrix_i : public Matrix_i<Scalar> {
         }
     }
 
+    //
+    // Iterators
+    //
+    /** Return an iterator to the beginning */
+    iterator begin();
+
+    /** Return an iterator to the end */
+    iterator end();
+
     // TODO
-    //   function to get stl-compatible iterator
     //   function to get number of non-zero entries
 
   protected:
     //! some name identifying the matrix, or empty
     std::string m_name;
 };
+
+//
+// -------------------------------------------------------------
+//
+
+template <typename Scalar>
+typename StoredMatrix_i<Scalar>::iterator StoredMatrix_i<Scalar>::begin() {
+    return iterator(*this, {0, 0});
+}
+
+template <typename Scalar>
+typename StoredMatrix_i<Scalar>::iterator StoredMatrix_i<Scalar>::end() {
+    return iterator(*this);
+}
 
 }  // namespace liblinalg
 #endif
