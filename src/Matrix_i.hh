@@ -62,6 +62,13 @@ class Matrix_i : public Subscribable {
      * \p c_this before extracting them to \p block and the flag \p add
      * controls whether the values are added to \p block or set.
      *
+     * \note This is a block-wise operaton. In the whole expression tree
+     * we first extract the block and then perform the operation between
+     * the individual blocks. This means that sparsity is not taken into
+     * account all the way. If you want element-wise access where the data
+     * is constructed element-wise as well use the iterators. There we
+     * also make full use of sparsity.
+     *
      * @param start_row The row index to start from
      * @param start_col The col index to start from
      * @param block     The block to extract the values to.
@@ -69,7 +76,7 @@ class Matrix_i : public Subscribable {
      * @param c_this    Coefficient to multiply all values of this matrix
      *                  before adding/setting them to \p block.
      */
-    virtual void fill(
+    virtual void extract_block(
           size_type start_row, size_type start_col,
           SmallMatrix<scalar_type>& block, bool add = false,
           scalar_type c_this = Constants<scalar_type>::one) const = 0;
@@ -145,7 +152,7 @@ typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::operator()(
     assert_upper_bound(col, n_cols());
 
     SmallMatrix<scalar_type> block(1, 1, false);
-    fill(row, col, block);
+    extract_block(row, col, block);
     return block(0, 0);
 }
 

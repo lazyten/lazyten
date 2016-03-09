@@ -125,9 +125,10 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
     /**
      * See documentation of Matrix_i function of the same name.
      */
-    void fill(size_type start_row, size_type start_col,
-              SmallMatrix<scalar_type>& block, bool add = false,
-              scalar_type c_this = Constants<scalar_type>::one) const override {
+    void extract_block(
+          size_type start_row, size_type start_col,
+          SmallMatrix<scalar_type>& block, bool add = false,
+          scalar_type c_this = Constants<scalar_type>::one) const override {
         // check that we do not overshoot the row index
         assert_upper_bound(start_row + block.n_rows() - 1, n_rows());
 

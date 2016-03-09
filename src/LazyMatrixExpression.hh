@@ -71,11 +71,13 @@ class LazyMatrixExpression
      *       is a CRS matrix.
      */
     virtual explicit operator stored_matrix_type() const {
+        // TODO use iterators!
+
         // initialise a SmallMatrix
         SmallMatrix<scalar_type> sm(this->n_rows(), this->n_cols(), false);
 
         // Fill it:
-        this->fill(0, 0, sm);
+        this->extract_block(0, 0, sm);
 
         // Copy to stored:
         stored_matrix_type res(sm);

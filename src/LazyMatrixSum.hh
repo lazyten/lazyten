@@ -18,6 +18,9 @@ class LazyMatrixProduct;
 template <typename StoredMatrix>
 class LazyMatrixExpression;
 
+// TODO: If sparsity should be incorporated, build up the sparsity pattern
+//       as more and more terms are added to the sum object.
+
 /** Macro to aid defining both in-place matrix-matrix addition and in-place
  * matrix-matrix subtraction */
 #define LazyMatrixSum_inplace_addsub_op(othertype)            \
@@ -225,9 +228,10 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
     /**
      * See documentation of Matrix_i function of the same name.
      */
-    virtual void fill(size_type start_row, size_type start_col,
-                      SmallMatrix<scalar_type>& block, bool add = false,
-                      scalar_type c_this = Constants<scalar_type>::one) const {
+    virtual void extract_block(
+          size_type start_row, size_type start_col,
+          SmallMatrix<scalar_type>& block, bool add = false,
+          scalar_type c_this = Constants<scalar_type>::one) const {
         // check that we do not overshoot the row index
         assert_upper_bound(start_row + block.n_rows() - 1, n_rows());
 
@@ -242,12 +246,13 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
 
             // Add the elements from the scaled matrix to the present
             // block
-            mat.fill(start_row, start_col, block, true, c_this * coeff);
+            mat.extract_block(start_row, start_col, block, true,
+                              c_this * coeff);
         }
 
         for (const auto& term : m_lazy_terms) {
             // add results to the present block:
-            term.fill(start_row, start_col, block, true, c_this);
+            term.extract_block(start_row, start_col, block, true, c_this);
         }
     }
 

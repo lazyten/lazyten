@@ -76,12 +76,12 @@ struct LazyMatrixTestingPolicy {
     /** Run some extra tests in order to compare/test model and sut.
      *
      * In this case we test the operator* with a Stored Matrix and
-     * the fill() function.
+     * the extract_block() function.
      * */
     static void extra_tests(const model_type& model, const sut_type& sut) {
         test_mult_by_stored(model, sut);
         test_convert_to_stored(model, sut);
-        test_fill(model, sut);
+        test_extract_block(model, sut);
     }
 
     static void test_mult_by_stored(const model_type& model,
@@ -106,7 +106,8 @@ struct LazyMatrixTestingPolicy {
         RC_ASSERT(NumComp::is_equal_matrix(result_model, result_matrix));
     }
 
-    static void test_fill(const model_type& model, const sut_type& sut) {
+    static void test_extract_block(const model_type& model,
+                                   const sut_type& sut) {
         size_type start_row = *gen::inRange<size_type>(0, model.n_rows());
         size_type start_col = *gen::inRange<size_type>(0, model.n_cols());
 
@@ -117,7 +118,7 @@ struct LazyMatrixTestingPolicy {
 
         // Extract a block from the matrix:
         SmallMatrix<scalar_type> block(n_rows, n_cols, false);
-        sut.matrix.fill(start_row, start_col, block);
+        sut.matrix.extract_block(start_row, start_col, block);
 
         // check that it agrees with the model:
         for (size_type i = start_row; i < start_row + n_rows; ++i) {

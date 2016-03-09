@@ -77,10 +77,11 @@ class LazyMatrixWrapper : public LazyMatrixExpression<StoredMatrix> {
     /**
      * See documentation of Matrix_i function of the same name.
      */
-    void fill(size_type start_row, size_type start_col,
-              SmallMatrix<scalar_type>& block, bool add = false,
-              scalar_type c_this = Constants<scalar_type>::one) const override {
-        m_inner->fill(start_row, start_col, block, add, c_this);
+    void extract_block(
+          size_type start_row, size_type start_col,
+          SmallMatrix<scalar_type>& block, bool add = false,
+          scalar_type c_this = Constants<scalar_type>::one) const override {
+        m_inner->extract_block(start_row, start_col, block, add, c_this);
     }
 
     /** \brief Number of rows of the matrix */

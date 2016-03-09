@@ -135,9 +135,12 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
      * See documentation of Matrix_i function of the same name.
      */
     // TODO comment: this is expensive for products of more than 2 lazy matrices
-    virtual void fill(size_type start_row, size_type start_col,
-                      SmallMatrix<scalar_type>& block, bool add = false,
-                      scalar_type c_this = Constants<scalar_type>::one) const {
+    //      perhaps use the conversion to stored_matrix and then the operator*
+    //      between lazy and stored matrices ?
+    virtual void extract_block(
+          size_type start_row, size_type start_col,
+          SmallMatrix<scalar_type>& block, bool add = false,
+          scalar_type c_this = Constants<scalar_type>::one) const {
         // check that we do not overshoot the row index
         assert_upper_bound(start_row + block.n_rows() - 1, n_rows());
 
@@ -148,8 +151,8 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
         if (m_factors.size() == 1) {
             // Pass on to the factor, just incorporating the c_this
             // and the m_coefficient.
-            m_factors[0]->fill(start_row, start_col, block, add,
-                               m_coefficient * c_this);
+            m_factors[0]->extract_block(start_row, start_col, block, add,
+                                        m_coefficient * c_this);
             return;
         }
 
@@ -157,7 +160,7 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
 
         // From the first factor get the required rows from all columns
         SmallMatrix<scalar_type> cache(block.n_rows(), (*it)->n_cols(), false);
-        (*it)->fill(start_row, 0, cache);
+        (*it)->extract_block(start_row, 0, cache);
 
         // first factor done:
         ++it;
@@ -166,14 +169,14 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
             // Get all rows and contract them away
             SmallMatrix<scalar_type> currentmat((*it)->n_rows(),
                                                 (*it)->n_cols(), false);
-            (*it)->fill(0, 0, currentmat);
+            (*it)->extract_block(0, 0, currentmat);
             cache = cache * currentmat;
         }
 
         // From the last factor get the required cols from all rows
         SmallMatrix<scalar_type> lastcache((*it)->n_rows(), block.n_cols(),
                                            false);
-        (*it)->fill(0, start_col, lastcache);
+        (*it)->extract_block(0, start_col, lastcache);
 
         // finally calculate the result.
         if (add) {
