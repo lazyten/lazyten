@@ -53,6 +53,9 @@ class StoredMatrix_i : public Matrix_i<Scalar> {
     //! The iterator type
     typedef DefaultMatrixIterator<StoredMatrix_i<Scalar>> iterator;
 
+    //! The const_iterator type
+    typedef typename base_type::const_iterator const_iterator;
+
     // Swapping:
     friend void swap(StoredMatrix_i& first, StoredMatrix_i& second) {
         using std::swap;
@@ -115,8 +118,14 @@ class StoredMatrix_i : public Matrix_i<Scalar> {
     /** Return an iterator to the beginning */
     iterator begin();
 
+    /** Return a const iterator to the beginning */
+    const_iterator begin() const;
+
     /** Return an iterator to the end */
     iterator end();
+
+    /** Return a const iterator to the end */
+    const_iterator end() const;
 
     // TODO
     //   function to get number of non-zero entries
@@ -136,8 +145,20 @@ typename StoredMatrix_i<Scalar>::iterator StoredMatrix_i<Scalar>::begin() {
 }
 
 template <typename Scalar>
+typename StoredMatrix_i<Scalar>::const_iterator StoredMatrix_i<Scalar>::begin()
+      const {
+    return base_type::cbegin();
+}
+
+template <typename Scalar>
 typename StoredMatrix_i<Scalar>::iterator StoredMatrix_i<Scalar>::end() {
     return iterator(*this);
+}
+
+template <typename Scalar>
+typename StoredMatrix_i<Scalar>::const_iterator StoredMatrix_i<Scalar>::end()
+      const {
+    return base_type::cend();
 }
 
 }  // namespace liblinalg
