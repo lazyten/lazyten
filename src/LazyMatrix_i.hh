@@ -47,7 +47,7 @@ class LazyMatrix_i : public LazyMatrixExpression<StoredMatrix> {
         assert_dbg(false, ExcNotImplemented());
     }
 
-    void print_tree(std::ostream& o) const {
+    void print_tree(std::ostream& o) const override {
         // just print the name of this leaf
         o << name();
     }

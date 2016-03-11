@@ -35,6 +35,8 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
         swap(static_cast<base_type&>(first), static_cast<base_type&>(second));
     }
 
+    // TODO add constructor from tuple of initialiser list!
+
     //
     // Constructors, destructors and assignment
     //

@@ -162,6 +162,8 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
         // first factor done:
         ++it;
 
+        // TODO it must be possible to use lazy * stored here somehow!
+        // maybe make use of the block view.
         for (; it < (std::end(m_factors) - 1); ++it) {
             // Get all rows and contract them away
             SmallMatrix<scalar_type> currentmat((*it)->n_rows(),

@@ -7,6 +7,12 @@
 
 namespace linalgwrap {
 
+// TODO define a set of optional functions which make performance better
+//      e.g. - an in-memory transpose() function
+//           - transpose-add ...
+//           - transpose-multiply
+//           - whatever else seems sensible
+
 // Forward-declare the interface class
 template <typename Scalar>
 class Matrix_i;
@@ -39,6 +45,12 @@ class StoredMatrix_i : public Matrix_i<Scalar>, public Subscribable {
     typedef Matrix_i<Scalar> base_type;
     typedef typename base_type::scalar_type scalar_type;
     typedef typename base_type::size_type size_type;
+
+    //! The iterator type
+    typedef DefaultMatrixIterator<StoredMatrix_i<Scalar>> iterator;
+
+    //! The const_iterator type
+    typedef typename base_type::const_iterator const_iterator;
 
     // Swapping:
     friend void swap(StoredMatrix_i& first, StoredMatrix_i& second) {
@@ -96,6 +108,21 @@ class StoredMatrix_i : public Matrix_i<Scalar>, public Subscribable {
         }
     }
 
+    //
+    // Iterators
+    //
+    /** Return an iterator to the beginning */
+    iterator begin();
+
+    /** Return a const iterator to the beginning */
+    const_iterator begin() const;
+
+    /** Return an iterator to the end */
+    iterator end();
+
+    /** Return a const iterator to the end */
+    const_iterator end() const;
+
     // TODO
     //   function to get stl-compatible iterator
     //   function to get number of non-zero entries
@@ -104,6 +131,32 @@ class StoredMatrix_i : public Matrix_i<Scalar>, public Subscribable {
     //! some name identifying the matrix, or empty
     std::string m_name;
 };
+
+//
+// -------------------------------------------------------------
+//
+
+template <typename Scalar>
+typename StoredMatrix_i<Scalar>::iterator StoredMatrix_i<Scalar>::begin() {
+    return iterator(*this, {0, 0});
+}
+
+template <typename Scalar>
+typename StoredMatrix_i<Scalar>::const_iterator StoredMatrix_i<Scalar>::begin()
+      const {
+    return base_type::cbegin();
+}
+
+template <typename Scalar>
+typename StoredMatrix_i<Scalar>::iterator StoredMatrix_i<Scalar>::end() {
+    return iterator(*this);
+}
+
+template <typename Scalar>
+typename StoredMatrix_i<Scalar>::const_iterator StoredMatrix_i<Scalar>::end()
+      const {
+    return base_type::cend();
+}
 
 }  // namespace liblinalg
 #endif

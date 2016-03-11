@@ -13,6 +13,9 @@
 // have an extra verbose output for rapidcheck function tests:
 //#define HAVE_MATRIX_RC_CLASSIFY
 
+// have a debug print of all generated matrices
+// #define HAVE_MATRIX_DEBUG_PRINT
+
 namespace linalgwrap {
 namespace tests {
 using namespace rc;
@@ -106,14 +109,17 @@ struct CommandBase : rc::state::Command<typename TestingPolicy::model_type,
     /** Perform the common checks for each command
      *
      * \param   model The model in the the state *before* the command has been
-     *applied
-     *          i.e. the same state as run gets it.
+     *          applied i.e. the same state as run gets it.
      * \param   sut   The system under test in the state *after* the command has
-     *been applied
-     *          i.e. after all the stuff of a command has been done to sut
-     *already.
+     *          been applied i.e. after all the stuff of a command has been done
+     *          to sut already.
      * */
     void run_common_tests(const model_type& model, const sut_type& sut) const {
+#ifdef HAVE_MATRIX_DEBUG_PRINT
+        std::cout << model << std::endl;
+        std::cout << "------------------------------------" << std::endl;
+#endif
+
         // Apply to a copy of the model
         model_type model_copy{model};
         this->apply(model_copy);

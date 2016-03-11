@@ -79,6 +79,9 @@ class ParameterMap {
         template <typename T>
         T& get(const std::string& key);
 
+        template <typename T>
+        const T& get(const std::string& key) const;
+
       private:
         // The stored pointer
         std::shared_ptr<void> m_object_ptr;
@@ -185,6 +188,21 @@ ParameterMap::Entry::Entry(SubscriptionPointer<T> ptr)
 
 template <typename T>
 T& ParameterMap::Entry::get(const std::string& key) {
+    // check that the correct type is requested:
+    assert_dbg(m_type_name == typeid(T).name(),
+               ExcWrongTypeRequested(typeid(T).name(), key, m_type_name));
+
+    if (m_via_subscription_ptr) {
+        DereferencePointerSubscriptionPointer<T> dereference;
+        return dereference(m_object_ptr);
+    } else {
+        // Extract pointer to type and dereference it
+        return *std::static_pointer_cast<T>(m_object_ptr);
+    }
+}
+
+template <typename T>
+const T& ParameterMap::Entry::get(const std::string& key) const {
     // check that the correct type is requested:
     assert_dbg(m_type_name == typeid(T).name(),
                ExcWrongTypeRequested(typeid(T).name(), key, m_type_name));

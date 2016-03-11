@@ -49,6 +49,9 @@ class Matrix_i {
           SmallMatrix<scalar_type>& block, bool add = false,
           scalar_type c_this = Constants<scalar_type>::one) const = 0;
 
+    // TODO some way to blockwise extract into StoredMatrix!
+    // TODO some way to convert StoredMatrix into SmallMatrix
+
     /** \brief return an element of the matrix
      *
      * It is advisible to overload this in order to get a more performant
