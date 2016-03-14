@@ -7,6 +7,7 @@
 #include <memory>
 #include <type_traits>
 #include "Constants.hh"
+#include "Range.hh"
 
 namespace linalgwrap {
 
@@ -34,6 +35,8 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
         first.m_arma.swap(second.m_arma);
         swap(static_cast<base_type&>(first), static_cast<base_type&>(second));
     }
+
+    // TODO add constructor from tuple of initialiser list!
 
     //
     // Constructors, destructors and assignment
@@ -122,33 +125,6 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
     //
     // matrix_i interface
     //
-    /**
-     * See documentation of Matrix_i function of the same name.
-     */
-    void extract_block(
-          size_type start_row, size_type start_col,
-          SmallMatrix<scalar_type>& block, bool add = false,
-          scalar_type c_this = Constants<scalar_type>::one) const override {
-        // check that we do not overshoot the row index
-        assert_upper_bound(start_row + block.n_rows() - 1, n_rows());
-
-        // check that we do not overshoot the column index
-        assert_upper_bound(start_col + block.n_cols() - 1, n_cols());
-
-        // TODO probably there exists a better way
-        for (size_type i = 0; i < block.n_rows(); ++i) {
-            for (size_type j = 0; j < block.n_cols(); ++j) {
-                if (add) {
-                    block(i, j) +=
-                          c_this * (*this)(i + start_row, j + start_col);
-                } else {
-                    block(i, j) =
-                          c_this * (*this)(i + start_row, j + start_col);
-                }
-            }
-        }
-    }
-
     /** \brief Number of rows of the matrix i
      */
     size_type n_rows() const override { return m_arma.n_rows; }
@@ -177,6 +153,69 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
         assert_upper_bound(row, n_rows());
         assert_upper_bound(col, n_cols());
         return m_arma.at(row, col);
+    }
+
+    /** \brief Return a copy of a block of values out of the matrix and
+     *         return it as a SmallMatrix of the appropriate size
+     *
+     * For more details of the interface see the function of the same
+     * name in ``LazyMatrixExpression``.
+     *
+     * \param row_range   The Range object representing the range of rows
+     *                    to extract. Note that it is a half-open interval
+     *                    i.e. the LHS is inclusive, but the RHS not.
+     * \param col_range   The Range object representing the range of
+     *                    columns to extract.
+     */
+    virtual SmallMatrix<scalar_type> extract_block(
+          Range<size_type> row_range, Range<size_type> col_range) const {
+        // Assertive checks:
+        assert_lower_bound(row_range.last(), this->n_rows() + 1);
+        assert_lower_bound(col_range.last(), this->n_cols() + 1);
+
+        // At least one range is empty -> no work to be done:
+        if (row_range.is_empty() || col_range.is_empty()) {
+            return SmallMatrix<scalar_type>{row_range.length(),
+                                            col_range.length()};
+        }
+
+        // Translate ranges to armadillo spans (which are closed intervals)
+        arma::span rows(row_range.first(), row_range.last() - 1);
+        arma::span cols(col_range.first(), col_range.last() - 1);
+
+        // Create a copy of the elements to extract
+        arma::mat m = m_arma.submat(rows, cols);
+
+        // Move into a now SmallMatrix:
+        return SmallMatrix<scalar_type>{std::move(m)};
+    }
+
+    /** \brief Add a copy of a block of values of the matrix to
+     *         the SmallMatrix provided by reference.
+     *
+     * For more details of the interface see the function of the same
+     * name in ``LazyMatrixExpression``.
+     *
+     *  \param in   Matrix to add the values to. It is assumed that it
+     *              already has the correct sparsity structure to take
+     *              all the values. Its size defines the size of the
+     *              block
+     *  \param start_row  The row index of the first element to extract
+     *  \param start_col  The column index of the first element to extract
+     *  \param c_this     The coefficient to multiply this matrix with
+     *                    before extracting.
+     */
+    void add_block_to(SmallMatrix<scalar_type>& in, size_type start_row,
+                      size_type start_col,
+                      scalar_type c_this = Constants<scalar_type>::one) const {
+        // check that we do not overshoot the row index
+        assert_upper_bound(start_row + in.n_rows(), this->n_rows() + 1);
+
+        // check that we do not overshoot the column index
+        assert_upper_bound(start_col + in.n_cols(), this->n_cols() + 1);
+
+        // Do the operation:
+        in.m_arma += c_this * m_arma(start_row, start_col, size(in.m_arma));
     }
 
     // Note: operator[] is taken as the default implementation
