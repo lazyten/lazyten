@@ -7,6 +7,12 @@
 
 namespace linalgwrap {
 
+// TODO define a set of optional functions which make performance better
+//      e.g. - an in-memory transpose() function
+//           - transpose-add ...
+//           - transpose-multiply
+//           - whatever else seems sensible
+
 // Forward-declare the interface class
 template <typename Scalar>
 class Matrix_i;
@@ -19,10 +25,6 @@ class MatrixIteratorDefaultCore;
 
 /** \brief Interface class for a matrix which is actually stored in memory
  * in some way
- *
- * This interface and hence all classes derived from it are subscribable using
- * the SubscriptionPointer class. This should be used very little and only when
- * other means (e.g. using shared pointers) is not possible.
  *
  * We expect any implementing class to also provide the following constructors:
  * - Construct matrix of fixed size and optionally fill with zeros or leave
@@ -39,9 +41,25 @@ class MatrixIteratorDefaultCore;
  *   StoredMatrix_i(const SmallMatrix&, scalar_type tolerance)
  *   ```
  *
+ * All implementing classes should further provide the function
+ * ```
+ * stored_matrix_type extract_block(Range<size_type> row_range,
+ *                                  Range<size_type> col_range) const;
+ * ```
+ * which should copy a block of the matrix and return it
+ * (similar to the ``extract_block`` in the ``LazyMatrixExpression`` class,
+ * as well as
+ * ```
+ * void add_block_to(stored_matrix_type& in, size_type start_row,
+ *                   size_type start_col,
+ *                   scalar_type c_this = Constants<scalar_type>::one) const;
+ * ```
+ * which --- again similar to ``add_block_to`` of ``LazyMatrixExpression`` ---
+ * should add a copy of a block of the matrix to the matrix provided on in.
+ *
  * Note that the operator() functions in derived classes are expected to return
  * zero even if an element is known to be zero by some sparsity pattern or
- * similar.
+ * similar. Modification of a non-existing element should fail, however.
  */
 template <typename Scalar>
 class StoredMatrix_i : public Matrix_i<Scalar> {
