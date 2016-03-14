@@ -8,6 +8,7 @@
 #include "ParameterMap.hh"
 #include <ostream>
 #include <memory>
+#include "Range.hh"
 
 namespace linalgwrap {
 
@@ -62,28 +63,115 @@ class LazyMatrixExpression
 
     /** \brief Convert the expression to a stored matrix
      *
-     * This is achieved naively by calling fill for the
-     * whole matrix and copying the data over to the
-     * stored_matrix_type
-     *
-     * \note Later one would probably like to incorporate the
-     *       sparsity pattern somehow as well if stored_matrix_type
-     *       is a CRS matrix.
+     * Achieved by calling extract_block on the whole matrix.
      */
     virtual explicit operator stored_matrix_type() const {
-        // TODO use iterators!
+        return extract_block({0, this->n_rows()}, {0, this->n_cols()});
+    }
 
-        // initialise a SmallMatrix
-        SmallMatrix<scalar_type> sm(this->n_rows(), this->n_cols(), false);
+    /** \brief Extract a block of values out of the matrix and
+     *         return it as a stored matrix of the appropriate size
+     *
+     * The values to extract are given by the index ranges. The ranges
+     * are inclusive on the lhs and exclusive on the rhs. Hence
+     * choosing a row range of [2,4) and a column range of [0,2) will
+     * extract the four values
+     * 			(2,0), (2,1),
+     * 			(3,0), (3,1)
+     * into a 4x4 matrix.
+     *
+     * The present implementation does not preform very well given that
+     * it actually uses the element-wise access operator() (row,col) on
+     * each element. Deriving classes should provide better implementations
+     * which apply operations block-wise. E.g. instead of adding
+     * individual elements of a matrix sum, we first extract the two
+     * full matrices directly and then add them up. This has the advantage
+     * that the latter type of operation is done by the library which knows
+     * all the internal structure of the stored matrix and (hopefully)
+     * is very well optimised for such operations.
+     *
+     * \param row_range   The Range object representing the range of rows
+     *                    to extract. Note that it is a half-open interval
+     *                    i.e. the LHS is inclusive, but the RHS not.
+     * \param col_range   The Range object representing the range of
+     *                    columns to extract.
+     */
+    virtual stored_matrix_type extract_block(Range<size_type> row_range,
+                                             Range<size_type> col_range) const {
+        // Assertive checks:
+        assert_lower_bound(row_range.last(), this->n_rows() + 1);
+        assert_lower_bound(col_range.last(), this->n_cols() + 1);
 
-        // Fill it:
-        this->extract_block(0, 0, sm);
+        // Allocate storage for return:
+        // TODO take care of sparsity here:
+        stored_matrix_type m(row_range.size(), col_range.size(), false);
 
-        // Copy to stored:
-        stored_matrix_type res(sm);
+        // copy data (this is for non-sparse matrices):
+        for (auto it = std::begin(m); it != std::end(m); ++it) {
+            m(it.row(), it.col()) = (*this)(it.row() + row_range.first(),
+                                            it.col() + col_range.first());
+        }
+    }
 
-        // Return
-        return res;
+    /** \brief Add a block of values of the matrix to the stored matrix
+     *         provided by reference.
+     *
+     *  Extract a block of values from this matrix, where the block
+     *  size is given by the size of the Stored Matrix ``in`` and the
+     *  element at which we start the extraction is given by
+     *  ``start_row`` and ``start_col``. In other words if ``in`` is a
+     *  2x2 matrix and ``start_row == 2`` and ``start_col==1`` we extract
+     *  the four elements (2,1),(2,2), (3,1) and (3,2).
+     *
+     *  The of a call to this function should be equivalent to
+     *  ```
+     *  in += c_this*extract_block({start_row, in.n_rows()},
+     *                             {start_col, in.n_cols()});
+     *  ```
+     *  In very many cases linear algebra libraries provide quicker
+     *  routes for doing this scaled addition, so this function should
+     *  be used for adding blocks of data to present data instead of
+     *  the code mentioned above.
+     *  Note, that the LazyMatrixSum class internally makes heavy use
+     *  of this function.
+     *
+     *  So if the derived data structure may wish to make use of such
+     *  better scaled addition functions of implementing libraries
+     *  this function should be overloaded.
+     *
+     *  \note The function assumes that the sparsity pattern in ``in``
+     *  already has the correct shape or is dynamically extended such
+     *  that the addition does not hit non-existing elements.
+     *
+     *  \param in   Matrix to add the values to. It is assumed that it
+     *              already has the correct sparsity structure to take
+     *              all the values. Its size defines the size of the
+     *              block
+     *  \param start_row  The row index of the first element to extract
+     *  \param start_col  The column index of the first element to extract
+     *  \param c_this     The coefficient to multiply this matrix with
+     *                    before extracting.
+     */
+    void add_block_to(stored_matrix_type& in, size_type start_row,
+                      size_type start_col,
+                      scalar_type c_this = Constants<scalar_type>::one) const {
+        // check that we do not overshoot the row index
+        assert_upper_bound(start_row + in.n_rows(), this->n_rows() + 1);
+
+        // check that we do not overshoot the column index
+        assert_upper_bound(start_col + in.n_cols(), this->n_cols() + 1);
+
+        // Extract the block
+        const stored_matrix_type extracted =
+              extract_block({start_row, start_row + in.n_rows()},
+                            {start_col, start_col + in.n_cols()});
+
+        assert_dbg(extracted.n_rows() == in.n_rows(), ExcInternalError());
+        assert_dbg(extracted.n_cols() == in.n_cols(), ExcInternalError());
+
+        // Add it to in via the equivalent function
+        // in the stored matrix
+        extracted.add_block_to(in, 0, 0, c_this);
     }
 
     /** \brief Multiplication with a stored matrix */
