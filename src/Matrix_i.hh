@@ -56,39 +56,6 @@ class Matrix_i : public Subscribable {
     //
     // Element access
     //
-    /** \brief Extract values of this matrix partially to \p block
-     * Get the values of the matrix starting at row index \p start_row
-     * and column index \p start_col. As many entries as there is space
-     * in \p block are extracted. So if \p block is a 2x2 matrix and
-     * \p start_row is 1 and \p start_col is 3, then the entries
-     * (1,3), (1,4), (2,3) and (2,4) are extracted.
-     *
-     * Optionally the values can be implicitly scaled by a coefficient
-     * \p c_this before extracting them to \p block and the flag \p add
-     * controls whether the values are added to \p block or set.
-     *
-     * \note This is a block-wise operaton. In the whole expression tree
-     * we first extract the block and then perform the operation between
-     * the individual blocks. This means that sparsity is not taken into
-     * account all the way. If you want element-wise access where the data
-     * is constructed element-wise as well use the iterators. There we
-     * also make full use of sparsity.
-     *
-     * THIS IS DEPRECATED: do not use any more
-     *
-     * @param start_row The row index to start from
-     * @param start_col The col index to start from
-     * @param block     The block to extract the values to.
-     * @param add       If true add the values, else set them.
-     * @param c_this    Coefficient to multiply all values of this matrix
-     *                  before adding/setting them to \p block.
-     */
-    virtual void extract_block(
-          size_type start_row, size_type start_col,
-          SmallMatrix<scalar_type>& block, bool add = false,
-          scalar_type c_this = Constants<scalar_type>::one) const
-          __attribute__((deprecated)) = 0;
-
     /** \brief return an element of the matrix    */
     virtual scalar_type operator()(size_type row, size_type col) const = 0;
 
