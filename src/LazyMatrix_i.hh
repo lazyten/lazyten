@@ -17,6 +17,18 @@ namespace linalgwrap {
  *    - Copying these type of objects is cheap.
  *    - Multiplication and addition of these objects is associative
  *
+ * From the abstact class ``Matrix_i`` we expect abstract lazy matrices to
+ * implement:
+ *   - ``size_type n_rows() const``
+ *   - ``size_type n_cols() const``
+ *   - ``scalar_type operator() (size_type row, size_type col) const``
+ *
+ * From ``LazyMatrixExpression`` we expect the implementation of
+ *   - ``stored_matrix_type operator*(const stored_matrix_type& in) const``
+ *   - ``lazy_matrix_expression_ptr_type clone() const``
+ * see the appropriate classes for details what these methods are required to
+ * do.
+ *
  * \tparam StoredMatrix   The type of stored matrix to use
  */
 template <typename StoredMatrix>
