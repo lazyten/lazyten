@@ -14,8 +14,6 @@
 
 namespace linalgwrap {
 
-// TODO make use of iterators
-
 template <typename Scalar>
 class SmallMatrix;
 
@@ -27,8 +25,9 @@ class MatrixIteratorDefaultCore;
 
 /** \brief Abstract matrix interface class
  *
- *  \note All classes implementing this interface should also be derived off
- *   DefaultIterators
+ * This interface and hence all classes derived from it are subscribable using
+ * the SubscriptionPointer class. This should be used very little and only when
+ * other means (e.g. using shared pointers) is not possible.
  * */
 template <typename Scalar>
 class Matrix_i : public Subscribable {
@@ -75,6 +74,8 @@ class Matrix_i : public Subscribable {
      * is constructed element-wise as well use the iterators. There we
      * also make full use of sparsity.
      *
+     * THIS IS DEPRECATED: do not use any more
+     *
      * @param start_row The row index to start from
      * @param start_col The col index to start from
      * @param block     The block to extract the values to.
@@ -85,14 +86,11 @@ class Matrix_i : public Subscribable {
     virtual void extract_block(
           size_type start_row, size_type start_col,
           SmallMatrix<scalar_type>& block, bool add = false,
-          scalar_type c_this = Constants<scalar_type>::one) const = 0;
+          scalar_type c_this = Constants<scalar_type>::one) const
+          __attribute__((deprecated)) = 0;
 
-    /** \brief return an element of the matrix
-     *
-     * It is advisible to overload this in order to get a more performant
-     * implementation.
-     */
-    virtual scalar_type operator()(size_type row, size_type col) const;
+    /** \brief return an element of the matrix    */
+    virtual scalar_type operator()(size_type row, size_type col) const = 0;
 
     /** \brief return an element of the vectorised matrix object
      *
@@ -150,18 +148,6 @@ std::ostream& operator<<(std::ostream& o, const Matrix_i<Scalar>& m);
 //
 // Matrix_i
 //
-template <typename Scalar>
-typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::operator()(
-      size_type row, size_type col) const {
-    // Check that we do not overshoot.
-    assert_upper_bound(row, n_rows());
-    assert_upper_bound(col, n_cols());
-
-    SmallMatrix<scalar_type> block(1, 1, false);
-    extract_block(row, col, block);
-    return block(0, 0);
-}
-
 template <typename Scalar>
 typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::operator[](
       size_type i) const {
