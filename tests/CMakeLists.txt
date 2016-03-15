@@ -4,6 +4,7 @@
 set(LINALGWRAP_TESTS_SOURCES
 	NumComp.cc
 	ExceptionTests.cc
+	RangeTests.cc
 	SubscriptionTests.cc
 	SmallMatrixTests.cc
 	ParameterMapTests.cc

@@ -3,6 +3,8 @@
 #include "Exceptions.hh"
 #include <utility>
 #include <type_traits>
+#include <iostream>
+#include "Constants.hh"
 
 namespace linalgwrap {
 
@@ -11,8 +13,10 @@ class RangeIterator;
 
 /** A range of integral values
  *
- * \note Empty ranges are allowed, but calling any function except
- * length(), size() or is_empty() on them leads to undefined behaviour.
+ * \note Empty ranges are allowed, but calling any function in order to
+ * access elements of the range(``first()``,``last()``, ``operator[]``)
+ * leads to undefined behaviour. In this case ``begin()`` is furthermore
+ * equivalent to ``end()``.
  * */
 template <typename T>
 class Range {
@@ -76,6 +80,10 @@ class Range {
     value_type m_last;   // exclusive
 };
 
+/** Output operator for ranges */
+template <typename T>
+std::ostream& operator<<(std::ostream& o, const Range<T>& r);
+
 /** Iterator for ranges */
 template <typename T>
 class RangeIterator : public std::iterator<std::input_iterator_tag, T> {
@@ -113,11 +121,28 @@ class RangeIterator : public std::iterator<std::input_iterator_tag, T> {
     bool operator!=(const RangeIterator& other) const;
 
   private:
+    /** Does this data structure represent an
+     *  iterator-past-the-end */
+    bool is_past_the_end() const;
+
+    /** Assert that the internal state is valid */
     void assert_valid_state() const;
 
     value_type m_current;
     value_type m_last;
 };
+
+//
+// Helper functions for ranges:
+//
+/** Return a range interval from 0 to \p t, i.e. 0 is included, but \p t not. */
+template <typename T>
+Range<T> range(const T& t);
+
+/** Return a range interval from \p t1 to \p t2, where \p t1 is included,
+ * but \p t2 not. */
+template <typename T>
+Range<T> range(const T& t1, const T& t2);
 
 //
 // ---------------------------------------------------
@@ -126,22 +151,24 @@ class RangeIterator : public std::iterator<std::input_iterator_tag, T> {
 template <typename T>
 Range<T>::Range(value_type first, value_type last)
       : m_first(first), m_last(last) {
-    assert_lower_bound(first, last);
+    assert_lower_bound(m_first, m_last);
 };
 
 template <typename T>
 Range<T>::Range(std::pair<value_type, value_type> first_last)
-      : m_first(first_last.first), m_last(first_last.second){};
+      : m_first(first_last.first), m_last(first_last.second) {
+    assert_lower_bound(m_first, m_last);
+};
 
 template <typename T>
 typename Range<T>::value_type Range<T>::first() const {
-    assert_dbg(length() > 0, ExcEmptyRange());
+    assert_dbg(!is_empty(), ExcEmptyRange());
     return m_first;
 }
 
 template <typename T>
 typename Range<T>::value_type Range<T>::last() const {
-    assert_dbg(length() > 0, ExcEmptyRange());
+    assert_dbg(!is_empty(), ExcEmptyRange());
     return m_last;
 }
 
@@ -157,26 +184,35 @@ typename Range<T>::size_type Range<T>::size() const {
 
 template <typename T>
 bool Range<T>::is_empty() const {
-    return length() == 0;
+    return length() <= 0;
 }
 
 template <typename T>
 typename Range<T>::value_type Range<T>::operator[](size_type i) const {
-    assert_dbg(length() > 0, ExcEmptyRange());
+    assert_dbg(!is_empty(), ExcEmptyRange());
     assert_range(0, i, length());
     return m_first + i;
 }
 
 template <typename T>
 RangeIterator<T> Range<T>::begin() const {
-    assert_dbg(length() > 0, ExcEmptyRange());
+    if (is_empty()) return end();
     return RangeIterator<T>{m_first, m_last};
 }
 
 template <typename T>
 RangeIterator<T> Range<T>::end() const {
-    assert_dbg(length() > 0, ExcEmptyRange());
     return RangeIterator<T>{};
+}
+
+template <typename T>
+std::ostream& operator<<(std::ostream& o, const Range<T>& r) {
+    if (r.is_empty()) {
+        o << "[0,0)";
+    } else {
+        o << "[" << r.first() << "," << r.last() << ")";
+    }
+    return o;
 }
 
 //
@@ -185,12 +221,17 @@ RangeIterator<T> Range<T>::end() const {
 
 template <typename T>
 void RangeIterator<T>::assert_valid_state() const {
-    assert_dbg(m_current < m_last, ExcIteratorPastEnd());
+    assert_dbg(!is_past_the_end(), ExcIteratorPastEnd());
+}
+
+template <typename T>
+bool RangeIterator<T>::is_past_the_end() const {
+    return m_current >= m_last;
 }
 
 template <typename T>
 RangeIterator<T>::RangeIterator()
-      : m_current{0}, m_last{0} {}
+      : m_current{Constants<T>::invalid}, m_last{Constants<T>::invalid} {}
 
 template <typename T>
 RangeIterator<T>::RangeIterator(value_type current, value_type last)
@@ -202,6 +243,7 @@ template <typename T>
 RangeIterator<T>& RangeIterator<T>::operator++() {
     assert_valid_state();
     m_current++;
+    return (*this);
 }
 
 template <typename T>
@@ -226,12 +268,35 @@ const typename RangeIterator<T>::pointer RangeIterator<T>::operator->() const {
 
 template <typename T>
 bool RangeIterator<T>::operator==(const RangeIterator& other) const {
-    return m_current == other.m_current;
+    // The iterators are equal if they are either both past the end
+    // or their m_current and their m_last agrees
+
+    const bool both_past_the_end = is_past_the_end() && other.is_past_the_end();
+    const bool identical_values =
+          (m_current == other.m_current && m_last == other.m_last);
+    return both_past_the_end || identical_values;
 }
 
 template <typename T>
 bool RangeIterator<T>::operator!=(const RangeIterator& other) const {
     return !(*this == other);
+}
+
+//
+// Range helper functions.
+//
+
+/** Return a range interval from 0 to \p t, i.e. 0 is included, but \p t not. */
+template <typename T>
+Range<T> range(const T& t) {
+    return Range<T>{0, t};
+}
+
+/** Return a range interval from \p t1 to \p t2, where \p t1 is included,
+ * but \p t2 not. */
+template <typename T>
+Range<T> range(const T& t1, const T& t2) {
+    return Range<T>{t1, t2};
 }
 
 }  // namespace linalgwrap
