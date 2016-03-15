@@ -50,17 +50,9 @@ class LazyMatrixExpression
         // nothing
     }
 
-    //
-    // Extra interface for expressions:
-    //
-    /** \brief Print the expression tree to this outstream */
-    virtual void print_tree(std::ostream& o) const = 0;
-
-    /** \brief Update the internal data of all objects in this expression
-     * given the ParameterMap
-     * */
-    virtual void update(const ParameterMap& map) = 0;
-
+    /** \name Data access
+     */
+    ///@{
     /** \brief Convert the expression to a stored matrix
      *
      * Achieved by calling extract_block on the whole matrix.
@@ -111,6 +103,8 @@ class LazyMatrixExpression
             m(it.row(), it.col()) = (*this)(it.row() + row_range.first(),
                                             it.col() + col_range.first());
         }
+
+        return m;
     }
 
     /** \brief Add a block of values of the matrix to the stored matrix
@@ -152,9 +146,9 @@ class LazyMatrixExpression
      *  \param c_this     The coefficient to multiply this matrix with
      *                    before extracting.
      */
-    void add_block_to(stored_matrix_type& in, size_type start_row,
-                      size_type start_col,
-                      scalar_type c_this = Constants<scalar_type>::one) const {
+    virtual void add_block_to(
+          stored_matrix_type& in, size_type start_row, size_type start_col,
+          scalar_type c_this = Constants<scalar_type>::one) const {
         // check that we do not overshoot the row index
         assert_upper_bound(start_row + in.n_rows(), this->n_rows() + 1);
 
@@ -173,6 +167,15 @@ class LazyMatrixExpression
         // in the stored matrix
         extracted.add_block_to(in, 0, 0, c_this);
     }
+    ///@}
+
+    /** \brief Print the expression tree to this outstream */
+    virtual void print_tree(std::ostream& o) const = 0;
+
+    /** \brief Update the internal data of all objects in this expression
+     * given the ParameterMap
+     * */
+    virtual void update(const ParameterMap& map) = 0;
 
     /** \brief Multiplication with a stored matrix */
     virtual stored_matrix_type operator*(
