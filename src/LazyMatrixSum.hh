@@ -98,9 +98,9 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
     }
 
   public:
-    //
-    // Constructors, destructors and assignment
-    //
+    /** \name Constructors, desctructors and assignment
+     */
+    ///@{
     /** \brief Create a matrix sum object
      *
      * @param term   The first matrix expression term
@@ -153,6 +153,7 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
         swap(*this, other);
         return *this;
     }
+    ///@}
 
     //
     // Push back further terms
@@ -225,46 +226,53 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
     //
     // Matrix_i interface
     //
-    /**
-     * See documentation of Matrix_i function of the same name.
-     */
-    virtual void extract_block(
-          size_type start_row, size_type start_col,
-          SmallMatrix<scalar_type>& block, bool add = false,
-          scalar_type c_this = Constants<scalar_type>::one) const override {
-        // check that we do not overshoot the row index
-        assert_upper_bound(start_row + block.n_rows() - 1, n_rows());
-
-        // check that we do not overshoot the column index
-        assert_upper_bound(start_col + block.n_cols() - 1, n_cols());
-
-        if (!add) block.set_zero();
-
-        for (const auto& stored_term : m_stored_terms) {
-            const scalar_type coeff = stored_term.coefficient();
-            const stored_matrix_type& mat = stored_term.matrix();
-
-            // Add the elements from the scaled matrix to the present
-            // block
-            mat.extract_block(start_row, start_col, block, true,
-                              c_this * coeff);
-        }
-
-        for (const auto& term : m_lazy_terms) {
-            // add results to the present block:
-            term.extract_block(start_row, start_col, block, true, c_this);
-        }
-    }
 
     /** \brief Number of rows of the matrix      */
-    virtual size_type n_rows() const override { return m_n_rows; }
+    size_type n_rows() const override { return m_n_rows; }
 
     /** \brief Number of columns of the matrix     */
-    virtual size_type n_cols() const override { return m_n_cols; }
+    size_type n_cols() const override { return m_n_cols; }
+
+    /** \brief return an element of the matrix    */
+    scalar_type operator()(size_type row, size_type col) const override;
 
     //
     // LazyMatrixExpression interface
     //
+    /** \brief Extract a block of values out of the matrix and
+     *         return it as a stored matrix of the appropriate size
+     *
+     * For more details of the interface see the function of the same
+     * name in ``LazyMatrixExpression``.
+     *
+     * \param row_range   The Range object representing the range of rows
+     *                    to extract. Note that it is a half-open interval
+     *                    i.e. the LHS is inclusive, but the RHS not.
+     * \param col_range   The Range object representing the range of
+     *                    columns to extract.
+     */
+    stored_matrix_type extract_block(Range<size_type> row_range,
+                                     Range<size_type> col_range) const override;
+
+    /** \brief Add a block of values of the matrix to the stored matrix
+     *         provided by reference.
+     *
+     * For more details of the interface see the function of the same name
+     * in ``LazyMatrixExpression``.
+     *
+     *  \param in   Matrix to add the values to. It is assumed that it
+     *              already has the correct sparsity structure to take
+     *              all the values. Its size defines the size of the
+     *              block
+     *  \param start_row  The row index of the first element to extract
+     *  \param start_col  The column index of the first element to extract
+     *  \param c_this     The coefficient to multiply this matrix with
+     *                    before extracting.
+     */
+    void add_block_to(
+          stored_matrix_type& in, size_type start_row, size_type start_col,
+          scalar_type c_this = Constants<scalar_type>::one) const override;
+
     /** \brief Update the internal data of all objects in this expression
      *         given the ParameterMap
      * */
@@ -280,6 +288,10 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
           const stored_matrix_type& m) const override {
         assert_size(n_cols(), m.n_rows());
 
+        // TODO
+        // The most common cases with zero or one
+        // stored matrix term could perhaps be optimised.
+
         // Allocate storage for the return and fill with zero
         stored_matrix_type res(n_rows(), m.n_cols(), true);
 
@@ -287,10 +299,11 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
             const scalar_type coeff = stored_term.coefficient();
             const stored_matrix_type& mat = stored_term.matrix();
 
-            // TODO maybe some sort of "Scaled -- View" could be useful
-            //      here as well.
-            //      or use an add_in function ???
-            res += coeff * (mat * m);
+            // do the multiplication:
+            const stored_matrix_type matm = mat * m;
+
+            // res += coeff*matm
+            matm.add_block_to(res, 0, 0, coeff);
         }
 
         for (const auto& term : m_lazy_terms) {
@@ -486,5 +499,68 @@ LazyMatrixSum<StoredMatrix> operator-(LazyMatrixProduct<StoredMatrix> lhs,
     return sum;
 }
 
+//
+// ------------------------------------------------------------
+//
+//
+// LazyMatrixSum
+//
+template <typename StoredMatrix>
+typename LazyMatrixSum<StoredMatrix>::scalar_type LazyMatrixSum<StoredMatrix>::
+operator()(size_type row, size_type col) const {
+    assert_range(0, row, n_rows());
+    assert_range(0, col, n_cols());
+    auto block = extract_block({row, row + 1}, {col, col + 1});
+    return block(0, 0);
+}
+
+template <typename StoredMatrix>
+typename LazyMatrixSum<StoredMatrix>::stored_matrix_type
+LazyMatrixSum<StoredMatrix>::extract_block(Range<size_type> row_range,
+                                           Range<size_type> col_range) const {
+    // At least one range is empty -> no work to be done:
+    if (row_range.is_empty() || col_range.is_empty()) {
+        return SmallMatrix<scalar_type>{row_range.length(), col_range.length()};
+    }
+
+    // Assertive checks:
+    assert_lower_bound(row_range.last(), this->n_rows() + 1);
+    assert_lower_bound(col_range.last(), this->n_cols() + 1);
+
+    // Allocate storage and set elements to zero
+    stored_matrix_type res(row_range.length(), col_range.length(), true);
+
+    // Add all terms to res
+    add_block_to(res, row_range.first(), col_range.first());
+
+    // Return it
+    return res;
+}
+
+template <typename StoredMatrix>
+void LazyMatrixSum<StoredMatrix>::add_block_to(stored_matrix_type& in,
+                                               size_type start_row,
+                                               size_type start_col,
+                                               scalar_type c_this) const {
+    // check that we do not overshoot the row index
+    assert_upper_bound(start_row + in.n_rows(), this->n_rows() + 1);
+
+    // check that we do not overshoot the column index
+    assert_upper_bound(start_col + in.n_cols(), this->n_cols() + 1);
+
+    for (const auto& stored_term : m_stored_terms) {
+        const scalar_type coeff = stored_term.coefficient();
+        const stored_matrix_type& mat = stored_term.matrix();
+
+        // Add the elements from the scaled matrix to the present
+        // block
+        mat.add_block_to(in, start_row, start_col, c_this * coeff);
+    }
+
+    for (const auto& term : m_lazy_terms) {
+        // add results to the present block:
+        term.add_block_to(in, start_row, start_col, c_this);
+    }
+}
 }  // namespace linalg
 #endif

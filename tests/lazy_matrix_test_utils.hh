@@ -108,22 +108,22 @@ struct LazyMatrixTestingPolicy {
 
     static void test_extract_block(const model_type& model,
                                    const sut_type& sut) {
-        size_type start_row = *gen::inRange<size_type>(0, model.n_rows());
-        size_type start_col = *gen::inRange<size_type>(0, model.n_cols());
 
-        size_type n_rows =
-              *gen::inRange<size_type>(1, model.n_rows() - start_row + 1);
-        size_type n_cols =
-              *gen::inRange<size_type>(1, model.n_cols() - start_col + 1);
+        Range<size_type> rows =
+              *gen::scale(2.0, gen::range_within<size_type>(0, model.n_rows()))
+                     .as("extract_block row range");
+        Range<size_type> cols =
+              *gen::scale(2.0, gen::range_within<size_type>(0, model.n_cols()))
+                     .as("extract_block col range");
 
         // Extract a block from the matrix:
-        SmallMatrix<scalar_type> block(n_rows, n_cols, false);
-        sut.matrix.extract_block(start_row, start_col, block);
+        stored_matrix_type block = sut.matrix.extract_block(rows, cols);
 
         // check that it agrees with the model:
-        for (size_type i = start_row; i < start_row + n_rows; ++i) {
-            for (size_type j = start_col; j < start_col + n_cols; ++j) {
-                RC_ASSERT(NumComp::is_equal(model(i, j), sut.matrix(i, j)));
+        for (size_type row : rows) {
+            for (size_type col : cols) {
+                RC_ASSERT(
+                      NumComp::is_equal(model(row, col), sut.matrix(row, col)));
             }
         }
     }

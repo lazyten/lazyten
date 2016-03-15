@@ -49,4 +49,12 @@ struct MatrixElement {
         return gen::exec(gen_element);
     }
 };
+
+namespace gen {
+template <typename Scalar>
+Gen<Scalar> matrix_element() {
+    return MatrixElement<Scalar>::matrix_element();
 }
+}  // namespace gen
+
+}  // namespace rc
