@@ -91,18 +91,23 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
 
     /** Multiply two small matrices */
     SmallMatrix operator*(const SmallMatrix& other) const {
+        assert_size(n_cols(), other.n_rows());
         arma::mat res = m_arma * other.m_arma;
         return SmallMatrix(res);
     }
 
     /* Add a small matrix to this one */
     SmallMatrix& operator+=(const SmallMatrix& other) {
+        assert_size(n_cols(), other.n_cols());
+        assert_size(n_rows(), other.n_rows());
         m_arma += other.m_arma;
         return *this;
     }
 
     /* Subtract a small matrix from this one */
     SmallMatrix& operator-=(const SmallMatrix& other) {
+        assert_size(n_cols(), other.n_cols());
+        assert_size(n_rows(), other.n_rows());
         m_arma -= other.m_arma;
         return *this;
     }
