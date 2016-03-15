@@ -22,10 +22,16 @@
 #	"
 #	LINALGWRAP_HAVE_GLIBC_STACKTRACE)
 message(AUTHOR_WARNING "TODO Test for glibc stacktrace")
-set(LINALGWRAP_HAVE_GLIBC_STACKTRACE)
+set(LINALGWRAP_HAVE_GLIBC_STACKTRACE TRUE)
+#
+# do we really want this definition for all executables?
+add_definitions(-DLINALGWRAP_HAVE_GLIBC_STACKTRACE)
 
 if(LINALGWRAP_HAVE_GLIBC_STACKTRACE)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -rdynamic")
+	# needed for meaningful stacktraces
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -rdynamic")
+	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -rdynamic")
+	set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -rdynamic")
 endif()
 
 #
@@ -73,5 +79,8 @@ if(LINALGWRAP_HAVE_GLIBC_STACKTRACE)
 #		LINALGWRAP_HAVE_LIBSTDCXX_DEMANGLER)
 	message(AUTHOR_WARNING "TODO Test for libc++ demangler")
 	set(LINALGWRAP_HAVE_LIBSTDCXX_DEMANGLER)
+	#
+	# do we really want this definition for all executables?
+	add_definitions(-DLINALGWRAP_HAVE_LIBSTDCXX_DEMANGLER)
 endif()
 
