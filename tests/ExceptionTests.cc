@@ -57,15 +57,15 @@ TEST_CASE("Exception system", "[exception]") {
             if (should_catch_something) {
                 // sometimes we catch something in debug mode.
                 RC_ASSERT_THROWS_AS(
-                      assert_range(value, lower_bound, upper_bound),
+                      assert_range(lower_bound, value, upper_bound),
                       ExcOutsideRange<decltype(value)>);
             } else {
                 // Assert the lower bound. If error, throw
-                assert_range(value, lower_bound, upper_bound);
+                assert_range(lower_bound, value, upper_bound);
             }
 #else
             // we should never catch anything in release mode.
-            assert_range(value, lower_bound, upper_bound);
+            assert_range(lower_bound, value, upper_bound);
 #endif
         };
         CHECK(rc::check("Test assert_range", test_assert_range));
@@ -85,11 +85,11 @@ TEST_CASE("Exception system", "[exception]") {
 #ifdef DEBUG
             if (should_catch_something) {
                 // sometimes we catch something in debug mode.
-                RC_ASSERT_THROWS_AS(assert_lower_bound(value, lower_bound),
+                RC_ASSERT_THROWS_AS(assert_lower_bound(lower_bound, value),
                                     ExcBelowLowerBound<decltype(value)>);
             } else {
                 // Assert the lower bound. If error, throw
-                assert_lower_bound(value, lower_bound);
+                assert_lower_bound(lower_bound, value);
             }
 #else
             // we should never catch anything in release mode.

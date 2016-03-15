@@ -159,12 +159,12 @@ using namespace exceptions;
  *
  * The macro takes the following arguments:
  * <ol>
- * <li> The number to check
  * <li> The lower bound
+ * <li> The number to check
  * <li> The upper bound plus one
  * </ol>
  */
-#define assert_range(number, start, end)                            \
+#define assert_range(start, number, end)                            \
     {                                                               \
         assert_dbg((start <= number) && (number < end),             \
                    ::linalgwrap::ExcOutsideRange<decltype(number)>( \
@@ -176,11 +176,11 @@ using namespace exceptions;
  *
  * Takes the following arguments
  * <ol>
- * <li> The number to check
  * <li> The lower bound
+ * <li> The number to check
  * </ol>
  */
-#define assert_lower_bound(number, start)                                      \
+#define assert_lower_bound(start, number)                                      \
     {                                                                          \
         assert_dbg(start <= number,                                            \
                    ::linalgwrap::ExcBelowLowerBound<decltype(number)>(number,  \

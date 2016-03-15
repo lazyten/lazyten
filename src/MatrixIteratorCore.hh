@@ -307,10 +307,10 @@ void MatrixIteratorDefaultCore<Matrix, Constness>::seek_to_element(
     assert_upper_bound(element.second, m_matrix_ptr->n_cols());
 
     // Assert that we make progress in the right direction:
-    assert_lower_bound(element.first, m_index.first);
+    assert_lower_bound(m_index.first, element.first);
 
     if (element.first == m_index.first) {
-        assert_lower_bound(element.second, m_index.second);
+        assert_lower_bound(m_index.second, element.second);
     }
 
     // Set the indices:

@@ -169,15 +169,15 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
      */
     virtual SmallMatrix<scalar_type> extract_block(
           Range<size_type> row_range, Range<size_type> col_range) const {
-        // Assertive checks:
-        assert_lower_bound(row_range.last(), this->n_rows() + 1);
-        assert_lower_bound(col_range.last(), this->n_cols() + 1);
-
         // At least one range is empty -> no work to be done:
         if (row_range.is_empty() || col_range.is_empty()) {
             return SmallMatrix<scalar_type>{row_range.length(),
                                             col_range.length()};
         }
+
+        // Assertive checks:
+        assert_lower_bound(row_range.last(), this->n_rows() + 1);
+        assert_lower_bound(col_range.last(), this->n_cols() + 1);
 
         // Translate ranges to armadillo spans (which are closed intervals)
         arma::span rows(row_range.first(), row_range.last() - 1);
