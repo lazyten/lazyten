@@ -44,18 +44,21 @@ class Matrix_i : public Subscribable {
     /** \brief Destructor */
     virtual ~Matrix_i() = default;
 
-    //
-    // Matrix properties
-    //
+    /** \name Matrix properties
+     *        Access to properties common to all matrices
+     */
+    ///@{
     /** \brief Number of rows of the matrix */
     virtual size_type n_rows() const = 0;
 
     /** \brief Number of columns of the matrix */
     virtual size_type n_cols() const = 0;
+    ///@}
 
-    //
-    // Element access
-    //
+    /** \name Data access
+     *        Access to matrix data
+     */
+    ///@{
     /** \brief return an element of the matrix    */
     virtual scalar_type operator()(size_type row, size_type col) const = 0;
 
@@ -65,10 +68,11 @@ class Matrix_i : public Subscribable {
      * traversed row by row)
      */
     virtual scalar_type operator[](size_type i) const;
+    ///@}
 
-    //
-    // Iterators
-    //
+    /** \name Iterators
+     */
+    ///@{
     /** Return an iterator to the beginning */
     iterator begin();
 
@@ -86,6 +90,7 @@ class Matrix_i : public Subscribable {
 
     /** Return a const_iterator to the end */
     const_iterator cend() const;
+    ///@}
 
     //
     // Operations --- or maybe out of scope
