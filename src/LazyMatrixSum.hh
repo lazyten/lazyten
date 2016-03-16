@@ -524,8 +524,8 @@ LazyMatrixSum<StoredMatrix>::extract_block(Range<size_type> row_range,
     }
 
     // Assertive checks:
-    assert_lower_bound(row_range.last(), this->n_rows() + 1);
-    assert_lower_bound(col_range.last(), this->n_cols() + 1);
+    assert_upper_bound(row_range.last(), this->n_rows() + 1);
+    assert_upper_bound(col_range.last(), this->n_cols() + 1);
 
     // Allocate storage and set elements to zero
     stored_matrix_type res(row_range.length(), col_range.length(), true);
