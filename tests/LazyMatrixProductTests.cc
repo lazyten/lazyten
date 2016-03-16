@@ -1,4 +1,4 @@
-#include "lazy_matrix_test_utils.hh"
+#include "lazy_matrix_tests_state.hh"
 #include "rapidcheck_utils.hh"
 #include <rapidcheck.h>
 #include <catch.hpp>
@@ -22,8 +22,6 @@ TEST_CASE("LazyMatrixProduct", "[LazyMatrixProduct]") {
     typedef stored_matrix_type model_matrix_type;
 
     SECTION("Random function test") {
-        using namespace matrix_test_utils;
-
         auto random_test = [] {
             model_matrix_type in(2, 3);
             in(0, 0) = 3;
@@ -37,7 +35,7 @@ TEST_CASE("LazyMatrixProduct", "[LazyMatrixProduct]") {
             // The actual test
             //
             // The test library we use
-            typedef lazy_matrix_test_utils::TestLibrary<
+            typedef lazy_matrix_tests::StatefulTestingLibrary<
                   model_matrix_type, LazyMatrixProduct<stored_matrix_type>>
                   test_library;
 
