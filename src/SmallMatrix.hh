@@ -83,7 +83,7 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
 
     /** Divide all matrix entries by a scalar value */
     SmallMatrix& operator/=(scalar_type s) {
-        assert_dbg(s == 0, ExcDevideByZero());
+        assert_dbg(s != 0, ExcDevideByZero());
         assert_finite(s);
         m_arma /= s;
         return *this;
@@ -181,15 +181,15 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
         }
 
         // Assertive checks:
-        assert_lower_bound(row_range.last(), this->n_rows() + 1);
-        assert_lower_bound(col_range.last(), this->n_cols() + 1);
+        assert_upper_bound(row_range.last(), this->n_rows() + 1);
+        assert_upper_bound(col_range.last(), this->n_cols() + 1);
 
         // Translate ranges to armadillo spans (which are closed intervals)
         arma::span rows(row_range.first(), row_range.last() - 1);
         arma::span cols(col_range.first(), col_range.last() - 1);
 
         // Create a copy of the elements to extract
-        arma::mat m = m_arma.submat(rows, cols);
+        arma::mat m = m_arma(rows, cols);
 
         // Move into a now SmallMatrix:
         return SmallMatrix<scalar_type>{std::move(m)};
@@ -213,6 +213,10 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
     void add_block_to(SmallMatrix<scalar_type>& in, size_type start_row,
                       size_type start_col,
                       scalar_type c_this = Constants<scalar_type>::one) const {
+
+        // Nothing to do:
+        if (in.n_rows() == 0 || in.n_cols() == 0) return;
+
         // check that we do not overshoot the row index
         assert_upper_bound(start_row + in.n_rows(), this->n_rows() + 1);
 

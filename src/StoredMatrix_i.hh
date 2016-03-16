@@ -116,6 +116,15 @@ class StoredMatrix_i : public Matrix_i<Scalar> {
         return (*this)(i_row, i_col);
     }
 
+    /** \brief Read-only access to vectorised matrix object
+     *
+     * Access the element in row-major ordering (i.e. the matrix is
+     * traversed row by row)
+     * */
+    scalar_type operator[](size_type i) const override {
+        return base_type::operator[](i);
+    }
+
     /** Set all elements to zero
      *
      * Overload this to get a more performant implementation.
