@@ -139,8 +139,8 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
     size_type n_cols() const override { return m_arma.n_cols; }
 
     scalar_type operator()(size_type row, size_type col) const override {
-        assert_upper_bound(row, n_rows());
-        assert_upper_bound(col, n_cols());
+        assert_greater(row, n_rows());
+        assert_greater(col, n_cols());
         return m_arma.at(row, col);
     }
 
@@ -155,8 +155,8 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
     void set_zero() override { m_arma.zeros(); }
 
     scalar_type& operator()(size_type row, size_type col) override {
-        assert_upper_bound(row, n_rows());
-        assert_upper_bound(col, n_cols());
+        assert_greater(row, n_rows());
+        assert_greater(col, n_cols());
         return m_arma.at(row, col);
     }
 
@@ -181,8 +181,8 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
         }
 
         // Assertive checks:
-        assert_upper_bound(row_range.last(), this->n_rows() + 1);
-        assert_upper_bound(col_range.last(), this->n_cols() + 1);
+        assert_greater_equal(row_range.last(), this->n_rows());
+        assert_greater_equal(col_range.last(), this->n_cols());
 
         // Translate ranges to armadillo spans (which are closed intervals)
         arma::span rows(row_range.first(), row_range.last() - 1);
@@ -217,11 +217,9 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
         // Nothing to do:
         if (in.n_rows() == 0 || in.n_cols() == 0) return;
 
-        // check that we do not overshoot the row index
-        assert_upper_bound(start_row + in.n_rows(), this->n_rows() + 1);
-
-        // check that we do not overshoot the column index
-        assert_upper_bound(start_col + in.n_cols(), this->n_cols() + 1);
+        // check that we do not overshoot the indices
+        assert_greater_equal(start_row + in.n_rows(), this->n_rows());
+        assert_greater_equal(start_col + in.n_cols(), this->n_cols());
 
         // Do the operation:
         in.m_arma += c_this * m_arma(start_row, start_col, size(in.m_arma));

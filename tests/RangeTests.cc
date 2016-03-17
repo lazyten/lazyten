@@ -22,7 +22,7 @@ struct RangeTests {
             RC_ASSERT(r.length() == static_cast<size_type>(t2 - t1));
         } else {
 #ifdef DEBUG
-            RC_ASSERT_THROWS_AS((Range<T>{t1, t2}), ExcBelowLowerBound<T>);
+            RC_ASSERT_THROWS_AS((Range<T>{t1, t2}), ExcTooLarge<T>);
 #endif
         }
     }

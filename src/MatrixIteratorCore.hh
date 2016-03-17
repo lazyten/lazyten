@@ -303,14 +303,13 @@ template <typename Matrix, bool Constness>
 void MatrixIteratorDefaultCore<Matrix, Constness>::seek_to_element(
       index_type element) {
     // Assert that the indices are not too large:
-    assert_upper_bound(element.first, m_matrix_ptr->n_rows());
-    assert_upper_bound(element.second, m_matrix_ptr->n_cols());
+    assert_greater(element.first, m_matrix_ptr->n_rows());
+    assert_greater(element.second, m_matrix_ptr->n_cols());
 
     // Assert that we make progress in the right direction:
-    assert_lower_bound(m_index.first, element.first);
-
+    assert_greater_equal(m_index.first, element.first);
     if (element.first == m_index.first) {
-        assert_lower_bound(m_index.second, element.second);
+        assert_greater_equal(m_index.second, element.second);
     }
 
     // Set the indices:

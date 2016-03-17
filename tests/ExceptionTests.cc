@@ -39,6 +39,7 @@ TEST_CASE("Exception system", "[exception]") {
 
     SECTION("Test derived assertion macros") {
         // TODO template this in the type of value and bound
+        //      use a testing namespace above for that
         auto test_assert_range = [](long lower_bound, long value) {
             // Arbitrary size:
             auto size = *gen::positive<decltype(value)>();
@@ -75,9 +76,10 @@ TEST_CASE("Exception system", "[exception]") {
         //
 
         // TODO template this in the type of value and bound
-        auto test_assert_lower_bound = [](long lower_bound, long value) {
+        //      use a testing namespace above for that
+        auto test_assert_greater_equal = [](long value1, long value2) {
             // Should this assertion fail?
-            const bool should_catch_something = (value < lower_bound);
+            const bool should_catch_something = !(value1 <= value2);
 
             // Classify according to upper property
             RC_CLASSIFY(should_catch_something, "Assertion failed");
@@ -85,27 +87,30 @@ TEST_CASE("Exception system", "[exception]") {
 #ifdef DEBUG
             if (should_catch_something) {
                 // sometimes we catch something in debug mode.
-                RC_ASSERT_THROWS_AS(assert_lower_bound(lower_bound, value),
-                                    ExcBelowLowerBound<decltype(value)>);
+                RC_ASSERT_THROWS_AS(assert_greater_equal(value1, value2),
+                                    ExcTooLarge<decltype(value1)>);
             } else {
-                // Assert the lower bound. If error, throw
-                assert_lower_bound(lower_bound, value);
+                // Assert that value2 greater or equal than value 2
+                // If error throw.
+                assert_greater_equal(value1, value2)
             }
 #else
             // we should never catch anything in release mode.
-            assert_lower_bound(value, lower_bound);
+            assert_greater_equal(value1, value2)
 #endif
         };
-        CHECK(rc::check("Test assert_lower_bound", test_assert_lower_bound));
+        CHECK(rc::check("Test assert_greater_equal",
+                        test_assert_greater_equal));
 
         //
         // ---------------------------------------------------------
         //
 
         // TODO template this in the type of value and bound
-        auto test_assert_upper_bound = [](long upper_bound, long value) {
+        //      use a testing namespace above for that
+        auto test_assert_greater = [](long value1, long value2) {
             // Should this assertion fail?
-            const bool should_catch_something = (value >= upper_bound);
+            const bool should_catch_something = !(value1 < value2);
 
             // Classify according to upper property
             RC_CLASSIFY(should_catch_something, "Assertion failed");
@@ -113,24 +118,44 @@ TEST_CASE("Exception system", "[exception]") {
 #ifdef DEBUG
             if (should_catch_something) {
                 // sometimes we catch something in debug mode.
-                RC_ASSERT_THROWS_AS(assert_upper_bound(value, upper_bound),
-                                    ExcAboveUpperBound<decltype(value)>);
+                RC_ASSERT_THROWS_AS(assert_greater(value1, value2),
+                                    ExcTooLargeOrEqual<decltype(value1)>);
             } else {
                 // Assert the lower bound. If error, throw
-                assert_upper_bound(value, upper_bound);
+                assert_greater(value1, value2);
             }
 #else
             // we should never catch anything in release mode.
-            assert_upper_bound(value, upper_bound);
+            assert_greater(value1, value2);
 #endif
         };
-        CHECK(rc::check("Test assert_upper_bound", test_assert_upper_bound));
+        CHECK(rc::check("Test assert_greater", test_assert_greater));
 
         //
         // ---------------------------------------------------------
         //
 
-        auto test_assert_size = [](size_t size1, size_t size2) {
+        auto test_assert_size = [] {
+            // The signed data type equivalent to size_t
+            typedef typename std::make_signed<size_t>::type ssize;
+
+            // Generate a first size and a difference
+            const ssize ssize1 = *gen::positive<ssize>();
+            const ssize diff = *gen::arbitrary<int>();
+
+            // Assert that difference is not too large
+            RC_PRE(-diff < ssize1);
+
+            // Build second size:
+            const ssize ssize2 = ssize1 + diff;
+
+            // Assert that size2 is positive:
+            RC_PRE(ssize2 > 0);
+
+            // Convert both to unsigned size_t
+            const size_t size1 = static_cast<size_t>(ssize1);
+            const size_t size2 = static_cast<size_t>(ssize2);
+
             // Should this assertion fail?
             const bool should_catch_something = (size1 != size2);
 
@@ -148,7 +173,6 @@ TEST_CASE("Exception system", "[exception]") {
 #else
             // we should never catch anything in release mode.
             assert_size(size1, size2);
-            assert_upper_bound(value, upper_bound);
 #endif
         };
         CHECK(rc::check("Test assert_size", test_assert_size));

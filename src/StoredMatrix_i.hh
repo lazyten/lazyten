@@ -109,7 +109,7 @@ class StoredMatrix_i : public Matrix_i<Scalar> {
      */
     virtual scalar_type& operator[](size_type i) {
         // Check that we do not overshoot.
-        assert_upper_bound(i, this->n_cols() * this->n_rows());
+        assert_range(0, i, this->n_cols() * this->n_rows());
 
         const size_type i_row = i / this->n_cols();
         const size_type i_col = i % this->n_cols();

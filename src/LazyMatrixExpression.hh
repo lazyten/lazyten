@@ -91,8 +91,8 @@ class LazyMatrixExpression
     virtual stored_matrix_type extract_block(Range<size_type> row_range,
                                              Range<size_type> col_range) const {
         // Assertive checks:
-        assert_upper_bound(row_range.last(), this->n_rows() + 1);
-        assert_upper_bound(col_range.last(), this->n_cols() + 1);
+        assert_greater_equal(row_range.last(), this->n_rows());
+        assert_greater_equal(col_range.last(), this->n_cols());
 
         // Allocate storage for return:
         // TODO take care of sparsity here:
@@ -149,11 +149,9 @@ class LazyMatrixExpression
     virtual void add_block_to(
           stored_matrix_type& in, size_type start_row, size_type start_col,
           scalar_type c_this = Constants<scalar_type>::one) const {
-        // check that we do not overshoot the row index
-        assert_upper_bound(start_row + in.n_rows(), this->n_rows() + 1);
-
-        // check that we do not overshoot the column index
-        assert_upper_bound(start_col + in.n_cols(), this->n_cols() + 1);
+        // check that we do not overshoot the indices
+        assert_greater_equal(start_row + in.n_rows(), this->n_rows());
+        assert_greater_equal(start_col + in.n_cols(), this->n_cols());
 
         // Extract the block
         const stored_matrix_type extracted =

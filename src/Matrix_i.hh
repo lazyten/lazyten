@@ -124,7 +124,7 @@ template <typename Scalar>
 typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::operator[](
       size_type i) const {
     // Check that we do not overshoot.
-    assert_upper_bound(i, n_cols() * n_rows());
+    assert_range(0, i, n_cols() * n_rows());
 
     const size_type i_row = i / n_cols();
     const size_type i_col = i % n_cols();

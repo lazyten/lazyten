@@ -524,8 +524,8 @@ LazyMatrixSum<StoredMatrix>::extract_block(Range<size_type> row_range,
     }
 
     // Assertive checks:
-    assert_upper_bound(row_range.last(), this->n_rows() + 1);
-    assert_upper_bound(col_range.last(), this->n_cols() + 1);
+    assert_greater_equal(row_range.last(), this->n_rows());
+    assert_greater_equal(col_range.last(), this->n_cols());
 
     // Allocate storage and set elements to zero
     stored_matrix_type res(row_range.length(), col_range.length(), true);
@@ -543,10 +543,10 @@ void LazyMatrixSum<StoredMatrix>::add_block_to(stored_matrix_type& in,
                                                size_type start_col,
                                                scalar_type c_this) const {
     // check that we do not overshoot the row index
-    assert_upper_bound(start_row + in.n_rows(), this->n_rows() + 1);
+    assert_greater_equal(start_row + in.n_rows(), this->n_rows());
 
     // check that we do not overshoot the column index
-    assert_upper_bound(start_col + in.n_cols(), this->n_cols() + 1);
+    assert_greater_equal(start_col + in.n_cols(), this->n_cols());
 
     for (const auto& stored_term : m_stored_terms) {
         const scalar_type coeff = stored_term.coefficient();

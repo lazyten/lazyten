@@ -151,13 +151,13 @@ Range<T> range(const T& t1, const T& t2);
 template <typename T>
 Range<T>::Range(value_type first, value_type last)
       : m_first(first), m_last(last) {
-    assert_lower_bound(m_first, m_last);
+    assert_greater_equal(m_first, m_last);
 };
 
 template <typename T>
 Range<T>::Range(std::pair<value_type, value_type> first_last)
       : m_first(first_last.first), m_last(first_last.second) {
-    assert_lower_bound(m_first, m_last);
+    assert_greater_equal(m_first, m_last);
 };
 
 template <typename T>
