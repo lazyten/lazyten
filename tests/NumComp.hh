@@ -125,17 +125,19 @@ struct NumComp {
 
             // Check all entries:
             // TODO use matrix iterator
-            try {
-                for (size_type i = 0; i < lhs.n_rows(); ++i) {
-                    for (size_type j = 0; j < lhs.n_cols(); ++j) {
+            for (size_type i = 0; i < lhs.n_rows(); ++i) {
+                for (size_type j = 0; j < lhs.n_cols(); ++j) {
+                    try {
                         if (!is_equal(lhs(i, j), rhs(i, j), m_tolerance,
                                       m_throw))
                             return false;
+                    } catch (const NumCompException& e) {
+                        throw NumCompException(
+                              e.lhs, e.rhs, e.error, e.tolerance,
+                              "Matrix entry (" + std::to_string(i) + "," +
+                                    std::to_string(j) + ") not equal.");
                     }
                 }
-            } catch (const NumCompException& e) {
-                throw NumCompException(e.lhs, e.rhs, e.error, e.tolerance,
-                                       "Matrix entry not equal.");
             }
 
             return true;
