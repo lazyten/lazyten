@@ -56,19 +56,21 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
      */
     SmallMatrix(const SmallMatrix& mat, scalar_type tolerance)
           : SmallMatrix(mat.n_rows(), mat.n_cols(), false) {
-        // TODO use iterator
-        for (size_type i = 0; i < mat.n_rows(); ++i) {
-            for (size_type j = 0; j < mat.n_cols(); ++j) {
-                if (std::fabs(mat(i, j)) < tolerance) {
-                    (*this)(i, j) = Constants<scalar_type>::zero();
-                } else {
 
-                    (*this)(i, j) = mat(i, j);
-                }
+        for (const auto elem : mat) {
+            if (std::fabs(*elem) < tolerance) {
+                (*this)(elem.row(), elem.col()) =
+                      Constants<scalar_type>::zero();
+            } else {
+                (*this)(elem.row(), elem.col()) = *elem;
             }
         }
     }
 
+    /** Normal copy constructor */
+    SmallMatrix(const SmallMatrix& mat) = default;
+
+    /** Construct from armadillo matrix */
     explicit SmallMatrix(arma::mat inner) : m_arma(inner) {}
 
     //
