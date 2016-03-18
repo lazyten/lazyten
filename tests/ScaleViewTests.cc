@@ -75,7 +75,7 @@ TEST_CASE("ScaleView", "[ScaleView]") {
         stored_view_generator svg{};
         stored_testlib lib{args_generator, svg, model_generator,
                            "ScaleView(stored matrix): ",
-                           TestConstants::default_num_tol};
+                           0.01 * TestConstants::default_num_tol};
         REQUIRE(lib.run_checks());
     }
 
@@ -83,7 +83,7 @@ TEST_CASE("ScaleView", "[ScaleView]") {
         lazy_view_generator lvg{};
         lazy_testlib lib{args_generator, lvg, model_generator,
                          "ScaleView(lazy matrix): ",
-                         TestConstants::default_num_tol};
+                         0.01 * TestConstants::default_num_tol};
         REQUIRE(lib.run_checks());
     }
 
