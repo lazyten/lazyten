@@ -22,7 +22,8 @@ TEST_CASE("SmallMatrix class", "[SmallMatrix]") {
     SECTION("Default stored matrix tests") {
         typedef typename stored_matrix_tests::TestingLibrary<small_matrix_type>
               testinglib;
-        REQUIRE(testinglib::run_check());
+        testinglib lib("SmallMatrix: ", TestConstants::default_num_tol);
+        REQUIRE(lib.run_checks());
     }
 }
 

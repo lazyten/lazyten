@@ -40,19 +40,14 @@ struct FunctionalityTests
     /** \brief Run all standard tests in order to compare/test model and sut. */
     static void run_all_tests(const compmat_type& model,
                               const sutmat_type& sut) {
+        base_type::test_copy(model, sut);
         base_type::test_element_access(model, sut);
-        test_equivalence(model, sut);
+        base_type::test_equivalence(model, sut);
         base_type::test_extract_block(model, sut);
         base_type::test_add_block_to(model, sut);
-        base_type::test_iterator(model, sut);
+        base_type::test_readonly_iterator(model, sut);
         base_type::template test_multiply_by<stored_matrix_type>(model, sut);
         test_convert_to_stored(model, sut);
-    }
-
-    /** Test wheather the two matrices are identical */
-    static void test_equivalence(const compmat_type& model,
-                                 const sutmat_type& sut) {
-        RC_ASSERT(NumComp::is_equal_matrix(model, sut));
     }
 
     /** Test conversion of the sut metrix to its stored_matrix_type */
