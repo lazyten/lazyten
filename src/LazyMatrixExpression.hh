@@ -85,6 +85,11 @@ class LazyMatrixExpression
      */
     virtual stored_matrix_type extract_block(Range<size_type> row_range,
                                              Range<size_type> col_range) const {
+        // At least one range is empty -> no work to be done:
+        if (row_range.is_empty() || col_range.is_empty()) {
+            return stored_matrix_type{row_range.length(), col_range.length()};
+        }
+
         // Assertive checks:
         assert_greater_equal(row_range.last(), this->n_rows());
         assert_greater_equal(col_range.last(), this->n_cols());
