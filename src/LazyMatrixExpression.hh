@@ -53,7 +53,7 @@ class LazyMatrixExpression
      * Achieved by calling extract_block on the whole matrix.
      */
     virtual explicit operator stored_matrix_type() const {
-        return extract_block({0, this->n_rows()}, {0, this->n_cols()});
+        return extract_block(range(this->n_rows()), range(this->n_cols()));
     }
 
     /** \brief Extract a block of values out of the matrix and
