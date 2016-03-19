@@ -20,20 +20,35 @@ class StoredMatrix_i;
 
 template <typename Scalar>
 class SmallMatrix : public StoredMatrix_i<Scalar> {
-    static_assert(std::is_same<double, Scalar>::value,
+    static_assert(std::is_same<double, Scalar>::value ||
+                        std::is_same<float, Scalar>::value ||
+                        std::is_same<std::complex<float>, Scalar>::value ||
+                        std::is_same<std::complex<double>, Scalar>::value ||
+                        std::is_same<short, Scalar>::value ||
+                        std::is_same<int, Scalar>::value ||
+                        std::is_same<long, Scalar>::value ||
+                        std::is_same<unsigned short, Scalar>::value ||
+                        std::is_same<unsigned int, Scalar>::value ||
+                        std::is_same<unsigned long, Scalar>::value,
                   "SmallMatrix<Scalar> is currently only available for Scalar "
-                  "== double.");
+                  "being one of double, float, complex<double>, "
+                  "complex<float>,  short, int, long, unsigned short, unsigned "
+                  "int, unsigned long");
 
   public:
     typedef StoredMatrix_i<Scalar> base_type;
     typedef typename base_type::scalar_type scalar_type;
     typedef typename base_type::size_type size_type;
 
+    /** The type of the storage object used to store the data
+     *  of the SmallMatrix */
+    typedef arma::Mat<Scalar> storage_type;
+
     // Swapping:
     friend void swap(SmallMatrix& first, SmallMatrix& second) {
         using std::swap;
-        first.m_arma.swap(second.m_arma);
         swap(static_cast<base_type&>(first), static_cast<base_type&>(second));
+        first.m_arma.swap(second.m_arma);
     }
 
     // TODO add constructor from tuple of initialiser list!
@@ -67,11 +82,8 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
         }
     }
 
-    /** Normal copy constructor */
-    SmallMatrix(const SmallMatrix& mat) = default;
-
     /** Construct from armadillo matrix */
-    explicit SmallMatrix(arma::mat inner) : m_arma(inner) {}
+    explicit SmallMatrix(storage_type inner) : m_arma(inner) {}
 
     //
     // Scalar operators
@@ -94,7 +106,7 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
     /** Multiply two small matrices */
     SmallMatrix operator*(const SmallMatrix& other) const {
         assert_size(n_cols(), other.n_rows());
-        arma::mat res = m_arma * other.m_arma;
+        storage_type res = m_arma * other.m_arma;
         return SmallMatrix(res);
     }
 
@@ -191,7 +203,7 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
         arma::span cols(col_range.first(), col_range.last() - 1);
 
         // Create a copy of the elements to extract
-        arma::mat m = m_arma(rows, cols);
+        storage_type m = m_arma(rows, cols);
 
         // Move into a now SmallMatrix:
         return SmallMatrix<scalar_type>{std::move(m)};
@@ -231,8 +243,11 @@ class SmallMatrix : public StoredMatrix_i<Scalar> {
     // since arma matrices are column-major, but our interface
     // is row-major
 
+    /** Read-only access to the inner storage */
+    const storage_type& data() const { return m_arma; }
+
   private:
-    arma::mat m_arma;
+    storage_type m_arma;
 };
 
 //
