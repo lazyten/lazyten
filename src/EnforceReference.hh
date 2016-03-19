@@ -7,7 +7,11 @@ namespace linalgwrap {
  * The class requires prior knowledge about the situation
  * Only in the case that we get the data by-value it really
  * does anything (it copies the data to internal storage
- * and returns a reference to it) */
+ * and returns a reference to it)
+ *
+ * \tparam T The data type
+ * \tparam FromValue Do we get the data by-value(true) or by-reference(false)
+ * */
 template <typename T, bool FromValue>
 struct EnforceReference {};
 
