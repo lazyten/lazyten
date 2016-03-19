@@ -77,7 +77,7 @@ bool TestingLibrary<View, ViewGenArg>::run_checks() const {
     bool res = true;
 
     /* TODO enable if read-write views are implemented
-    if (View::view_of_stored_matrix) {
+    if (!View::is_const_view) {
         res &= rc::check(m_prefix + "Test copying stored matrix views",
                          m_gen.generate(comptests::test_copy));
     }
@@ -98,7 +98,7 @@ bool TestingLibrary<View, ViewGenArg>::run_checks() const {
                      m_gen.generate(comptests::test_readonly_iterator));
 
     /* TODO enable if read-write views are implemented
-    if (View::view_of_stored_matrix) {
+    if (!View::is_const_view) {
         // Read-write element access
         res &= rc::check(
               m_prefix + "Altering elements via ()",
