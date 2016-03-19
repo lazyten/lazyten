@@ -88,6 +88,9 @@ class ViewBase<Matrix, false>
     /** Is this ViewBase for a view of a stored matrix */
     static constexpr bool view_of_stored_matrix = false;
 
+    /** Is this a const-view or is it writable */
+    static constexpr bool is_const_view = true;
+
     //
     // Constructors, destructors and assignment
     //
@@ -160,6 +163,9 @@ class ViewBase<Matrix, true>
 
     /** Is this a view of a stored matrix */
     static constexpr bool view_of_stored_matrix = true;
+
+    /** Is this a const-view or is it writable */
+    static constexpr bool is_const_view = std::is_const<Matrix>::value;
 
     //
     // Constructors, destructors and assignment
