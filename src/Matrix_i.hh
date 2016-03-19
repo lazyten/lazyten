@@ -41,8 +41,15 @@ class Matrix_i : public Subscribable {
     //! The const iterator type
     typedef DefaultMatrixConstIterator<Matrix_i<Scalar>> const_iterator;
 
-    /** \brief Destructor */
+    /** \name Matrix constructor, destructor and assignment */
+    ///@{
     virtual ~Matrix_i() = default;
+    Matrix_i() = default;
+    Matrix_i(const Matrix_i&) = default;
+    Matrix_i(Matrix_i&&) = default;
+    Matrix_i& operator=(const Matrix_i&) = default;
+    Matrix_i& operator=(Matrix_i&&) = default;
+    ///@}
 
     /** \name Matrix properties
      *        Access to properties common to all matrices

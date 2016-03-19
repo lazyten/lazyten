@@ -66,11 +66,6 @@ class LazyMatrixWrapper : public LazyMatrixExpression<StoredMatrix> {
     /** Non-const access to the inner data object */
     inner_matrix_type& inner_matrix() { return *m_inner; }
 
-    // Default copy and assignment
-    LazyMatrixWrapper(const LazyMatrixWrapper&) = default;
-    LazyMatrixWrapper& operator=(const LazyMatrixWrapper&) = default;
-    LazyMatrixWrapper(LazyMatrixWrapper&&) = default;
-
     //
     // Matrix_i interface
     //

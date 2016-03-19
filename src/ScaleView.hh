@@ -23,25 +23,12 @@ class ScaleView : public ViewBase<Matrix> {
     /** A swap function for ScaleView */
     friend void swap(ScaleView& first, ScaleView& second);
 
-    /** \name Constructors, desctructors and assignment
-     */
-    ///@{
     /* \brief Construct from matrix and scaling factor
      *
      * \param mat      Matrix to scale
      * \param scaling  Scaling factor to scale all elements with
      */
     ScaleView(inner_matrix_type& mat, scalar_type scaling);
-
-    /** Default Copy construtor */
-    ScaleView(const ScaleView& other) = default;
-
-    /** Default move construtor */
-    ScaleView(ScaleView&& other) = default;
-
-    /** Default assignment operator */
-    ScaleView& operator=(const ScaleView& other) = default;
-    ///@}
 
     //
     // Matrix_i interface

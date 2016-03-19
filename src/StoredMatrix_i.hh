@@ -74,18 +74,11 @@ class StoredMatrix_i : public Matrix_i<Scalar> {
     //! The const_iterator type
     typedef typename base_type::const_iterator const_iterator;
 
-    // Swapping:
-    friend void swap(StoredMatrix_i& first, StoredMatrix_i& second) {
+    friend void swap(StoredMatrix_i& rhs, StoredMatrix_i& lhs) {
         using std::swap;
-        swap(first.m_name, second.m_name);
+        swap(static_cast<base_type&>(rhs), static_cast<base_type&>(lhs));
+        swap(rhs.m_name, lhs.m_name);
     }
-
-    //
-    // Assignment, construction, destruction
-    //
-
-    /** Default destructor */
-    virtual ~StoredMatrix_i() = default;
 
     //
     // Stored matrices can have a name

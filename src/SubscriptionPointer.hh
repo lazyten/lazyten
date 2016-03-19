@@ -21,7 +21,6 @@ class SubscriptionPointer {
     /** A swap function for Subscription pointers */
     friend void swap(SubscriptionPointer& first, SubscriptionPointer& second) {
         using std::swap;
-
         swap(first.m_subscriber_id_ptr, second.m_subscriber_id_ptr);
         swap(first.m_subscribed_obj_ptr, second.m_subscribed_obj_ptr);
     }

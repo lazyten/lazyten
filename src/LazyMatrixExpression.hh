@@ -45,11 +45,6 @@ class LazyMatrixExpression
     typedef std::shared_ptr<LazyMatrixExpression<StoredMatrix>>
           lazy_matrix_expression_ptr_type;
 
-    // Swapping:
-    friend void swap(LazyMatrixExpression&, LazyMatrixExpression&) {
-        // nothing
-    }
-
     /** \name Data access
      */
     ///@{

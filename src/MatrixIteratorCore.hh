@@ -57,6 +57,16 @@ struct MatrixIteratorCoreBase
     /** It the iterator a const iterator? */
     static constexpr bool is_const_iterator = Constness;
 
+    //@{
+    /** Defaults for the big five */
+    virtual ~MatrixIteratorCoreBase() = default;
+    MatrixIteratorCoreBase() = default;
+    MatrixIteratorCoreBase(MatrixIteratorCoreBase&&) = default;
+    MatrixIteratorCoreBase(const MatrixIteratorCoreBase&) = default;
+    MatrixIteratorCoreBase& operator=(MatrixIteratorCoreBase&&) = default;
+    MatrixIteratorCoreBase& operator=(const MatrixIteratorCoreBase&) = default;
+    //@}
+
     //
     // Information about the current element:
     //
@@ -136,7 +146,7 @@ class MatrixIteratorDefaultCore
      *
      *  In other words this constructor constructs an iterator
      *  in the state past-the-end. */
-    MatrixIteratorDefaultCore(matrix_type& mat);
+    explicit MatrixIteratorDefaultCore(matrix_type& mat);
 
     /** \brief Construct an iterator giving the initial value
      * it should point to. */

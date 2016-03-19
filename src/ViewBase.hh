@@ -59,6 +59,7 @@ class ViewBase<Matrix, false>
       : public LazyMatrixExpression<
               typename std::remove_const<Matrix>::type::stored_matrix_type>,
         public ViewBaseMatrixContainer<Matrix> {
+
   public:
     //! Typedef of the container used to store the inner matrix
     typedef ViewBaseMatrixContainer<Matrix> container_type;
@@ -97,9 +98,6 @@ class ViewBase<Matrix, false>
      */
     ViewBase(inner_matrix_type& inner, const std::string& identifier)
           : container_type(inner, identifier){};
-
-    ViewBase(const ViewBase&) = default;
-    ViewBase(ViewBase&&) = default;
 
     //
     // Partial implementation of LazyMatrixExpression interface.
@@ -174,12 +172,6 @@ class ViewBase<Matrix, true>
      */
     ViewBase(inner_matrix_type& inner, const std::string& identifier);
 
-    //! Default copy constructor
-    ViewBase(const ViewBase&) = default;
-
-    //! Default move constructor
-    ViewBase(ViewBase&&) = default;
-
     //
     // Partial implementation of LazyMatrixExpression interface.
     //
@@ -201,8 +193,8 @@ class ViewBase<Matrix, true>
 // BaseViewMatrixContainer
 //
 template <typename Matrix>
-void swap(ViewBaseMatrixContainer<Matrix>& first,
-          ViewBaseMatrixContainer<Matrix>& second) {
+inline void swap(ViewBaseMatrixContainer<Matrix>& first,
+                 ViewBaseMatrixContainer<Matrix>& second) {
     using std::swap;  // enable ADL
     swap(first.m_inner_ptr, second.m_inner_ptr);
 }
@@ -229,22 +221,6 @@ std::string ViewBaseMatrixContainer<Matrix>::identifier() const {
     return m_inner_ptr.subscriber_id();
 }
 
-//
-// ViewBase swap
-//
-
-template <typename Matrix, bool isStored>
-void swap(ViewBase<Matrix, isStored>& first,
-          ViewBase<Matrix, isStored>& second) {
-    typedef typename ViewBase<Matrix, isStored>::container_type container_type;
-    typedef typename ViewBase<Matrix, isStored>::base_type base_type;
-
-    using std::swap;  // enable ADL
-
-    swap(static_cast<container_type&>(first),
-         static_cast<container_type&>(second));
-    swap(static_cast<base_type&>(first), static_cast<base_type&>(second));
-}
 //
 // ViewBase of lazy
 //

@@ -98,7 +98,7 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
     }
 
   public:
-    /** \name Constructors, desctructors and assignment
+    /** \name Constructors for lazy sums
      */
     ///@{
     /** \brief Create a matrix sum object
@@ -139,20 +139,14 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
         m_stored_terms.push_back(std::move(term));
     }
 
-    /** \brief Default copy constructor */
-    LazyMatrixSum(const LazyMatrixSum&) = default;
-
-    /** \brief Default move constructor */
-    LazyMatrixSum(LazyMatrixSum&&) = default;
-
-    /** \brief Default destructor */
+    //@{
+    /** Defaults for the big five */
     ~LazyMatrixSum() = default;
-
-    /** Assignment operator */
-    LazyMatrixSum& operator=(LazyMatrixSum other) {
-        swap(*this, other);
-        return *this;
-    }
+    LazyMatrixSum(const LazyMatrixSum&) = default;
+    LazyMatrixSum(LazyMatrixSum&&) = default;
+    LazyMatrixSum& operator=(const LazyMatrixSum&) = default;
+    LazyMatrixSum& operator=(LazyMatrixSum&&) = default;
+    //@}
     ///@}
 
     //

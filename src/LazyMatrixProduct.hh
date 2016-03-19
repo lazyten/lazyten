@@ -54,9 +54,6 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
         m_factors.push_back(std::move(expr.clone()));
     }
 
-    /** \brief Copy constructor */
-    LazyMatrixProduct(const LazyMatrixProduct&) = default;
-
     /** \brief Copy and scale constructor constructor
      *
      * Copy the contents of another product and scale it altogether
@@ -69,17 +66,14 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
         m_coefficient *= factor;
     }
 
-    /** \brief Default move constructor */
-    LazyMatrixProduct(LazyMatrixProduct&&) = default;
-
-    /** \brief Default destructor */
+    //@{
+    /** Defaults for the big five */
     ~LazyMatrixProduct() = default;
-
-    /** Assignment operator */
-    LazyMatrixProduct& operator=(LazyMatrixProduct other) {
-        swap(*this, other);
-        return *this;
-    }
+    LazyMatrixProduct(const LazyMatrixProduct&) = default;
+    LazyMatrixProduct(LazyMatrixProduct&&) = default;
+    LazyMatrixProduct& operator=(const LazyMatrixProduct& other) = default;
+    LazyMatrixProduct& operator=(LazyMatrixProduct&& other) = default;
+    //@}
     ///@}
 
     //

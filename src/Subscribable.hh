@@ -30,9 +30,8 @@ class Subscribable {
     /** A swap function for Subscribables */
     friend void swap(Subscribable&, Subscribable&) {
         // do nothing since the pointers that point to first,
-        // still point to the first object still point to the
-        // first object and those which point to second object
-        // still point to the second.
+        // still point to the first object and those which
+        // point to second object still point to the second.
     }
 
     //
@@ -84,8 +83,15 @@ class Subscribable {
         // or anything else
     }
 
-    /** Default assignment operator */
+    /** Copy assignment operator */
     Subscribable& operator=(const Subscribable&) {
+        // All pointers to this object stay intact, so there is no reason
+        // to do anything here.
+        return *this;
+    }
+
+    /** Move assignment operator */
+    Subscribable& operator=(Subscribable&&) {
         // All pointers to this object stay intact, so there is no reason
         // to do anything here.
         return *this;
