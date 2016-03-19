@@ -43,7 +43,7 @@ class Range {
      * The first element is inclusive, the last exclusive
      * (half-open interval)
      */
-    explicit Range(std::pair<value_type, value_type> first_last);
+    Range(std::pair<value_type, value_type> first_last);
 
     /** \brief Return the effective number of elements in the range
      *
