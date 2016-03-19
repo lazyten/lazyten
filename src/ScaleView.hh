@@ -35,14 +35,10 @@ class ScaleView : public ViewBase<Matrix> {
     //
 
     /** \brief Number of rows of the matrix */
-    size_type n_rows() const override {
-        return base_type::inner_matrix().n_rows();
-    }
+    size_type n_rows() const override;
 
     /** \brief Number of columns of the matrix  */
-    size_type n_cols() const override {
-        return base_type::inner_matrix().n_cols();
-    }
+    size_type n_cols() const override;
 
     /** \brief return an element of the matrix    */
     scalar_type operator()(size_type row, size_type col) const override;
@@ -90,11 +86,8 @@ class ScaleView : public ViewBase<Matrix> {
         return m_scaling * base_type::inner_matrix() * m;
     }
 
-    /** \brief Clone the expression */
-    lazy_matrix_expression_ptr_type clone() const {
-        // return a copy enwrapped in the pointer type
-        return lazy_matrix_expression_ptr_type(new ScaleView(*this));
-    }
+    /** \brief Clone the view */
+    lazy_matrix_expression_ptr_type clone() const override;
 
   private:
     scalar_type m_scaling;
@@ -128,6 +121,16 @@ ScaleView<Matrix>::ScaleView(inner_matrix_type& mat, scalar_type scaling)
       : base_type{mat, "ScaleView"}, m_scaling{scaling} {}
 
 template <typename Matrix>
+typename ScaleView<Matrix>::size_type ScaleView<Matrix>::n_rows() const {
+    return base_type::inner_matrix().n_rows();
+}
+
+template <typename Matrix>
+typename ScaleView<Matrix>::size_type ScaleView<Matrix>::n_cols() const {
+    return base_type::inner_matrix().n_cols();
+}
+
+template <typename Matrix>
 typename ScaleView<Matrix>::scalar_type ScaleView<Matrix>::operator()(
       size_type row, size_type col) const {
     return m_scaling * base_type::inner_matrix()(row, col);
@@ -146,6 +149,12 @@ void ScaleView<Matrix>::add_block_to(stored_matrix_type& in,
                                      scalar_type c_this) const {
     base_type::inner_matrix().add_block_to(in, start_row, start_col,
                                            c_this * m_scaling);
+}
+
+template <typename Matrix>
+typename ScaleView<Matrix>::lazy_matrix_expression_ptr_type
+ScaleView<Matrix>::clone() const {
+    return lazy_matrix_expression_ptr_type(new ScaleView(*this));
 }
 
 }  // view
