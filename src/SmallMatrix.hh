@@ -18,6 +18,7 @@ class Matrix_i;
 template <typename Scalar>
 class StoredMatrix_i;
 
+/** A class for a dense stored matrix, currently implemented using armadillo. */
 template <typename Scalar>
 class SmallMatrix : public StoredMatrix_i<Scalar> {
     static_assert(std::is_same<double, Scalar>::value ||
