@@ -1,5 +1,6 @@
 #pragma once
 #include "matrix_tests.hh"
+#include "ScaleView.hh"
 
 namespace linalgwrap {
 namespace tests {
@@ -42,7 +43,10 @@ class TestingLibrary {
           std::string prefix = "",
           double tolerance = TestConstants::default_num_tol);
 
-    bool run_checks() const;
+    void run_checks() const;
+
+    /** Disable the view * stored test */
+    void disable_run_view_times_stored();
 
   private:
     // The testing library we use
@@ -55,6 +59,82 @@ class TestingLibrary {
 
     std::string m_prefix;
     callgen_type m_gen;
+
+    // The TransposeView * stored operation is not yet implemented for
+    // views of lazy matrices. This flag allows to disable this test.
+    bool m_run_view_times_stored = true;
+};
+
+/** Class to supply standard view_generator functionals for the TestingLibrary
+ */
+template <typename ViewTypes, typename MakeViewExtraArg>
+struct StandardViewGenerators {
+    // The types we use
+    typedef typename ViewTypes::stored_matrix_type stored_matrix_type;
+
+    // The derived default views:
+    typedef typename ViewTypes::view_of_stored_type view_of_stored_type;
+    typedef typename ViewTypes::view_of_scaleview_type view_of_scaleview_type;
+    typedef typename ViewTypes::view_of_lazy_type view_of_lazy_type;
+
+    // The argument and makeview function:
+    typedef MakeViewExtraArg makeview_fctn_arg_type;
+
+    /** Generate a view of a stored matrix */
+    struct stored_view_generator {
+        typedef typename view_of_stored_type::inner_matrix_type
+              stored_matrix_type;
+        typedef std::function<view_of_stored_type(
+              stored_matrix_type&, makeview_fctn_arg_type)> makeview_fctn_type;
+
+        view_of_stored_type operator()(
+              std::pair<stored_matrix_type, makeview_fctn_arg_type> mat_args);
+
+        stored_view_generator(makeview_fctn_type makeview_fctn);
+
+      private:
+        makeview_fctn_type m_makeview_fctn;
+        std::shared_ptr<stored_matrix_type> m_stored_ptr;
+    };
+
+    /** Generate a view of a lazy matrix */
+    struct lazy_view_generator {
+        typedef typename view_of_lazy_type::inner_matrix_type lazy_matrix_type;
+        typedef std::function<view_of_lazy_type(
+              lazy_matrix_type&, makeview_fctn_arg_type)> makeview_fctn_type;
+
+        view_of_lazy_type operator()(
+              std::pair<stored_matrix_type, makeview_fctn_arg_type> mat_args);
+
+        lazy_view_generator(makeview_fctn_type makeview_fctn);
+
+      private:
+        makeview_fctn_type m_makeview_fctn;
+        std::shared_ptr<lazy_matrix_type> m_lazy_ptr;
+    };
+
+    /** Generate a view of a view of a stored matrix */
+    struct view_view_generator {
+        typedef typename view_of_scaleview_type::inner_matrix_type view_type;
+        typedef std::function<view_of_scaleview_type(
+              view_type&, makeview_fctn_arg_type)> makeview_fctn_type;
+
+        static_assert(
+              std::is_same<
+                    view::ScaleView<typename view_type::inner_matrix_type>,
+                    view_type>::value,
+              "view_view_generator can only generate ScaleViews");
+
+        view_of_scaleview_type operator()(
+              std::pair<stored_matrix_type, makeview_fctn_arg_type> mat_args);
+
+        view_view_generator(makeview_fctn_type makeview_fctn);
+
+      private:
+        makeview_fctn_type m_makeview_fctn;
+        std::shared_ptr<stored_matrix_type> m_stored_ptr;
+        std::shared_ptr<view_type> m_view_ptr;
+    };
 };
 
 //
@@ -71,43 +151,46 @@ TestingLibrary<View, ViewGenArg>::TestingLibrary(
         m_gen{args_generator, view_generator, model_generator, tolerance} {}
 
 template <typename View, typename ViewGenArg>
-bool TestingLibrary<View, ViewGenArg>::run_checks() const {
-    const double eps = std::numeric_limits<scalar_type>::epsilon();
+void TestingLibrary<View, ViewGenArg>::disable_run_view_times_stored() {
+    m_run_view_times_stored = false;
+}
 
-    bool res = true;
+template <typename View, typename ViewGenArg>
+void TestingLibrary<View, ViewGenArg>::run_checks() const {
+    const double eps = std::numeric_limits<scalar_type>::epsilon();
 
     /* TODO enable if read-write views are implemented
     if (!View::is_const_view) {
-        res &= rc::check(m_prefix + "Test copying stored matrix views",
-                         m_gen.generate(comptests::test_copy));
+        CHECK(rc::check(m_prefix + "Test copying stored matrix views",
+                         m_gen.generate(comptests::test_copy)));
     }
     */
 
     // Test basic equivalence:
-    res &= rc::check(m_prefix + "Equivalence of View to model expression",
-                     m_gen.generate(comptests::test_equivalence, 10. * eps));
+    CHECK(rc::check(m_prefix + "Equivalence of View to model expression",
+                    m_gen.generate(comptests::test_equivalence, 10. * eps)));
 
     // Read-only element access
-    res &= rc::check(m_prefix + "Element access via () and []",
-                     m_gen.generate(comptests::test_element_access));
-    res &= rc::check(m_prefix + "Element access via extract_block",
-                     m_gen.generate(comptests::test_extract_block));
-    res &= rc::check(m_prefix + "Data access via add_block_to",
-                     m_gen.generate(comptests::test_add_block_to));
-    res &= rc::check(m_prefix + "Read-only iterator of small matrices",
-                     m_gen.generate(comptests::test_readonly_iterator));
+    CHECK(rc::check(m_prefix + "Element access via () and []",
+                    m_gen.generate(comptests::test_element_access)));
+    CHECK(rc::check(m_prefix + "Element access via extract_block",
+                    m_gen.generate(comptests::test_extract_block)));
+    CHECK(rc::check(m_prefix + "Data access via add_block_to",
+                    m_gen.generate(comptests::test_add_block_to)));
+    CHECK(rc::check(m_prefix + "Read-only iterator of small matrices",
+                    m_gen.generate(comptests::test_readonly_iterator)));
 
     /* TODO enable if read-write views are implemented
     if (!View::is_const_view) {
         // Read-write element access
-        res &= rc::check(
+        CHECK(rc::check(
               m_prefix + "Altering elements via ()",
-              m_gen.generate(comptests::test_setting_elements_indexed));
-        res &= rc::check(
+              m_gen.generate(comptests::test_setting_elements_indexed)));
+        CHECK(rc::check(
               m_prefix + "Altering elements via []",
-              m_gen.generate(comptests::test_setting_elements_vectorised));
-        res &= rc::check(m_prefix + "Altering elements via iterator",
-                         m_gen.generate(comptests::test_readwrite_iterator));
+              m_gen.generate(comptests::test_setting_elements_vectorised)));
+        CHECK(rc::check(m_prefix + "Altering elements via iterator",
+                         m_gen.generate(comptests::test_readwrite_iterator)));
     }
     */
 
@@ -115,31 +198,93 @@ bool TestingLibrary<View, ViewGenArg>::run_checks() const {
     typedef LazyMatrixWrapper<stored_matrix_type, stored_matrix_type>
           lazy_matrix_type;
 
-    res &= rc::check(m_prefix + "Multiplication by scalar",
-                     m_gen.generate(comptests::test_mutiply_scalar));
-    res &= rc::check(m_prefix + "Divide by scalar",
-                     m_gen.generate(comptests::test_divide_scalar));
-    res &= rc::check(
+    CHECK(rc::check(m_prefix + "Multiplication by scalar",
+                    m_gen.generate(comptests::test_mutiply_scalar)));
+    CHECK(rc::check(m_prefix + "Divide by scalar",
+                    m_gen.generate(comptests::test_divide_scalar)));
+    CHECK(rc::check(
           m_prefix + "Add a stored matrix",
-          m_gen.generate(comptests::template test_add<stored_matrix_type>));
-    res &= rc::check(
+          m_gen.generate(comptests::template test_add<stored_matrix_type>)));
+    CHECK(rc::check(
           m_prefix + "Add a lazy matrix",
-          m_gen.generate(comptests::template test_add<lazy_matrix_type>));
-    res &= rc::check(
+          m_gen.generate(comptests::template test_add<lazy_matrix_type>)));
+    CHECK(rc::check(
           m_prefix + "Subtract a stored matrix",
           m_gen.generate(
-                comptests::template test_subtract<stored_matrix_type>));
-    res &= rc::check(
-          m_prefix + "Multiply a stored matrix",
-          m_gen.generate(
-                comptests::template test_multiply_by<stored_matrix_type>));
-    res &= rc::check(
+                comptests::template test_subtract<stored_matrix_type>)));
+    if (m_run_view_times_stored) {
+        CHECK(rc::check(
+              m_prefix + "Multiply a stored matrix",
+              m_gen.generate(
+                    comptests::template test_multiply_by<stored_matrix_type>)));
+    }
+    CHECK(rc::check(
           m_prefix + "Multiply a lazy matrix",
           m_gen.generate(
-                comptests::template test_multiply_by<lazy_matrix_type>));
-
-    return res;
+                comptests::template test_multiply_by<lazy_matrix_type>)));
 }
+
+//
+// StandardViewGenerators
+//
+template <typename ViewTypes, typename MakeViewExtraArg>
+typename StandardViewGenerators<ViewTypes,
+                                MakeViewExtraArg>::view_of_stored_type
+      StandardViewGenerators<ViewTypes,
+                             MakeViewExtraArg>::stored_view_generator::
+      operator()(
+            std::pair<stored_matrix_type, makeview_fctn_arg_type> mat_args) {
+    // Store the stored matrix in permanent memory:
+    m_stored_ptr.reset(new stored_matrix_type{std::move(mat_args.first)});
+
+    // Return a view to it:
+    return m_makeview_fctn(std::ref(*m_stored_ptr), mat_args.second);
+}
+
+template <typename ViewTypes, typename MakeViewExtraArg>
+StandardViewGenerators<ViewTypes, MakeViewExtraArg>::stored_view_generator::
+      stored_view_generator(makeview_fctn_type makeview_fctn)
+      : m_makeview_fctn(makeview_fctn) {}
+
+template <typename ViewTypes, typename MakeViewExtraArg>
+typename StandardViewGenerators<ViewTypes, MakeViewExtraArg>::view_of_lazy_type
+      StandardViewGenerators<ViewTypes, MakeViewExtraArg>::lazy_view_generator::
+      operator()(
+            std::pair<stored_matrix_type, makeview_fctn_arg_type> mat_args) {
+    // Store the lazy matrix in permanent memory:
+    m_lazy_ptr.reset(new lazy_matrix_type{std::move(mat_args.first)});
+
+    // Return a view to it:
+    return m_makeview_fctn(std::ref(*m_lazy_ptr), mat_args.second);
+}
+
+template <typename ViewTypes, typename MakeViewExtraArg>
+StandardViewGenerators<ViewTypes, MakeViewExtraArg>::lazy_view_generator::
+      lazy_view_generator(makeview_fctn_type makeview_fctn)
+      : m_makeview_fctn(makeview_fctn) {}
+
+template <typename ViewTypes, typename MakeViewExtraArg>
+typename StandardViewGenerators<ViewTypes,
+                                MakeViewExtraArg>::view_of_scaleview_type
+      StandardViewGenerators<ViewTypes, MakeViewExtraArg>::view_view_generator::
+      operator()(
+            std::pair<stored_matrix_type, makeview_fctn_arg_type> mat_args) {
+    m_view_ptr.reset();
+
+    // Store the stored matrix in permanent memory:
+    m_stored_ptr.reset(new stored_matrix_type{std::move(mat_args.first)});
+
+    // Construct a scale view and store it into the pointer:
+    m_view_ptr.reset(new view_type{*m_stored_ptr, 1.0});
+
+    // Return a view to the latter:
+    return m_makeview_fctn(std::ref(*m_view_ptr), mat_args.second);
+}
+
+template <typename ViewTypes, typename MakeViewExtraArg>
+StandardViewGenerators<ViewTypes, MakeViewExtraArg>::view_view_generator::
+      view_view_generator(makeview_fctn_type makeview_fctn)
+      : m_makeview_fctn(makeview_fctn) {}
 
 }  // namespace view_tests
 }  // namespace tests
