@@ -3,14 +3,15 @@
 
 #include <cstddef>
 #include <utility>
-#include "SmallMatrix.hh"
 #include <string>
-#include "Exceptions.hh"
-#include "Constants.hh"
 #include <iostream>
 #include <iomanip>
-#include "MatrixIterator.hh"
+#include "type_utils.hh"
+#include "Constants.hh"
+#include "Exceptions.hh"
 #include "Subscribable.hh"
+#include "SmallMatrix.hh"
+#include "MatrixIterator.hh"
 
 namespace linalgwrap {
 
@@ -110,6 +111,21 @@ class Matrix_i : public Subscribable {
     void transpose() { assert_dbg(false, ExcNotImplemented()); }
     */
 };
+
+//@{
+/** \brief struct representing a type (std::true_type, std::false_type) which
+ *  indicates whether T is a stored matrix
+ *
+ * The definition is done using SFINAE, such that even for types not having a
+ * typedef scalar_type this expression is valid.
+ *  */
+template <typename T, typename = void>
+struct IsMatrix : public std::false_type {};
+
+template <typename T>
+struct IsMatrix<T, void_t<typename T::scalar_type>>
+      : public std::is_base_of<Matrix_i<typename T::scalar_type>, T> {};
+//@}
 
 /** \brief Simple output operator, that plainly shows all entries of
  *  the Matrix one by one.

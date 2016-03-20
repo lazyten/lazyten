@@ -7,12 +7,6 @@
 
 namespace linalgwrap {
 
-// TODO define a set of optional functions which make performance better
-//      e.g. - an in-memory transpose() function
-//           - transpose-add ...
-//           - transpose-multiply
-//           - whatever else seems sensible
-
 // Forward-declare the interface class
 template <typename Scalar>
 class Matrix_i;
@@ -148,12 +142,31 @@ class StoredMatrix_i : public Matrix_i<Scalar> {
     const_iterator end() const;
 
     // TODO
-    //   function to get number of non-zero entries
+    //   function to get actual number of non-zero entries
+    //   function to get estimated/implicitly known number of non-zero entries
 
   protected:
     //! some name identifying the matrix, or empty
     std::string m_name;
 };
+
+//@{
+/** \brief struct representing a type (std::true_type, std::false_type) which
+ *indicates
+ *  whether T is a stored matrix
+ *
+ * The definition is done using SFINAE, such that even for types not having a
+ *typedef
+ * scalar_type this expression is valid.
+ *  */
+template <typename Matrix, typename = void>
+struct IsStoredMatrix : public std::false_type {};
+
+template <typename Matrix>
+struct IsStoredMatrix<Matrix, void_t<typename Matrix::scalar_type>>
+      : public std::is_base_of<StoredMatrix_i<typename Matrix::scalar_type>,
+                               Matrix> {};
+//@}
 
 //
 // -------------------------------------------------------------
