@@ -29,7 +29,7 @@ class TestingLibrary {
     TestingLibrary(std::string prefix = "",
                    double tolerance = TestConstants::default_num_tol);
 
-    bool run_checks() const;
+    void run_checks() const;
 
   private:
     // The testing library we use
@@ -60,49 +60,45 @@ TestingLibrary<Matrix>::TestingLibrary(std::string prefix, double tolerance)
       : m_prefix{prefix}, m_gen{argsgen, identity, identity, tolerance} {}
 
 template <typename Matrix>
-bool TestingLibrary<Matrix>::run_checks() const {
+void TestingLibrary<Matrix>::run_checks() const {
     const double eps = std::numeric_limits<scalar_type>::epsilon();
 
-    bool res = true;
-
     // Test copying stored matrices
-    res &= rc::check(m_prefix + "Test copying stored matrices",
-                     m_gen.generate(comptests::test_copy, eps));
+    CHECK(rc::check(m_prefix + "Test copying stored matrices",
+                    m_gen.generate(comptests::test_copy, eps)));
 
     // Read-only element access
-    res &= rc::check(m_prefix + "Element access via () and []",
-                     m_gen.generate(comptests::test_element_access, eps));
-    res &= rc::check(m_prefix + "Element access via extract_block",
-                     m_gen.generate(comptests::test_extract_block));
-    res &= rc::check(m_prefix + "Data access via add_block_to",
-                     m_gen.generate(comptests::test_add_block_to));
-    res &= rc::check(m_prefix + "Read-only iterator of small matrices",
-                     m_gen.generate(comptests::test_readonly_iterator, eps));
+    CHECK(rc::check(m_prefix + "Element access via () and []",
+                    m_gen.generate(comptests::test_element_access, eps)));
+    CHECK(rc::check(m_prefix + "Element access via extract_block",
+                    m_gen.generate(comptests::test_extract_block)));
+    CHECK(rc::check(m_prefix + "Data access via add_block_to",
+                    m_gen.generate(comptests::test_add_block_to)));
+    CHECK(rc::check(m_prefix + "Read-only iterator of small matrices",
+                    m_gen.generate(comptests::test_readonly_iterator, eps)));
 
     // Read-write element access
-    res &= rc::check(
+    CHECK(rc::check(
           m_prefix + "Altering elements via ()",
-          m_gen.generate(comptests::test_setting_elements_indexed, eps));
-    res &= rc::check(
+          m_gen.generate(comptests::test_setting_elements_indexed, eps)));
+    CHECK(rc::check(
           m_prefix + "Altering elements via []",
-          m_gen.generate(comptests::test_setting_elements_vectorised, eps));
-    res &= rc::check(m_prefix + "Altering elements via iterator",
-                     m_gen.generate(comptests::test_readwrite_iterator, eps));
+          m_gen.generate(comptests::test_setting_elements_vectorised, eps)));
+    CHECK(rc::check(m_prefix + "Altering elements via iterator",
+                    m_gen.generate(comptests::test_readwrite_iterator, eps)));
 
     // Operations
-    res &= rc::check(m_prefix + "Multiplication by scalar",
-                     m_gen.generate(comptests::test_mutiply_scalar));
-    res &= rc::check(m_prefix + "Divide by scalar",
-                     m_gen.generate(comptests::test_divide_scalar));
-    res &= rc::check(m_prefix + "Add a matrix",
-                     m_gen.generate(comptests::template test_add<Matrix>));
-    res &= rc::check(m_prefix + "Subtract a matrix",
-                     m_gen.generate(comptests::template test_subtract<Matrix>));
-    res &= rc::check(
+    CHECK(rc::check(m_prefix + "Multiplication by scalar",
+                    m_gen.generate(comptests::test_mutiply_scalar)));
+    CHECK(rc::check(m_prefix + "Divide by scalar",
+                    m_gen.generate(comptests::test_divide_scalar)));
+    CHECK(rc::check(m_prefix + "Add a matrix",
+                    m_gen.generate(comptests::template test_add<Matrix>)));
+    CHECK(rc::check(m_prefix + "Subtract a matrix",
+                    m_gen.generate(comptests::template test_subtract<Matrix>)));
+    CHECK(rc::check(
           m_prefix + "Matrix multiplication",
-          m_gen.generate(comptests::template test_multiply_by<Matrix>));
-
-    return res;
+          m_gen.generate(comptests::template test_multiply_by<Matrix>)));
 }
 
 }  // namespace stored_matrix_tests

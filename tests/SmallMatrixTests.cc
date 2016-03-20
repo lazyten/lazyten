@@ -23,7 +23,7 @@ TEST_CASE("SmallMatrix class", "[SmallMatrix]") {
         typedef typename stored_matrix_tests::TestingLibrary<small_matrix_type>
               testinglib;
         testinglib lib("SmallMatrix: ", 0.01 * TestConstants::default_num_tol);
-        REQUIRE(lib.run_checks());
+        lib.run_checks();
     }
 }
 
