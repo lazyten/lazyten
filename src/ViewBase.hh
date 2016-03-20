@@ -9,6 +9,10 @@
 namespace linalgwrap {
 namespace view {
 
+// Forward declaration
+template <typename Matrix, typename = void>
+struct ViewInnermostMatrixType;
+
 /** \brief Class which contains and manages the reference
  *         to the Matrix we view upon.
  */
@@ -29,6 +33,26 @@ class ViewBaseMatrixContainer {
     ViewBaseMatrixContainer(inner_matrix_type& inner,
                             const std::string& identifier);
 
+    /** \brief Is the innermost matrix contained in the view structure a
+     *         stored matrix?
+     *
+     * \note This property is evaluated in a recursive fashion, i.e. a
+     *       view of a view of a stored matrix has this flag evaluating
+     *       to true.
+     * */
+    static constexpr bool is_stored_matrix_view =
+          IsStoredMatrix<typename ViewInnermostMatrixType<Matrix>::type>::value;
+
+    /** \brief Does this view contain a matrix at innermost level,
+     *         which we can write to?
+     *
+     * The idea is that if the innermost matrix is a stored matrix and
+     * is non-const we can undo the view operations and set elements on
+     * this matrix.
+     * */
+    static constexpr bool is_const_view =
+          is_stored_matrix_view && std::is_const<Matrix>::value;
+
   protected:
     /** Access the inner matrix as a reference */
     inner_matrix_type& inner_matrix();
@@ -42,6 +66,48 @@ class ViewBaseMatrixContainer {
     //! Store a copy of the inner lazy matrix expression:
     SubscriptionPointer<inner_matrix_type> m_inner_ptr;
 };
+
+//@{
+/** \brief struct representing a type (std::true_type, std::false_type) which
+ *  indicates whether T is a stored matrix
+ *
+ * The definition is done using SFINAE, such that even for types not having a
+ * typedef inner_matrix_type this expression is valid.
+ *  */
+template <typename Matrix, typename = void>
+struct IsView : std::false_type {};
+
+template <typename Matrix>
+struct IsView<Matrix, void_t<typename Matrix::inner_matrix_type>>
+      : std::is_base_of<
+              ViewBaseMatrixContainer<typename Matrix::inner_matrix_type>,
+              Matrix> {};
+//@}
+
+/** \brief Struct allowing access to the type of the innermost matrix
+ *         we view upon.
+ *
+ * Achieved by recursively checking wheather the current matrix has the
+ * base type ViewBaseMatrixContainer. If this is the case we go one
+ * level deeper into Matrix::inner_matrix_type, otherwise we return the
+ * current type.
+ */
+//@{
+template <typename Matrix, typename>
+struct ViewInnermostMatrixType {
+    // default implementation used if inner_matrix_type is not available
+    // then we can be sure, that we do not have a view here ...
+    typedef Matrix type;
+};
+
+template <typename Matrix>
+struct ViewInnermostMatrixType<Matrix,
+                               void_t<typename Matrix::inner_matrix_type>> {
+    typedef typename std::conditional<IsView<Matrix>::value,
+                                      typename Matrix::inner_matrix_type,
+                                      Matrix>::type type;
+};
+//@}
 
 /** \brief View base class
  *
@@ -71,29 +137,13 @@ class ViewBase<Matrix, false>
     typedef LazyMatrixExpression<typename std::remove_const<
           inner_matrix_type>::type::stored_matrix_type> base_type;
 
-    //@{
-    /** Default typedefs for standard types */
-    typedef typename base_type::stored_matrix_type stored_matrix_type;
-    typedef typename base_type::size_type size_type;
-    typedef typename base_type::scalar_type scalar_type;
-    typedef typename base_type::lazy_matrix_expression_ptr_type
-          lazy_matrix_expression_ptr_type;
-    //@}
+    static_assert(
+          std::is_base_of<
+                LazyMatrixExpression<typename base_type::stored_matrix_type>,
+                Matrix>::value,
+          "Matrix is not a child of LazyMatrixExpression of the same "
+          "StoredMatrix type");
 
-    static_assert(std::is_base_of<LazyMatrixExpression<stored_matrix_type>,
-                                  Matrix>::value,
-                  "Matrix is not a child of LazyMatrixExpression of the same "
-                  "StoredMatrix type");
-
-    /** Is this ViewBase for a view of a stored matrix */
-    static constexpr bool view_of_stored_matrix = false;
-
-    /** Is this a const-view or is it writable */
-    static constexpr bool is_const_view = true;
-
-    //
-    // Constructors, destructors and assignment
-    //
     /** Construct a ViewBase class for a LazyMatrix
      *
      * \param inner   Reference to the LazyMatrix
@@ -102,9 +152,6 @@ class ViewBase<Matrix, false>
     ViewBase(inner_matrix_type& inner, const std::string& identifier)
           : container_type(inner, identifier){};
 
-    //
-    // Partial implementation of LazyMatrixExpression interface.
-    //
     /** \brief Update the internal data of all objects in this expression
      *         given the ParameterMap
      * */
@@ -141,6 +188,9 @@ class ViewBase<Matrix, true>
         public ViewBaseMatrixContainer<Matrix> {
   public:
     // TODO these views could in theory be made writable!
+    //      Use the is_const_view flag of ViewBaseMatrixContainer to check
+    //      this before enabling the writable [] and () operators in
+    //      deriving classes.
 
     //! Typedef of the container used to store the inner matrix
     typedef ViewBaseMatrixContainer<Matrix> container_type;
@@ -148,28 +198,6 @@ class ViewBase<Matrix, true>
     //! Typedef of the type of matrix stored in this class
     typedef typename container_type::inner_matrix_type inner_matrix_type;
 
-    //! Typedef of the base type
-    typedef LazyMatrixExpression<typename std::remove_const<Matrix>::type>
-          base_type;
-
-    //@{
-    /** Default typedefs for standard types */
-    typedef typename base_type::stored_matrix_type stored_matrix_type;
-    typedef typename base_type::size_type size_type;
-    typedef typename base_type::scalar_type scalar_type;
-    typedef typename base_type::lazy_matrix_expression_ptr_type
-          lazy_matrix_expression_ptr_type;
-    //@}
-
-    /** Is this a view of a stored matrix */
-    static constexpr bool view_of_stored_matrix = true;
-
-    /** Is this a const-view or is it writable */
-    static constexpr bool is_const_view = std::is_const<Matrix>::value;
-
-    //
-    // Constructors, destructors and assignment
-    //
     /** Construct a ViewBase class for a LazyMatrix
      *
      * \param inner   Reference to the LazyMatrix
@@ -178,9 +206,6 @@ class ViewBase<Matrix, true>
      */
     ViewBase(inner_matrix_type& inner, const std::string& identifier);
 
-    //
-    // Partial implementation of LazyMatrixExpression interface.
-    //
     /** \brief Update the internal data of all objects in this expression
      *         given the ParameterMap
      * */
