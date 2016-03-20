@@ -232,7 +232,7 @@ StoredMatrix operator*(const StoredMatrix& lhs,
                        const LazyMatrixExpression<StoredMatrix>& rhs) {
     assert_dbg(
           false,
-          ExcDiabled(
+          ExcDisabled(
                 "The operation \"StoredMatrix * LazyMatrixExpression\" is "
                 "disabled because it is usually pretty expensive. "
                 "Use \"StoredMatrix * LazyMatrixExpression * StoredMatrix\" "

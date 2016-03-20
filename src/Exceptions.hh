@@ -114,7 +114,7 @@ DefExceptionMsg(ExcInternalError,
  * The calling of this function was deliberately disabled for some reason (which
  * is given here).
  */
-DefException1(ExcDiabled, char *,
+DefException1(ExcDisabled, char *,
               << "The method you attempt to call has been disabled: " << arg1);
 
 /**
