@@ -1,8 +1,6 @@
 #pragma once
 #include "ViewBase.hh"
 
-// TODO move specialisation to different files (E.g. the StoredMatrix file ??)
-
 namespace linalgwrap {
 namespace view {
 
@@ -40,8 +38,8 @@ class TransposeViewBase : public ViewBase<Matrix> {
     //
     // LazyMatrixExpression interface
     //
-    /** \brief Convert the TransposeView<SmallMatrix> to the
-     *         corresponding SmallMatrix.
+    /** \brief Convert the TransposeView<Matrix> to the
+     *         corresponding stored matrix.
      *
      * Achieved by converting the inner matrix to its stored
      * matrix and then taking the transpose view of the result.
@@ -122,10 +120,9 @@ class TransposeView : public TransposeViewSpecialise<Matrix> {
     lazy_matrix_expression_ptr_type clone() const override;
 };
 
-/** Convenience function to make a ScaleView
+/** Convenience function to make a TransposeView
  *
- *\param m   The Matrix to scale
- *\param s   The scaling coefficient to apply to all matrix entries
+ *\param m   The Matrix to transpose
  */
 template <typename Matrix>
 TransposeView<Matrix> transpose(Matrix& m);
@@ -189,7 +186,6 @@ template <typename Matrix>
 inline typename TransposeViewBase<Matrix>::stored_matrix_type
 TransposeViewBase<Matrix>::extract_block(Range<size_type> row_range,
                                          Range<size_type> col_range) const {
-
     // At least one range is empty -> no work to be done:
     if (row_range.is_empty() || col_range.is_empty()) {
         return stored_matrix_type{row_range.length(), col_range.length()};
@@ -235,6 +231,8 @@ inline typename TransposeViewBase<Matrix>::stored_matrix_type
                 "only the allowed type of operation do occur. "
                 " 2. Explicitly convert a subexpression to its stored matrix "
                 "type and perform the operation on the stored matrices."));
+
+    assert_size(n_cols(), m.n_rows());
 
     // Allocate a matrix of zeros
     stored_matrix_type mat(n_rows(), m.n_cols(), true);
