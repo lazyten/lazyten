@@ -13,6 +13,7 @@ set(LINALGWRAP_TESTS_SOURCES
 	LazyMatrixSumTests.cc
 	ScaleViewTests.cc
 	TransposeViewTests.cc
+	BlockViewTests.cc
 	main.cc
 )
 
