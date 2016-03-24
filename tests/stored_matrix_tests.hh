@@ -21,8 +21,7 @@ class TestingLibrary {
      *  \param prefix A prefix to use in the rapidcheck description string
      *  \param tolerance Numeric tolerance used for comparison in (some) checks.
      *                   The checks for which machine epsilon is used as
-     *tolerance
-     *                   are:
+     *                   tolerance are:
      *  - Copying a stored matrix
      *  - Setting and getting elements via [], () or iterator
      */
