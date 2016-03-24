@@ -11,6 +11,7 @@ set(LINALGWRAP_TESTS_SOURCES
 	LazyMatrixWrapperTests.cc
 	LazyMatrixProductTests.cc
 	LazyMatrixSumTests.cc
+	LazyMatrix_i_Tests.cc
 	ScaleViewTests.cc
 	TransposeViewTests.cc
 	BlockViewTests.cc

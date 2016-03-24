@@ -24,10 +24,13 @@ namespace linalgwrap {
  *   - ``scalar_type operator() (size_type row, size_type col) const``
  *
  * From ``LazyMatrixExpression`` we expect the implementation of
- *   - ``stored_matrix_type operator*(const stored_matrix_type& in) const``
  *   - ``lazy_matrix_expression_ptr_type clone() const``
  * see the appropriate classes for details what these methods are required to
  * do.
+ *
+ * It is recommended to overload the ``operator*`` between the lazy matrix
+ * and ``stored_matrix_type`` as well (as defied below) if a more performant
+ * multiplication than plain element-by-element is possible.
  *
  * \tparam StoredMatrix   The type of stored matrix to use
  */
@@ -64,6 +67,14 @@ class LazyMatrix_i : public LazyMatrixExpression<StoredMatrix> {
         o << name();
     }
 
+    /** A default implementation of the matrix-matrix product.
+     *
+     * This loops over all occupied elements of this matrix and
+     * performs the product. Overload this in case there is a
+     * more performant implementation for your matrix available.
+     */
+    stored_matrix_type operator*(const stored_matrix_type& in) const override;
+
     /** Get the name of the matrix */
     std::string name() const { return m_name; }
 
@@ -74,6 +85,25 @@ class LazyMatrix_i : public LazyMatrixExpression<StoredMatrix> {
     //! some name identifying the matrix, or empty
     std::string m_name;
 };
+
+template <typename StoredMatrix>
+typename LazyMatrix_i<StoredMatrix>::stored_matrix_type
+      LazyMatrix_i<StoredMatrix>::
+      operator*(const stored_matrix_type& in) const {
+    assert_size(this->n_cols(), in.n_rows());
+
+    // Allocate return storage
+    stored_matrix_type res(this->n_rows(), in.n_cols(), true);
+
+    // Perform the product
+    for (size_type k = 0; k < in.n_cols(); ++k) {
+        for (auto it = this->begin(); it != this->end(); ++it) {
+            res(it.row(), k) += *it * in(it.col(), k);
+        }
+    }
+
+    return res;
+}
 
 }  // namespace linalg
 #endif  // LINALG_MATRIX_I_HPP_
