@@ -60,22 +60,20 @@ DefException3(ExcOutsideRange, T, T, T, << "Index " << arg1
 
 /**
  * Exception to indicate that a number is larger than an upper bound.
- * Similar to <tt>ExcOutsideRange</tt>, the number given should actually
- * be the upper bound plus one.
+ * The intention is that arg1 <= arg2 should have been satisfied.
  */
 template <typename T>
-DefException2(ExcAboveUpperBound, T, T,
-              << "Number " << arg1 << " must be smaller than " << arg2 << ".");
+DefException2(ExcTooLarge, T, T, << "Number " << arg1
+                                 << " must be smaller or equal to " << arg2
+                                 << ".");
 
 /**
- * Exception to indicate that a number is below a lower bound.
- * Similar to <tt>ExcOutsideRange</tt>, the number given should actually
- * be the lower bound.
+ * Exception to indicate that a number is larger or equal to an upper bound
+ * The intention is that arg1 < arg2 should have been satisfied.
  */
 template <typename T>
-DefException2(ExcBelowLowerBound, T, T, << "Number " << arg1
-                                        << " must be larger or equal " << arg2
-                                        << ".");
+DefException2(ExcTooLargeOrEqual, T, T,
+              << "Number " << arg1 << " must be smaller than " << arg2 << ".");
 
 //
 // Program logic
@@ -116,7 +114,7 @@ DefExceptionMsg(ExcInternalError,
  * The calling of this function was deliberately disabled for some reason (which
  * is given here).
  */
-DefException1(ExcDiabled, char *,
+DefException1(ExcDisabled, char *,
               << "The method you attempt to call has been disabled: " << arg1);
 
 /**
@@ -159,12 +157,12 @@ using namespace exceptions;
  *
  * The macro takes the following arguments:
  * <ol>
- * <li> The number to check
  * <li> The lower bound
+ * <li> The number to check
  * <li> The upper bound plus one
  * </ol>
  */
-#define assert_range(number, start, end)                            \
+#define assert_range(start, number, end)                            \
     {                                                               \
         assert_dbg((start <= number) && (number < end),             \
                    ::linalgwrap::ExcOutsideRange<decltype(number)>( \
@@ -172,35 +170,35 @@ using namespace exceptions;
     }
 
 /**
- * Uses assert_dbg in order to check that a lower bound is satisfied.
+ * Uses assert_dbg in order to check that a rhs is greater or equal
+ * to a lhs
  *
  * Takes the following arguments
  * <ol>
- * <li> The number to check
- * <li> The lower bound
+ * <li> lhs number
+ * <li> rhs number
  * </ol>
  */
-#define assert_lower_bound(number, start)                                      \
-    {                                                                          \
-        assert_dbg(start <= number,                                            \
-                   ::linalgwrap::ExcBelowLowerBound<decltype(number)>(number,  \
-                                                                      start)); \
+#define assert_greater_equal(lhs, rhs)                                  \
+    {                                                                   \
+        assert_dbg(lhs <= rhs,                                          \
+                   ::linalgwrap::ExcTooLarge<decltype(lhs)>(lhs, rhs)); \
     }
 
 /**
- * Uses assert_dbg in order to check that an upper bound is satisfied.
+ * Uses assert_dbg in order to check that a rhs is strictly greater to
+ * a lhs
  *
  * Takes the following arguments
  * <ol>
- * <li> The number to check
- * <li> The upper bound plus one
+ * <li> lhs number
+ * <li> rhs number
  * </ol>
  */
-#define assert_upper_bound(number, end)                                       \
-    {                                                                         \
-        assert_dbg(number < end,                                              \
-                   ::linalgwrap::ExcAboveUpperBound<decltype(number)>(number, \
-                                                                      end));  \
+#define assert_greater(lhs, rhs)                                               \
+    {                                                                          \
+        assert_dbg(lhs < rhs,                                                  \
+                   ::linalgwrap::ExcTooLargeOrEqual<decltype(lhs)>(lhs, rhs)); \
     }
 
 /**

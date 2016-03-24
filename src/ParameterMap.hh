@@ -71,10 +71,10 @@ class ParameterMap {
         Entry();
 
         template <typename T>
-        Entry(std::shared_ptr<T> ptr);
+        explicit Entry(std::shared_ptr<T> ptr);
 
         template <typename T>
-        Entry(SubscriptionPointer<T> ptr);
+        explicit Entry(SubscriptionPointer<T> ptr);
 
         template <typename T>
         T& get(const std::string& key);
@@ -95,21 +95,6 @@ class ParameterMap {
     };
 
   public:
-    //
-    // Constructors
-    //
-    /** Default constructor */
-    ParameterMap() = default;
-
-    /** Copy constructor */
-    ParameterMap(const ParameterMap&) = default;
-
-    /** Move constructor */
-    ParameterMap(ParameterMap&&) = default;
-
-    //
-    // Operations
-    //
     /** Insert or update using a shared pointer */
     template <typename T>
     void update(std::string key, std::shared_ptr<T> object_ptr);

@@ -26,7 +26,7 @@ struct Arbitrary<::linalgwrap::SmallMatrix<Scalar>> {
 
             // set to arbitrary values
             for (size_type i = 0; i < matrix.n_rows() * matrix.n_cols(); ++i) {
-                matrix[i] = *MatrixElement<scalar_type>::matrix_element();
+                matrix[i] = *gen::matrix_element<scalar_type>();
             }
 
             return matrix;

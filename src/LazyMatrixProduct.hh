@@ -18,15 +18,6 @@ class LazyMatrixExpression;
 /**
  * \brief Class to represent a product of matrices, which are scaled
  * by a common coefficient.
- *
- * TODO implement optimisation if two stored matrices are to be multiplied
- *      directly after another (should not happen automatically, so not of
- *      major concern).
- *
- * TODO One could do this by keeping track via a speciffic pointer whether
- *      the last object pushed onto the factor stack was in fact a stored
- *      matrix enwraped into a lazy matrix and if yes do the multiplication
- *      straight away.
  */
 template <typename StoredMatrix>
 class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
@@ -47,9 +38,9 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
         swap(static_cast<base_type&>(first), static_cast<base_type&>(second));
     }
 
-    //
-    // Constructors, destructors, assignment
-    //
+    /** \name Constructors, desctructors and assignment
+     */
+    ///@{
     /** \brief Create a matrix product object:
      *
      * @param expr   The first matrix expression factor
@@ -63,9 +54,6 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
         m_factors.push_back(std::move(expr.clone()));
     }
 
-    /** \brief Copy constructor */
-    LazyMatrixProduct(const LazyMatrixProduct&) = default;
-
     /** \brief Copy and scale constructor constructor
      *
      * Copy the contents of another product and scale it altogether
@@ -78,17 +66,15 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
         m_coefficient *= factor;
     }
 
-    /** \brief Default move constructor */
-    LazyMatrixProduct(LazyMatrixProduct&&) = default;
-
-    /** \brief Default destructor */
+    //@{
+    /** Defaults for the big five */
     ~LazyMatrixProduct() = default;
-
-    /** Assignment operator */
-    LazyMatrixProduct& operator=(LazyMatrixProduct other) {
-        swap(*this, other);
-        return *this;
-    }
+    LazyMatrixProduct(const LazyMatrixProduct&) = default;
+    LazyMatrixProduct(LazyMatrixProduct&&) = default;
+    LazyMatrixProduct& operator=(const LazyMatrixProduct& other) = default;
+    LazyMatrixProduct& operator=(LazyMatrixProduct&& other) = default;
+    //@}
+    ///@}
 
     //
     // Push back further factors
@@ -131,77 +117,42 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
     //
     // Matrix_i interface
     //
-    /**
-     * See documentation of Matrix_i function of the same name.
-     */
-    // TODO comment: this is expensive for products of more than 2 lazy matrices
-    virtual void fill(size_type start_row, size_type start_col,
-                      SmallMatrix<scalar_type>& block, bool add = false,
-                      scalar_type c_this = Constants<scalar_type>::one) const {
-        // check that we do not overshoot the row index
-        assert_upper_bound(start_row + block.n_rows() - 1, n_rows());
-
-        // check that we do not overshoot the column index
-        assert_upper_bound(start_col + block.n_cols() - 1, n_cols());
-
-        // if we have only one factor, just do it there and be done
-        if (m_factors.size() == 1) {
-            // Pass on to the factor, just incorporating the c_this
-            // and the m_coefficient.
-            m_factors[0]->fill(start_row, start_col, block, add,
-                               m_coefficient * c_this);
-            return;
-        }
-
-        auto it = std::begin(m_factors);
-
-        // From the first factor get the required rows from all columns
-        SmallMatrix<scalar_type> cache(block.n_rows(), (*it)->n_cols(), false);
-        (*it)->fill(start_row, 0, cache);
-
-        // first factor done:
-        ++it;
-
-        // TODO it must be possible to use lazy * stored here somehow!
-        // maybe make use of the block view.
-        for (; it < (std::end(m_factors) - 1); ++it) {
-            // Get all rows and contract them away
-            SmallMatrix<scalar_type> currentmat((*it)->n_rows(),
-                                                (*it)->n_cols(), false);
-            (*it)->fill(0, 0, currentmat);
-            cache = cache * currentmat;
-        }
-
-        // From the last factor get the required cols from all rows
-        SmallMatrix<scalar_type> lastcache((*it)->n_rows(), block.n_cols(),
-                                           false);
-        (*it)->fill(0, start_col, lastcache);
-
-        // finally calculate the result.
-        if (add) {
-            block += m_coefficient * c_this * cache * lastcache;
-        } else {
-            block = m_coefficient * c_this * cache * lastcache;
-        }
-    }
-
     /** \brief Number of rows of the matrix */
-    virtual size_type n_rows() const {
+    size_type n_rows() const override {
         // The number of rows of the product
         // equals the number of rows of the first element in the product.
         return m_factors.front()->n_rows();
     }
 
     /** \brief Number of columns of the matrix  */
-    virtual size_type n_cols() const {
+    size_type n_cols() const override {
         // The number of columns of the product
         // equals the nuber of columns of the last element in the product.
         return m_factors.back()->n_cols();
     }
 
+    /** \brief return an element of the matrix    */
+    scalar_type operator()(size_type row, size_type col) const override;
+
     //
     // LazyMatrixExpression interface
     //
+    /** \brief Extract a block of values out of the matrix and
+     *         return it as a stored matrix of the appropriate size
+     *
+     * For more details of the interface see the function of the same
+     * name in ``LazyMatrixExpression``.
+     *
+     * \param row_range   The Range object representing the range of rows
+     *                    to extract. Note that it is a half-open interval
+     *                    i.e. the LHS is inclusive, but the RHS not.
+     * \param col_range   The Range object representing the range of
+     *                    columns to extract.
+     */
+    virtual stored_matrix_type extract_block(
+          Range<size_type> row_range,
+          Range<size_type> col_range) const override;
+
     /** \brief Update the internal data of all objects in this expression
      *         given the ParameterMap
      * */
@@ -213,7 +164,8 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
     }
 
     /** \brief Multiplication with a stored matrix */
-    virtual stored_matrix_type operator*(const stored_matrix_type& m) const {
+    virtual stored_matrix_type operator*(
+          const stored_matrix_type& m) const override {
         assert_size(n_cols(), m.n_rows());
 
         // Deal with last factor:
@@ -222,22 +174,19 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
         ++it;
 
         // Deal with all others:
-        for (; it != m_factors.rend(); ++it) {
-            // Pointer to the factor object
-            const lazy_matrix_expression_ptr_type& expr_ptr = *it;
-            res = (*expr_ptr) * res;
-        }
+        contract_in_place(it, m_factors.rend(), res);
         return res;
     }
 
     /** \brief Print the expression tree to this outstream
      * */
-    virtual void print_tree(std::ostream& o) const {
+    virtual void print_tree(std::ostream& o) const override {
         // TODO to be implemented
+        assert_dbg(false, ExcNotImplemented());
     }
 
     /** \brief Clone the expression */
-    lazy_matrix_expression_ptr_type clone() const {
+    lazy_matrix_expression_ptr_type clone() const override {
         // return a copy enwrapped in the pointer type
         return lazy_matrix_expression_ptr_type(new LazyMatrixProduct(*this));
     }
@@ -261,6 +210,20 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
     }
 
   private:
+    /** \brief Contract a range of factors from m_factor with the stored_matrix
+     *m
+     * After the execution of the function \p m contains the result.
+     *
+     * The function is equivalent to
+     * ```
+     * for (; begin != end; ++begin) {
+     *     m = (**begin) * m;
+     * }
+     */
+    template <typename Iterator>
+    void contract_in_place(Iterator begin, Iterator end,
+                           stored_matrix_type& m) const;
+
     //! The vector containing the lazy matrix expression factors
     std::vector<lazy_matrix_expression_ptr_type> m_factors;
     scalar_type m_coefficient;
@@ -325,6 +288,84 @@ template <typename StoredMatrix>
 LazyMatrixProduct<StoredMatrix> operator-(LazyMatrixProduct<StoredMatrix> mat) {
     typedef typename StoredMatrix::scalar_type scalar_type;
     return -Constants<scalar_type>::one * mat;
+}
+
+//
+// ------------------------------------------------------------
+//
+//
+// LazyMatrixProduct
+//
+template <typename StoredMatrix>
+typename LazyMatrixProduct<StoredMatrix>::scalar_type
+      LazyMatrixProduct<StoredMatrix>::
+      operator()(size_type row, size_type col) const {
+    assert_range(0, row, n_rows());
+    assert_range(0, col, n_cols());
+    auto block = extract_block({row, row + 1}, {col, col + 1});
+    return block(0, 0);
+}
+
+template <typename StoredMatrix>
+typename LazyMatrixProduct<StoredMatrix>::stored_matrix_type LazyMatrixProduct<
+      StoredMatrix>::extract_block(Range<size_type> row_range,
+                                   Range<size_type> col_range) const {
+    // At least one range is empty -> no work to be done:
+    if (row_range.is_empty() || col_range.is_empty()) {
+        return stored_matrix_type{row_range.length(), col_range.length()};
+    }
+
+    // Assertive checks:
+    assert_greater_equal(row_range.last(), this->n_rows());
+    assert_greater_equal(col_range.last(), this->n_cols());
+
+    // If there is only one factor, just perform the operation downstream
+    // and scale it:
+    if (m_factors.size() == 1) {
+        return m_coefficient *
+               m_factors[0]->extract_block(row_range, col_range);
+    }
+
+    // Iterator over the factors from the back
+    auto itfac = m_factors.rbegin();
+
+    // Do the last factor. Note that we will only need those columns
+    // desired by our function.
+    const auto rows_of_last = range((*itfac)->n_rows());
+    stored_matrix_type cache =
+          m_coefficient * (*itfac)->extract_block(rows_of_last, col_range);
+
+    // Last factor done:
+    ++itfac;
+
+    // Perform the multiplications on the remaining factors one-by-one
+    // except the first factor.
+    contract_in_place(itfac, m_factors.rend() - 1, cache);
+
+    // Extract the first factor, but only those rows required:
+    const auto cols_of_first = range(m_factors.front()->n_cols());
+    stored_matrix_type first =
+          m_factors.front()->extract_block(row_range, cols_of_first);
+
+    // Return the product of both:
+    return first * cache;
+
+    // If extracting the required part of the first factor is much
+    // more expansive that doing another lazy*stored multiplication
+    // and binning the rows we do not require, than perhaps it is
+    // in fact better to let the for loop run over all factors but
+    // the last and use another extract_block on the cache to
+    // extract the appropriate row elements.
+}
+
+template <typename StoredMatrix>
+template <typename Iterator>
+void LazyMatrixProduct<StoredMatrix>::contract_in_place(
+      Iterator begin, Iterator end, stored_matrix_type& m) const {
+    for (; begin != end; ++begin) {
+        const lazy_matrix_expression_ptr_type& expr_ptr = *begin;
+        m = (*expr_ptr) * m;
+    }
 }
 
 }  // namespace linalgwrap

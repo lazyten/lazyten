@@ -1,6 +1,7 @@
 #pragma once
 #include <rapidcheck.h>
 #include <StoredMatrix_i.hh>
+#include "MatrixElement.hh"
 
 namespace rc {
 
@@ -22,7 +23,7 @@ struct FixedSizeMatrix {
 
             // set to arbitrary values
             for (size_type i = 0; i < m.n_rows() * m.n_cols(); ++i) {
-                m[i] = *MatrixElement<scalar_type>::matrix_element();
+                m[i] = *gen::matrix_element<scalar_type>();
             }
 
             return m;
@@ -30,4 +31,13 @@ struct FixedSizeMatrix {
         return gen::exec(callable);
     }
 };
+
+namespace gen {
+template <typename Matrix>
+Gen<Matrix> fixed_size(typename Matrix::size_type n_rows,
+                       typename Matrix::size_type n_cols) {
+    return FixedSizeMatrix<Matrix>::fixed_size(n_rows, n_cols);
 }
+
+}  // namespace gen
+}  // namespace rc

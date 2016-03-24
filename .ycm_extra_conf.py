@@ -14,6 +14,9 @@ flags = [
     '-fexceptions',
     # Compile debug code as well
     '-DDEBUG',
+    # Compile extra code blocks:
+    '-DLINALGWRAP_HAVE_GLIBC_STACKTRACE',
+    '-DLINALGWRAP_HAVE_LIBSTDCXX_DEMANGLER',
     # Compile as c++11
     '-std=c++11',
     # Treat .h header files as c++:

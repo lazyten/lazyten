@@ -4,13 +4,17 @@
 set(LINALGWRAP_TESTS_SOURCES
 	NumComp.cc
 	ExceptionTests.cc
+	RangeTests.cc
 	SubscriptionTests.cc
 	SmallMatrixTests.cc
 	ParameterMapTests.cc
 	LazyMatrixWrapperTests.cc
 	LazyMatrixProductTests.cc
 	LazyMatrixSumTests.cc
+	LazyMatrix_i_Tests.cc
 	ScaleViewTests.cc
+	TransposeViewTests.cc
+	BlockViewTests.cc
 	main.cc
 )
 

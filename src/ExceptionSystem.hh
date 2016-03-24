@@ -96,17 +96,12 @@ static ExceptionEffect assert_dbg_effect = ExceptionEffect::ABORT;
  * on exception construction, the default string is printed when the exception
  * is raised.
  */
-#define DefExceptionMsg(Exception, defaulttext)                         \
-    class Exception : public ::linalgwrap::ExceptionBase {              \
-      public:                                                           \
-        Exception(const std::string& msg = defaulttext) : m_msg(msg) {} \
-        virtual ~Exception() noexcept {}                                \
-        virtual void print_extra(std::ostream& out) const noexcept {    \
-            out << m_msg << std::endl;                                  \
-        }                                                               \
-                                                                        \
-      private:                                                          \
-        const std::string m_msg;                                        \
+#define DefExceptionMsg(Exception, defaulttext)                      \
+    class Exception : public ::linalgwrap::ExceptionBase {           \
+      public:                                                        \
+        virtual void print_extra(std::ostream& out) const noexcept { \
+            out << defaulttext << std::endl;                         \
+        }                                                            \
     }
 
 /**

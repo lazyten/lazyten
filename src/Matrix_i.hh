@@ -3,90 +3,106 @@
 
 #include <cstddef>
 #include <utility>
-#include "SmallMatrix.hh"
 #include <string>
-#include "Exceptions.hh"
-#include "Constants.hh"
 #include <iostream>
 #include <iomanip>
+#include "type_utils.hh"
+#include "Constants.hh"
+#include "Exceptions.hh"
+#include "Subscribable.hh"
+#include "SmallMatrix.hh"
+#include "MatrixIterator.hh"
 
 namespace linalgwrap {
 
 template <typename Scalar>
 class SmallMatrix;
 
-/** \brief Abstract matrix interface class */
+template <typename IteratorCore>
+class MatrixIterator;
+
+template <typename Matrix, bool Constness>
+class MatrixIteratorDefaultCore;
+
+/** \brief Abstract matrix interface class
+ *
+ * This interface and hence all classes derived from it are subscribable using
+ * the SubscriptionPointer class. This should be used very little and only when
+ * other means (e.g. using shared pointers) is not possible.
+ * */
 template <typename Scalar>
-class Matrix_i {
+class Matrix_i : public Subscribable {
   public:
     typedef size_t size_type;
     typedef Scalar scalar_type;
 
-    /** \brief Destructor */
+    //! The iterator type (a const iterator)
+    typedef DefaultMatrixConstIterator<Matrix_i<Scalar>> iterator;
+
+    //! The const iterator type
+    typedef DefaultMatrixConstIterator<Matrix_i<Scalar>> const_iterator;
+
+    /** \name Matrix constructor, destructor and assignment */
+    ///@{
     virtual ~Matrix_i() = default;
+    Matrix_i() = default;
+    Matrix_i(const Matrix_i&) = default;
+    Matrix_i(Matrix_i&&) = default;
+    Matrix_i& operator=(const Matrix_i&) = default;
+    Matrix_i& operator=(Matrix_i&&) = default;
+    ///@}
 
-    /** \brief Extract values of this matrix partially to \p block
-     *
-     * Get the values of the matrix starting at row index \p start_row
-     * and column index \p start_col. As many entries as there is space
-     * in \p block are extracted. So if \p block is a 2x2 matrix and
-     * \p start_row is 1 and \p start_col is 3, then the entries
-     * (1,3), (1,4), (2,3) and (2,4) are extracted.
-     *
-     * Optionally the values can be implicitly scaled by a coefficient
-     * \p c_this before extracting them to \p block and the flag \p add
-     * controls whether the values are added to \p block or set.
-     *
-     * @param start_row The row index to start from
-     * @param start_col The col index to start from
-     * @param block     The block to extract the values to.
-     * @param add       If true add the values, else set them.
-     * @param c_this    Coefficient to multiply all values of this matrix
-     *                  before adding/setting them to \p block.
+    /** \name Matrix properties
+     *        Access to properties common to all matrices
      */
-    virtual void fill(
-          size_type start_row, size_type start_col,
-          SmallMatrix<scalar_type>& block, bool add = false,
-          scalar_type c_this = Constants<scalar_type>::one) const = 0;
+    ///@{
+    /** \brief Number of rows of the matrix */
+    virtual size_type n_rows() const = 0;
 
-    // TODO some way to blockwise extract into StoredMatrix!
-    // TODO some way to convert StoredMatrix into SmallMatrix
+    /** \brief Number of columns of the matrix */
+    virtual size_type n_cols() const = 0;
+    ///@}
 
-    /** \brief return an element of the matrix
-     *
-     * It is advisible to overload this in order to get a more performant
-     * implementation.
+    /** \name Data access
+     *        Access to matrix data
      */
-    virtual scalar_type operator()(size_type row, size_type col) const {
-        // Check that we do not overshoot.
-        assert_upper_bound(row, n_rows());
-        assert_upper_bound(col, n_cols());
-
-        SmallMatrix<scalar_type> block(1, 1, false);
-        fill(row, col, block);
-        return block(0, 0);
-    }
+    ///@{
+    /** \brief return an element of the matrix    */
+    virtual scalar_type operator()(size_type row, size_type col) const = 0;
 
     /** \brief return an element of the vectorised matrix object
      *
      * Access the element in row-major ordering (i.e. the matrix is
      * traversed row by row)
      */
-    virtual scalar_type operator[](size_type i) const {
-        // Check that we do not overshoot.
-        assert_upper_bound(i, n_cols() * n_rows());
+    virtual scalar_type operator[](size_type i) const;
+    ///@}
 
-        const size_type i_row = i / n_cols();
-        const size_type i_col = i % n_cols();
-        return (*this)(i_row, i_col);
-    }
+    /** \name Iterators
+     */
+    ///@{
+    /** Return an iterator to the beginning */
+    iterator begin();
 
-    /** \brief Number of rows of the matrix */
-    virtual size_type n_rows() const = 0;
+    /** Return a const_iterator to the beginning */
+    const_iterator begin() const;
 
-    /** \brief Number of columns of the matrix */
-    virtual size_type n_cols() const = 0;
+    /** Return a const_iterator to the beginning */
+    const_iterator cbegin() const;
 
+    /** Return an iterator to the end */
+    iterator end();
+
+    /** Return a const_iterator to the end */
+    const_iterator end() const;
+
+    /** Return a const_iterator to the end */
+    const_iterator cend() const;
+    ///@}
+
+    //
+    // Operations --- or maybe out of scope
+    //
     /** \brief Return the inverse of the matrix
     void inverse() { assert_dbg(false, ExcNotImplemented()); }
     */
@@ -96,12 +112,81 @@ class Matrix_i {
     */
 };
 
+//@{
+/** \brief struct representing a type (std::true_type, std::false_type) which
+ *  indicates whether T is a stored matrix
+ *
+ * The definition is done using SFINAE, such that even for types not having a
+ * typedef scalar_type this expression is valid.
+ *  */
+template <typename T, typename = void>
+struct IsMatrix : public std::false_type {};
+
+template <typename T>
+struct IsMatrix<T, void_t<typename T::scalar_type>>
+      : public std::is_base_of<Matrix_i<typename T::scalar_type>, T> {};
+//@}
+
 /** \brief Simple output operator, that plainly shows all entries of
  *  the Matrix one by one.
  *
  *  Rows are seperated by a newline and entries by spaces.
  *  The last row is not terminated by a newline character.
  *  */
+template <typename Scalar>
+std::ostream& operator<<(std::ostream& o, const Matrix_i<Scalar>& m);
+
+//
+// ---------------------------------------------------------------
+//
+
+//
+// Matrix_i
+//
+template <typename Scalar>
+typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::operator[](
+      size_type i) const {
+    // Check that we do not overshoot.
+    assert_range(0, i, n_cols() * n_rows());
+
+    const size_type i_row = i / n_cols();
+    const size_type i_col = i % n_cols();
+    return (*this)(i_row, i_col);
+}
+
+template <typename Scalar>
+typename Matrix_i<Scalar>::iterator Matrix_i<Scalar>::begin() {
+    return iterator(*this, {0, 0});
+}
+
+template <typename Scalar>
+typename Matrix_i<Scalar>::const_iterator Matrix_i<Scalar>::begin() const {
+    return cbegin();
+}
+
+template <typename Scalar>
+typename Matrix_i<Scalar>::const_iterator Matrix_i<Scalar>::cbegin() const {
+    return const_iterator(*this, {0, 0});
+}
+
+template <typename Scalar>
+typename Matrix_i<Scalar>::iterator Matrix_i<Scalar>::end() {
+    return iterator(*this);
+}
+
+template <typename Scalar>
+typename Matrix_i<Scalar>::const_iterator Matrix_i<Scalar>::end() const {
+    return cend();
+}
+
+template <typename Scalar>
+typename Matrix_i<Scalar>::const_iterator Matrix_i<Scalar>::cend() const {
+    return const_iterator(*this);
+}
+
+//
+// Out of scope
+//
 template <typename Scalar>
 std::ostream& operator<<(std::ostream& o, const Matrix_i<Scalar>& m) {
     typedef typename Matrix_i<Scalar>::size_type size_type;

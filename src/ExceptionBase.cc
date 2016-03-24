@@ -9,7 +9,7 @@
 #include <execinfo.h>
 #endif
 
-#ifdef HAVE_LIBSTDCXX_DEMANGLER
+#ifdef LINALGWRAP_HAVE_LIBSTDCXX_DEMANGLER
 #include <cxxabi.h>
 #endif
 
@@ -88,8 +88,8 @@ void ExceptionBase::print_stacktrace(std::ostream& out) const {
     int initframe = 0;
     for (; initframe < m_n_stacktrace_frames; ++initframe) {
         if (std::strstr(stacktrace[initframe], "linalgwrap") &&
-            std::strstr(stacktrace[initframe], "exception") &&
-            std::strstr(stacktrace[initframe], "raise")) {
+            std::strstr(stacktrace[initframe], "ExceptionBase") &&
+            std::strstr(stacktrace[initframe], "add_exc_data")) {
             // The current frame contains linalgwrap, exceptions and raise, ie.
             // it is the one
             // corresponding to

@@ -2,8 +2,8 @@
 #define LINALG_STORED_MATRIX_I_HPP_
 
 #include "Matrix_i.hh"
-#include "Subscribable.hh"
 #include "Constants.hh"
+#include "MatrixIterator.hh"
 
 namespace linalgwrap {
 
@@ -17,12 +17,14 @@ namespace linalgwrap {
 template <typename Scalar>
 class Matrix_i;
 
+template <typename IteratorCore>
+class MatrixIterator;
+
+template <typename Matrix, bool Constness>
+class MatrixIteratorDefaultCore;
+
 /** \brief Interface class for a matrix which is actually stored in memory
  * in some way
- *
- * This interface and hence all classes derived from it are subscribable using
- * the SubscriptionPointer class. This should be used very little and only when
- * other means (e.g. using shared pointers) is not possible.
  *
  * We expect any implementing class to also provide the following constructors:
  * - Construct matrix of fixed size and optionally fill with zeros or leave
@@ -38,9 +40,29 @@ class Matrix_i;
  *   StoredMatrix_i(const SmallMatrix&)
  *   StoredMatrix_i(const SmallMatrix&, scalar_type tolerance)
  *   ```
+ *
+ * All implementing classes should further provide the function
+ * ```
+ * stored_matrix_type extract_block(Range<size_type> row_range,
+ *                                  Range<size_type> col_range) const;
+ * ```
+ * which should copy a block of the matrix and return it
+ * (similar to the ``extract_block`` in the ``LazyMatrixExpression`` class,
+ * as well as
+ * ```
+ * void add_block_to(stored_matrix_type& in, size_type start_row,
+ *                   size_type start_col,
+ *                   scalar_type c_this = Constants<scalar_type>::one) const;
+ * ```
+ * which --- again similar to ``add_block_to`` of ``LazyMatrixExpression`` ---
+ * should add a copy of a block of the matrix to the matrix provided on in.
+ *
+ * Note that the operator() functions in derived classes are expected to return
+ * zero even if an element is known to be zero by some sparsity pattern or
+ * similar. Modification of a non-existing element should fail, however.
  */
 template <typename Scalar>
-class StoredMatrix_i : public Matrix_i<Scalar>, public Subscribable {
+class StoredMatrix_i : public Matrix_i<Scalar> {
   public:
     typedef Matrix_i<Scalar> base_type;
     typedef typename base_type::scalar_type scalar_type;
@@ -52,18 +74,11 @@ class StoredMatrix_i : public Matrix_i<Scalar>, public Subscribable {
     //! The const_iterator type
     typedef typename base_type::const_iterator const_iterator;
 
-    // Swapping:
-    friend void swap(StoredMatrix_i& first, StoredMatrix_i& second) {
+    friend void swap(StoredMatrix_i& rhs, StoredMatrix_i& lhs) {
         using std::swap;
-        swap(first.m_name, second.m_name);
+        swap(static_cast<base_type&>(rhs), static_cast<base_type&>(lhs));
+        swap(rhs.m_name, lhs.m_name);
     }
-
-    //
-    // Assignment, construction, destruction
-    //
-
-    /** Default destructor */
-    virtual ~StoredMatrix_i() = default;
 
     //
     // Stored matrices can have a name
@@ -87,11 +102,20 @@ class StoredMatrix_i : public Matrix_i<Scalar>, public Subscribable {
      */
     virtual scalar_type& operator[](size_type i) {
         // Check that we do not overshoot.
-        assert_upper_bound(i, this->n_cols() * this->n_rows());
+        assert_range(0, i, this->n_cols() * this->n_rows());
 
         const size_type i_row = i / this->n_cols();
         const size_type i_col = i % this->n_cols();
         return (*this)(i_row, i_col);
+    }
+
+    /** \brief Read-only access to vectorised matrix object
+     *
+     * Access the element in row-major ordering (i.e. the matrix is
+     * traversed row by row)
+     * */
+    scalar_type operator[](size_type i) const override {
+        return base_type::operator[](i);
     }
 
     /** Set all elements to zero
@@ -124,13 +148,31 @@ class StoredMatrix_i : public Matrix_i<Scalar>, public Subscribable {
     const_iterator end() const;
 
     // TODO
-    //   function to get stl-compatible iterator
-    //   function to get number of non-zero entries
+    //   function to get actual number of non-zero entries
+    //   function to get estimated/implicitly known number of non-zero entries
 
   protected:
     //! some name identifying the matrix, or empty
     std::string m_name;
 };
+
+//@{
+/** \brief struct representing a type (std::true_type, std::false_type) which
+ *indicates
+ *  whether T is a stored matrix
+ *
+ * The definition is done using SFINAE, such that even for types not having a
+ *typedef
+ * scalar_type this expression is valid.
+ *  */
+template <typename Matrix, typename = void>
+struct IsStoredMatrix : public std::false_type {};
+
+template <typename Matrix>
+struct IsStoredMatrix<Matrix, void_t<typename Matrix::scalar_type>>
+      : public std::is_base_of<StoredMatrix_i<typename Matrix::scalar_type>,
+                               Matrix> {};
+//@}
 
 //
 // -------------------------------------------------------------
