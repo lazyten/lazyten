@@ -56,7 +56,7 @@ typename BlockViewSpecialise<Matrix, SmallMatrix<Scalar>>::stored_matrix_type
 
     // At least one range is empty -> no work to be done:
     if (this->m_row_range.is_empty() || this->m_col_range.is_empty()) {
-        return SmallMatrix<scalar_type>{this->m_row_range.length(), m.n_rows()};
+        return stored_matrix_type{this->m_row_range.length(), m.n_rows()};
     }
 
     // Translate ranges to armadillo spans (which are closed intervals)
