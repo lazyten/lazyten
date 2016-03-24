@@ -92,7 +92,7 @@ TEST_CASE("TransposeView", "[TransposeView]") {
                     0.1 * TestConstants::default_num_tol};
 
         // Run the tests:
-        lib.disable_run_view_times_stored();
+        lib.disable_run_matrix_times_stored();
         lib.run_checks();
     }
 
