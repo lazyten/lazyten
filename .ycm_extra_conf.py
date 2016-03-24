@@ -17,6 +17,7 @@ flags = [
     # Compile extra code blocks:
     '-DLINALGWRAP_HAVE_GLIBC_STACKTRACE',
     '-DLINALGWRAP_HAVE_LIBSTDCXX_DEMANGLER',
+    '-DLINALGWRAP_HAVE_ARMADILLO',
     # Compile as c++11
     '-std=c++11',
     # Treat .h header files as c++:

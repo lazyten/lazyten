@@ -15,9 +15,6 @@
 
 namespace linalgwrap {
 
-template <typename Scalar>
-class SmallMatrix;
-
 template <typename IteratorCore>
 class MatrixIterator;
 

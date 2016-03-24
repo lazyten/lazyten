@@ -57,3 +57,6 @@ endif()
 
 # add to general dependencies:
 set(LINALGWRAP_DEPENDENCIES ${LINALGWRAP_DEPENDENCIES} ${ARMADILLO_LIBRARY})
+
+# enable armadillo-dependant code:
+add_definitions(-DLINALGWRAP_HAVE_ARMADILLO)

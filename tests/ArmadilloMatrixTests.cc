@@ -1,6 +1,7 @@
 #include <rapidcheck.h>
 #include <catch.hpp>
 #include "stored_matrix_tests.hh"
+#include <ArmadilloMatrix.hh>
 
 // Generators for neccessary matrices
 #include "generators.hh"
@@ -12,20 +13,23 @@ namespace linalgwrap {
 namespace tests {
 using namespace rc;
 
-TEST_CASE("SmallMatrix class", "[SmallMatrix]") {
+#ifdef LINALGWRAP_HAVE_ARMADILLO
+TEST_CASE("ArmadilloMatrix class", "[ArmadilloMatrix]") {
     // Make sure that the program does not get aborted
     exceptions::assert_dbg_effect = exceptions::ExceptionEffect::THROW;
 
     // The type of matrix we wish to test.
-    typedef SmallMatrix<double> small_matrix_type;
+    typedef ArmadilloMatrix<double> matrix_type;
 
     SECTION("Default stored matrix tests") {
-        typedef typename stored_matrix_tests::TestingLibrary<small_matrix_type>
+        typedef typename stored_matrix_tests::TestingLibrary<matrix_type>
               testinglib;
-        testinglib lib("SmallMatrix: ", 0.01 * TestConstants::default_num_tol);
+        testinglib lib("ArmadilloMatrix: ",
+                       0.01 * TestConstants::default_num_tol);
         lib.run_checks();
     }
 }
+#endif
 
 }  // tests
 }  // linalgwrap

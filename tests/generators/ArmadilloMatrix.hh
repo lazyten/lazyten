@@ -1,18 +1,18 @@
 #pragma once
 
-#include <SmallMatrix.hh>
+#include <ArmadilloMatrix.hh>
 #include <rapidcheck.h>
 #include "../TestConstants.hh"
 #include "MatrixElement.hh"
 
 namespace rc {
 template <typename Scalar>
-struct Arbitrary<::linalgwrap::SmallMatrix<Scalar>> {
-    typedef ::linalgwrap::SmallMatrix<Scalar> small_matrix_type;
+struct Arbitrary<::linalgwrap::ArmadilloMatrix<Scalar>> {
+    typedef ::linalgwrap::ArmadilloMatrix<Scalar> small_matrix_type;
     typedef typename small_matrix_type::size_type size_type;
     typedef typename small_matrix_type::scalar_type scalar_type;
 
-    static Gen<::linalgwrap::SmallMatrix<Scalar>> arbitrary() {
+    static Gen<::linalgwrap::ArmadilloMatrix<Scalar>> arbitrary() {
         // Define a lambda that returns a new matrix object.
         auto callable = [] {
             const size_type maxsize =

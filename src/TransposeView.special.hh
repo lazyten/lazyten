@@ -1,5 +1,5 @@
 #pragma once
-#include <SmallMatrix.hh>
+#include <ArmadilloMatrix.hh>
 
 /** \file TransposeView.special.hh
  *  \brief Partial template specialisations for TransposeView
@@ -7,6 +7,7 @@
 
 namespace linalgwrap {
 namespace view {
+#ifdef LINALGWRAP_HAVE_ARMADILLO
 /** \brief Class implementing the type-specific TransposeView functionality.
  *
  * Specialisation for SmallMatrices
@@ -14,7 +15,7 @@ namespace view {
  * \tparam Matrix     The actual matrix type of which this is a view
  * */
 template <typename Matrix, typename Scalar>
-class TransposeViewSpecialise<Matrix, SmallMatrix<Scalar>>
+class TransposeViewSpecialise<Matrix, ArmadilloMatrix<Scalar>>
       : public TransposeViewBase<Matrix> {
   public:
     /** \name Typedefs of standard types
@@ -46,14 +47,21 @@ class TransposeViewSpecialise<Matrix, SmallMatrix<Scalar>>
     // TODO perhaps specialise operator* between the view and a
     //      SmallMatrix<Scalar> as well
 };
+#endif  // LINALGWRAP_HAVE_ARMADILLO
 
+//
+// ---------------------------------------------------
+//
+
+#ifdef LINALGWRAP_HAVE_ARMADILLO
 template <typename Matrix, typename Scalar>
-TransposeViewSpecialise<Matrix, SmallMatrix<Scalar>>::TransposeViewSpecialise(
-      inner_matrix_type& mat)
+TransposeViewSpecialise<
+      Matrix,
+      ArmadilloMatrix<Scalar>>::TransposeViewSpecialise(inner_matrix_type& mat)
       : base_type(mat) {}
 
 template <typename Matrix, typename Scalar>
-TransposeViewSpecialise<Matrix, SmallMatrix<Scalar>>::
+TransposeViewSpecialise<Matrix, ArmadilloMatrix<Scalar>>::
 operator stored_matrix_type() const {
     typedef typename inner_matrix_type::storage_type storage_type;
     const storage_type& matrix = base_type::inner_matrix().data();
@@ -62,6 +70,7 @@ operator stored_matrix_type() const {
     // (Armadillo-specific call)
     return SmallMatrix<Scalar>{std::move(matrix.t())};
 }
+#endif  // LINALGWRAP_HAVE_ARMADILLO
 
 }  // namespace view
 }  // namespace linalgwrap
