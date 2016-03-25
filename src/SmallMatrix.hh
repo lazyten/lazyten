@@ -1,5 +1,5 @@
 #pragma once
-#include <ArmadilloMatrix.hh>
+#include "ArmadilloMatrix.hh"
 
 namespace linalgwrap {
 #if defined LINALGWRAP_HAVE_ARMADILLO
@@ -7,6 +7,10 @@ namespace linalgwrap {
 template <typename Scalar>
 using SmallMatrix = ArmadilloMatrix<Scalar>;
 #else
-static_assert(false, "No implementation for SmallMatrix.");
+template <typename Scalar>
+class SmallMatrix {
+    static_assert(false, "No default implementation for SmallMatrix.");
+};
 #endif
+
 }  // end namespace linalgwrap
