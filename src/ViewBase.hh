@@ -53,12 +53,12 @@ class ViewBaseMatrixContainer {
     static constexpr bool is_const_view =
           is_stored_matrix_view && std::is_const<Matrix>::value;
 
+    /** Constant access to the inner matrix of the view */
+    const inner_matrix_type& inner_matrix() const;
+
   protected:
     /** Access the inner matrix as a reference */
     inner_matrix_type& inner_matrix();
-
-    /** Access the inner matrix as a const reference */
-    const inner_matrix_type& inner_matrix() const;
 
     std::string identifier() const;
 
