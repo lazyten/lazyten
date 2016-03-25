@@ -1,5 +1,6 @@
 #pragma once
 #include "ViewBase.hh"
+#include "VectorOf.hh"
 
 namespace linalgwrap {
 namespace view {
@@ -127,6 +128,12 @@ class TransposeView : public TransposeViewSpecialise<Matrix> {
  */
 template <typename Matrix>
 TransposeView<Matrix> transpose(Matrix& m);
+
+/** \brief Special multiplication operator for the scalar product */
+template <typename MatrixType>
+typename MatrixType::scalar_type operator*(
+      const TransposeView<VectorOf<MatrixType>>& lhs,
+      const VectorOf<MatrixType>& rhs);
 
 //
 // ---------------------------------------------------
@@ -291,6 +298,13 @@ TransposeView<Matrix>::clone() const {
 template <typename Matrix>
 TransposeView<Matrix> transpose(Matrix& m) {
     return TransposeView<Matrix>(m);
+}
+
+template <typename MatrixType>
+inline typename MatrixType::scalar_type operator*(
+      const TransposeView<VectorOf<MatrixType>>& lhs,
+      const VectorOf<MatrixType>& rhs) {
+    return lhs.inner_matrix().dot(rhs);
 }
 
 }  // view
