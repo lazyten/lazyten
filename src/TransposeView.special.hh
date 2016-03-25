@@ -2,11 +2,14 @@
 #include <ArmadilloMatrix.hh>
 
 /** \file TransposeView.special.hh
- *  \brief Partial template specialisations for TransposeView
+ *  \brief Partial template specialisations for TransposeView.
  */
 
 namespace linalgwrap {
 namespace view {
+//
+// ArmadialloMatrix
+//
 #ifdef LINALGWRAP_HAVE_ARMADILLO
 /** \brief Class implementing the type-specific TransposeView functionality.
  *
@@ -44,8 +47,8 @@ class TransposeViewSpecialise<Matrix, ArmadilloMatrix<Scalar>>
      */
     explicit operator stored_matrix_type() const override;
 
-    // TODO perhaps specialise operator* between the view and a
-    //      SmallMatrix<Scalar> as well
+    // TODO perhaps specialise operator* between the view and an
+    //      ArmadilloMatrix<Scalar> as well
 };
 #endif  // LINALGWRAP_HAVE_ARMADILLO
 
@@ -53,6 +56,9 @@ class TransposeViewSpecialise<Matrix, ArmadilloMatrix<Scalar>>
 // ---------------------------------------------------
 //
 
+//
+// ArmadilloMatrix
+//
 #ifdef LINALGWRAP_HAVE_ARMADILLO
 template <typename Matrix, typename Scalar>
 TransposeViewSpecialise<
