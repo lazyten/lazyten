@@ -7,6 +7,7 @@ set(LINALGWRAP_TESTS_SOURCES
 	RangeTests.cc
 	SubscriptionTests.cc
 	ArmadilloMatrixTests.cc
+	ArmadilloVectorTests.cc
 	ParameterMapTests.cc
 	LazyMatrixWrapperTests.cc
 	LazyMatrixProductTests.cc
