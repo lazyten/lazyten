@@ -29,8 +29,8 @@ class BlockViewBase : public ViewBase<Matrix> {
      * Range of rows and columns.
      *
      * \param mat      Matrix to view a block of
-     * \param row_range Range of rows to keep
-     * \param col_range Range of columns to keep
+     * \param row_range Range of rows to keep, may not be an empty range
+     * \param col_range Range of columns to keep, may not be an empty range
      */
     BlockViewBase(inner_matrix_type& mat, Range<size_type> row_range,
                   Range<size_type> col_range);
@@ -57,8 +57,10 @@ class BlockViewBase : public ViewBase<Matrix> {
      * \param row_range   The Range object representing the range of rows
      *                    to extract. Note that it is a half-open interval
      *                    i.e. the LHS is inclusive, but the RHS not.
+     *                    The Range may not be empty.
      * \param col_range   The Range object representing the range of
      *                    columns to extract.
+     *                    The Range may not be empty.
      */
     stored_matrix_type extract_block(Range<size_type> row_range,
                                      Range<size_type> col_range) const override;
@@ -72,7 +74,7 @@ class BlockViewBase : public ViewBase<Matrix> {
      *  \param in   Matrix to add the values to. It is assumed that it
      *              already has the correct sparsity structure to take
      *              all the values. Its size defines the size of the
-     *              block
+     *              block. May not be an empty matrix
      *  \param start_row  The row index of the first element to extract
      *  \param start_col  The column index of the first element to extract
      *  \param c_this     The coefficient to multiply this matrix with
@@ -197,20 +199,11 @@ BlockViewBase<Matrix>::BlockViewBase(inner_matrix_type& mat,
         m_row_range(row_range),
         m_col_range(col_range) {
 
-    // TODO at the moment the case of empty ranges is not allowed
-    assert_dbg(!row_range.is_empty(), ExcNotImplemented());
-    assert_dbg(!col_range.is_empty(), ExcNotImplemented());
-
-    if (!row_range.is_empty()) {
-        // Assert that the range makes sense:
-        assert_greater_equal(row_range.last(),
-                             base_type::inner_matrix().n_rows());
-    }
-
-    if (!col_range.is_empty()) {
-        assert_greater_equal(col_range.last(),
-                             base_type::inner_matrix().n_cols());
-    }
+    // Assertions
+    assert_greater(0, row_range.length());
+    assert_greater(0, col_range.length());
+    assert_greater_equal(row_range.last(), base_type::inner_matrix().n_rows());
+    assert_greater_equal(col_range.last(), base_type::inner_matrix().n_cols());
 }
 
 template <typename Matrix>
@@ -240,10 +233,9 @@ template <typename Matrix>
 inline typename BlockViewBase<Matrix>::stored_matrix_type
 BlockViewBase<Matrix>::extract_block(Range<size_type> row_range,
                                      Range<size_type> col_range) const {
-    // At least one range is empty -> no work to be done:
-    if (row_range.is_empty() || col_range.is_empty()) {
-        return stored_matrix_type{row_range.length(), col_range.length()};
-    }
+    // Assertive checks:
+    assert_greater(0, row_range.length());
+    assert_greater(0, col_range.length());
 
     // Assertive checks:
     assert_greater_equal(row_range.last(), n_rows());
@@ -267,6 +259,9 @@ inline void BlockViewBase<Matrix>::add_block_to(stored_matrix_type& in,
                                                 size_type start_row,
                                                 size_type start_col,
                                                 scalar_type c_this) const {
+    assert_greater(0, in.n_rows());
+    assert_greater(0, in.n_cols());
+
     // check that we do not overshoot the indices
     assert_greater_equal(start_row + in.n_rows(), n_rows());
     assert_greater_equal(start_col + in.n_cols(), n_cols());

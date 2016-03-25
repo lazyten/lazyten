@@ -217,18 +217,17 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
      * \param row_range   The Range object representing the range of rows
      *                    to extract. Note that it is a half-open interval
      *                    i.e. the LHS is inclusive, but the RHS not.
+     *                    The Range may not be empty.
      * \param col_range   The Range object representing the range of
      *                    columns to extract.
+     *                    The Range may not be empty.
      */
     virtual ArmadilloMatrix<scalar_type> extract_block(
           Range<size_type> row_range, Range<size_type> col_range) const {
-        // At least one range is empty -> no work to be done:
-        if (row_range.is_empty() || col_range.is_empty()) {
-            return ArmadilloMatrix<scalar_type>{row_range.length(),
-                                                col_range.length()};
-        }
-
         // Assertive checks:
+        assert_greater(0, row_range.length());
+        assert_greater(0, col_range.length());
+
         assert_greater_equal(row_range.last(), this->n_rows());
         assert_greater_equal(col_range.last(), this->n_cols());
 
@@ -254,7 +253,7 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
      *  \param in   Matrix to add the values to. It is assumed that it
      *              already has the correct sparsity structure to take
      *              all the values. Its size defines the size of the
-     *              block
+     *              block. May not be an empty matrix
      *  \param start_row  The row index of the first element to extract
      *  \param start_col  The column index of the first element to extract
      *  \param c_this     The coefficient to multiply this matrix with
@@ -263,9 +262,8 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
     void add_block_to(ArmadilloMatrix<scalar_type>& in, size_type start_row,
                       size_type start_col,
                       scalar_type c_this = Constants<scalar_type>::one) const {
-
-        // Nothing to do:
-        if (in.n_rows() == 0 || in.n_cols() == 0) return;
+        assert_greater(0, in.n_rows());
+        assert_greater(0, in.n_cols());
 
         // check that we do not overshoot the indices
         assert_greater_equal(start_row + in.n_rows(), this->n_rows());

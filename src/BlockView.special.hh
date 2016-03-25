@@ -62,10 +62,8 @@ typename BlockViewSpecialise<Matrix,
       operator*(const stored_matrix_type& m) const {
     assert_size(base_type::n_cols(), m.n_rows());
 
-    // At least one range is empty -> no work to be done:
-    if (this->m_row_range.is_empty() || this->m_col_range.is_empty()) {
-        return stored_matrix_type{this->m_row_range.length(), m.n_rows()};
-    }
+    assert_dbg(!this->m_row_range.is_empty(), ExcInternalError());
+    assert_dbg(!this->m_col_range.is_empty(), ExcInternalError());
 
     // Translate ranges to armadillo spans (which are closed intervals)
     arma::span rows(this->m_row_range.first(), this->m_row_range.last() - 1);

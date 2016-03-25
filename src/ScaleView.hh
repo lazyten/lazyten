@@ -70,7 +70,7 @@ class ScaleView : public ViewBase<Matrix> {
      *  \param in   Matrix to add the values to. It is assumed that it
      *              already has the correct sparsity structure to take
      *              all the values. Its size defines the size of the
-     *              block
+     *              block. May not be an empty matrix.
      *  \param start_row  The row index of the first element to extract
      *  \param start_col  The column index of the first element to extract
      *  \param c_this     The coefficient to multiply this matrix with

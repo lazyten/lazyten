@@ -92,8 +92,10 @@ class LazyMatrixWrapper : public LazyMatrixExpression<StoredMatrix> {
      * \param row_range   The Range object representing the range of rows
      *                    to extract. Note that it is a half-open interval
      *                    i.e. the LHS is inclusive, but the RHS not.
+     *                    The Range may not be empty.
      * \param col_range   The Range object representing the range of
      *                    columns to extract.
+     *                    The Range may not be empty.
      */
     stored_matrix_type extract_block(
           Range<size_type> row_range,
@@ -110,7 +112,7 @@ class LazyMatrixWrapper : public LazyMatrixExpression<StoredMatrix> {
      *  \param in   Matrix to add the values to. It is assumed that it
      *              already has the correct sparsity structure to take
      *              all the values. Its size defines the size of the
-     *              block
+     *              block. May not be an empty matrix.
      *  \param start_row  The row index of the first element to extract
      *  \param start_col  The column index of the first element to extract
      *  \param c_this     The coefficient to multiply this matrix with
