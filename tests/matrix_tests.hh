@@ -346,11 +346,15 @@ template <typename CompMatrix, typename SutMatrix>
 void ComparativeTests<CompMatrix, SutMatrix>::test_extract_block(
       const compmat_type& model, const sutmat_type& sut,
       const double tolerance) {
+
+    size_type min_range_size = 1;
     Range<size_type> rows =
-          *gen::scale(2.0, gen::range_within<size_type>(0, model.n_rows()))
+          *gen::scale(2.0, gen::range_within<size_type>(0, model.n_rows(),
+                                                        min_range_size))
                  .as("extract_block row range");
     Range<size_type> cols =
-          *gen::scale(2.0, gen::range_within<size_type>(0, model.n_cols()))
+          *gen::scale(2.0, gen::range_within<size_type>(0, model.n_cols(),
+                                                        min_range_size))
                  .as("extract_block col range");
 
     // Extract a block from the matrix:
@@ -380,15 +384,16 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_add_block_to(
           Range<size_type>{0, 0}, Range<size_type>{0, 0})) block_matrix_type;
 
     // Then generate two sizes:
-    auto n_rows = *gen::inRange<size_type>(0, model.n_rows())
+    size_type min_size = 1;
+    auto n_rows = *gen::inRange<size_type>(min_size, model.n_rows() + 1)
                          .as("Number of rows of the matrix to add a block to");
-    auto n_cols = *gen::inRange<size_type>(0, model.n_cols()).as(
+    auto n_cols = *gen::inRange<size_type>(min_size, model.n_cols() + 1).as(
           "Number of columns of the matrix to add a block to");
 
     // Generate the offsets:
-    auto r_offset = *gen::inRange<size_type>(0, model.n_rows() - n_rows)
+    auto r_offset = *gen::inRange<size_type>(0, model.n_rows() - n_rows + 1)
                            .as("Start row for add_block_to");
-    auto c_offset = *gen::inRange<size_type>(0, model.n_cols() - n_cols)
+    auto c_offset = *gen::inRange<size_type>(0, model.n_cols() - n_cols + 1)
                            .as("Start col for add_block_to");
 
     // Generate an arbitrary factor:

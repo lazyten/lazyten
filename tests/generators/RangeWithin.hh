@@ -21,19 +21,27 @@ struct RangeWithin {
                 throw rc::GenerationFailure(ss.str());
             }
 
-            if (min_length >= max - min) {
+            if (min_length > max - min) {
                 std::stringstream ss;
                 ss << "Minimal length " << min_length
-                   << " must be smaller than the difference between max and min"
-                   << max - min;
+                   << " must be smaller or equal to the difference between max "
+                   << "and min, which is " << max - min;
                 throw rc::GenerationFailure(ss.str());
             }
 
-            if (min == max) return linalgwrap::Range<value_type>{min, max};
+            if (min_length == max - min) {
+                return linalgwrap::Range<value_type>{min, max};
+            }
 
-            auto length = *gen::inRange<value_type>(min_length, max - min);
-            auto start = *gen::inRange<value_type>(min, max - length);
-
+            auto length = *gen::inRange<value_type>(min_length, max - min + 1);
+            auto start = *gen::scale(2.0, gen::inRange<value_type>(
+                                                min, max - length + 1));
+            if (start + length > max) {
+                std::stringstream ss;
+                ss << "Something went wrong: Too large maximum "
+                   << start + length << " where desired max was " << max;
+                throw rc::GenerationFailure(ss.str());
+            }
             return linalgwrap::Range<value_type>{start, start + length};
         };
         return gen::exec(gen_range);
