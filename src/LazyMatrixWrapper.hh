@@ -158,7 +158,7 @@ class LazyMatrixWrapper : public LazyMatrixExpression<StoredMatrix> {
 
 /** \brief Convenience function to construct a LazyMatrixWrapper */
 template <typename StoredMatrix, typename InnerMatrix, typename... Args>
-LazyMatrixWrapper<StoredMatrix, InnerMatrix> make_lazy_matrix(Args... args) {
+LazyMatrixWrapper<StoredMatrix, InnerMatrix> make_lazy_matrix(Args&&... args) {
     return LazyMatrixWrapper<StoredMatrix, InnerMatrix>(
           std::move(std::make_shared<InnerMatrix>(args...)));
 }
