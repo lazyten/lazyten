@@ -1,6 +1,5 @@
 # this file is greatly inspired by cmake/setup_cached_variables.cmake of deal.ii
 
-
 #
 # Mess with build type
 #
@@ -55,13 +54,20 @@ set(LINALGWRAP_DEFINITIONS "")	# empty list
 LIST(APPEND LINALGWRAP_DEFINITIONS_DEBUG "DEBUG")
 LIST(APPEND LINALGWRAP_DEFINITIONS_RELEASE "RELEASE")
 
-
-
+#
+# Setup build type for examples
+#
+if (CMAKE_BUILD_TYPE MATCHES "Release")
+	set(EXAMPLES_BUILD_TYPE "RELEASE")
+else()
+	set(EXAMPLES_BUILD_TYPE "DEBUG")
+endif()
 
 #
 # Extra options
 #
 option(LINALGWRAP_ENABLE_TESTS "Build linalgwrap tests" ON)
+option(LINALGWRAP_ENABLE_EXAMPLES "Build linalgwrap examples" ON)
 option(LINALGWRAP_COMPILE_PEDANTIC "Use extremely pedantic compiler flags" OFF)
 option(LINALGWRAP_WITH_EXTERNAL_RAPIDCHECK "Use an external rapidcheck library for the tests." OFF)
 option(LINALGWRAP_WITH_EXTERNAL_CATCH "Use an external catch library for the tests." OFF)

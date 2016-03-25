@@ -58,3 +58,8 @@ add_subdirectory(external)
 if(LINALGWRAP_ENABLE_TESTS) 
 	add_subdirectory(tests)
 endif()
+
+# Add subdirectories for the examples.
+if(LINALGWRAP_ENABLE_EXAMPLES)
+	add_subdirectory(examples)
+endif()
