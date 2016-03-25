@@ -202,6 +202,8 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
     /** Set all elements to zero */
     void set_zero() override { m_arma.zeros(); }
 
+    scalar_type accumulate() const override { return arma::accu(m_arma); }
+
     scalar_type& operator()(size_type row, size_type col) override {
         assert_greater(row, n_rows());
         assert_greater(col, n_cols());
@@ -377,26 +379,28 @@ ArmadilloMatrix<Scalar>::ArmadilloMatrix(
       std::initializer_list<std::initializer_list<scalar_type>> list_of_lists)
       : ArmadilloMatrix(
               list_of_lists.size(),
-              list_of_lists.size() > 0 ? *list_of_lists.begin().size() : 0,
+              list_of_lists.size() > 0 ? list_of_lists.begin()->size() : 0,
               false) {
+#ifdef DEBUG
     size_type n_rows = list_of_lists.size();
-    size_type n_cols = n_rows > 0 ? *list_of_lists.begin().size() : 0;
+    size_type n_cols = n_rows > 0 ? list_of_lists.begin()->size() : 0;
+#endif
 
     // Assert all columns have equal length.
     assert_element_sizes(list_of_lists, n_cols);
 
     size_type i = 0;
-    size_type j = 0;
     for (auto row : list_of_lists) {
+        size_type j = 0;
         for (scalar_type elem : row) {
             (*this)(i, j) = elem;
             ++j;
         }
+        assert_dbg(j == n_cols, ExcInternalError());
         ++i;
     }
 
     assert_dbg(i == n_rows, ExcInternalError());
-    assert_dbg(j == n_cols, ExcInternalError());
 }
 
 template <typename Scalar>

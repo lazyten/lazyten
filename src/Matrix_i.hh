@@ -6,6 +6,7 @@
 #include <string>
 #include <iostream>
 #include <iomanip>
+#include <numeric>
 #include "type_utils.hh"
 #include "Constants.hh"
 #include "Exceptions.hh"
@@ -97,16 +98,14 @@ class Matrix_i : public Subscribable {
     const_iterator cend() const;
     ///@}
 
-    //
-    // Operations --- or maybe out of scope
-    //
-    /** \brief Return the inverse of the matrix
-    void inverse() { assert_dbg(false, ExcNotImplemented()); }
-    */
-
-    /** \brief Return the transpose this matrix
-    void transpose() { assert_dbg(false, ExcNotImplemented()); }
-    */
+    /** \name Standard operations
+     */
+    ///@{
+    /** Calculate the (signed) sum of all matrix entries. */
+    virtual scalar_type accumulate() const {
+        return std::accumulate(begin(), end(), Constants<scalar_type>::zero);
+    }
+    ///@}
 };
 
 //@{
