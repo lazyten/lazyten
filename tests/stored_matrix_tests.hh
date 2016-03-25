@@ -1,5 +1,6 @@
 #pragma once
 #include "matrix_tests.hh"
+#include <Exceptions.hh>
 
 namespace linalgwrap {
 namespace tests {
@@ -46,6 +47,8 @@ class TestingLibrary {
         return *gen::arbitrary<matrix_type>().as("Matrix");
     };
 
+    void once_test_initialiser_list_constructor() const;
+
     std::string m_prefix;
     callgen_type m_gen;
 };
@@ -59,8 +62,29 @@ TestingLibrary<Matrix>::TestingLibrary(std::string prefix, double tolerance)
       : m_prefix{prefix}, m_gen{argsgen, identity, identity, tolerance} {}
 
 template <typename Matrix>
+void TestingLibrary<Matrix>::once_test_initialiser_list_constructor() const {
+    matrix_type m{{11.0, 12.0}, {21.0, 22.0}, {31.0, 32.0}};
+
+    CHECK(m.n_rows() == 3);
+    CHECK(m.n_cols() == 2);
+
+    for (size_type i = 0; i < m.n_rows(); ++i) {
+        for (size_type j = 0; j < m.n_cols(); ++j) {
+            CHECK(m(i, j) == 10. * (i + 1) + j + 1);
+        }
+    }
+
+#ifdef DEBUG
+    CHECK_THROWS_AS((matrix_type{{1.0, 2.0}, {1.0}}), ExcSizeMismatch);
+#endif
+}
+
+template <typename Matrix>
 void TestingLibrary<Matrix>::run_checks() const {
     const double eps = std::numeric_limits<scalar_type>::epsilon();
+
+    // Test construction from initialiser list
+    once_test_initialiser_list_constructor();
 
     // Test copying stored matrices
     CHECK(rc::check(m_prefix + "Test copying stored matrices",
