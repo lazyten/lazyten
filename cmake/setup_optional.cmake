@@ -25,7 +25,7 @@ message(AUTHOR_WARNING "TODO Test for glibc stacktrace")
 set(LINALGWRAP_HAVE_GLIBC_STACKTRACE TRUE)
 #
 # do we really want this definition for all executables?
-add_definitions(-DLINALGWRAP_HAVE_GLIBC_STACKTRACE)
+LIST(APPEND LINALGWRAP_DEFINITIONS "LINALGWRAP_HAVE_GLIBC_STACKTRACE")
 
 if(LINALGWRAP_HAVE_GLIBC_STACKTRACE)
 	# needed for meaningful stacktraces
@@ -81,6 +81,6 @@ if(LINALGWRAP_HAVE_GLIBC_STACKTRACE)
 	set(LINALGWRAP_HAVE_LIBSTDCXX_DEMANGLER)
 	#
 	# do we really want this definition for all executables?
-	add_definitions(-DLINALGWRAP_HAVE_LIBSTDCXX_DEMANGLER)
+	LIST(APPEND LINALGWRAP_DEFINITIONS "LINALGWRAP_HAVE_LIBSTDCXX_DEMANGLER")
 endif()
 
