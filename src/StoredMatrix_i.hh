@@ -118,6 +118,8 @@ class StoredMatrix_i : public Matrix_i<Scalar> {
         return base_type::operator[](i);
     }
 
+    /** \name Standard operations */
+    ///@{
     /** Set all elements to zero
      *
      * Overload this to get a more performant implementation.
@@ -131,6 +133,8 @@ class StoredMatrix_i : public Matrix_i<Scalar> {
             }
         }
     }
+
+    ///@}
 
     //
     // Iterators
