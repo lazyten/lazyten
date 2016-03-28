@@ -27,7 +27,8 @@ DefExceptionMsg(ExcDevideByZero, "Devision by zero encountered.");
  */
 DefException1(ExcNumberNotFinite, std::complex<double>,
               << "Encoutered a non-finite number, where this was not expected."
-                 "(its value is" << arg1 << ").");
+                 "(its value is"
+              << arg1 << ").");
 
 /**
 * A number is zero, but it should not be here.
