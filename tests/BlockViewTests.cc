@@ -1,8 +1,8 @@
+#include "view_tests.hh"
 #include <BlockView.hh>
 #include <ScaleView.hh>
-#include <rapidcheck.h>
 #include <catch.hpp>
-#include "view_tests.hh"
+#include <rapidcheck.h>
 
 namespace linalgwrap {
 namespace tests {
@@ -26,7 +26,6 @@ TEST_CASE("BlockView", "[BlockView]") {
     };
 
     // Make types accessible
-    typedef TestTypes::scalar_type scalar_type;
     typedef TestTypes::stored_matrix_type stored_matrix_type;
     typedef TestTypes::lazy_matrix_type lazy_matrix_type;
     typedef TestTypes::inner_scaleview_type inner_scaleview_type;
@@ -77,11 +76,13 @@ TEST_CASE("BlockView", "[BlockView]") {
 
     // Generators for the test case views:
     typedef view_tests::StandardViewGenerators<
-          TestTypes, std::pair<range_type, range_type>> standard_generators;
+          TestTypes, std::pair<range_type, range_type>>
+          standard_generators;
 
     SECTION("Default view tests on the stored view") {
         typedef view_tests::TestingLibrary<TestTypes::view_of_stored_type,
-                                           decltype(args_generator())> testlib;
+                                           decltype(args_generator())>
+              testlib;
 
         auto make_view = [](const stored_matrix_type& sm,
                             std::pair<range_type, range_type> p) {
@@ -104,10 +105,11 @@ TEST_CASE("BlockView", "[BlockView]") {
 
     SECTION("Default view tests on the lazy view") {
         typedef view_tests::TestingLibrary<TestTypes::view_of_lazy_type,
-                                           decltype(args_generator())> testlib;
+                                           decltype(args_generator())>
+              testlib;
 
-        auto make_view =
-              [](lazy_matrix_type& sm, std::pair<range_type, range_type> p) {
+        auto make_view = [](lazy_matrix_type& sm,
+                            std::pair<range_type, range_type> p) {
             return view::block(sm, p.first, p.second);
         };
 
@@ -126,7 +128,8 @@ TEST_CASE("BlockView", "[BlockView]") {
 
     SECTION("Default view tests on the view view") {
         typedef view_tests::TestingLibrary<TestTypes::view_of_scaleview_type,
-                                           decltype(args_generator())> testlib;
+                                           decltype(args_generator())>
+              testlib;
 
         auto make_view = [](inner_scaleview_type& sm,
                             std::pair<range_type, range_type> p) {

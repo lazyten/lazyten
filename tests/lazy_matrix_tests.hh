@@ -1,8 +1,9 @@
 #pragma once
-#include <rapidcheck.h>
-#include <LazyMatrixExpression.hh>
 #include "matrix_tests.hh"
 #include "rapidcheck_utils.hh"
+#include <LazyMatrixExpression.hh>
+#include <catch.hpp>
+#include <rapidcheck.h>
 
 // have an extra verbose output for rapidcheck function tests:
 //# define HAVE_LAZYMATRIX_RC_CLASSIFY

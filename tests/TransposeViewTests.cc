@@ -1,8 +1,8 @@
-#include <TransposeView.hh>
-#include <ScaleView.hh>
-#include <rapidcheck.h>
-#include <catch.hpp>
 #include "view_tests.hh"
+#include <ScaleView.hh>
+#include <TransposeView.hh>
+#include <catch.hpp>
+#include <rapidcheck.h>
 
 namespace linalgwrap {
 namespace tests {
@@ -28,7 +28,6 @@ TEST_CASE("TransposeView", "[TransposeView]") {
     };
 
     // Make types accessible
-    typedef TestTypes::scalar_type scalar_type;
     typedef TestTypes::stored_matrix_type stored_matrix_type;
     typedef TestTypes::lazy_matrix_type lazy_matrix_type;
     typedef TestTypes::inner_scaleview_type inner_scaleview_type;
@@ -59,10 +58,12 @@ TEST_CASE("TransposeView", "[TransposeView]") {
 
     SECTION("Default view tests on the stored view") {
         typedef view_tests::TestingLibrary<TestTypes::view_of_stored_type,
-                                           decltype(args_generator())> testlib;
+                                           decltype(args_generator())>
+              testlib;
 
-        auto make_view = [](const stored_matrix_type& sm,
-                            std::tuple<>) { return view::transpose(sm); };
+        auto make_view = [](const stored_matrix_type& sm, std::tuple<>) {
+            return view::transpose(sm);
+        };
 
         // Generator for the stored view
         standard_generators::stored_view_generator svg(make_view);
@@ -78,10 +79,12 @@ TEST_CASE("TransposeView", "[TransposeView]") {
 
     SECTION("Default view tests on the lazy view") {
         typedef view_tests::TestingLibrary<TestTypes::view_of_lazy_type,
-                                           decltype(args_generator())> testlib;
+                                           decltype(args_generator())>
+              testlib;
 
-        auto make_view = [](lazy_matrix_type& sm,
-                            std::tuple<>) { return view::transpose(sm); };
+        auto make_view = [](lazy_matrix_type& sm, std::tuple<>) {
+            return view::transpose(sm);
+        };
 
         // Generator for the lazy view
         standard_generators::lazy_view_generator lvg(make_view);
@@ -98,10 +101,12 @@ TEST_CASE("TransposeView", "[TransposeView]") {
 
     SECTION("Default view tests on the view view") {
         typedef view_tests::TestingLibrary<TestTypes::view_of_scaleview_type,
-                                           decltype(args_generator())> testlib;
+                                           decltype(args_generator())>
+              testlib;
 
-        auto make_view = [](inner_scaleview_type& sm,
-                            std::tuple<>) { return view::transpose(sm); };
+        auto make_view = [](inner_scaleview_type& sm, std::tuple<>) {
+            return view::transpose(sm);
+        };
 
         // Generator for the scale-view view
         standard_generators::view_view_generator vvg(make_view);
