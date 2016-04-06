@@ -18,8 +18,8 @@ flags = [
     '-DLINALGWRAP_HAVE_GLIBC_STACKTRACE',
     '-DLINALGWRAP_HAVE_LIBSTDCXX_DEMANGLER',
     '-DLINALGWRAP_HAVE_ARMADILLO',
-    # Compile as c++11
-    '-std=c++11',
+    # Compile as c++14
+    '-std=c++14',
     # Treat .h header files as c++:
     '-x', 'c++',
     # Include other libraries and show errors and 

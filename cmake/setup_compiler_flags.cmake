@@ -21,12 +21,19 @@
 #	LINALGWRAP_DEFINITIONS_DEBUG		Extra definitions for debug builds
 # 	LINALGWRAP_DEFINITIONS_RELEASE		Extra definitions for release builds
 
-######################
-#--     Macros     --#
-######################
+#################################
+#--     Modules and macros    --#
+#################################
+include(CheckCXXCompilerFlag)
 
+macro(enable_if_compiles VARIABLE FLAG)
+	CHECK_CXX_COMPILER_FLAG(${FLAG} LINALGWRAP_HAVE_FLAG_${FLAG})
+	if (LINALGWRAP_HAVE_FLAG_${FLAG})
+		set(${VARIABLE} "${${VARIABLE}} ${FLAG}")
+	endif()
+endmacro(enable_if_compiles)
 
-message(AUTHOR_WARNING "TODO: Have an enable_if kind of adding mechanism")
+# TODO have something similar for the linker
 
 ########################################################
 #--     Set the compiler flags and build options     --#

@@ -1,27 +1,29 @@
 # Compiler flags for the default compilers, i.e. gnu or clang
 
+#######################
+#--  Version check  --#
+#######################
+
+set(GCC_MIN_VERSION "4.9")
+set(CLANG_MIN_VERSION "3.5")
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+	if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS GCC_MIN_VERSION)
+		message(FATAL_ERROR "gcc version ${GCC_MIN_VERSION} or higher is required for compilation (C++14 support)")
+	endif()
+endif()
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+	if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS CLANG_MIN_VERSION)
+		message(FATAL_ERROR "clang version ${CLANG_MIN_VERSION} or higher is required for compilation (C++14 support)")
+	endif()
+endif() 
 
 ###############
 #--  Common --#
 ###############
-# We definitely need c++11
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
-# Show high confidence warning
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-
-# Make them errors such that we cannot ignore them
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
-
-# Show valuable extra warnings
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
-
-# Turn on warnings about language extensions
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic")
-
-# But silence some rather annoying warnings
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-macros")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter")
+# We definitely need c++14
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
 #
 # Warning policy 
@@ -30,10 +32,21 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-parameter")
 # post by a clang developer on stack exchange
 # https://programmers.stackexchange.com/questions/122608#124574
 
-if (LINALGWRAP_COMPILE_PEDANTIC)
-else()
-endif()
+# Show high confidence warning
+enable_if_compiles(CMAKE_CXX_FLAGS  "-Wall")
 
+# Show valuable extra warnings
+enable_if_compiles(CMAKE_CXX_FLAGS "-Wextra")
+
+# Turn on warnings about language extensions
+enable_if_compiles(CMAKE_CXX_FLAGS "-pedantic")
+
+# But silence some rather annoying warnings
+enable_if_compiles(CMAKE_CXX_FLAGS "-Wno-unused-macros")
+enable_if_compiles(CMAKE_CXX_FLAGS "-Wno-unused-parameter")
+
+# Make warnings errors, such that we cannot ignore them
+enable_if_compiles(CMAKE_CXX_FLAGS "-Werror")
 
 ##############
 #--  Debug --#
@@ -42,7 +55,8 @@ endif()
 # Extra stuff for debug:
 #
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
+	enable_if_compiles(CMAKE_CXX_FLAGS_DEBUG "-O0")
+	enable_if_compiles(CMAKE_CXX_FLAGS_DEBUG "-Og")
 
 	# Common linker flags for all of debug:
 	set(COMMON_LINKER_FLAGS_DEBUG "${COMMON_LINKER_FLAGS_DEBUG} -g")

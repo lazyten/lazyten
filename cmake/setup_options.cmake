@@ -68,6 +68,4 @@ endif()
 #
 option(LINALGWRAP_ENABLE_TESTS "Build linalgwrap tests" ON)
 option(LINALGWRAP_ENABLE_EXAMPLES "Build linalgwrap examples" ON)
-option(LINALGWRAP_COMPILE_PEDANTIC "Use extremely pedantic compiler flags" OFF)
-option(LINALGWRAP_WITH_EXTERNAL_RAPIDCHECK "Use an external rapidcheck library for the tests." OFF)
-option(LINALGWRAP_WITH_EXTERNAL_CATCH "Use an external catch library for the tests." OFF)
+
