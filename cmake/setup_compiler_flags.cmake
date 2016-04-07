@@ -26,12 +26,36 @@
 #################################
 include(CheckCXXCompilerFlag)
 
+# macro to enforce c++ standard:
+macro(USE_CXX_STANDARD STANDARD)
+	if (CMAKE_VERSION VERSION_LESS "3.1")
+		set (FLAG "c++${STANDARD}")
+
+		if (STANDARD EQUAL "14")
+			if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "3.5")
+				set(FLAG "c++1y")
+			endif()
+		endif()
+		set (CMAKE_CXX_FLAGS "-std=${FLAG} ${CMAKE_CXX_FLAGS}")
+		unset(FLAG)
+	else()
+		# set the standard and enforce it:
+		set(CMAKE_CXX_STANDARD ${STANDARD})
+		set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+		# make sure we no not use the gnu++ extensions:
+		# this adds c++n instead of gnu++n to the command line
+		set(CMAKE_CXX_EXTENSIONS OFF)
+	endif()
+endmacro(USE_CXX_STANDARD)
+
 macro(enable_if_compiles VARIABLE FLAG)
 	CHECK_CXX_COMPILER_FLAG(${FLAG} LINALGWRAP_HAVE_FLAG_${FLAG})
 	if (LINALGWRAP_HAVE_FLAG_${FLAG})
 		set(${VARIABLE} "${${VARIABLE}} ${FLAG}")
 	endif()
 endmacro(enable_if_compiles)
+
 
 # TODO have something similar for the linker
 

@@ -1,18 +1,11 @@
-cmake_minimum_required(VERSION 2.8.8)
+cmake_minimum_required(VERSION 3.0.0)
 
 # Setup options, has to be done BEFORE project definition.
 include(cmake/setup_options.cmake)
 
-if (CMAKE_VERSION VERSION_LESS "3.0.0")
-	# work around the new version feature introduced
-	# for cmake 3.0.0
-	project(linalgwrap)
-	set(PROJECT_VERSION "0.1.0")
-else()
-	# enable the new feature:
-	cmake_policy(SET CMP0048 NEW)
-	project(linalgwrap VERSION 0.1.0)
-endif()
+# enable the new version feature introduced in cmake 3.0.0
+cmake_policy(SET CMP0048 NEW)
+project(linalgwrap VERSION 0.1.0)
 
 # enable testing of this project
 enable_testing()

@@ -5,7 +5,7 @@
 #######################
 
 set(GCC_MIN_VERSION "4.9")
-set(CLANG_MIN_VERSION "3.5")
+set(CLANG_MIN_VERSION "3.4")
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 	if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS GCC_MIN_VERSION)
@@ -22,8 +22,9 @@ endif()
 ###############
 #--  Common --#
 ###############
-# We definitely need c++14
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+
+# enforce c++14
+USE_CXX_STANDARD(14)
 
 #
 # Warning policy 
