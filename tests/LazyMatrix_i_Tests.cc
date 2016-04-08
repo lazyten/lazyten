@@ -1,7 +1,7 @@
 #include "lazy_matrix_tests.hh"
-#include <LazyMatrixWrapper.hh>
-#include <LazyMatrix_i.hh>
 #include <catch.hpp>
+#include <linalgwrap/LazyMatrixWrapper.hh>
+#include <linalgwrap/LazyMatrix_i.hh>
 #include <rapidcheck.h>
 
 namespace linalgwrap {

@@ -1,8 +1,8 @@
 #pragma once
 #include "TestConstants.hh"
-#include <Matrix_i.hh>
 #include <algorithm>
 #include <cmath>
+#include <linalgwrap/Matrix_i.hh>
 
 #include <iostream>
 

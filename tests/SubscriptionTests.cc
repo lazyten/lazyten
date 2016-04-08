@@ -1,6 +1,6 @@
-#include <Subscribable.hh>
-#include <SubscriptionPointer.hh>
 #include <catch.hpp>
+#include <linalgwrap/Subscribable.hh>
+#include <linalgwrap/SubscriptionPointer.hh>
 #include <memory>
 #include <rapidcheck.h>
 #include <rapidcheck/state.h>

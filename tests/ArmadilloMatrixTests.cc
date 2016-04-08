@@ -1,6 +1,6 @@
 #include "stored_matrix_tests.hh"
-#include <ArmadilloMatrix.hh>
 #include <catch.hpp>
+#include <linalgwrap/ArmadilloMatrix.hh>
 #include <rapidcheck.h>
 
 // Generators for neccessary matrices

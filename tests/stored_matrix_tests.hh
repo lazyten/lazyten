@@ -1,7 +1,7 @@
 #pragma once
 #include "matrix_tests.hh"
-#include <Exceptions.hh>
 #include <catch.hpp>
+#include <linalgwrap/Exceptions.hh>
 
 namespace linalgwrap {
 namespace tests {

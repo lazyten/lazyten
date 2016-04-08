@@ -1,6 +1,6 @@
 #pragma once
 #include "lazy_matrix_tests.hh"
-#include <view.hh>
+#include <linalgwrap/view.hh>
 
 namespace linalgwrap {
 namespace tests {

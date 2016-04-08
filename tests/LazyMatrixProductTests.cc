@@ -1,8 +1,8 @@
 #include "generators.hh"
 #include "lazy_matrix_tests_state.hh"
 #include "rapidcheck_utils.hh"
-#include <LazyMatrixProduct.hh>
 #include <catch.hpp>
+#include <linalgwrap/LazyMatrixProduct.hh>
 #include <rapidcheck.h>
 
 namespace linalgwrap {

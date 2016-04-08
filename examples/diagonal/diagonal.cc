@@ -1,9 +1,9 @@
 #include "DiagonalUpdatable.hh"
-#include <LazyMatrixWrapper.hh>
-#include <SmallMatrix.hh>
 #include <algorithm>
 #include <iostream>
-#include <view.hh>
+#include <linalgwrap/LazyMatrixWrapper.hh>
+#include <linalgwrap/SmallMatrix.hh>
+#include <linalgwrap/view.hh>
 
 using namespace linalgwrap;
 

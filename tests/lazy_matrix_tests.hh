@@ -1,8 +1,8 @@
 #pragma once
 #include "matrix_tests.hh"
 #include "rapidcheck_utils.hh"
-#include <LazyMatrixExpression.hh>
 #include <catch.hpp>
+#include <linalgwrap/LazyMatrixExpression.hh>
 #include <rapidcheck.h>
 
 // have an extra verbose output for rapidcheck function tests:

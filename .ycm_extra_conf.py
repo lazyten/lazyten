@@ -26,7 +26,6 @@ flags = [
     # warnings within them
     # To suppress errors shown here, use "-isystem" 
     # instead of "-I"
-    '-I', '.',
     '-I', 'src',
     '-isystem', 'external/rapidcheck/include',
     '-isystem', 'external/rapidcheck/ext/catch/include',

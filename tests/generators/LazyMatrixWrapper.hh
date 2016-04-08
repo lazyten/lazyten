@@ -1,7 +1,7 @@
 #pragma once
 #include "../TestConstants.hh"
 #include "FixedSizeMatrix.hh"
-#include <LazyMatrixWrapper.hh>
+#include <linalgwrap/LazyMatrixWrapper.hh>
 #include <rapidcheck.h>
 
 namespace rc {

@@ -1,7 +1,7 @@
-#include <BlockDiagonalMatrix.hh>
-#include <LazyMatrixWrapper.hh>
-#include <SmallMatrix.hh>
 #include <catch.hpp>
+#include <linalgwrap/BlockDiagonalMatrix.hh>
+#include <linalgwrap/LazyMatrixWrapper.hh>
+#include <linalgwrap/SmallMatrix.hh>
 #include <rapidcheck.h>
 
 namespace linalgwrap {

@@ -1,5 +1,5 @@
-#include <Exceptions.hh>
 #include <catch.hpp>
+#include <linalgwrap/Exceptions.hh>
 #include <rapidcheck.h>
 
 namespace linalgwrap {

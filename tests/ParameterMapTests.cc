@@ -1,7 +1,7 @@
-#include <ParameterMap.hh>
-#include <SmallMatrix.hh>
-#include <SubscriptionPointer.hh>
 #include <catch.hpp>
+#include <linalgwrap/ParameterMap.hh>
+#include <linalgwrap/SmallMatrix.hh>
+#include <linalgwrap/SubscriptionPointer.hh>
 #include <rapidcheck.h>
 
 namespace linalgwrap {

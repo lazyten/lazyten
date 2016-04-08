@@ -2,7 +2,7 @@
 
 #include "../TestConstants.hh"
 #include "MatrixElement.hh"
-#include <ArmadilloMatrix.hh>
+#include <linalgwrap/ArmadilloMatrix.hh>
 #include <rapidcheck.h>
 
 namespace rc {

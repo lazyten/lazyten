@@ -1,6 +1,6 @@
 #pragma once
 #include "MatrixElement.hh"
-#include <StoredMatrix_i.hh>
+#include <linalgwrap/StoredMatrix_i.hh>
 #include <rapidcheck.h>
 
 namespace rc {

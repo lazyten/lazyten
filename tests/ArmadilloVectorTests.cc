@@ -1,6 +1,6 @@
 #include "stored_matrix_tests.hh"
-#include <ArmadilloVector.hh>
 #include <catch.hpp>
+#include <linalgwrap/ArmadilloVector.hh>
 #include <rapidcheck.h>
 
 namespace linalgwrap {

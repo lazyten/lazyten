@@ -1,9 +1,9 @@
 #pragma once
 #include "NumComp.hh"
-#include "Range.hh"
 #include "TestConstants.hh"
 #include "generators.hh"
 #include <functional>
+#include <linalgwrap/Range.hh>
 #include <rapidcheck.h>
 
 // have a debug print of all generated matrices

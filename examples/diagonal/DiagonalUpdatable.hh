@@ -1,9 +1,9 @@
 #pragma once
-#include <LazyMatrix_i.hh>
 #include <initializer_list>
-#include <Exceptions.hh>
-#include <Constants.hh>
-#include <SmallVector.hh>
+#include <linalgwrap/Constants.hh>
+#include <linalgwrap/Exceptions.hh>
+#include <linalgwrap/LazyMatrix_i.hh>
+#include <linalgwrap/SmallVector.hh>
 
 using namespace linalgwrap;
 

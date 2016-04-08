@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../TestConstants.hh"
-#include "Constants.hh"
 #include <limits>
+#include <linalgwrap/Constants.hh>
 #include <rapidcheck.h>
 
 namespace rc {
