@@ -89,7 +89,7 @@ BlockDiagonalMatrix<Matrices...>::BlockDiagonalMatrix(
       : m_blocks{std::move(blocks)}, m_size{0} {
     // Assert that all matrix blocks are quadratic.
     tuple_for_each([](auto& mat) { assert_size(mat.n_rows(), mat.n_cols()); },
-                   tuple_ref(blocks));
+                   tuple_ref(m_blocks));
 
     // Determine size of this matrix:
     // Lambda to add size of current block in:
