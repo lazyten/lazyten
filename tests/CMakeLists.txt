@@ -16,6 +16,7 @@ set(LINALGWRAP_TESTS_SOURCES
 	ScaleViewTests.cc
 	TransposeViewTests.cc
 	BlockViewTests.cc
+	BlockDiagonalMatrixTests.cc
 	main.cc
 )
 

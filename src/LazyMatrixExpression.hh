@@ -189,6 +189,23 @@ class LazyMatrixExpression
     virtual lazy_matrix_expression_ptr_type clone() const = 0;
 };
 
+//@{
+/** \brief struct representing a type (std::true_type, std::false_type) which
+ *         indicates whether Matrix is a lazy matrix
+ *
+ * The definition is done using SFINAE, such that even for types not having a
+ * typedef stored_matrix_type this expression is valid.
+ *  */
+template <typename Matrix, typename = void>
+struct IsLazyMatrix : public std::false_type {};
+
+template <typename Matrix>
+struct IsLazyMatrix<Matrix, void_t<typename Matrix::stored_matrix_type>>
+      : public std::is_base_of<
+              LazyMatrixExpression<typename Matrix::stored_matrix_type>,
+              Matrix> {};
+//@}
+
 //
 // CallUpadateIfAvail class
 //
