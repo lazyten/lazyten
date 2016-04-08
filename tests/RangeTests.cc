@@ -158,6 +158,8 @@ TEST_CASE("Range tests", "[range]") {
         RangeTests<int>::access_to_past_the_end_iterator();
     }
 
+    // TODO test operators +=, -=, -, + on ranges and value types.
+
 }  // TEST_CASE
 }  // namespace test
 }  // namespace linalgwrap

@@ -17,6 +17,8 @@ class Matrix_i;
 template <typename Scalar>
 class StoredMatrix_i;
 
+namespace detail {
+
 /** \brief Base class providing the required inner functionality of an iterator
  *
  * This class should be overloaded for more special (sparsity-aware) traversal
@@ -327,4 +329,5 @@ void MatrixIteratorDefaultCore<Matrix, Constness>::seek_to_element(
     m_index = element;
 }
 
+}  // namespace detail
 }  // namespace linalgwrap

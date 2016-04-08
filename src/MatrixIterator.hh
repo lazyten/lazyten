@@ -22,8 +22,8 @@ class MatrixIterator : private IteratorCore {
 
     static_assert(
           std::is_base_of<
-                MatrixIteratorCoreBase<original_matrix_type,
-                                       IteratorCore::is_const_iterator>,
+                detail::MatrixIteratorCoreBase<original_matrix_type,
+                                               IteratorCore::is_const_iterator>,
                 IteratorCore>::value,
           "The IteratorCore should be a subclass of MatrixIteratorCoreBase");
 

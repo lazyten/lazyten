@@ -3,13 +3,19 @@
 #include "LazyMatrixExpression.hh"
 #include "StoredMatrix_i.hh"
 #include "SubscriptionPointer.hh"
-#include "type_utils.hh"
+#include <IsView.hh>
 #include <type_traits>
 
 namespace linalgwrap {
-namespace view {
 
 // Forward declaration
+template <typename Matrix>
+struct IsView;
+
+namespace view {
+namespace detail {
+
+// Further forward declaration
 template <typename Matrix, typename = void>
 struct ViewInnermostMatrixType;
 
@@ -66,23 +72,6 @@ class ViewBaseMatrixContainer {
     //! Store a copy of the inner lazy matrix expression:
     SubscriptionPointer<inner_matrix_type> m_inner_ptr;
 };
-
-//@{
-/** \brief struct representing a type (std::true_type, std::false_type) which
- *  indicates whether T is a stored matrix
- *
- * The definition is done using SFINAE, such that even for types not having a
- * typedef inner_matrix_type this expression is valid.
- *  */
-template <typename Matrix, typename = void>
-struct IsView : std::false_type {};
-
-template <typename Matrix>
-struct IsView<Matrix, void_t<typename Matrix::inner_matrix_type>>
-      : std::is_base_of<
-              ViewBaseMatrixContainer<typename Matrix::inner_matrix_type>,
-              Matrix> {};
-//@}
 
 /** \brief Struct allowing access to the type of the innermost matrix
  *         we view upon.
@@ -279,5 +268,6 @@ void ViewBase<Matrix, true>::print_tree(std::ostream& o) const {
       << container_type::inner_matrix().name();
 }
 
+}  // detail
 }  // view
 }  // linalgwrap

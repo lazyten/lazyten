@@ -1,5 +1,4 @@
 #include "view_tests.hh"
-#include <ScaleView.hh>
 #include <catch.hpp>
 #include <rapidcheck.h>
 #include <tuple>
@@ -18,11 +17,14 @@ TEST_CASE("ScaleView", "[ScaleView]") {
         typedef SmallMatrix<scalar_type> stored_matrix_type;
         typedef LazyMatrixWrapper<stored_matrix_type, stored_matrix_type>
               lazy_matrix_type;
-        typedef view::ScaleView<stored_matrix_type> inner_scaleview_type;
+        typedef view::detail::ScaleView<stored_matrix_type>
+              inner_scaleview_type;
 
-        typedef view::ScaleView<const stored_matrix_type> view_of_stored_type;
-        typedef view::ScaleView<inner_scaleview_type> view_of_scaleview_type;
-        typedef view::ScaleView<lazy_matrix_type> view_of_lazy_type;
+        typedef view::detail::ScaleView<const stored_matrix_type>
+              view_of_stored_type;
+        typedef view::detail::ScaleView<inner_scaleview_type>
+              view_of_scaleview_type;
+        typedef view::detail::ScaleView<lazy_matrix_type> view_of_lazy_type;
     };
 
     // Make types accessible

@@ -1,9 +1,9 @@
 #pragma once
-
-#include "ViewBase.hh"
+#include <view/ViewBase.hh>
 
 namespace linalgwrap {
 namespace view {
+namespace detail {
 
 template <typename Matrix>
 class ScaleView : public ViewBase<Matrix> {
@@ -93,16 +93,6 @@ class ScaleView : public ViewBase<Matrix> {
     scalar_type m_scaling;
 };
 
-/** Convenience function to make a ScaleView
- *
- *\param m   The Matrix to scale
- *\param s   The scaling coefficient to apply to all matrix entries
- */
-template <typename Matrix>
-ScaleView<Matrix> scale(Matrix& m, typename Matrix::scalar_type s) {
-    return ScaleView<Matrix>(m, s);
-}
-
 //
 // ---------------------------------------------------
 //
@@ -157,5 +147,6 @@ ScaleView<Matrix>::clone() const {
     return lazy_matrix_expression_ptr_type(new ScaleView(*this));
 }
 
+}  // detail
 }  // view
 }  // linalgwrap

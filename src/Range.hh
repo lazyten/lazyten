@@ -66,6 +66,9 @@ class Range {
     /** Is this range empty */
     bool is_empty() const;
 
+    /** Check whether the provided value is in range */
+    bool contains(value_type i) const;
+
     /** Return the ith value of the range */
     value_type operator[](size_type i) const;
 
@@ -75,6 +78,15 @@ class Range {
     /** Return an iterator to the last element of the range */
     RangeIterator<T> end() const;
 
+    /** \name Shifting operations */
+    ///@{
+    /** Shift the range by a certain value */
+    Range& operator+=(value_type i);
+
+    /** Shift the range by a certain value */
+    Range& operator-=(value_type i);
+    ///@}
+
   private:
     value_type m_first;  // inclusive
     value_type m_last;   // exclusive
@@ -83,6 +95,18 @@ class Range {
 /** Output operator for ranges */
 template <typename T>
 std::ostream& operator<<(std::ostream& o, const Range<T>& r);
+
+template <typename T>
+Range<T>& operator+(Range<T> r, T i);
+
+template <typename T>
+Range<T>& operator+(T i, Range<T> r);
+
+template <typename T>
+Range<T>& operator-(Range<T> r, T i);
+
+template <typename T>
+Range<T>& operator-(T i, Range<T> r);
 
 /** Iterator for ranges */
 template <typename T>
@@ -186,6 +210,10 @@ template <typename T>
 bool Range<T>::is_empty() const {
     return length() <= 0;
 }
+template <typename T>
+bool Range<T>::contains(value_type i) const {
+    return m_first <= i && i < m_last;
+}
 
 template <typename T>
 typename Range<T>::value_type Range<T>::operator[](size_type i) const {
@@ -206,6 +234,25 @@ RangeIterator<T> Range<T>::end() const {
 }
 
 template <typename T>
+Range<T>& Range<T>::operator+=(value_type i) {
+    if (i > 0) {
+        assert_dbg(m_first + i >= m_first, ExcOverflow());
+        assert_dbg(m_last + i >= m_last, ExcOverflow());
+    } else {
+        assert_dbg(m_first + i <= m_first, ExcUnderflow());
+        assert_dbg(m_last + i <= m_last, ExcUnderflow());
+    }
+
+    m_first += i;
+    m_last += i;
+}
+
+template <typename T>
+Range<T>& Range<T>::operator-=(value_type i) {
+    return (*this) += -i;
+}
+
+template <typename T>
 std::ostream& operator<<(std::ostream& o, const Range<T>& r) {
     if (r.is_empty()) {
         o << "[0,0)";
@@ -213,6 +260,26 @@ std::ostream& operator<<(std::ostream& o, const Range<T>& r) {
         o << "[" << r.first() << "," << r.last() << ")";
     }
     return o;
+}
+
+template <typename T>
+Range<T>& operator+(Range<T> r, T i) {
+    return r += i;
+}
+
+template <typename T>
+Range<T>& operator+(T i, Range<T> r) {
+    return r + i;
+}
+
+template <typename T>
+Range<T>& operator-(Range<T> r, T i) {
+    return r -= i;
+}
+
+template <typename T>
+Range<T>& operator-(T /*i*/, Range<T> /*r*/) {
+    assert_dbg(false, ExcNotImplemented());
 }
 
 //

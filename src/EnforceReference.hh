@@ -1,6 +1,7 @@
 #pragma once
 
 namespace linalgwrap {
+namespace detail {
 
 /** \brief Class to enforce a reference to be returned
  *
@@ -57,4 +58,5 @@ T& EnforceReference<T, true>::operator()(T t) const {
     return dummy;
 }
 
+}  // namespace detail
 }  // namespace linalgwrap

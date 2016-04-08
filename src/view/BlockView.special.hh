@@ -7,6 +7,7 @@
 
 namespace linalgwrap {
 namespace view {
+namespace detail {
 #ifdef LINALGWRAP_HAVE_ARMADILLO
 /** \brief Class implementing the type-specific TransposeView functionality.
  *
@@ -92,5 +93,6 @@ typename BlockViewSpecialise<Matrix,
 }
 #endif  // LINALGWRAP_HAVE_ARMADILLO
 
+}  // namespace detail
 }  // namespace view
 }  // namespace linalgwrap

@@ -35,6 +35,12 @@ DefException1(ExcNumberNotFinite, std::complex<double>,
 */
 DefExceptionMsg(ExcZero, "Encountered a zero, where this does not make sense.");
 
+/** An overflow was detected. */
+DefExceptionMsg(ExcOverflow, "Overflow detected.");
+
+/** An underflow was detected. */
+DefExceptionMsg(ExcUnderflow, "Underflow detected.");
+
 //
 // Range and size checking
 //

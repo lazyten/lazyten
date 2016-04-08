@@ -1,9 +1,11 @@
 #pragma once
 #include "VectorOf.hh"
-#include "ViewBase.hh"
+#include <view/ViewBase.hh>
+#include <view/make_view.hh>
 
 namespace linalgwrap {
 namespace view {
+namespace detail {
 
 /** Implementation of fallback base functionality for all TransposeViews */
 template <typename Matrix>
@@ -121,13 +123,6 @@ class TransposeView : public TransposeViewSpecialise<Matrix> {
     /** \brief Clone the view */
     lazy_matrix_expression_ptr_type clone() const override;
 };
-
-/** Convenience function to make a TransposeView
- *
- *\param m   The Matrix to transpose
- */
-template <typename Matrix>
-TransposeView<Matrix> transpose(Matrix& m);
 
 /** \brief Special multiplication operator for the scalar product */
 template <typename MatrixType>
@@ -293,11 +288,6 @@ TransposeView<Matrix>::clone() const {
 // out-of-scope functions:
 //
 
-template <typename Matrix>
-TransposeView<Matrix> transpose(Matrix& m) {
-    return TransposeView<Matrix>(m);
-}
-
 template <typename MatrixType>
 inline typename MatrixType::scalar_type operator*(
       const TransposeView<VectorOf<MatrixType>>& lhs,
@@ -305,6 +295,7 @@ inline typename MatrixType::scalar_type operator*(
     return lhs.inner_matrix().dot(rhs);
 }
 
+}  // namespace detail
 }  // view
 }  // linalgwrap
 

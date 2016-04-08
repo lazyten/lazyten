@@ -6,18 +6,20 @@ namespace linalgwrap {
 template <typename IteratorCore>
 class MatrixIterator;
 
+namespace detail {
 template <typename Matrix, bool Constness>
 class MatrixIteratorDefaultCore;
+}  // namespace detail
 
 //! The default matrix iterator
 template <typename Matrix>
 using DefaultMatrixIterator =
-      MatrixIterator<MatrixIteratorDefaultCore<Matrix, false>>;
+      MatrixIterator<detail::MatrixIteratorDefaultCore<Matrix, false>>;
 
 //! The default matrix const iterator
 template <typename Matrix>
 using DefaultMatrixConstIterator =
-      MatrixIterator<MatrixIteratorDefaultCore<Matrix, true>>;
+      MatrixIterator<detail::MatrixIteratorDefaultCore<Matrix, true>>;
 
 }  // namespace linalgwrap
 

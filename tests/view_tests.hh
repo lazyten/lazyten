@@ -1,6 +1,6 @@
 #pragma once
-#include "ScaleView.hh"
 #include "lazy_matrix_tests.hh"
+#include <view.hh>
 
 namespace linalgwrap {
 namespace tests {
@@ -108,11 +108,10 @@ struct StandardViewGenerators {
                                                      makeview_fctn_arg_type)>
               makeview_fctn_type;
 
-        static_assert(
-              std::is_same<
-                    view::ScaleView<typename view_type::inner_matrix_type>,
-                    view_type>::value,
-              "view_view_generator can only generate ScaleViews");
+        static_assert(std::is_same<view::detail::ScaleView<
+                                         typename view_type::inner_matrix_type>,
+                                   view_type>::value,
+                      "view_view_generator can only generate ScaleViews");
 
         view_of_scaleview_type operator()(
               std::pair<stored_matrix_type, makeview_fctn_arg_type> mat_args);

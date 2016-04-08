@@ -1,8 +1,12 @@
 #pragma once
-#include "ViewBase.hh"
+#include <view/ViewBase.hh>
 
 namespace linalgwrap {
 namespace view {
+namespace detail {
+
+// TODO specialise stored matrix        * BlockView operator
+//      specialise LazyMatrixExpression * BlockView operator
 
 /** Implementation of fallback base functionality for all BlockViews */
 template <typename Matrix>
@@ -157,36 +161,6 @@ class BlockView : public BlockViewSpecialise<Matrix> {
     lazy_matrix_expression_ptr_type clone() const override;
 };
 
-/** Convenience function to make a BlockView
- *
- *\param m      The Matrix to take a block of
- *\param rows   The range of row indices to consider
- *\param cols   The range of column indices to consider
- */
-template <typename Matrix>
-BlockView<Matrix> block(Matrix& m, Range<typename Matrix::size_type> rows,
-                        Range<typename Matrix::size_type> cols);
-
-// TODO have a special structure for a column view?
-/** Convenience function to make a BlockView which selects
- *  a range of columns (i.e. a column view)
- *
- *\param m      The Matrix to take some columns of
- *\param cols   The range of columns to consider
- */
-template <typename Matrix>
-BlockView<Matrix> columns(Matrix& m, Range<typename Matrix::size_type> cols);
-
-// TODO have a special structure for a row view?
-/** Convenience function to make a BlockView which selects
- *  a range of rows (i.e. a row view)
- *
- *\param m      The Matrix to take some columns of
- *\param rows   The range of rows to consider
- */
-template <typename Matrix>
-BlockView<Matrix> rows(Matrix& m, Range<typename Matrix::size_type> rows);
-
 //
 // -------------------------------------------------------
 //
@@ -333,25 +307,7 @@ BlockView<Matrix>::clone() const {
     return lazy_matrix_expression_ptr_type(new BlockView(*this));
 }
 
-//
-// out-of-scope functions:
-//
-template <typename Matrix>
-BlockView<Matrix> block(Matrix& m, Range<typename Matrix::size_type> rows,
-                        Range<typename Matrix::size_type> cols) {
-    return BlockView<Matrix>{m, rows, cols};
-}
-
-template <typename Matrix>
-BlockView<Matrix> columns(Matrix& m, Range<typename Matrix::size_type> cols) {
-    return BlockView<Matrix>{m, range(m.n_rows()), cols};
-}
-
-template <typename Matrix>
-BlockView<Matrix> rows(Matrix& m, Range<typename Matrix::size_type> rows) {
-    return BlockView<Matrix>{m, rows, range(m.n_cols())};
-}
-
+}  // namespace detail
 }  // view
 }  // linalgwrap
 

@@ -20,6 +20,8 @@ set(LINALGWRAP_TESTS_SOURCES
 	main.cc
 )
 
+# TODO have a benchmark test!
+
 # 
 # For each build type compile seperate tests.
 #

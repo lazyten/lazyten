@@ -9,9 +9,11 @@ namespace linalgwrap {
 template <typename... Matrices>
 class BlockDiagonalMatrix;
 
+namespace detail {
 /** Definition of type traits for all BlockDiagonalMatrix classes */
 template <typename... Matrices>
 class BlockDiagonalMatrixTypeTraits;
+}  // namespace detail
 
 /** \brief struct representing a type (std::true_type, std::false_type) which
  *  indicates whether T is a block diagonal matrix
@@ -21,8 +23,9 @@ class BlockDiagonalMatrixTypeTraits;
  *  */
 template <typename T>
 struct IsBlockDiagonalMatrix
-      : public std::is_base_of<BlockDiagonalMatrixTypeTraits<>, T> {};
+      : public std::is_base_of<detail::BlockDiagonalMatrixTypeTraits<>, T> {};
 
+namespace detail {
 /** Explicit specialisation of type traits class for a matrix object with
  *  no matrices
  *
@@ -84,6 +87,7 @@ class BlockDiagonalMatrixTypeTraits<Matrix, Matrices...>
     static bool constexpr all_stored =
           base_type::all_stored && IsStoredMatrix<Matrix>::value;
 };
+}  // namespace detail
 
 /** \brief Class implementing the common interface and functionality of
  *  all BlockDiagonalMatrixBase classes
@@ -96,8 +100,8 @@ class BlockDiagonalMatrixTypeTraits<Matrix, Matrices...>
 // TODO better iterator for this type of matrices.
 template <typename... Matrices>
 class BlockDiagonalMatrixBase
-      : BlockDiagonalMatrixTypeTraits<Matrices...>,
-        public Matrix_i<typename BlockDiagonalMatrixTypeTraits<
+      : detail::BlockDiagonalMatrixTypeTraits<Matrices...>,
+        public Matrix_i<typename detail::BlockDiagonalMatrixTypeTraits<
               Matrices...>::scalar_type> {
     /* TODO Implementation of StoredMatrix_i interface
 public std::conditional<
@@ -108,7 +112,7 @@ public std::conditional<
         Matrices...>::scalar_type>>::type {
         */
   public:
-    typedef BlockDiagonalMatrixTypeTraits<Matrices...> traits_type;
+    typedef detail::BlockDiagonalMatrixTypeTraits<Matrices...> traits_type;
     typedef typename traits_type::size_type size_type;
     typedef typename traits_type::scalar_type scalar_type;
 

@@ -7,6 +7,7 @@
 
 namespace linalgwrap {
 namespace view {
+namespace detail {
 //
 // ArmadialloMatrix
 //
@@ -77,5 +78,6 @@ operator stored_matrix_type() const {
 }
 #endif  // LINALGWRAP_HAVE_ARMADILLO
 
+}  // namespace detail
 }  // namespace view
 }  // namespace linalgwrap
