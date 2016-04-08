@@ -58,8 +58,8 @@ BlockViewSpecialise<Matrix, ArmadilloMatrix<Scalar>>::BlockViewSpecialise(
 template <typename Matrix, typename Scalar>
 typename BlockViewSpecialise<Matrix,
                              ArmadilloMatrix<Scalar>>::stored_matrix_type
-      BlockViewSpecialise<Matrix, ArmadilloMatrix<Scalar>>::
-      operator*(const stored_matrix_type& m) const {
+      BlockViewSpecialise<Matrix, ArmadilloMatrix<Scalar>>::operator*(
+            const stored_matrix_type& m) const {
     assert_size(base_type::n_cols(), m.n_rows());
 
     assert_dbg(!this->m_row_range.is_empty(), ExcInternalError());

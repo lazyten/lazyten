@@ -1,8 +1,8 @@
-#include <rapidcheck.h>
-#include <catch.hpp>
-#include <SubscriptionPointer.hh>
 #include <Subscribable.hh>
+#include <SubscriptionPointer.hh>
+#include <catch.hpp>
 #include <memory>
+#include <rapidcheck.h>
 #include <rapidcheck/state.h>
 
 // have an extra verbose output for rapidcheck function tests:
@@ -624,9 +624,9 @@ struct RedirectPointer
         RC_ASSERT(res);
 
         // Check that the subscriptions agree
-        auto assertion_on_pair =
-              [&](const typename model_type::subscribable_model& mod_obj,
-                  const SubscribableType& sut_obj) {
+        auto assertion_on_pair = [&](
+              const typename model_type::subscribable_model& mod_obj,
+              const SubscribableType& sut_obj) {
             // get the list of subscribers from the sut.
             auto sut_subscriptions = sut_obj.subscribers();
 
@@ -859,8 +859,8 @@ struct CopyRemovePointer
                 auto res = std::count_if(std::begin(obj_subscribers),
                                          std::end(obj_subscribers),
                                          [&](const std::string& oid) {
-                    return oid == copy.subscriber_id();
-                });
+                                             return oid == copy.subscriber_id();
+                                         });
                 RC_ASSERT(res == 2);
             }
 #endif
@@ -938,8 +938,8 @@ struct AssignRemovePointer
                 auto res = std::count_if(std::begin(obj_subscribers),
                                          std::end(obj_subscribers),
                                          [&](const std::string& oid) {
-                    return oid == copy.subscriber_id();
-                });
+                                             return oid == copy.subscriber_id();
+                                         });
                 RC_ASSERT(res == 2);
             }
 #endif
@@ -1128,44 +1128,45 @@ TEST_CASE("Subscription and SubscriptionPointer system", "[subscription]") {
         auto subscribing_to_different_objects_test =
               //[](std::vector<int> datas) {
               [] {
-            // Initial values:
-            std::vector<int> datas{1, 2, 3, 4, 5, 6, 7, 8, 9};
+                  // Initial values:
+                  std::vector<int> datas{1, 2, 3, 4, 5, 6, 7, 8, 9};
 
-            //
-            // The actual test
-            //
-            RC_PRE(datas.size() > size_t{0});
+                  //
+                  // The actual test
+                  //
+                  RC_PRE(datas.size() > size_t{0});
 
-            // The subscribable we will use for checking
-            typedef SimpleSubscribable subscribable_type;
+                  // The subscribable we will use for checking
+                  typedef SimpleSubscribable subscribable_type;
 
-            // Allocate the test objects:
-            std::vector<subscribable_type> objects{datas.size()};
-            std::transform(std::begin(datas), std::end(datas),
-                           std::begin(objects),
-                           [](int d) { return SimpleSubscribable{d}; });
+                  // Allocate the test objects:
+                  std::vector<subscribable_type> objects{datas.size()};
+                  std::transform(std::begin(datas), std::end(datas),
+                                 std::begin(objects),
+                                 [](int d) { return SimpleSubscribable{d}; });
 
-            // Setup the model and initial system state
-            SubscriptionModel<subscribable_type> model{objects};
-            SubscriptionSystemUnderTest<subscribable_type> sut{objects};
+                  // Setup the model and initial system state
+                  SubscriptionModel<subscribable_type> model{objects};
+                  SubscriptionSystemUnderTest<subscribable_type> sut{objects};
 
-            // Typedef the operations
-            typedef CreateEmptyPointer<subscribable_type> op_CreateEmpty;
-            typedef CreateObjectPointer<subscribable_type> op_CreateObj;
-            typedef ResetPointer<subscribable_type> op_Reset;
-            typedef RedirectPointer<subscribable_type> op_Redirect;
-            typedef RemovePointer<subscribable_type> op_Remove;
-            typedef CopyRemovePointer<subscribable_type> op_CpRm;
-            typedef AssignRemovePointer<subscribable_type> op_AssignRm;
+                  // Typedef the operations
+                  typedef CreateEmptyPointer<subscribable_type> op_CreateEmpty;
+                  typedef CreateObjectPointer<subscribable_type> op_CreateObj;
+                  typedef ResetPointer<subscribable_type> op_Reset;
+                  typedef RedirectPointer<subscribable_type> op_Redirect;
+                  typedef RemovePointer<subscribable_type> op_Remove;
+                  typedef CopyRemovePointer<subscribable_type> op_CpRm;
+                  typedef AssignRemovePointer<subscribable_type> op_AssignRm;
 
-            // Define generator for commands:
-            auto genCommands = state::gen::execOneOf<
-                  op_CreateObj, op_CreateEmpty, op_Reset, op_Remove,
-                  op_Redirect, op_CpRm, op_AssignRm>;
+                  // Define generator for commands:
+                  auto genCommands =
+                        state::gen::execOneOf<op_CreateObj, op_CreateEmpty,
+                                              op_Reset, op_Remove, op_Redirect,
+                                              op_CpRm, op_AssignRm>;
 
-            // Run it through rapidcheck
-            state::check(model, sut, genCommands);
-        };
+                  // Run it through rapidcheck
+                  state::check(model, sut, genCommands);
+              };
 
         REQUIRE(rc::check(
               "Random function test of subscriber-subscription model.",

@@ -1,10 +1,10 @@
 #pragma once
-#include <cstddef>
-#include "Exceptions.hh"
-#include <utility>
-#include <type_traits>
-#include <iostream>
 #include "Constants.hh"
+#include "Exceptions.hh"
+#include <cstddef>
+#include <iostream>
+#include <type_traits>
+#include <utility>
 
 namespace linalgwrap {
 

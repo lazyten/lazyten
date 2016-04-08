@@ -1,6 +1,7 @@
 #pragma once
 #include "matrix_tests.hh"
 #include <Exceptions.hh>
+#include <catch.hpp>
 
 namespace linalgwrap {
 namespace tests {
@@ -36,8 +37,9 @@ class TestingLibrary {
     typedef matrix_tests::ComparativeTests<matrix_type, matrix_type> comptests;
 
     // The caller type we use
-    typedef typename comptests::template RapidcheckTestableGenerator<
-          matrix_type> callgen_type;
+    typedef
+          typename comptests::template RapidcheckTestableGenerator<matrix_type>
+                callgen_type;
 
     /** Identity operation on the matrix */
     static constexpr matrix_type identity(matrix_type m) { return m; };

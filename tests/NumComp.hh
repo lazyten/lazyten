@@ -1,8 +1,8 @@
 #pragma once
 #include "TestConstants.hh"
-#include <cmath>
-#include <algorithm>
 #include <Matrix_i.hh>
+#include <algorithm>
+#include <cmath>
 
 #include <iostream>
 

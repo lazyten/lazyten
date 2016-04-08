@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Exceptions.hh"
-#include "StoredMatrix_i.hh"
-#include <memory>
-#include <initializer_list>
-#include <type_traits>
 #include "Constants.hh"
+#include "Exceptions.hh"
 #include "Range.hh"
+#include "StoredMatrix_i.hh"
+#include <initializer_list>
+#include <memory>
+#include <type_traits>
 
 #ifdef LINALGWRAP_HAVE_ARMADILLO
 #include <armadillo>
@@ -277,7 +277,7 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
         in.m_arma += c_this * m_arma(start_col, start_row, size(in.m_arma));
     }
 
-    scalar_type& operator[](size_type i)override {
+    scalar_type& operator[](size_type i) override {
         assert_greater(i, n_cols() * n_rows());
         // Note that armadillo storage in column-major, but since
         // we store the transpose of what we represent internally
@@ -404,8 +404,7 @@ ArmadilloMatrix<Scalar>::ArmadilloMatrix(
 }
 
 template <typename Scalar>
-ArmadilloMatrix<Scalar>::ArmadilloMatrix(storage_type inner)
-      : m_arma(inner) {}
+ArmadilloMatrix<Scalar>::ArmadilloMatrix(storage_type inner) : m_arma(inner) {}
 
 #else
 template <typename Scalar>

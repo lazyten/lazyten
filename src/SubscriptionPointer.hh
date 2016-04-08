@@ -1,11 +1,11 @@
 #ifndef SUBSCRIPTIONPOINTER_H_
 #define SUBSCRIPTIONPOINTER_H_
 
-#include <utility>
-#include <string>
-#include <memory>
-#include <type_traits>
 #include "Subscribable.hh"
+#include <memory>
+#include <string>
+#include <type_traits>
+#include <utility>
 
 namespace linalgwrap {
 

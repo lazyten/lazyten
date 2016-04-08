@@ -3,6 +3,10 @@
 
 namespace linalgwrap {
 #if defined LINALGWRAP_HAVE_ARMADILLO
+// Forward declare:
+template <typename Scalar>
+class ArmadilloMatrix;
+
 // Use armadillo if available
 template <typename Scalar>
 using SmallMatrix = ArmadilloMatrix<Scalar>;

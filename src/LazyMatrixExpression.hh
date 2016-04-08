@@ -1,14 +1,14 @@
 #ifndef LINALG_LAZY_MATRIX_EXPRESSION_HPP_
 #define LINALG_LAZY_MATRIX_EXPRESSION_HPP_
 
-#include <ostream>
-#include <memory>
-#include "Range.hh"
-#include "Matrix_i.hh"
-#include "StoredMatrix_i.hh"
-#include "LazyMatrixSum.hh"
 #include "LazyMatrixProduct.hh"
+#include "LazyMatrixSum.hh"
+#include "Matrix_i.hh"
 #include "ParameterMap.hh"
+#include "Range.hh"
+#include "StoredMatrix_i.hh"
+#include <memory>
+#include <ostream>
 
 namespace linalgwrap {
 

@@ -1,12 +1,12 @@
 #pragma once
-#include <iterator>
-#include <type_traits>
-#include "Exceptions.hh"
-#include "SubscriptionPointer.hh"
 #include "Constants.hh"
 #include "EnforceReference.hh"
+#include "Exceptions.hh"
 #include "Matrix_i.hh"
 #include "StoredMatrix_i.hh"
+#include "SubscriptionPointer.hh"
+#include <iterator>
+#include <type_traits>
 
 namespace linalgwrap {
 
@@ -36,7 +36,8 @@ struct MatrixIteratorCoreBase
     typedef std::pair<size_type, size_type> index_type;
 
     typedef std::iterator<std::forward_iterator_tag,
-                          typename Matrix::scalar_type> base_type;
+                          typename Matrix::scalar_type>
+          base_type;
     typedef typename base_type::value_type value_type;
     typedef typename base_type::reference reference;
     typedef typename base_type::pointer pointer;

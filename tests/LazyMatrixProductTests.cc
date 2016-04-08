@@ -1,9 +1,9 @@
+#include "generators.hh"
 #include "lazy_matrix_tests_state.hh"
 #include "rapidcheck_utils.hh"
-#include <rapidcheck.h>
-#include <catch.hpp>
 #include <LazyMatrixProduct.hh>
-#include "generators.hh"
+#include <catch.hpp>
+#include <rapidcheck.h>
 
 namespace linalgwrap {
 namespace tests {

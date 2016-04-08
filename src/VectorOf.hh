@@ -1,7 +1,7 @@
 #pragma once
+#include "Range.hh"
 #include <initializer_list>
 #include <vector>
-#include "Range.hh"
 
 namespace linalgwrap {
 

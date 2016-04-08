@@ -1,8 +1,8 @@
-#include <rapidcheck.h>
-#include <catch.hpp>
-#include <LazyMatrixWrapper.hh>
 #include "lazy_matrix_tests.hh"
+#include <LazyMatrixWrapper.hh>
 #include <LazyMatrix_i.hh>
+#include <catch.hpp>
+#include <rapidcheck.h>
 
 namespace linalgwrap {
 namespace tests {
@@ -70,8 +70,9 @@ TEST_CASE("LazyMatrix_i abstract class", "[LazyMatrix_i]") {
     };
 
     SECTION("Default lazy matrix tests") {
-        typedef lazy_matrix_tests::TestingLibrary<
-              lazy_matrix_type, decltype(args_generator())> testlib;
+        typedef lazy_matrix_tests::TestingLibrary<lazy_matrix_type,
+                                                  decltype(args_generator())>
+              testlib;
 
         testlib lib{args_generator, lazy_generator, model_generator,
                     "LazyMatrix_i: ", TestConstants::default_num_tol};

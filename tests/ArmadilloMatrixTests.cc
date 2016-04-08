@@ -1,7 +1,7 @@
-#include <rapidcheck.h>
-#include <catch.hpp>
 #include "stored_matrix_tests.hh"
 #include <ArmadilloMatrix.hh>
+#include <catch.hpp>
+#include <rapidcheck.h>
 
 // Generators for neccessary matrices
 #include "generators.hh"

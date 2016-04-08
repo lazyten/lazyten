@@ -61,9 +61,8 @@ class TransposeViewSpecialise<Matrix, ArmadilloMatrix<Scalar>>
 //
 #ifdef LINALGWRAP_HAVE_ARMADILLO
 template <typename Matrix, typename Scalar>
-TransposeViewSpecialise<
-      Matrix,
-      ArmadilloMatrix<Scalar>>::TransposeViewSpecialise(inner_matrix_type& mat)
+TransposeViewSpecialise<Matrix, ArmadilloMatrix<Scalar>>::
+      TransposeViewSpecialise(inner_matrix_type& mat)
       : base_type(mat) {}
 
 template <typename Matrix, typename Scalar>

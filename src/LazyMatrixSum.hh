@@ -5,9 +5,9 @@
 #include "LazyMatrixExpression.hh"
 #include "LazyMatrixProduct.hh"
 #include "SubscriptionPointer.hh"
-#include <vector>
 #include <algorithm>
 #include <iterator>
+#include <vector>
 
 namespace linalgwrap {
 

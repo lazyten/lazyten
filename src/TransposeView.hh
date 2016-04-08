@@ -1,6 +1,6 @@
 #pragma once
-#include "ViewBase.hh"
 #include "VectorOf.hh"
+#include "ViewBase.hh"
 
 namespace linalgwrap {
 namespace view {
@@ -215,8 +215,7 @@ TransposeViewBase<Matrix>::extract_block(Range<size_type> row_range,
 
 template <typename Matrix>
 inline typename TransposeViewBase<Matrix>::stored_matrix_type
-      TransposeViewBase<Matrix>::
-      operator*(const stored_matrix_type& m) const {
+      TransposeViewBase<Matrix>::operator*(const stored_matrix_type& m) const {
     // TODO: The default implementation done here is a really bad idea for
     // lazy matrices, since we need to calculate each lazy matrix element
     // one-by-one (Remember the philosophy of lazy matrices: This is what
@@ -282,8 +281,7 @@ TransposeViewSpecialise<Matrix, MatrixBare>::TransposeViewSpecialise(
 // TransposeView
 //
 template <typename Matrix>
-TransposeView<Matrix>::TransposeView(inner_matrix_type& mat)
-      : base_type(mat) {}
+TransposeView<Matrix>::TransposeView(inner_matrix_type& mat) : base_type(mat) {}
 
 template <typename Matrix>
 typename TransposeView<Matrix>::lazy_matrix_expression_ptr_type

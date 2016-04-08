@@ -19,16 +19,14 @@ TEST_CASE("BlockDiagonalMatrix class", "[BlockDiagonalMatrix]") {
 
     SECTION("Simple function test") {
         stored_matrix_type stored{{1.0, 2.0}, {3.0, 4.0}};
-        lazy_matrix_type wrap{stored};
+        lazy_matrix_type lazy{stored};
 
         auto diag1 = make_block_diagonal(stored_matrix_type{stored},
                                          stored_matrix_type{stored});
-
-        auto diag2 = make_block_diagonal(std::move(wrap), std::move(stored));
+        auto diag2 = make_block_diagonal(std::move(lazy), std::move(stored));
 
         auto res = diag1 + diag2;
-
-        auto res2 = diag1 * diag2;
+        auto res2 = diag2 * diag1;
 
         CHECK(diag1.n_rows() == 4u);
         CHECK(diag2.n_rows() == 4u);

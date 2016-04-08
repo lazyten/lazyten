@@ -1,6 +1,6 @@
-#include <rapidcheck.h>
-#include <catch.hpp>
 #include <Range.hh>
+#include <catch.hpp>
+#include <rapidcheck.h>
 #include <type_traits>
 
 namespace linalgwrap {

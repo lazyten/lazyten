@@ -2,11 +2,11 @@
 #define LINALGWRAP_PARAMETER_WRAP_HH_
 
 #pragma once
-#include <map>
-#include <string>
-#include <memory>
-#include "SubscriptionPointer.hh"
 #include "Exceptions.hh"
+#include "SubscriptionPointer.hh"
+#include <map>
+#include <memory>
+#include <string>
 
 namespace linalgwrap {
 

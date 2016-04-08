@@ -3,13 +3,14 @@
 
 #include "Exceptions.hh"
 #include "SubscriptionPointer.hh"
-#include <string>
+#include <algorithm>
 #include <list>
+#include <memory>
+#include <sstream>
+#include <string>
 #include <typeinfo>
 #include <utility>
-#include <sstream>
 #include <vector>
-#include <algorithm>
 
 namespace linalgwrap {
 

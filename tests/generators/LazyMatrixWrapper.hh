@@ -1,8 +1,8 @@
 #pragma once
-#include <rapidcheck.h>
-#include <LazyMatrixWrapper.hh>
 #include "../TestConstants.hh"
 #include "FixedSizeMatrix.hh"
+#include <LazyMatrixWrapper.hh>
+#include <rapidcheck.h>
 
 namespace rc {
 

@@ -1,8 +1,8 @@
 #include "ExceptionBase.hh"
 
-#include <iostream>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
 #include <sstream>
 
 #ifdef LINALGWRAP_HAVE_GLIBC_STACKTRACE
@@ -59,11 +59,13 @@ void ExceptionBase::print_extra(std::ostream& out) const noexcept {
 }
 
 void ExceptionBase::print_exc_data(std::ostream& out) const noexcept {
-    out << "The assertion" << std::endl << "   " << m_failed_condition
-        << std::endl << "failed in line " << m_line << " of file \"" << m_file
-        << "\" while executing the function" << std::endl << "   " << m_function
-        << std::endl << "This raised the exception" << std::endl << "   "
-        << m_name << std::endl;
+    out << "The assertion" << std::endl
+        << "   " << m_failed_condition << std::endl
+        << "failed in line " << m_line << " of file \"" << m_file
+        << "\" while executing the function" << std::endl
+        << "   " << m_function << std::endl
+        << "This raised the exception" << std::endl
+        << "   " << m_name << std::endl;
 }
 
 void ExceptionBase::print_stacktrace(std::ostream& out) const {
@@ -115,7 +117,8 @@ void ExceptionBase::print_stacktrace(std::ostream& out) const {
         // flag -rdynamic on compilation. Warn him and continue:
         if (pos_bracketcl == pos_bracket + 1) {
             out << stacktrace_entry << "   (add flag \"-rdynamic\" on linking "
-                                       "to improve stacktrace)" << std::endl;
+                                       "to improve stacktrace)"
+                << std::endl;
             continue;
         }
 
@@ -159,8 +162,10 @@ void ExceptionBase::print_stacktrace(std::ostream& out) const {
     }
 
     // TODO: have this hint?
-    out << std::endl << "Hint: Use \"addr2line -e <file> <address>\" to get "
-                        "line number in BT." << std::endl;
+    out << std::endl
+        << "Hint: Use \"addr2line -e <file> <address>\" to get "
+           "line number in BT."
+        << std::endl;
 
     // Free the memory for the above.
     free(stacktrace);

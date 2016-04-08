@@ -1,13 +1,14 @@
 #ifndef LINALG_MATRIX_PRODUCT_HPP_
 #define LINALG_MATRIX_PRODUCT_HPP_
 
-#include "ParameterMap.hh"
-#include "LazyMatrixExpression.hh"
 #include "Constants.hh"
-#include <memory>
-#include <vector>
+#include "LazyMatrixExpression.hh"
+#include "ParameterMap.hh"
+#include "Range.hh"
 #include <algorithm>
 #include <iterator>
+#include <memory>
+#include <vector>
 
 namespace linalgwrap {
 
@@ -300,8 +301,8 @@ LazyMatrixProduct<StoredMatrix> operator-(LazyMatrixProduct<StoredMatrix> mat) {
 //
 template <typename StoredMatrix>
 typename LazyMatrixProduct<StoredMatrix>::scalar_type
-      LazyMatrixProduct<StoredMatrix>::
-      operator()(size_type row, size_type col) const {
+LazyMatrixProduct<StoredMatrix>::operator()(size_type row,
+                                            size_type col) const {
     assert_range(0, row, n_rows());
     assert_range(0, col, n_cols());
     auto block = extract_block({row, row + 1}, {col, col + 1});
@@ -309,9 +310,9 @@ typename LazyMatrixProduct<StoredMatrix>::scalar_type
 }
 
 template <typename StoredMatrix>
-typename LazyMatrixProduct<StoredMatrix>::stored_matrix_type LazyMatrixProduct<
-      StoredMatrix>::extract_block(Range<size_type> row_range,
-                                   Range<size_type> col_range) const {
+typename LazyMatrixProduct<StoredMatrix>::stored_matrix_type
+LazyMatrixProduct<StoredMatrix>::extract_block(
+      Range<size_type> row_range, Range<size_type> col_range) const {
     // Assertive checks:
     assert_greater(0, row_range.length());
     assert_greater(0, col_range.length());

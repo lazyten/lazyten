@@ -1,6 +1,6 @@
 #pragma once
-#include "lazy_matrix_tests.hh"
 #include "ScaleView.hh"
+#include "lazy_matrix_tests.hh"
 
 namespace linalgwrap {
 namespace tests {
@@ -70,8 +70,9 @@ struct StandardViewGenerators {
     struct stored_view_generator {
         typedef typename view_of_stored_type::inner_matrix_type
               stored_matrix_type;
-        typedef std::function<view_of_stored_type(
-              stored_matrix_type&, makeview_fctn_arg_type)> makeview_fctn_type;
+        typedef std::function<view_of_stored_type(stored_matrix_type&,
+                                                  makeview_fctn_arg_type)>
+              makeview_fctn_type;
 
         view_of_stored_type operator()(
               std::pair<stored_matrix_type, makeview_fctn_arg_type> mat_args);
@@ -86,8 +87,9 @@ struct StandardViewGenerators {
     /** Generate a view of a lazy matrix */
     struct lazy_view_generator {
         typedef typename view_of_lazy_type::inner_matrix_type lazy_matrix_type;
-        typedef std::function<view_of_lazy_type(
-              lazy_matrix_type&, makeview_fctn_arg_type)> makeview_fctn_type;
+        typedef std::function<view_of_lazy_type(lazy_matrix_type&,
+                                                makeview_fctn_arg_type)>
+              makeview_fctn_type;
 
         view_of_lazy_type operator()(
               std::pair<stored_matrix_type, makeview_fctn_arg_type> mat_args);
@@ -102,8 +104,9 @@ struct StandardViewGenerators {
     /** Generate a view of a view of a stored matrix */
     struct view_view_generator {
         typedef typename view_of_scaleview_type::inner_matrix_type view_type;
-        typedef std::function<view_of_scaleview_type(
-              view_type&, makeview_fctn_arg_type)> makeview_fctn_type;
+        typedef std::function<view_of_scaleview_type(view_type&,
+                                                     makeview_fctn_arg_type)>
+              makeview_fctn_type;
 
         static_assert(
               std::is_same<
@@ -170,10 +173,8 @@ void TestingLibrary<View, ViewGenArg>::run_checks() const {
 template <typename ViewTypes, typename MakeViewExtraArg>
 typename StandardViewGenerators<ViewTypes,
                                 MakeViewExtraArg>::view_of_stored_type
-      StandardViewGenerators<ViewTypes,
-                             MakeViewExtraArg>::stored_view_generator::
-      operator()(
-            std::pair<stored_matrix_type, makeview_fctn_arg_type> mat_args) {
+StandardViewGenerators<ViewTypes, MakeViewExtraArg>::stored_view_generator::
+operator()(std::pair<stored_matrix_type, makeview_fctn_arg_type> mat_args) {
     // Store the stored matrix in permanent memory:
     m_stored_ptr.reset(new stored_matrix_type{std::move(mat_args.first)});
 
@@ -188,9 +189,8 @@ StandardViewGenerators<ViewTypes, MakeViewExtraArg>::stored_view_generator::
 
 template <typename ViewTypes, typename MakeViewExtraArg>
 typename StandardViewGenerators<ViewTypes, MakeViewExtraArg>::view_of_lazy_type
-      StandardViewGenerators<ViewTypes, MakeViewExtraArg>::lazy_view_generator::
-      operator()(
-            std::pair<stored_matrix_type, makeview_fctn_arg_type> mat_args) {
+StandardViewGenerators<ViewTypes, MakeViewExtraArg>::lazy_view_generator::
+operator()(std::pair<stored_matrix_type, makeview_fctn_arg_type> mat_args) {
     // Store the lazy matrix in permanent memory:
     m_lazy_ptr.reset(new lazy_matrix_type{std::move(mat_args.first)});
 
@@ -206,9 +206,8 @@ StandardViewGenerators<ViewTypes, MakeViewExtraArg>::lazy_view_generator::
 template <typename ViewTypes, typename MakeViewExtraArg>
 typename StandardViewGenerators<ViewTypes,
                                 MakeViewExtraArg>::view_of_scaleview_type
-      StandardViewGenerators<ViewTypes, MakeViewExtraArg>::view_view_generator::
-      operator()(
-            std::pair<stored_matrix_type, makeview_fctn_arg_type> mat_args) {
+StandardViewGenerators<ViewTypes, MakeViewExtraArg>::view_view_generator::
+operator()(std::pair<stored_matrix_type, makeview_fctn_arg_type> mat_args) {
     m_view_ptr.reset();
 
     // Store the stored matrix in permanent memory:

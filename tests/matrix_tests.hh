@@ -1,10 +1,10 @@
 #pragma once
-#include <rapidcheck.h>
 #include "NumComp.hh"
 #include "Range.hh"
-#include "generators.hh"
 #include "TestConstants.hh"
+#include "generators.hh"
 #include <functional>
+#include <rapidcheck.h>
 
 // have a debug print of all generated matrices
 // #define HAVE_MATRIX_DEBUG_PRINT
@@ -39,7 +39,8 @@ struct ComparativeTests {
     /** std::function type which describes the call signature of all
      *  static test functions in this class. */
     typedef std::function<void(const compmat_type&, const sutmat_type&,
-                               const double)> testfunction_type;
+                               const double)>
+          testfunction_type;
 
     static_assert(
           std::is_same<size_type, typename CompMatrix::size_type>::value,
@@ -387,8 +388,9 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_add_block_to(
     size_type min_size = 1;
     auto n_rows = *gen::inRange<size_type>(min_size, model.n_rows() + 1)
                          .as("Number of rows of the matrix to add a block to");
-    auto n_cols = *gen::inRange<size_type>(min_size, model.n_cols() + 1).as(
-          "Number of columns of the matrix to add a block to");
+    auto n_cols =
+          *gen::inRange<size_type>(min_size, model.n_cols() + 1)
+                 .as("Number of columns of the matrix to add a block to");
 
     // Generate the offsets:
     auto r_offset = *gen::inRange<size_type>(0, model.n_rows() - n_rows + 1)

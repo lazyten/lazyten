@@ -17,8 +17,8 @@ Gen<Commands<Cmd>> commandsScaledLength(const typename Cmd::Model &initialState,
     auto commands_with_size = [=](int size) {
         return commands<Cmd>(initialState,
                              [=](const typename Cmd::Model &state) {
-            return rc::gen::resize(size, genFunc(state));
-        });
+                                 return rc::gen::resize(size, genFunc(state));
+                             });
     };
 
     return rc::gen::withSize([=](int size) {

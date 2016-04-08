@@ -1,7 +1,7 @@
 #include "lazy_matrix_tests_state.hh"
-#include <rapidcheck.h>
-#include <catch.hpp>
 #include <LazyMatrixSum.hh>
+#include <catch.hpp>
+#include <rapidcheck.h>
 
 namespace linalgwrap {
 namespace tests {

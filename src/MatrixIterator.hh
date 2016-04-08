@@ -81,7 +81,7 @@ class MatrixIterator : private IteratorCore {
     auto operator*() const -> decltype(base_type::value());
 
     /** Access the members of the element we point to. */
-    auto operator -> () const -> decltype(base_type::ptr_to_value());
+    auto operator-> () const -> decltype(base_type::ptr_to_value());
 
     //
     // Comparison
@@ -99,23 +99,12 @@ class MatrixIterator : private IteratorCore {
     bool operator!=(const MatrixIterator& other) const;
 };
 
-//! The default matrix iterator
-template <typename Matrix>
-using DefaultMatrixIterator =
-      MatrixIterator<MatrixIteratorDefaultCore<Matrix, false>>;
-
-//! The default matrix const iterator
-template <typename Matrix>
-using DefaultMatrixConstIterator =
-      MatrixIterator<MatrixIteratorDefaultCore<Matrix, true>>;
-
 //
 // ----------------------------------------------------------------
 //
 
 template <typename IteratorCore>
-MatrixIterator<IteratorCore>::MatrixIterator()
-      : base_type{} {}
+MatrixIterator<IteratorCore>::MatrixIterator() : base_type{} {}
 
 template <typename IteratorCore>
 MatrixIterator<IteratorCore>::MatrixIterator(matrix_type& mat)
@@ -176,7 +165,7 @@ auto MatrixIterator<IteratorCore>::operator*() const
 }
 
 template <typename IteratorCore>
-auto MatrixIterator<IteratorCore>::operator -> () const
+auto MatrixIterator<IteratorCore>::operator-> () const
       -> decltype(base_type::ptr_to_value()) {
     base_type::assert_valid_state();
     return base_type::ptr_to_value();

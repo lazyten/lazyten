@@ -2,9 +2,9 @@
 
 #include "LazyMatrixExpression.hh"
 #include "StoredMatrix_i.hh"
-#include <type_traits>
-#include "type_utils.hh"
 #include "SubscriptionPointer.hh"
+#include "type_utils.hh"
+#include <type_traits>
 
 namespace linalgwrap {
 namespace view {
@@ -135,7 +135,8 @@ class ViewBase<Matrix, false>
 
     //! Typedef of the base type
     typedef LazyMatrixExpression<typename std::remove_const<
-          inner_matrix_type>::type::stored_matrix_type> base_type;
+          inner_matrix_type>::type::stored_matrix_type>
+          base_type;
 
     static_assert(
           std::is_base_of<

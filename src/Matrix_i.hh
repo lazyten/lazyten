@@ -1,18 +1,18 @@
 #ifndef LINALG_MATRIX_I_HPP_
 #define LINALG_MATRIX_I_HPP_
 
-#include <cstddef>
-#include <utility>
-#include <string>
-#include <iostream>
-#include <iomanip>
-#include <numeric>
-#include "type_utils.hh"
 #include "Constants.hh"
+#include "DefaultMatrixIterator.hh"
 #include "Exceptions.hh"
-#include "Subscribable.hh"
 #include "SmallMatrix.hh"
-#include "MatrixIterator.hh"
+#include "Subscribable.hh"
+#include "type_utils.hh"
+#include <cstddef>
+#include <iomanip>
+#include <iostream>
+#include <numeric>
+#include <string>
+#include <utility>
 
 namespace linalgwrap {
 

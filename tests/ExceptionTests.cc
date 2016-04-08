@@ -1,6 +1,6 @@
-#include <rapidcheck.h>
-#include <catch.hpp>
 #include <Exceptions.hh>
+#include <catch.hpp>
+#include <rapidcheck.h>
 
 namespace linalgwrap {
 namespace tests {

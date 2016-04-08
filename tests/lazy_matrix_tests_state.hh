@@ -1,8 +1,8 @@
 #pragma once
+#include "lazy_matrix_tests.hh"
+#include "matrix_tests.hh"
 #include <rapidcheck.h>
 #include <rapidcheck/state.h>
-#include "matrix_tests.hh"
-#include "lazy_matrix_tests.hh"
 
 // have an extra verbose output for rapidcheck function tests:
 //#define HAVE_MATRIX_RC_CLASSIFY
@@ -180,8 +180,9 @@ struct AddMatrix : CommandBase<TestingTraits> {
     MatrixTermType term;
 
     AddMatrix(const model_type& model)
-          : term{*FixedSizeMatrix<MatrixTermType>::fixed_size(
-                        model.n_rows(), model.n_cols()).as("Matrix to add")} {}
+          : term{*FixedSizeMatrix<MatrixTermType>::fixed_size(model.n_rows(),
+                                                              model.n_cols())
+                        .as("Matrix to add")} {}
 
     void apply(model_type& model) const override {
         // Make sure the size fits:

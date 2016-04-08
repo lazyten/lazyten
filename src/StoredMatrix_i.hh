@@ -1,9 +1,10 @@
 #ifndef LINALG_STORED_MATRIX_I_HPP_
 #define LINALG_STORED_MATRIX_I_HPP_
 
-#include "Matrix_i.hh"
 #include "Constants.hh"
-#include "MatrixIterator.hh"
+#include "DefaultMatrixIterator.hh"
+#include "Matrix_i.hh"
+#include "type_utils.hh"
 
 namespace linalgwrap {
 
@@ -16,12 +17,6 @@ namespace linalgwrap {
 // Forward-declare the interface class
 template <typename Scalar>
 class Matrix_i;
-
-template <typename IteratorCore>
-class MatrixIterator;
-
-template <typename Matrix, bool Constness>
-class MatrixIteratorDefaultCore;
 
 /** \brief Interface class for a matrix which is actually stored in memory
  * in some way

@@ -1,7 +1,7 @@
-#include <rapidcheck.h>
-#include <catch.hpp>
 #include "stored_matrix_tests.hh"
 #include <ArmadilloVector.hh>
+#include <catch.hpp>
+#include <rapidcheck.h>
 
 namespace linalgwrap {
 namespace tests {

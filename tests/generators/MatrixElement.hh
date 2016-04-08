@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Constants.hh"
-#include <rapidcheck.h>
 #include "../TestConstants.hh"
+#include "Constants.hh"
 #include <limits>
+#include <rapidcheck.h>
 
 namespace rc {
 template <typename Scalar>

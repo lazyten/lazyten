@@ -1,8 +1,8 @@
-#include <rapidcheck.h>
-#include <catch.hpp>
 #include <ParameterMap.hh>
 #include <SmallMatrix.hh>
 #include <SubscriptionPointer.hh>
+#include <catch.hpp>
+#include <rapidcheck.h>
 
 namespace linalgwrap {
 namespace tests {

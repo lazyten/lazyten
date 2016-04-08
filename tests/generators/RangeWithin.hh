@@ -1,6 +1,6 @@
 #pragma once
-#include <rapidcheck.h>
 #include <Range.hh>
+#include <rapidcheck.h>
 #include <sstream>
 
 namespace rc {
@@ -34,8 +34,8 @@ struct RangeWithin {
             }
 
             auto length = *gen::inRange<value_type>(min_length, max - min + 1);
-            auto start = *gen::scale(2.0, gen::inRange<value_type>(
-                                                min, max - length + 1));
+            auto start = *gen::scale(
+                  2.0, gen::inRange<value_type>(min, max - length + 1));
             if (start + length > max) {
                 std::stringstream ss;
                 ss << "Something went wrong: Too large maximum "

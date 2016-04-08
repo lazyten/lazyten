@@ -277,8 +277,7 @@ inline void BlockViewBase<Matrix>::add_block_to(stored_matrix_type& in,
 
 template <typename Matrix>
 inline typename BlockViewBase<Matrix>::stored_matrix_type
-      BlockViewBase<Matrix>::
-      operator*(const stored_matrix_type& m) const {
+      BlockViewBase<Matrix>::operator*(const stored_matrix_type& m) const {
 
     assert_size(n_cols(), m.n_rows());
 
@@ -291,13 +290,13 @@ inline typename BlockViewBase<Matrix>::stored_matrix_type
 
     // For lazy matrices it is probably best to inform the user that we need
     // to do some heavy operation in the other case and disable the operation.
-    assert_dbg(IsStoredMatrix<Matrix>::value,
-               ExcDisabled(
-                     "The operation \"BlockView<LazyMatrix> * StoredMatrix\" "
-                     "is disabled because it is potentially pretty expensive. "
-                     "You should either rearrange the order in which the "
-                     "operations are performed or else explicitly convert a "
-                     "subexpression to its stored matrix type."));
+    assert_dbg(
+          IsStoredMatrix<Matrix>::value,
+          ExcDisabled("The operation \"BlockView<LazyMatrix> * StoredMatrix\" "
+                      "is disabled because it is potentially pretty expensive. "
+                      "You should either rearrange the order in which the "
+                      "operations are performed or else explicitly convert a "
+                      "subexpression to its stored matrix type."));
 
     // TODO
     // For all other cases we need to either extract the block and perform

@@ -1,8 +1,8 @@
 #ifndef LINALGWRAP_EXCEPTION_SYSTEM_H_
 #define LINALGWRAP_EXCEPTION_SYSTEM_H_
 #include "ExceptionBase.hh"
-#include <string>
 #include <iostream>
+#include <string>
 
 namespace linalgwrap {
 

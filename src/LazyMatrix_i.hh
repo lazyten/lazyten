@@ -87,9 +87,8 @@ class LazyMatrix_i : public LazyMatrixExpression<StoredMatrix> {
 };
 
 template <typename StoredMatrix>
-typename LazyMatrix_i<StoredMatrix>::stored_matrix_type
-      LazyMatrix_i<StoredMatrix>::
-      operator*(const stored_matrix_type& in) const {
+typename LazyMatrix_i<StoredMatrix>::stored_matrix_type LazyMatrix_i<
+      StoredMatrix>::operator*(const stored_matrix_type& in) const {
     assert_size(this->n_cols(), in.n_rows());
 
     // Allocate return storage

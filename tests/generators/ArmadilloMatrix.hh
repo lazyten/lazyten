@@ -1,9 +1,9 @@
 #pragma once
 
-#include <ArmadilloMatrix.hh>
-#include <rapidcheck.h>
 #include "../TestConstants.hh"
 #include "MatrixElement.hh"
+#include <ArmadilloMatrix.hh>
+#include <rapidcheck.h>
 
 namespace rc {
 template <typename Scalar>

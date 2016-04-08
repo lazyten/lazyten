@@ -1,7 +1,7 @@
 #pragma once
-#include <rapidcheck.h>
-#include <StoredMatrix_i.hh>
 #include "MatrixElement.hh"
+#include <StoredMatrix_i.hh>
+#include <rapidcheck.h>
 
 namespace rc {
 
