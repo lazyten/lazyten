@@ -54,6 +54,8 @@ macro(USE_CXX_STANDARD STANDARD)
 
 		if (STANDARD EQUAL "14")
 			if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "3.5")
+				# Clang <3.5 needs special treatment here, 
+				# since c++14 flag is not yet know there
 				set(FLAG "c++1y")
 			endif()
 		endif()
