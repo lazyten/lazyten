@@ -28,7 +28,7 @@ using namespace rc;
 
 TEST_CASE("ScaleView", "[ScaleView]") {
     // Make sure that the program does not get aborted
-    exceptions::assert_dbg_effect = exceptions::ExceptionEffect::THROW;
+    AssertDbgEffect::set(ExceptionEffect::THROW);
 
     // Define the types we use for the test:
     struct TestTypes {

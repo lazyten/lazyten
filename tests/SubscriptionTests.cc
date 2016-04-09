@@ -998,10 +998,8 @@ struct AssignRemovePointer
 TEST_CASE("Subscription and SubscriptionPointer system", "[subscription]") {
     using namespace subscription_tests;
 
-#ifdef DEBUG
     // Make sure that the program does not get aborted
-    exceptions::assert_dbg_effect = exceptions::ExceptionEffect::THROW;
-#endif
+    AssertDbgEffect::set(ExceptionEffect::THROW);
 
     SECTION("SubscriptionPointer  gets the data from Subscribable") {
         SimpleSubscribable s{};

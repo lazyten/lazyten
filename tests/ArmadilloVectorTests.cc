@@ -29,7 +29,7 @@ using namespace rc;
 #ifdef LINALGWRAP_HAVE_ARMADILLO
 TEST_CASE("ArmadilloVector class", "[ArmadilloVector]") {
     // Make sure that the program does not get aborted
-    exceptions::assert_dbg_effect = exceptions::ExceptionEffect::THROW;
+    AssertDbgEffect::set(ExceptionEffect::THROW);
 
     // The type of vector we wish to test.
     typedef ArmadilloVector<double> vector_type;

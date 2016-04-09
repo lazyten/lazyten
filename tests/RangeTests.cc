@@ -141,7 +141,7 @@ TEST_CASE("Range tests", "[range]") {
     using namespace range_tests;
 
     // Make sure that the program does not get aborted
-    exceptions::assert_dbg_effect = exceptions::ExceptionEffect::THROW;
+    AssertDbgEffect::set(ExceptionEffect::THROW);
 
     SECTION("Range construction") {
         REQUIRE(rc::check("Range construction (size_t)",

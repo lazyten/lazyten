@@ -58,9 +58,8 @@ class SimpleLazyMatrix : public LazyMatrix_i<StoredMatrix> {
 
 TEST_CASE("LazyMatrix_i abstract class", "[LazyMatrix_i]") {
     using namespace lazymatrix_i_tests;
-
     // Make sure that the program does not get aborted
-    exceptions::assert_dbg_effect = exceptions::ExceptionEffect::THROW;
+    AssertDbgEffect::set(ExceptionEffect::THROW);
 
     // Test constructor
     // Test swapping

@@ -29,7 +29,7 @@ using namespace rc;
 
 TEST_CASE("ParameterMap tests", "[parametermap]") {
     // Make sure that the program does not get aborted
-    exceptions::assert_dbg_effect = exceptions::ExceptionEffect::THROW;
+    AssertDbgEffect::set(ExceptionEffect::THROW);
 
     // Some data:
     int i = 5;

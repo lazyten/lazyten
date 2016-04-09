@@ -29,7 +29,7 @@ using namespace rc;
 
 TEST_CASE("BlockDiagonalMatrix class", "[BlockDiagonalMatrix]") {
     // Make sure that the program does not get aborted
-    exceptions::assert_dbg_effect = exceptions::ExceptionEffect::THROW;
+    AssertDbgEffect::set(ExceptionEffect::THROW);
 
     typedef double scalar_type;
     typedef SmallMatrix<scalar_type> stored_matrix_type;

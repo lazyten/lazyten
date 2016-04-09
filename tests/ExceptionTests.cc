@@ -27,8 +27,7 @@ using namespace rc;
 
 TEST_CASE("Exception system", "[exception]") {
     // Make sure that the program does not get aborted
-    linalgwrap::exceptions::assert_dbg_effect =
-          linalgwrap::exceptions::ExceptionEffect::THROW;
+    AssertDbgEffect::set(ExceptionEffect::THROW);
 
     SECTION("Test throw or raise mechanism") {
 #ifdef DEBUG
@@ -46,10 +45,10 @@ TEST_CASE("Exception system", "[exception]") {
 
         // Test if an ExcNotImplemented exception would be thrown:
         REQUIRE_THROWS_AS(assert_throw(false, ExcNotImplemented()),
-                          exceptions::ExcNotImplemented);
+                          ExcNotImplemented);
 
         // Test if an ExcIO exception would be thrown:
-        REQUIRE_THROWS_AS(assert_throw(false, ExcIO()), exceptions::ExcIO);
+        REQUIRE_THROWS_AS(assert_throw(false, ExcIO()), ExcIO);
     }
 
     //

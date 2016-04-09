@@ -25,6 +25,7 @@
 set(LINALGWRAP_SOURCES
 	ParameterMap.cc
 	ExceptionBase.cc
+	ExceptionSystem.cc
 	version.cc
 )	
 

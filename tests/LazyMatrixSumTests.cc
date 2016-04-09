@@ -28,8 +28,7 @@ using namespace rc;
 
 TEST_CASE("LazyMatrixSum", "[LazyMatrixSum]") {
     // Make sure that the program does not get aborted
-    linalgwrap::exceptions::assert_dbg_effect =
-          linalgwrap::exceptions::ExceptionEffect::THROW;
+    AssertDbgEffect::set(ExceptionEffect::THROW);
 
     // TODO  Test swap function
     // TODO  Test constructors
