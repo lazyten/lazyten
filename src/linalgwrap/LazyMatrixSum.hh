@@ -476,17 +476,18 @@ LazyMatrixSum<StoredMatrix> operator-(LazyMatrixSum<StoredMatrix> mat) {
 //
 // Further addition operators
 //
-LazyMatrixSum_outofplace_addsub_op(LazyMatrixProduct<StoredMatrix>);
-LazyMatrixSum_outofplace_addsub_op(const StoredMatrix&);
-LazyMatrixSum_outofplace_addsub_op(const LazyMatrixExpression<StoredMatrix>&);
+LazyMatrixSum_outofplace_addsub_op(LazyMatrixProduct<StoredMatrix>)  //
+      LazyMatrixSum_outofplace_addsub_op(const StoredMatrix&)        //
+      LazyMatrixSum_outofplace_addsub_op(
+            const LazyMatrixExpression<StoredMatrix>&)  //
 
-LazyMatrixProduct_outofplace_addsub_op(const StoredMatrix&);
-LazyMatrixProduct_outofplace_addsub_op(
-      const LazyMatrixExpression<StoredMatrix>&);
+      LazyMatrixProduct_outofplace_addsub_op(const StoredMatrix&)  //
+      LazyMatrixProduct_outofplace_addsub_op(
+            const LazyMatrixExpression<StoredMatrix>&)  //
 
-template <typename StoredMatrix>
-LazyMatrixSum<StoredMatrix> operator+(LazyMatrixSum<StoredMatrix> lhs,
-                                      LazyMatrixSum<StoredMatrix> rhs) {
+      template <typename StoredMatrix>
+      LazyMatrixSum<StoredMatrix> operator+(LazyMatrixSum<StoredMatrix> lhs,
+                                            LazyMatrixSum<StoredMatrix> rhs) {
     lhs += rhs;
     return lhs;
 }

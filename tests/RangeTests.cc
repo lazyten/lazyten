@@ -124,10 +124,10 @@ struct RangeTests {
     }
 
     static void access_to_past_the_end_iterator() {
+#ifdef DEBUG
         range_type r{0, 1};
         auto it = std::end(r);
 
-#ifdef DEBUG
         CHECK_THROWS_AS(*it, ExcIteratorPastEnd);
         CHECK_THROWS_AS(++it, ExcIteratorPastEnd);
         CHECK_THROWS_AS(it++, ExcIteratorPastEnd);

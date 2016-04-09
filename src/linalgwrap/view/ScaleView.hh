@@ -40,7 +40,8 @@ class ScaleView : public ViewBase<Matrix> {
     ///@}
 
     /** A swap function for ScaleView */
-    friend void swap(ScaleView& first, ScaleView& second);
+    template <typename M>
+    friend void swap(ScaleView<M>& first, ScaleView<M>& second);
 
     /* \brief Construct from matrix and scaling factor
      *

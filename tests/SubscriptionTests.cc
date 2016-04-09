@@ -131,7 +131,7 @@ struct SubscriptionSystemUnderTest {
             // find out where we point to:
             auto res = std::find_if(
                   std::begin(other.objects), std::end(other.objects),
-                  [](const SubscribableType& obj) { return &obj == raw; });
+                  [&](const SubscribableType& obj) { return &obj == raw; });
 
             if (res == std::end(other.objects)) {
                 // something went wrong when finding the pointer.

@@ -86,12 +86,12 @@ template <typename Matrix>
 void TestingLibrary<Matrix>::once_test_initialiser_list_constructor() const {
     matrix_type m{{11.0, 12.0}, {21.0, 22.0}, {31.0, 32.0}};
 
-    CHECK(m.n_rows() == 3);
-    CHECK(m.n_cols() == 2);
+    CHECK((m.n_rows() == 3));
+    CHECK((m.n_cols() == 2));
 
     for (size_type i = 0; i < m.n_rows(); ++i) {
         for (size_type j = 0; j < m.n_cols(); ++j) {
-            CHECK(m(i, j) == 10. * (i + 1) + j + 1);
+            CHECK((m(i, j) == 10. * (i + 1) + j + 1));
         }
     }
 

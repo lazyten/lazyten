@@ -47,8 +47,9 @@ class ViewBaseMatrixContainer {
     typedef Matrix inner_matrix_type;
 
     /** A swap function for ViewMatrixContainer */
-    friend void swap(ViewBaseMatrixContainer& first,
-                     ViewBaseMatrixContainer& second);
+    template <typename M>
+    friend void swap(ViewBaseMatrixContainer<M>& first,
+                     ViewBaseMatrixContainer<M>& second);
 
     /** \brief Construct a container from a matrix reference and an identifier.
      *
@@ -274,7 +275,7 @@ std::string ViewBaseMatrixContainer<Matrix>::identifier() const {
 template <typename Matrix>
 ViewBase<Matrix, true>::ViewBase(inner_matrix_type& inner,
                                  const std::string& identifier)
-      : container_type(inner, identifier){};
+      : container_type(inner, identifier) {}
 
 template <typename Matrix>
 void ViewBase<Matrix, true>::update(const ParameterMap&) {

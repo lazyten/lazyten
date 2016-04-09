@@ -77,7 +77,8 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
     typedef arma::Mat<Scalar> storage_type;
 
     // Swapping:
-    friend void swap(ArmadilloMatrix& first, ArmadilloMatrix& second);
+    template <typename S>
+    friend void swap(ArmadilloMatrix<S>& first, ArmadilloMatrix<S>& second);
 
     /** \name Constructors
      */
@@ -178,7 +179,9 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
         return true;
     }
 
-    bool operator!=(const ArmadilloMatrix& other) const { !operator==(other); }
+    bool operator!=(const ArmadilloMatrix& other) const {
+        return !operator==(other);
+    }
 
     //
     // matrix_i interface

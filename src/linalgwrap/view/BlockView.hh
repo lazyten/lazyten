@@ -44,7 +44,8 @@ class BlockViewBase : public ViewBase<Matrix> {
     ///@}
 
     /** A swap function for ScaleView */
-    friend void swap(BlockViewBase& first, BlockViewBase& second);
+    template <typename M>
+    friend void swap(BlockViewBase<M>& first, BlockViewBase<M>& second);
 
     /* \brief Construct from matrix and row/column Range
      *
