@@ -25,9 +25,6 @@
 
 namespace linalgwrap {
 
-/** Basic exceptions */
-namespace exceptions {
-
 //
 // Numerics
 //
@@ -169,10 +166,6 @@ DefExceptionMsg(ExcIO, "An input/output error has occurred.");
  * file.
  */
 DefException1(ExcFileNotOpen, char *, << "Could not open file " << arg1);
-}  // exceptions
-
-// Import exceptions namespace
-using namespace exceptions;
 
 //
 // Helper macros

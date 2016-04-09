@@ -25,26 +25,27 @@
 
 namespace linalgwrap {
 
-namespace exceptions {
-
 /** Options how to deal with exceptions.
  *
  * THROW: Throw the exception
  * ABORT: Print it and abort the program
  */
-enum class ExceptionEffect { THROW, ABORT };
+enum class ExceptionEffect : char { THROW, ABORT };
 
-/** How the assert_dbg macro deals with failing assertions.
- *  If such an assertion fails the macro will create an exception
- *  (second argument) and then process the latter as indicated with
- *  this property.
+/** Manage the effect if an assertion managed by assert_dbg fails
  *
- *  @note Since the assert_dbg macro is only active in DEBUG mode
- *        Changing this has no effect for RELEASE builds.
- */
-static ExceptionEffect assert_dbg_effect = ExceptionEffect::ABORT;
+ * By default whenever an exception is triggered with assert_dbg, then
+ * the program is aborted (ExceptionEffect::ABORT). If you want to
+ * change this behaviour try the set() function.
+ * */
+class AssertDbgEffect {
+  public:
+    static void set(ExceptionEffect effect);
+    static ExceptionEffect get();
 
-}  // namespace exceptions
+  private:
+    static ExceptionEffect m_eff;
+};
 
 //
 // Assert Macros
@@ -58,12 +59,12 @@ static ExceptionEffect assert_dbg_effect = ExceptionEffect::ABORT;
 #ifdef DEBUG
 #define assert_dbg(cond, exception)                                           \
     {                                                                         \
-        using namespace linalgwrap::exceptions;                               \
         if (!(cond)) {                                                        \
             auto __exc__cept = exception;                                     \
             __exc__cept.add_exc_data(__FILE__, __LINE__, __PRETTY_FUNCTION__, \
                                      #cond, #exception);                      \
-            if (assert_dbg_effect == ExceptionEffect::ABORT) {                \
+            if (linalgwrap::AssertDbgEffect::get() ==                         \
+                ExceptionEffect::ABORT) {                                     \
                 std::cerr << __exc__cept.what() << std::endl;                 \
                 std::abort();                                                 \
             } else {                                                          \
@@ -97,7 +98,6 @@ static ExceptionEffect assert_dbg_effect = ExceptionEffect::ABORT;
  */
 #define assert_abort(cond, exception)                                         \
     {                                                                         \
-        using namespace linalgwrap::exceptions;                               \
         if (!(cond)) {                                                        \
             auto __exc__cept = exception;                                     \
             __exc__cept.add_exc_data(__FILE__, __LINE__, __PRETTY_FUNCTION__, \
