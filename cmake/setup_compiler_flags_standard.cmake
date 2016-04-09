@@ -67,11 +67,8 @@ enable_if_compiles(CMAKE_CXX_FLAGS "-pedantic")
 enable_if_compiles(CMAKE_CXX_FLAGS "-Wno-unused-macros")
 enable_if_compiles(CMAKE_CXX_FLAGS "-Wno-unused-parameter")
 
-#TODO This breaks things. We have to forcibly add the flag and
-#     do this at the very end, unfortunately, see the end of this file
-#     for where this is actually done.
 # Make warnings errors, such that we cannot ignore them
-# enable_if_compiles(CMAKE_CXX_FLAGS "-Werror")
+enable_if_compiles(CMAKE_CXX_FLAGS "-Werror")
 
 #######################
 #-- Bug workarounds --#
@@ -108,13 +105,3 @@ endif()
 if (CMAKE_BUILD_TYPE MATCHES "Release")
 	# nothing atm
 endif()
-
-##########################
-#-- Warnings as errors --#
-##########################
-# We have to do this at the end of setting all compiler flags because otherwise
-# enable_if_compiles does not work any more. I do not know why, but it seems
-# to be a cmake bug that has been addressed recently.
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
-
-
