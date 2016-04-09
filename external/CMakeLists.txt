@@ -41,7 +41,9 @@ if (LINALGWRAP_ENABLE_TESTS AND NOT LINALGWRAP_WITH_EXTERNAL_RAPIDCHECK)
 	add_subdirectory(rapidcheck)
 
 	# Set some compiler options to make rapidcheck compile
-	set(LINALGWRAP_RAPIDCHECK_EXTRA_FLAGS "${LINALGWRAP_RAPIDCHECK_EXTRA_FLAGS} -Wno-gnu-zero-variadic-macro-arguments")
+	enable_if_compiles(LINALGWRAP_RAPIDCHECK_EXTRA_FLAGS "-Wno-gnu-zero-variadic-macro-arguments")
+	#enable_if_compiles(LINALGWRAP_RAPIDCHECK_EXTRA_FLAGS "-Wno-error=pedantic")
+	enable_if_compiles(LINALGWRAP_RAPIDCHECK_EXTRA_FLAGS "-Wno-pedantic")
 	set(LINALGWRAP_RAPIDCHECK_EXTRA_FLAGS "${LINALGWRAP_RAPIDCHECK_EXTRA_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
 
 	foreach(_potential_target
