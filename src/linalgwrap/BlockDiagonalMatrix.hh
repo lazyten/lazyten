@@ -172,7 +172,11 @@ BlockDiagonalMatrix<Matrices...>::operator()(size_type row,
               cur_block_start_index <= col && col < cur_block_end_index;
 
         if (col_in_range) {
+            // col is in the range of the block -> return the value
             res = mat(row - cur_block_start_index, col - cur_block_start_index);
+        } else {
+            // col is not in the range of the block -> result has to be zero
+            res = 0.0;
         }
     };
 
