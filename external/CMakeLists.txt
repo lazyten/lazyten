@@ -34,8 +34,9 @@ if (LINALGWRAP_ENABLE_TESTS AND NOT LINALGWRAP_WITH_EXTERNAL_RAPIDCHECK)
 	endif()
 
 	# make sure rapidcheck gets checked as well ...
-	set(RC_ENABLE_TESTS "ON")
-	set(RC_ENABLE_CATCH "ON")
+	set(RC_ENABLE_TESTS ON CACHE BOOL "Build RapidCheck tests")
+	# We need catch:
+	set(RC_ENABLE_CATCH ON CACHE BOOL "Build Catch.hpp support")
 
 	# Add the rapidcheck stuff
 	add_subdirectory(rapidcheck)

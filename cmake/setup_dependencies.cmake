@@ -57,8 +57,9 @@ endif()
 #################
 #-- armadillo --#
 #################
+set(ARMADILLO_MIN_VERSION "4.000")
 
-SET(ARMADILLO_DIR "$ENV{ARPACK_DIR}" CACHE PATH "Optional hint to find and armadillo installation")
+SET(ARMADILLO_DIR "$ENV{ARMADILLO_DIR}" CACHE PATH "Optional hint to find and armadillo installation")
 
 find_library(ARMADILLO_LIBRARY armadillo
 	DOC "Path to the armadillo library."
@@ -74,6 +75,39 @@ find_path(ARMADILLO_INCLUDE armadillo
 )
 if ("${ARMADILLO_INCLUDE}" STREQUAL "ARMADILLO_INCLUDE-NOTFOUND")
 	message(FATAL_ERROR "Could not find armadillo include files. Specify ARMADILLO_DIR for a hint")
+endif()
+
+set(ARMIDILLO_VERSION_FILE "${ARMADILLO_INCLUDE}/armadillo_bits/arma_version.hpp")
+if (EXISTS "${ARMIDILLO_VERSION_FILE}")
+	#
+	# Extract exact armadillo version
+	#
+	file(STRINGS "${ARMIDILLO_VERSION_FILE}" ARMIDILLO_VERSION_MAJOR_STRING
+		REGEX "#define.*ARMA_VERSION_MAJOR")
+	STRING(REGEX REPLACE "^.*ARMA_VERSION_MAJOR.*([0-9]+).*" "\\1"
+		ARMIDILLO_VERSION_MAJOR "${ARMIDILLO_VERSION_MAJOR_STRING}")
+	#
+	file(STRINGS "${ARMIDILLO_VERSION_FILE}" ARMIDILLO_VERSION_MINOR_STRING
+		REGEX "#define.*ARMA_VERSION_MINOR")
+	STRING(REGEX REPLACE "^.*ARMA_VERSION_MINOR.*([0-9]+).*" "\\1"
+		ARMIDILLO_VERSION_MINOR "${ARMIDILLO_VERSION_MINOR_STRING}")
+	#
+	file(STRINGS "${ARMIDILLO_VERSION_FILE}" ARMIDILLO_VERSION_PATCH_STRING
+		REGEX "#define.*ARMA_VERSION_PATCH")
+	STRING(REGEX REPLACE "^.*ARMA_VERSION_PATCH.*([0-9]+).*" "\\1"
+		ARMIDILLO_VERSION_PATCH "${ARMIDILLO_VERSION_PATCH_STRING}")
+	#
+	set(ARMIDILLO_VERSION 
+		"${ARMIDILLO_VERSION_MAJOR}.${ARMIDILLO_VERSION_MINOR}.${ARMIDILLO_VERSION_PATCH}")
+	
+	#
+	# Check armadillo version
+	#
+	if (ARMIDILLO_VERSION VERSION_LESS ARMADILLO_MIN_VERSION)
+		message(FATAL_ERROR "Armadillo version is too old. Expect at least version ${ARMADILLO_MIN_VERSION}.")
+	endif()
+else()
+	message(FATAL_ERROR "Could not check armadillo version. Did not find expected version file ${ARMIDILLO_VERSION_FILE}")
 endif()
 
 # add to general dependencies:
