@@ -97,10 +97,10 @@ class MatrixIterator : private IteratorCore {
     // Element access
     //
     /** Return the value of the element we point to. */
-    auto operator*() const -> decltype(base_type::value());
+    auto operator*() const -> decltype(this->value());
 
     /** Access the members of the element we point to. */
-    auto operator-> () const -> decltype(base_type::ptr_to_value());
+    auto operator-> () const -> decltype(this->ptr_to_value());
 
     //
     // Comparison
@@ -178,14 +178,14 @@ MatrixIterator<IteratorCore> MatrixIterator<IteratorCore>::operator++(int) {
 
 template <typename IteratorCore>
 auto MatrixIterator<IteratorCore>::operator*() const
-      -> decltype(base_type::value()) {
+      -> decltype(this->value()) {
     base_type::assert_valid_state();
     return base_type::value();
 }
 
 template <typename IteratorCore>
 auto MatrixIterator<IteratorCore>::operator-> () const
-      -> decltype(base_type::ptr_to_value()) {
+      -> decltype(this->ptr_to_value()) {
     base_type::assert_valid_state();
     return base_type::ptr_to_value();
 }

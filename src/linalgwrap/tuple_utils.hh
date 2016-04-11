@@ -27,12 +27,31 @@
 //      and get rid of the head/tail stuff as much as possible, as it makes
 //      it harder for the compiler to optimise these operations.
 
+// General note about the functions in this code unit:
+//
+// Many of these functions can in theory be implemented as constexpr functions
+// in C++14, since the restrictions on constexpr functions have been lifted
+// somewhat in N3652.
+//
+// Unfortunately gcc 4.9, which we attempt to support, does not yet have this
+// capablility. Hence we use a #if guard to check whether the present compiler
+// implements the laxer constexpr functions and only in this case we make use
+// of them.
+//
+// Unfortunately this makes the code overall less readable. Damn gcc <5.
+
 namespace linalgwrap {
 namespace detail {
 //! Implementation to get the tuple tail
+#if __cpp_constexpr >= 201304
 template <std::size_t... Indices, typename E, typename... Es>
 constexpr std::tuple<Es...> tuple_tail_impl(std::index_sequence<Indices...>,
                                             std::tuple<E, Es...>&& t);
+#else
+template <std::size_t... Indices, typename E, typename... Es>
+std::tuple<Es...> tuple_tail_impl(std::index_sequence<Indices...>,
+                                  std::tuple<E, Es...>&& t);
+#endif
 
 //! Implementation of the ref function for tuple references
 //  We want to return a tuple of references from a referenced tuple.
@@ -52,16 +71,26 @@ template <typename E, typename... Es>
 constexpr const E& tuple_head(const std::tuple<E, Es...>& t);
 
 /** Get the tail of a std::tuple, taking ownership of the original object. */
+#if __cpp_constexpr >= 201304
 template <typename E, typename... Es>
 constexpr std::tuple<Es...> tuple_tail(std::tuple<E, Es...>&& t);
+#else
+template <typename E, typename... Es>
+std::tuple<Es...> tuple_tail(std::tuple<E, Es...>&& t);
+#endif
 
 /** Construct a tuple taking ownership of head and tail. */
 template <typename E, typename... Es>
 constexpr std::tuple<E, Es...> tuple_cons(E&& e, std::tuple<Es...>&& t);
 
 /** Construct a tuple of references to each element of the referenced tuple */
+#if __cpp_constexpr >= 201304
 template <typename... Es>
 constexpr std::tuple<Es&...> tuple_ref(std::tuple<Es...>& t);
+#else
+template <typename... Es>
+std::tuple<Es&...> tuple_ref(std::tuple<Es...>& t);
+#endif
 ///@}
 
 /** \name Tuple traversal and mapping */
@@ -73,8 +102,13 @@ constexpr std::tuple<Es&...> tuple_ref(std::tuple<Es...>& t);
  *         Does not apply the operation if no object
  *         matches the predicate
  */
+#if __cpp_constexpr >= 201304
 template <typename Pred, typename Op, typename... Ts>
 constexpr void tuple_for_first(Pred&& pred, Op&& op, std::tuple<Ts...>&& t);
+#else
+template <typename Pred, typename Op, typename... Ts>
+void tuple_for_first(Pred&& pred, Op&& op, std::tuple<Ts...>&& t);
+#endif
 
 // End recursion
 template <typename Pred, typename Op>
@@ -83,8 +117,13 @@ constexpr void tuple_for_first(Pred&&, Op&&, std::tuple<>);
 
 //@{
 /** \brief Apply a unary operator to all elements of a tuple in turn. */
+#if __cpp_constexpr >= 201304
 template <typename UnOp, typename... Ts>
 constexpr void tuple_for_each(UnOp&& op, std::tuple<Ts...>&& t);
+#else
+template <typename UnOp, typename... Ts>
+void tuple_for_each(UnOp&& op, std::tuple<Ts...>&& t);
+#endif
 
 // Special case to end recursion
 template <typename UnOp>
@@ -103,8 +142,13 @@ constexpr void tuple_for_each(UnOp&&, std::tuple<>);
  * implementation fails. Use tuple_for_each for unary operators
  * returning void.
  *  */
+#if __cpp_constexpr >= 201304
 template <typename UnOp, typename... Ts>
 constexpr auto tuple_map(UnOp&& op, std::tuple<Ts...>&& t);
+#else
+template <typename UnOp, typename... Ts>
+auto tuple_map(UnOp&& op, std::tuple<Ts...>&& t);
+#endif
 
 // Special case to end recursion.
 template <typename UnOp>
@@ -123,9 +167,15 @@ constexpr std::tuple<> tuple_map(UnOp&&, std::tuple<>);
  * implementation fails. Use for_each for operators
  * returning void.
  *  */
+#if __cpp_constexpr >= 201304
 template <typename BinOp, typename... Tlhs, typename... Trhs>
 constexpr auto tuple_map(BinOp&& op, std::tuple<Tlhs...>&& lhs,
                          std::tuple<Trhs...>&& rhs);
+#else
+template <typename BinOp, typename... Tlhs, typename... Trhs>
+auto tuple_map(BinOp&& op, std::tuple<Tlhs...>&& lhs,
+               std::tuple<Trhs...>&& rhs);
+#endif
 
 // Special case to end recursion.
 template <typename BinOp>
@@ -138,9 +188,15 @@ constexpr std::tuple<> tuple_map(BinOp&&, std::tuple<>, std::tuple<>);
 //
 
 namespace detail {
+#if __cpp_constexpr >= 201304
 template <std::size_t... Indices, typename E, typename... Es>
 constexpr std::tuple<Es...> tuple_tail_impl(std::index_sequence<Indices...>,
                                             std::tuple<E, Es...>&& t) {
+#else
+template <std::size_t... Indices, typename E, typename... Es>
+inline std::tuple<Es...> tuple_tail_impl(std::index_sequence<Indices...>,
+                                         std::tuple<E, Es...>&& t) {
+#endif
     typedef std::tuple<E, Es...> tuple_t;
     typedef std::tuple<Es...> tail_t;
 
@@ -166,9 +222,13 @@ constexpr const E& tuple_head(const std::tuple<E, Es...>& t) {
     return std::get<0>(t);
 }
 
-/** Get the tail of a std::tuple reference*/
+#if __cpp_constexpr >= 201304
 template <typename E, typename... Es>
 constexpr std::tuple<Es...> tuple_tail(std::tuple<E, Es...>&& t) {
+#else
+template <typename E, typename... Es>
+inline std::tuple<Es...> tuple_tail(std::tuple<E, Es...>&& t) {
+#endif
     typedef std::tuple<E, Es...> tuple_t;
 
     // First construct an index sequence from 0 to the number of types in Es
@@ -183,14 +243,24 @@ constexpr std::tuple<E, Es...> tuple_cons(E&& e, std::tuple<Es...>&& t) {
     return std::tuple_cat(std::tuple<E>{e}, t);
 }
 
+#if __cpp_constexpr >= 201304
 template <typename... Es>
 constexpr std::tuple<Es&...> tuple_ref(std::tuple<Es...>& t) {
+#else
+template <typename... Es>
+inline std::tuple<Es&...> tuple_ref(std::tuple<Es...>& t) {
+#endif
     auto idcs = std::make_index_sequence<sizeof...(Es)>();
     return detail::tuple_ref_impl(idcs, t);
 }
 
+#if __cpp_constexpr >= 201304
 template <typename Pred, typename Op, typename... Ts>
 constexpr void tuple_for_first(Pred&& pred, Op&& op, std::tuple<Ts...>&& t) {
+#else
+template <typename Pred, typename Op, typename... Ts>
+inline void tuple_for_first(Pred&& pred, Op&& op, std::tuple<Ts...>&& t) {
+#endif
     typedef std::tuple<Ts...> tuple_t;
 
     if (pred(tuple_head(t))) {
@@ -209,8 +279,13 @@ constexpr void tuple_for_first(Pred&& pred, Op&& op, std::tuple<Ts...>&& t) {
 template <typename Pred, typename Op>
 constexpr void tuple_for_first(Pred&&, Op&&, std::tuple<>) {}
 
+#if __cpp_constexpr >= 201304
 template <typename UnOp, typename... Ts>
 constexpr void tuple_for_each(UnOp&& op, std::tuple<Ts...>&& t) {
+#else
+template <typename UnOp, typename... Ts>
+inline void tuple_for_each(UnOp&& op, std::tuple<Ts...>&& t) {
+#endif
     typedef std::tuple<Ts...> tuple_t;
 
     // Apply to head:
@@ -226,8 +301,13 @@ constexpr void tuple_for_each(UnOp&& op, std::tuple<Ts...>&& t) {
 template <typename UnOp>
 constexpr void tuple_for_each(UnOp&&, std::tuple<>) {}
 
+#if __cpp_constexpr >= 201304
 template <typename UnOp, typename... Ts>
 constexpr auto tuple_map(UnOp&& op, std::tuple<Ts...>&& t) {
+#else
+template <typename UnOp, typename... Ts>
+inline auto tuple_map(UnOp&& op, std::tuple<Ts...>&& t) {
+#endif
     typedef std::tuple<Ts...> tuple_t;
 
     // Apply op to head:
@@ -249,9 +329,15 @@ constexpr std::tuple<> tuple_map(UnOp&&, std::tuple<>) {
     return std::tuple<>{};
 }
 
+#if __cpp_constexpr >= 201304
 template <typename BinOp, typename... Tlhs, typename... Trhs>
 constexpr auto tuple_map(BinOp&& op, std::tuple<Tlhs...>&& lhs,
                          std::tuple<Trhs...>&& rhs) {
+#else
+template <typename BinOp, typename... Tlhs, typename... Trhs>
+inline auto tuple_map(BinOp&& op, std::tuple<Tlhs...>&& lhs,
+                      std::tuple<Trhs...>&& rhs) {
+#endif
     static_assert(sizeof...(Tlhs) == sizeof...(Trhs),
                   "Both tuples to map for the case of binary operations "
                   "need to be of the same size.");

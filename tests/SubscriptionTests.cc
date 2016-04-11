@@ -210,7 +210,7 @@ struct SubscriptionModel {
           : pointers{}, objects{objects_.size()} {
 
         auto construct_model = [](const SubscribableType& o) {
-            subscribable_model m{};
+            subscribable_model m;
             m.data = o;
             return m;
         };
