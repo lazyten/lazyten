@@ -27,6 +27,7 @@ branches:
   except:
     - dev
     - /^dev-.*$/
+    - /^dev_.*$/
 
 compiler:
   - clang
