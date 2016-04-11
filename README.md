@@ -1,4 +1,4 @@
-# linalgwrap
+# linalgwrap [![Build Status](https://travis-ci.org/linalgwrap/linalgwrap.svg?branch=master)](https://travis-ci.org/linalgwrap/linalgwrap)
 A lightweight linear algebra wrapper library adding support for lazy matrix evaluation to existing linear algebra libraries.
 
 More documentation will follow shortly. 
