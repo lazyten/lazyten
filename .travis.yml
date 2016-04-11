@@ -69,7 +69,7 @@ env:
     - CXX_COMPILER="clang++-3.8" CC_COMPILER="clang-3.8" TESTCASE="linalgwrap_tests_DEBUG"
     #
     # build with gcc 4.9 and run release tests
-    - CXX_COMPILER="g++-4.9"     CC_COMPILER="gcc-4.9"   TESTCASE="linalgwrap_tests_NONE"
+    - CXX_COMPILER="g++-4.9"     CC_COMPILER="gcc-4.9"   TESTCASE="linalgwrap_tests_RELEASE"
 
 script:
   - mkdir build && cd build
