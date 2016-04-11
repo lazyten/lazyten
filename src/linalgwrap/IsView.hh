@@ -36,14 +36,14 @@ namespace detail {
 
 //! Default implementation of IsView (== false)
 template <typename Matrix, typename = void>
-struct IsViewImpl : std::false_type {};
+struct IsViewImpl : public std::false_type {};
 
 //! Implementation of IsView, which is true if we have a view.
 template <typename Matrix>
 struct IsViewImpl<Matrix, void_t<typename Matrix::inner_matrix_type>>
-      : std::is_base_of<view::detail::ViewBaseMatrixContainer<
-                              typename Matrix::inner_matrix_type>,
-                        Matrix> {};
+      : public std::is_base_of<view::detail::ViewBaseMatrixContainer<
+                                     typename Matrix::inner_matrix_type>,
+                               Matrix> {};
 }
 
 //@{
@@ -54,7 +54,7 @@ struct IsViewImpl<Matrix, void_t<typename Matrix::inner_matrix_type>>
  * typedef inner_matrix_type this expression is valid.
  *  */
 template <typename Matrix>
-struct IsView : detail::IsViewImpl<Matrix> {};
+struct IsView : public detail::IsViewImpl<Matrix> {};
 
 //@}
 
