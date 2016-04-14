@@ -57,61 +57,17 @@ endif()
 #################
 #-- armadillo --#
 #################
-set(ARMADILLO_MIN_VERSION "4.000")
+include(FindArmadillo)
+find_package(Armadillo REQUIRED)
 
-SET(ARMADILLO_DIR "$ENV{ARMADILLO_DIR}" CACHE PATH "Optional hint to find and armadillo installation")
-
-find_library(ARMADILLO_LIBRARY armadillo
-	DOC "Path to the armadillo library."
-	HINTS ${ARMADILLO_DIR} ${ARMADILLO_DIR}/lib
-)
-if ("${ARMADILLO_LIBRARY}" STREQUAL "ARMADILLO_LIBRARY-NOTFOUND")
-	message(FATAL_ERROR "Could not find armadillo library. Specify ARMADILLO_DIR for a hint")
+# We need at least 4.000
+if(ARMADILLO_VERSION_STRING VERSION_LESS "4.000")
+	message(FATAL_ERROR "Armadillo version is too old. Expect at least version ${ARMADILLO_MIN_VERSION}.")
 endif()
 
-find_path(ARMADILLO_INCLUDE armadillo
-	DOC "Path to the armadillo include directory."
-	HINTS ${ARMADILLO_DIR} ${ARMADILLO_DIR}/include
-)
-if ("${ARMADILLO_INCLUDE}" STREQUAL "ARMADILLO_INCLUDE-NOTFOUND")
-	message(FATAL_ERROR "Could not find armadillo include files. Specify ARMADILLO_DIR for a hint")
-endif()
-
-set(ARMIDILLO_VERSION_FILE "${ARMADILLO_INCLUDE}/armadillo_bits/arma_version.hpp")
-if (EXISTS "${ARMIDILLO_VERSION_FILE}")
-	#
-	# Extract exact armadillo version
-	#
-	file(STRINGS "${ARMIDILLO_VERSION_FILE}" ARMIDILLO_VERSION_MAJOR_STRING
-		REGEX "#define.*ARMA_VERSION_MAJOR")
-	STRING(REGEX REPLACE "^.*ARMA_VERSION_MAJOR.*([0-9]+).*" "\\1"
-		ARMIDILLO_VERSION_MAJOR "${ARMIDILLO_VERSION_MAJOR_STRING}")
-	#
-	file(STRINGS "${ARMIDILLO_VERSION_FILE}" ARMIDILLO_VERSION_MINOR_STRING
-		REGEX "#define.*ARMA_VERSION_MINOR")
-	STRING(REGEX REPLACE "^.*ARMA_VERSION_MINOR.*([0-9]+).*" "\\1"
-		ARMIDILLO_VERSION_MINOR "${ARMIDILLO_VERSION_MINOR_STRING}")
-	#
-	file(STRINGS "${ARMIDILLO_VERSION_FILE}" ARMIDILLO_VERSION_PATCH_STRING
-		REGEX "#define.*ARMA_VERSION_PATCH")
-	STRING(REGEX REPLACE "^.*ARMA_VERSION_PATCH.*([0-9]+).*" "\\1"
-		ARMIDILLO_VERSION_PATCH "${ARMIDILLO_VERSION_PATCH_STRING}")
-	#
-	set(ARMIDILLO_VERSION 
-		"${ARMIDILLO_VERSION_MAJOR}.${ARMIDILLO_VERSION_MINOR}.${ARMIDILLO_VERSION_PATCH}")
-	
-	#
-	# Check armadillo version
-	#
-	if (ARMIDILLO_VERSION VERSION_LESS ARMADILLO_MIN_VERSION)
-		message(FATAL_ERROR "Armadillo version is too old. Expect at least version ${ARMADILLO_MIN_VERSION}.")
-	endif()
-else()
-	message(FATAL_ERROR "Could not check armadillo version. Did not find expected version file ${ARMIDILLO_VERSION_FILE}")
-endif()
-
-# add to general dependencies:
-set(LINALGWRAP_DEPENDENCIES ${LINALGWRAP_DEPENDENCIES} ${ARMADILLO_LIBRARY})
+# add to general dependencies and include string
+set(LINALGWRAP_DEPENDENCIES ${LINALGWRAP_DEPENDENCIES} ${ARMADILLO_LIBRARIES})
+include_directories(${ARMADILLO_INCLUDE_DIRS})
 
 # enable armadillo-dependant code:
 LIST(APPEND LINALGWRAP_DEFINITIONS "LINALGWRAP_HAVE_ARMADILLO")
