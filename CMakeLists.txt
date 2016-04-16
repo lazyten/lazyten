@@ -29,6 +29,16 @@ list(APPEND CMAKE_MODULE_PATH  "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
 include(DebugReleaseBuild)
 drb_init()
 
+##########################################################################
+# Global options
+
+# setup global options (needs to be done before call to project())
+option(LINALGWRAP_ENABLE_TESTS "Build linalgwrap tests" ON)
+option(LINALGWRAP_ENABLE_EXAMPLES "Build linalgwrap examples" ON)
+
+##########################################################################
+# Project setup
+
 # enable the new version feature introduced in cmake 3.0.0
 cmake_policy(SET CMP0048 NEW)
 project(linalgwrap VERSION 0.1.0)
@@ -67,13 +77,11 @@ add_subdirectory(src)
 add_subdirectory(external)
 
 # Add subdirectories for the test.
-option(LINALGWRAP_ENABLE_TESTS "Build linalgwrap tests" ON)
 if(LINALGWRAP_ENABLE_TESTS) 
 	add_subdirectory(tests)
 endif()
 
 # Add subdirectories for the examples.
-option(LINALGWRAP_ENABLE_EXAMPLES "Build linalgwrap examples" ON)
 if(LINALGWRAP_ENABLE_EXAMPLES)
 	add_subdirectory(examples)
 endif()
