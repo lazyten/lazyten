@@ -21,21 +21,27 @@
 
 cmake_minimum_required(VERSION 3.0.0)
 
-# Setup options, has to be done BEFORE project definition.
-include(cmake/setup_options.cmake)
+# Set the module path
+list(APPEND CMAKE_MODULE_PATH  "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
+
+# Load the DebugReleaseBuild module for a simultaneous Debug and Release
+# and release build and initialise it.
+include(DebugReleaseBuild)
+drb_init()
 
 # enable the new version feature introduced in cmake 3.0.0
 cmake_policy(SET CMP0048 NEW)
 project(linalgwrap VERSION 0.1.0)
+drb_setup_project(linalgwrap)
+
+# Global include directories for this project:
+include_directories("${linalgwrap_SOURCE_DIR}/src")
 
 # enable testing of this project
 enable_testing()
 
 ##########################################################################
-# Setup compiler and dependencies:
-
-# default default compiler flags:
-include(cmake/setup_compiler_flags.cmake)
+# Setup hard and optional dependencies and find components
 
 # setup hard dependencies
 include(cmake/setup_dependencies.cmake)
@@ -44,19 +50,11 @@ include(cmake/setup_dependencies.cmake)
 include(cmake/setup_optional.cmake)
 
 ##########################################################################
-# Library and binary dir for this project.
+# Installing DebugReleaseBuild cmake module
 
-# Setup the main include directory of this project.
-set(LINALGWRAP_INCLUDE_DIR "${linalgwrap_SOURCE_DIR}/src")
-include_directories(${LINALGWRAP_INCLUDE_DIR})
-
-# Setup the main binary directory
-set(LINALGWRAP_LIBRARY_DIR "${linalgwrap_BINARY_DIR}/src")
-link_directories(${LINALGWRAP_LIBRARY_DIR})
-
-# The name of the library targets in Debug and Release form
-set(LINALGWRAP_DEBUG_TARGET "${CMAKE_PROJECT_NAME}.g")
-set(LINALGWRAP_RELEASE_TARGET "${CMAKE_PROJECT_NAME}")
+install(DIRECTORY "${linalgwrap_SOURCE_DIR}/cmake/modules"
+	DESTINATION share/cmake
+	FILES_MATCHING PATTERN "*.cmake")
 
 ##########################################################################
 # Pass on to subdirectories:
@@ -69,11 +67,13 @@ add_subdirectory(src)
 add_subdirectory(external)
 
 # Add subdirectories for the test.
+option(LINALGWRAP_ENABLE_TESTS "Build linalgwrap tests" ON)
 if(LINALGWRAP_ENABLE_TESTS) 
 	add_subdirectory(tests)
 endif()
 
 # Add subdirectories for the examples.
+option(LINALGWRAP_ENABLE_EXAMPLES "Build linalgwrap examples" ON)
 if(LINALGWRAP_ENABLE_EXAMPLES)
 	add_subdirectory(examples)
 endif()

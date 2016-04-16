@@ -29,62 +29,35 @@ set(LINALGWRAP_SOURCES
 	version.cc
 )	
 
-#
-# add the Release and Debug targets and set their properties
-#
-FOREACH(build ${LINALGWRAP_BUILD_TYPES})
-	# add the library target
-	add_library(${LINALGWRAP_${build}_TARGET} ${LINALGWRAP_SOURCES})
+# add the libraries for Debug and Release:
+drb_add_library(linalgwrap
+	DBGSUFFIX  ".g"
+	FILES ${LINALGWRAP_SOURCES}
+)
 
-	if (BUILD_SHARED_LIBS)
-		set(LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${CMAKE_SHARED_LINKER_FLAGS_${build}}")
-	else()
-		set(LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} ${CMAKE_STATIC_LINKER_FLAGS_${build}}")
-	endif()
+drb_set_target_properties(ALL linalgwrap 
+	PROPERTIES
+	VERSION "${PROJECT_VERSION}"
+)
 
-	# set the compilation properties
-	set_target_properties(
-		"${LINALGWRAP_${build}_TARGET}"
-		PROPERTIES
-		# version for the so library:
-		SOVERSION "${PROJECT_VERSION}"
-		LINK_FLAGS "${LINKER_FLAGS}"
-		LINKER_LANGUAGE "CXX"
-		COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_${build}}"
-		COMPILE_DEFINITIONS "${LINALGWRAP_DEFINITIONS};${LINALGWRAP_DEFINITIONS_${build}}"
-	)
+drb_target_compile_definitions(ALL     linalgwrap 
+	PRIVATE ${LINALGWRAP_DEFINITIONS})
+drb_target_compile_definitions(DEBUG   linalgwrap 
+	PRIVATE ${LINALGWRAP_DEFINITIONS_DEBUG})
+drb_target_compile_definitions(RELEASE linalgwrap 
+	PRIVATE ${LINALGWRAP_DEFINITIONS_RELEASE})
 
-	# link in the dependencies:
-	if(NOT "${LINALGWRAP_DEPENDENCIES_${build}} ${LINALGWRAP_DEPENDENCIES}" STREQUAL " ")
-		# link, but only if there is anything to link
-		target_link_libraries(
-			${LINALGWRAP_${build}_TARGET}
-			${LINALGWRAP_DEPENDENCIES_${build}}
-			${LINALGWRAP_DEPENDENCIES}
-		)
-	endif()
+drb_target_link_libraries(ALL     linalgwrap ${LINALGWRAP_DEPENDENCIES})
+drb_target_link_libraries(DEBUG   linalgwrap ${LINALGWRAP_DEPENDENCIES_DEBUG})
+drb_target_link_libraries(RELEASE linalgwrap ${LINALGWRAP_DEPENDENCIES_RELEASE})
 
-# 	TODO this export stuff does not work
-#	FILE(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/cmake)	
-#	export(TARGETS ${LINALGWRAP_${build}_TARGET} 
-#		FILE ${CMAKE_BINARY_DIR}/cmake/${CMAKE_PROJECT_NAME}_libraries.cmake
-#		APPEND
-#	)
-
-
-	# set the installation property for this target:
-	install(TARGETS ${LINALGWRAP_${build}_TARGET}
-		DESTINATION lib 
-#		EXPORT ${CMAKE_PROJECT_NAME}_libraries
-		COMPONENT library
-	)
-ENDFOREACH()
+# set the installation property for these targets:
+install(TARGETS ${linalgwrap_TARGETS}
+	DESTINATION lib 
+	COMPONENT library
+)
 
 # install the includes:
-install(DIRECTORY . DESTINATION "include/${CMAKE_PROJECT_NAME}"
+install(DIRECTORY . DESTINATION "include/linalgwrap"
 	FILES_MATCHING PATTERN "*.hh")
 
-## install the cmake configuration:
-#install(EXPORT ${CMAKE_PROJECT_NAME}_libraries
-#	DESTINATION "include/${CMAKE_PROJECT_NAME}/cmake" 
-#	COMPONENT library)
