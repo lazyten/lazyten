@@ -41,11 +41,11 @@ drb_set_target_properties(ALL linalgwrap
 )
 
 drb_target_compile_definitions(ALL     linalgwrap 
-	PRIVATE ${LINALGWRAP_DEFINITIONS})
+	PUBLIC ${LINALGWRAP_DEFINITIONS})
 drb_target_compile_definitions(DEBUG   linalgwrap 
-	PRIVATE ${LINALGWRAP_DEFINITIONS_DEBUG})
+	PUBLIC ${LINALGWRAP_DEFINITIONS_DEBUG})
 drb_target_compile_definitions(RELEASE linalgwrap 
-	PRIVATE ${LINALGWRAP_DEFINITIONS_RELEASE})
+	PUBLIC ${LINALGWRAP_DEFINITIONS_RELEASE})
 
 drb_target_link_libraries(ALL     linalgwrap ${LINALGWRAP_DEPENDENCIES})
 drb_target_link_libraries(DEBUG   linalgwrap ${LINALGWRAP_DEPENDENCIES_DEBUG})
@@ -53,11 +53,28 @@ drb_target_link_libraries(RELEASE linalgwrap ${LINALGWRAP_DEPENDENCIES_RELEASE})
 
 # set the installation property for these targets:
 install(TARGETS ${linalgwrap_TARGETS}
+	EXPORT LinalgwrapTargets
 	DESTINATION lib 
 	COMPONENT library
 )
 
 # install the includes:
-install(DIRECTORY . DESTINATION "include/linalgwrap"
-	FILES_MATCHING PATTERN "*.hh")
+install(DIRECTORY . 
+	DESTINATION "include/linalgwrap"
+	COMPONENT devel
+	FILES_MATCHING PATTERN "*.hh"
+)
+
+# Export the target specifications for linalgwrap.
+export(EXPORT LinalgwrapTargets
+	FILE "${CMAKE_CURRENT_BINARY_DIR}/linalgwrapTargets.cmake"
+	NAMESPACE Upstream::
+)
+
+# and install them appropriately:
+install(EXPORT LinalgwrapTargets
+	FILE "linalgwrapTargets.cmake"
+	NAMESPACE Upstream::
+	DESTINATION "${PackageModuleLocation}/linalgwrap"
+)
 
