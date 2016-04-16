@@ -58,14 +58,14 @@ TEST_CASE("LazyMatrixProduct", "[LazyMatrixProduct]") {
                   test_library;
 
             // The commands we check
-            auto genCommands =
-                  state::gen::execOneOf<typename test_library::op_MultiplyLazy,
-                                        typename test_library::op_UnaryMinus,
-                                        typename test_library::op_MultScalar,
-                                        typename test_library::op_DivideScalar>;
+            auto genCommands = state::gen::execOneOfWithArgs<
+                  typename test_library::op_MultiplyLazy,
+                  typename test_library::op_UnaryMinus,
+                  typename test_library::op_MultScalar,
+                  typename test_library::op_DivideScalar>;
 
             // Run the check:
-            test_library().run_check(in, genCommands, 0.25);
+            test_library().run_check(in, genCommands(), 0.25);
         };
 
         REQUIRE(rc::check("Random function test of LazyMatrixProduct.",
