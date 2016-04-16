@@ -19,13 +19,15 @@
 ##
 ## ---------------------------------------------------------------------
 
+# Check we have at least the required version:
+cmake_minimum_required(VERSION 3.0.0)
 
-# Setup build type for examples
-if (CMAKE_BUILD_TYPE MATCHES "Release")
-	set(EXAMPLES_BUILD_TYPE "RELEASE")
-else()
-	set(EXAMPLES_BUILD_TYPE "DEBUG")
-endif()
+# Set basedir for this module
+set(DRB_DIR "${CMAKE_CURRENT_LIST_DIR}/DebugReleaseBuild")
 
-# Include subdirectories:
-add_subdirectory(diagonal)
+# include other files:
+include("${DRB_DIR}/drb_init.cmake")
+include("${DRB_DIR}/drb_utils.cmake")
+include("${DRB_DIR}/drb_setup_compiler_flags.cmake")
+include("${DRB_DIR}/drb_setup_project.cmake")
+include("${DRB_DIR}/drb_targets.cmake")

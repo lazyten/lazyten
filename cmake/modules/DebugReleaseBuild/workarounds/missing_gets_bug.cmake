@@ -29,9 +29,9 @@ option(PROVIDE_DUMMY_GETS "Do we have the missing gets bug?" OFF)
 #
 
 if (PROVIDE_DUMMY_GETS) 
-FILE(WRITE "${linalgwrap_BINARY_DIR}/gets_dummy.hh"
+	FILE(WRITE "${${CMAKE_PROJECT_NAME}_BINARY_DIR}/gets_dummy.hh"
 "#pragma once
 extern \"C\" char* gets (char* __s);")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -include ${linalgwrap_BINARY_DIR}/gets_dummy.hh")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -include ${${CMAKE_PROJECT_NAME}_BINARY_DIR}/gets_dummy.hh")
 endif()

@@ -73,7 +73,7 @@ enable_if_compiles(CMAKE_CXX_FLAGS "-Werror")
 #######################
 #-- Bug workarounds --#
 #######################
-include(cmake/bugs/missing_gets_bug.cmake)
+include(${DRB_DIR}/workarounds/missing_gets_bug.cmake)
 
 ##############
 #--  Debug --#
