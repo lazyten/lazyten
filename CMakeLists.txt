@@ -32,6 +32,9 @@ drb_init()
 ##########################################################################
 # Global options
 
+# Path where cmake wants the modules and config packages:
+set(PackageModuleLocation share/cmake)
+
 # setup global options (needs to be done before call to project())
 option(LINALGWRAP_ENABLE_TESTS "Build linalgwrap tests" ON)
 option(LINALGWRAP_ENABLE_EXAMPLES "Build linalgwrap examples" ON)
@@ -60,13 +63,6 @@ include(cmake/setup_dependencies.cmake)
 include(cmake/setup_optional.cmake)
 
 ##########################################################################
-# Installing DebugReleaseBuild cmake module
-
-install(DIRECTORY "${linalgwrap_SOURCE_DIR}/cmake/modules"
-	DESTINATION share/cmake
-	FILES_MATCHING PATTERN "*.cmake")
-
-##########################################################################
 # Pass on to subdirectories:
 
 # The src directory does most of the work: Here the library is build and 
@@ -85,3 +81,7 @@ endif()
 if(LINALGWRAP_ENABLE_EXAMPLES)
 	add_subdirectory(examples)
 endif()
+
+##########################################################################
+# Finally install modules and packages:
+include(cmake/install_modules_packages.cmake)

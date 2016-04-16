@@ -26,18 +26,16 @@ namespace state {
 namespace gen {
 
 // TODO implement into rapidcheck in some sensible way
-template <typename Cmd, typename GenerationFunc>
-Gen<Commands<Cmd>> commandsScaledLength(const typename Cmd::Model &initialState,
-                                        double scale,
-                                        GenerationFunc &&genFunc) {
+template <typename Model, typename GenerationFunc>
+auto commandsScaledLength(const Model &initialState, double scale,
+                          GenerationFunc &&genFunc) {
 
     /// Generate a sequence of commands where the commands themself
     /// get passed the size ``size``.
     auto commands_with_size = [=](int size) {
-        return commands<Cmd>(initialState,
-                             [=](const typename Cmd::Model &state) {
-                                 return rc::gen::resize(size, genFunc(state));
-                             });
+        return commands<Model>(initialState, [=](const Model &state) {
+            return rc::gen::resize(size, genFunc(state));
+        });
     };
 
     return rc::gen::withSize([=](int size) {
@@ -63,9 +61,8 @@ template <typename Model, typename Sut, typename GenFunc>
 void state_check_scaled(const Model &initialState, Sut &sut, double scale,
                         GenFunc &&generationFunc) {
 
-    const auto commandsGenScaled =
-          *rc::state::gen::commandsScaledLength<rc::state::Command<Model, Sut>>(
-                initialState, scale, generationFunc);
+    const auto commandsGenScaled = *rc::state::gen::commandsScaledLength(
+          initialState, scale, generationFunc);
 
     // Run the thing:
     runAll(commandsGenScaled, initialState, sut);
