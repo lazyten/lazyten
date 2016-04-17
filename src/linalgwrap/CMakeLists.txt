@@ -29,6 +29,10 @@ set(LINALGWRAP_SOURCES
 	version.cc
 )	
 
+# Dump the current version as an include file.
+include(WriteVersionHeader)
+WRITE_VERSION_HEADER("${CMAKE_CURRENT_BINARY_DIR}/version_defs.hh")
+
 # add the libraries for Debug and Release:
 drb_add_library(linalgwrap
 	DBGSUFFIX  ".g"
@@ -63,6 +67,10 @@ install(DIRECTORY .
 	DESTINATION "include/linalgwrap"
 	COMPONENT devel
 	FILES_MATCHING PATTERN "*.hh"
+)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/version_defs.hh"
+	DESTINATION "include/linalgwrap"
+	COMPONENT devel
 )
 
 # Export the target specifications for linalgwrap.
