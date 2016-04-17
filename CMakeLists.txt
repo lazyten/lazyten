@@ -48,7 +48,8 @@ project(linalgwrap VERSION 0.1.0)
 drb_setup_project(linalgwrap)
 
 # Global include directories for this project:
-include_directories("${linalgwrap_SOURCE_DIR}/src")
+include_directories("${linalgwrap_SOURCE_DIR}/src")  # for default sources
+include_directories("${linalgwrap_BINARY_DIR}/src")  # for generated sources
 
 # enable testing of this project
 enable_testing()

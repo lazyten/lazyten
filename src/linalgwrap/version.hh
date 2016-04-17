@@ -18,17 +18,22 @@
 //
 
 #pragma once
+#include "linalgwrap/version_defs.hh"  // will be created by cmake
 #include <string>
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 1
-#define VERSION_REVISION 0
+// The file linalgwrap/version_defs.hh will be created by cmake from
+// the interal project version and will contain definitions of the
+// macros VERSION_MINOR VERSION_MAJOR VERSION_PATCH
+
+namespace linalgwrap {
 
 struct version {
     static int constexpr major{VERSION_MAJOR};
     static int constexpr minor{VERSION_MINOR};
-    static int constexpr revision{VERSION_REVISION};
+    static int constexpr patch{VERSION_PATCH};
 
     // Return the version as a string
     static std::string version_string();
 };
+
+}  // namespace linalgwrap

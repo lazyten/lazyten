@@ -20,8 +20,12 @@
 #include "linalgwrap/version.hh"
 #include <sstream>
 
+namespace linalgwrap {
+
 std::string version::version_string() {
     std::stringstream ss;
-    ss << major << "." << minor << "." << revision;
+    ss << major << "." << minor << "." << patch;
     return ss.str();
 }
+
+}  // namespace linalgwrap
