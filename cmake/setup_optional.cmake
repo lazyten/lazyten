@@ -19,7 +19,18 @@
 ##
 ## ---------------------------------------------------------------------
 
-# Setup optional dependencies and features
+# adds entries to these things
+#
+# 	LINALGWRAP_DEPENDENCIES			everyone needs these libraries
+# 	LINALGWRAP_DEPENDENCIES_DEBUG		debug mode needs these extras
+# 	LINALGWRAP_DEPENDENCIES_RELEASE		release mode needs these extras
+# 	LINALGWRAP_DEPENDENCIES_TEST		tests need these extra libraries
+#
+#       LINALGWRAP_DEFINITIONS			definitions for all compilation
+#       LINALGWRAP_DEFINITIONS_DEBUG		definitions for debug mode
+#       LINALGWRAP_DEFINITIONS_RELEASE		definitions for release mode
+#       
+
 
 #################################
 #--     Modules and macros    --#

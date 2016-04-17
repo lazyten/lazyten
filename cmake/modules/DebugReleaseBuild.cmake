@@ -23,11 +23,11 @@
 cmake_minimum_required(VERSION 3.0.0)
 
 # Set basedir for this module
-set(DRB_DIR "${CMAKE_CURRENT_LIST_DIR}/DebugReleaseBuild")
+set(DRB_DIR "${CMAKE_CURRENT_LIST_DIR}/DebugReleaseBuild"
+	CACHE INTERNAL "Base directory of the DebugReleaseBuild module.")
 
 # include other files:
 include("${DRB_DIR}/drb_init.cmake")
 include("${DRB_DIR}/drb_utils.cmake")
 include("${DRB_DIR}/drb_setup_compiler_flags.cmake")
-include("${DRB_DIR}/drb_setup_project.cmake")
 include("${DRB_DIR}/drb_targets.cmake")

@@ -26,11 +26,8 @@ macro(drb_add_target TARGET KIND)
 	# For internal usage only. Interface may change at any
 	# time. Use drb_add_library or drb_add_executable instead.
 
-	# Check that we have a drb setup
-	if(NOT ${CMAKE_PROJECT_NAME}_HAS_DRB_SETUP)
-		message(FATAL_ERROR "You have to setup the DebugReleaseBuild \
-for this project(${CMAKE_PROJECT_NAME}) before setting up any targets via \
-drb_add_target. Try calling drb_setup_project first.")
+	if(NOT DRB_INITIALISED)
+		message(FATAL_ERROR "You have to call drb_init before any other DebugReleaseBuild function.")
 	endif()
 
 	# Set the target variables
@@ -142,10 +139,8 @@ macro(drb_add_library TARGET)
 	#
 
 	# Check that we have a drb setup
-	if(NOT ${CMAKE_PROJECT_NAME}_HAS_DRB_SETUP)
-		message(FATAL_ERROR "You have to setup the DebugReleaseBuild \
-for this project(${CMAKE_PROJECT_NAME}) before setting up any targets via \
-drb_add_library. Try calling drb_setup_project first.")
+	if(NOT DRB_INITIALISED)
+		message(FATAL_ERROR "You have to call drb_init before any other DebugReleaseBuild function.")
 	endif()
 
 	# Make ARGN string a list, which we then can properly pass on
@@ -209,10 +204,8 @@ macro(drb_add_executable TARGET)
 	#
 
 	# check that drb has been initialised
-	if(NOT ${CMAKE_PROJECT_NAME}_HAS_DRB_SETUP)
-		message(FATAL_ERROR "You have to setup the DebugReleaseBuild \
-for this project(${CMAKE_PROJECT_NAME}) before setting up any targets via \
-drb_add_executable. Try calling drb_setup_project first.")
+	if(NOT DRB_INITIALISED)
+		message(FATAL_ERROR "You have to call drb_init before any other DebugReleaseBuild function.")
 	endif()
 
 	# Make ARGN string a list, which we then can properly pass on

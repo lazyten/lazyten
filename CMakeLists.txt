@@ -39,13 +39,18 @@ set(PackageModuleLocation share/cmake)
 option(LINALGWRAP_ENABLE_TESTS "Build linalgwrap tests" ON)
 option(LINALGWRAP_ENABLE_EXAMPLES "Build linalgwrap examples" ON)
 
+option(LINALGWRAP_WITH_EXTERNAL_RAPIDCHECK "Use external rapidcheck from git repository (ON) or system-provided (OFF)." ON)
+option(LINALGWRAP_INSTALL_RAPIDCHECK "If LINALGWRAP_WITH_EXTERNAL_RAPIDCHECK is ON, should rapidcheck be installed as well?" OFF)
+
+option(LINALGWRAP_WITH_EXTERNAL_CATCH "Use external catch library from git repository (ON) or system-provided version (OFF)." ON)
+option(LINALGWRAP_INSTALL_CATCH "If LINALGWRAP_WITH_EXTERNAL_CATCH is ON, should catch be installed as well?" OFF)
+
 ##########################################################################
 # Project setup
 
 # enable the new version feature introduced in cmake 3.0.0
 cmake_policy(SET CMP0048 NEW)
 project(linalgwrap VERSION 0.1.0)
-drb_setup_project(linalgwrap)
 
 # Global include directories for this project:
 include_directories("${linalgwrap_SOURCE_DIR}/src")  # for default sources
@@ -56,6 +61,9 @@ enable_testing()
 
 ##########################################################################
 # Setup hard and optional dependencies and find components
+
+# Determine and setup compiler flags:
+drb_setup_compiler_flags()
 
 # setup hard dependencies
 include(cmake/setup_dependencies.cmake)
