@@ -22,6 +22,7 @@
 #include <iostream>
 #include <linalgwrap/LazyMatrixWrapper.hh>
 #include <linalgwrap/SmallMatrix.hh>
+#include <linalgwrap/version.hh>
 #include <linalgwrap/view.hh>
 
 using namespace linalgwrap;
@@ -41,6 +42,15 @@ int main() {
     // Define some types
     typedef double scalar_type;
     typedef SmallMatrix<scalar_type> stored_matrix_type;
+
+    //
+    // -------------------------
+    //
+
+    // Print the linalgwrap version we run on:
+    std::cout << "Running with linalgwrap " << version::version_string()
+              << std::endl
+              << std::endl;
 
     //
     // -------------------------
