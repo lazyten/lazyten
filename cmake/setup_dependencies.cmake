@@ -25,6 +25,22 @@
 # 	LINALGWRAP_DEPENDENCIES_DEBUG		debug mode needs these extras
 # 	LINALGWRAP_DEPENDENCIES_RELEASE		release mode needs these extras
 # 	LINALGWRAP_DEPENDENCIES_TEST		tests need these extra libraries
+#
+#       LINALGWRAP_DEFINITIONS			definitions for all compilation
+#       LINALGWRAP_DEFINITIONS_DEBUG		definitions for debug mode
+#       LINALGWRAP_DEFINITIONS_RELEASE		definitions for release mode
+#       
+
+####################
+#-- Empty it all --#
+####################
+set(LINALGWRAP_DEPENDENCIES "")
+set(LINALGWRAP_DEPENDENCIES_DEBUG "")
+set(LINALGWRAP_DEPENDENCIES_RELEASE "")
+set(LINALGWRAP_DEPENDENCIES_TEST "")
+set(LINALGWRAP_DEFINITIONS "")
+set(LINALGWRAP_DEFINITIONS_DEBUG "")
+set(LINALGWRAP_DEFINITIONS_RELEASE "")
 
 ##############
 #-- catch  --#
