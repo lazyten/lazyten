@@ -25,7 +25,7 @@
 # Requires the variable PackageModuleLocation to be set.
 
 # Installing cmake modules
-install(DIRECTORY "${linalgwrap_SOURCE_DIR}/cmake/modules"
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/cmake/modules"
 	DESTINATION ${PackageModuleLocation}
 	COMPONENT devel
 	FILES_MATCHING PATTERN "*.cmake"
@@ -34,20 +34,20 @@ install(DIRECTORY "${linalgwrap_SOURCE_DIR}/cmake/modules"
 # Write a basic version file for linalgwrap
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
-	"${CMAKE_CURRENT_BINARY_DIR}/linalgwrapConfigVersion.cmake"
+	"${CMAKE_BINARY_DIR}/linalgwrapConfigVersion.cmake"
 	COMPATIBILITY AnyNewerVersion
 )
 
 # Adjust a configure file
 configure_file(cmake/linalgwrapConfig.cmake.in
-	"${CMAKE_CURRENT_BINARY_DIR}/linalgwrapConfig.cmake"
+	"${CMAKE_BINARY_DIR}/linalgwrapConfig.cmake"
 	COPYONLY
 )
 
 # Set an export location:
 install(FILES
-	"${CMAKE_CURRENT_BINARY_DIR}/linalgwrapConfig.cmake"
-	"${CMAKE_CURRENT_BINARY_DIR}/linalgwrapConfigVersion.cmake"
+	"${CMAKE_BINARY_DIR}/linalgwrapConfig.cmake"
+	"${CMAKE_BINARY_DIR}/linalgwrapConfigVersion.cmake"
 	DESTINATION "${PackageModuleLocation}/linalgwrap"
 	COMPONENT devel
 )
