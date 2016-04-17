@@ -24,7 +24,7 @@
 #
 # Requires the variable PackageModuleLocation to be set.
 
-# Installing DebugReleaseBuild cmake module
+# Installing cmake modules
 install(DIRECTORY "${linalgwrap_SOURCE_DIR}/cmake/modules"
 	DESTINATION ${PackageModuleLocation}
 	COMPONENT devel
