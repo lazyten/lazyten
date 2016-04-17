@@ -58,8 +58,11 @@ drb_target_link_libraries(RELEASE linalgwrap ${LINALGWRAP_DEPENDENCIES_RELEASE})
 # set the installation property for these targets:
 install(TARGETS ${linalgwrap_TARGETS}
 	EXPORT LinalgwrapTargets
-	DESTINATION lib 
 	COMPONENT library
+	LIBRARY DESTINATION lib
+	ARCHIVE DESTINATION lib
+	RUNTIME DESTINATION bin
+	INCLUDES DESTINATION include
 )
 
 # install the includes:
