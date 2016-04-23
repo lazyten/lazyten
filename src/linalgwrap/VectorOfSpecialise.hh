@@ -47,6 +47,12 @@ class VectorOfSpecialise : public VectorOfBase<MatrixType> {
 template <typename Scalar>
 class VectorOfSpecialise<ArmadilloMatrix<Scalar>>
       : public VectorOfBase<ArmadilloMatrix<Scalar>> {
+    static_assert(!std::is_same<std::complex<float>, Scalar>::value &&
+                        !std::is_same<std::complex<double>, Scalar>::value,
+                  "VectorOfSpecialise<ArmadilloMatrix<Scalar>> is currently "
+                  "not well-tested for complex-valued data types. Hence "
+                  "complex<double> and complex<float> cannot be used");
+
   public:
     typedef VectorOfBase<ArmadilloMatrix<Scalar>> base_type;
     typedef typename base_type::scalar_type scalar_type;
@@ -104,6 +110,7 @@ VectorOfSpecialise<ArmadilloMatrix<Scalar>>::dot(
     typedef typename ArmadilloMatrix<Scalar>::storage_type storage_type;
     const storage_type& thismat = this->data();
     const storage_type& othermat = other.data();
+    // TODO if thismat is complex, we might need cdot here!
     return arma::dot(thismat, othermat);
 }
 
