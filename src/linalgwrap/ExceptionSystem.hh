@@ -64,7 +64,7 @@ class AssertDbgEffect {
             __exc__cept.add_exc_data(__FILE__, __LINE__, __PRETTY_FUNCTION__, \
                                      #cond, #exception);                      \
             if (linalgwrap::AssertDbgEffect::get() ==                         \
-                ExceptionEffect::ABORT) {                                     \
+                linalgwrap::ExceptionEffect::ABORT) {                         \
                 std::cerr << __exc__cept.what() << std::endl;                 \
                 std::abort();                                                 \
             } else {                                                          \
