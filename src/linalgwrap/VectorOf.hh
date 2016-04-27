@@ -47,6 +47,17 @@ class VectorOf : public detail::VectorOfSpecialise<MatrixType> {
 
     /** \brief Construct from std::vector */
     explicit VectorOf(const std::vector<scalar_type>& v);
+
+    /** \brief Construct from Matrix type
+     *
+     * The matrix is asserted to be a 1xn matrix.
+     */
+    explicit VectorOf(const MatrixType& m);
+
+    /** \brief Construct from iterators */
+    template <class InputIterator>
+    VectorOf(InputIterator first, InputIterator last);
+
     ///@}
 
     /** \name Vector operations
@@ -124,6 +135,14 @@ VectorOf<MatrixType>::VectorOf(size_type size, bool fill_zero)
       : base_type{size, fill_zero} {}
 
 template <typename MatrixType>
+template <class InputIterator>
+VectorOf<MatrixType>::VectorOf(InputIterator first, InputIterator last)
+      : VectorOf(std::distance(first, last), false) {
+    assert_greater(0, std::distance(first, last));
+    std::copy(first, last, base_type::begin());
+}
+
+template <typename MatrixType>
 VectorOf<MatrixType>::VectorOf(std::initializer_list<scalar_type> list)
       : VectorOf(list.size(), false) {
     auto itbase = base_type::begin();
@@ -134,8 +153,21 @@ VectorOf<MatrixType>::VectorOf(std::initializer_list<scalar_type> list)
 
 template <typename MatrixType>
 VectorOf<MatrixType>::VectorOf(const std::vector<scalar_type>& v)
-      : VectorOf(v.size(), false) {
-    std::copy(v.begin(), v.end(), base_type::begin());
+      : VectorOf(v.begin(), v.end()) {}
+
+template <typename MatrixType>
+VectorOf<MatrixType>::VectorOf(const MatrixType& m)
+      : VectorOf(m.n_rows(), false) {
+    // Assert that the matrix size is correct.
+    assert_size(m.n_cols(), 1);
+
+    // If the distance between begin and end is not equal to the number
+    // of rows the matrix contained unexpected sparsity.
+    // TODO use some kind of "has sparsity" check here once it exists.
+    assert_dbg(std::distance(std::begin(m), std::end(m)) == m.n_rows(),
+               ExcMatrixNotDense());
+
+    std::copy(std::begin(m), std::end(m), base_type::begin());
 }
 
 template <typename MatrixType>
