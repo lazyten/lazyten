@@ -26,6 +26,7 @@
 #include "linalgwrap/SmallMatrix.hh"
 #include "linalgwrap/Subscribable.hh"
 #include "linalgwrap/type_utils.hh"
+#include <complex>
 #include <cstddef>
 #include <iomanip>
 #include <iostream>
@@ -117,13 +118,31 @@ class Matrix_i : public Subscribable {
     const_iterator cend() const;
     ///@}
 
+    /** \name Check for matrix properties
+     */
+    ///@{
+    /** \brief Check whether the matrix is symmetric
+     *
+     * Loops over all elements and check wheather the difference
+     * between m(i,j) and m(j,i) is less than the tolerance given
+     * */
+    bool is_symmetric(scalar_type tolerance =
+                            Constants<scalar_type>::default_tolerance) const;
+
+    // TODO ideas: is_real, is_hermetian, is_real_symmetric
+    ///@}
+
     /** \name Standard operations
      */
     ///@{
+    /** \brief Compute the trace fo this matrix
+     * Only works for quadratic matrices */
+    scalar_type trace() const;
+
     /** Calculate the (signed) sum of all matrix entries. */
-    virtual scalar_type accumulate() const {
-        return std::accumulate(begin(), end(), Constants<scalar_type>::zero);
-    }
+    scalar_type accumulate() const;
+
+    // TODO implement some matrix norm!
     ///@}
 };
 
