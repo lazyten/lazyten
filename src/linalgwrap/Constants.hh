@@ -43,6 +43,11 @@ struct Constants {
           std::numeric_limits<scalar_type>::has_signaling_NaN
                 ? std::numeric_limits<scalar_type>::signaling_NaN()
                 : std::numeric_limits<scalar_type>::max();
+
+    /** \brief Constant which gives the default numerical tolerance to use
+     *  for a number of checks */
+    static constexpr scalar_type default_tolerance =
+          std::numeric_limits<scalar_type>::epsilon();
 };
 }
 
