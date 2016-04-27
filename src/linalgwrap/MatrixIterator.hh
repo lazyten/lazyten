@@ -28,7 +28,7 @@ namespace linalgwrap {
  * matrix in the way the core dictates.
  * */
 template <typename IteratorCore>
-class MatrixIterator : private IteratorCore {
+class MatrixIterator : public IteratorCore {
   public:
     typedef IteratorCore base_type;
     typedef typename base_type::original_matrix_type original_matrix_type;
