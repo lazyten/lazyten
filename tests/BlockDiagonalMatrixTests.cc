@@ -37,7 +37,8 @@ TEST_CASE("BlockDiagonalMatrix class", "[BlockDiagonalMatrix]") {
           lazy_matrix_type;
 
     SECTION("Simple function test") {
-        stored_matrix_type stored{{1.0, 2.0}, {3.0, 4.0}};
+        stored_matrix_type stored{{1.0, 2.0},   // first row
+                                  {3.0, 4.0}};  // second row
         lazy_matrix_type lazy{stored};
 
         auto diag1 = make_block_diagonal(stored_matrix_type{stored},
