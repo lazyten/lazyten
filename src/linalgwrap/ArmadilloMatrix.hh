@@ -224,7 +224,8 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
     /** Set all elements to zero */
     void set_zero() override { m_arma.zeros(); }
 
-    scalar_type accumulate() const override { return arma::accu(m_arma); }
+    scalar_type accumulate() const { return arma::accu(m_arma); }
+    scalar_type trace() const { return arma::trace(m_arma); }
 
     scalar_type& operator()(size_type row, size_type col) override {
         assert_greater(row, n_rows());

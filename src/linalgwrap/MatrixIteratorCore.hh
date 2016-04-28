@@ -47,6 +47,7 @@ template <typename Matrix, bool Constness>
 struct MatrixIteratorCoreBase
       : public std::iterator<std::forward_iterator_tag,
                              typename Matrix::scalar_type> {
+  public:
     typedef Matrix original_matrix_type;
 
     typedef typename std::conditional<Constness, const Matrix, Matrix>::type

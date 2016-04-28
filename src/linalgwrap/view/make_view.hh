@@ -40,6 +40,16 @@ template <typename Matrix>
 class BlockView;
 }
 
+/** Convenience function to make a generic view of the whole matrix as it is
+ *
+ * \param m     The Matrix to view upon
+ *
+ * \note This is a dirty hack at the moment to make a stored object lazy.
+ *       Please only use when neccessary and avoid it if you can.
+ */
+template <typename Matrix>
+detail::BlockView<Matrix> view(Matrix& m);
+
 /** Convenience function to make a BlockView
  *
  *\param m      The Matrix to take a block of
@@ -91,6 +101,14 @@ detail::TransposeView<Matrix> transpose(Matrix& m);
 //
 // ---------------------------------------------------------------
 //
+
+template <typename Matrix>
+detail::BlockView<Matrix> view(Matrix& m) {
+    static_assert(
+          IsStoredMatrix<Matrix>::value,
+          "view::view(mat) is only allowed for mat being a stored matrix");
+    return detail::BlockView<Matrix>{m, range(m.n_rows()), range(m.n_cols())};
+}
 
 template <typename Matrix>
 detail::BlockView<Matrix> block(Matrix& m,

@@ -58,6 +58,30 @@ DefExceptionMsg(ExcOverflow, "Overflow detected.");
 DefExceptionMsg(ExcUnderflow, "Underflow detected.");
 
 //
+// Matrix properties
+//
+
+/** A matrix that was expected to be Hermetian is not */
+DefExceptionMsg(ExcMatrixNotHermitian,
+                "Encountered a non-Hermetian matrix where a Hermetian matrix "
+                "was expected");
+
+/** A matrix that was expected to be Hermetian is not */
+DefExceptionMsg(ExcMatrixNotSymmetric,
+                "Encountered a non-Symmetric matrix where a Symmetric matrix "
+                "was expected");
+
+/** A matrix which was expected to be dense, contained sparsity */
+DefExceptionMsg(
+      ExcMatrixNotDense,
+      "Encountered a non-dense matrix where a dense matrix was expected");
+
+/** A matrix which was expected to be quadratic, was not */
+DefExceptionMsg(
+      ExcMatrixNotSquare,
+      "Encountered a non-square matrix where a square matrix was expected");
+
+//
 // Range and size checking
 //
 /**
