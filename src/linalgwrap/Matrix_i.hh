@@ -25,10 +25,12 @@
 #include "linalgwrap/Exceptions.hh"
 #include "linalgwrap/SmallMatrix.hh"
 #include "linalgwrap/Subscribable.hh"
+#include "linalgwrap/io/MatrixPrinter.hh"
 #include "linalgwrap/type_utils.hh"
 #include <complex>
 #include <cstddef>
 #include <iomanip>
+#include <ios>
 #include <iostream>
 #include <numeric>
 #include <string>
@@ -218,22 +220,44 @@ typename Matrix_i<Scalar>::const_iterator Matrix_i<Scalar>::cend() const {
     return const_iterator(*this);
 }
 
+template <typename Scalar>
+bool Matrix_i<Scalar>::is_symmetric(scalar_type tolerance) const {
+    // Check that the matrix is quadratic:
+    if (n_rows() != n_cols()) return false;
+
+    // Check if lower and upper triangle agree:
+    for (auto i : range(n_rows())) {
+        for (auto j : range(i + 1, n_cols())) {
+            if (std::abs((*this)(i, j) - (*this)(j, i)) > tolerance)
+                return false;
+        }
+    }
+    return true;
+}
+
+template <typename Scalar>
+inline typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::accumulate()
+      const {
+    return std::accumulate(begin(), end(), Constants<scalar_type>::zero);
+}
+
+template <typename Scalar>
+inline typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::trace() const {
+    assert_dbg(n_rows() == n_cols(), ExcMatrixNotSquare());
+
+    scalar_type trace{Constants<scalar_type>::zero};
+    for (size_type i = 0; i < n_rows(); ++i) {
+        trace += (*this)(i, i);
+    }
+    return trace;
+}
+
 //
 // Out of scope
 //
 template <typename Scalar>
 std::ostream& operator<<(std::ostream& o, const Matrix_i<Scalar>& m) {
-    typedef typename Matrix_i<Scalar>::size_type size_type;
-
-    for (size_type i = 0; i < m.n_rows(); ++i) {
-        for (size_type j = 0; j < m.n_cols(); ++j) {
-            o << std::setw(15) << m(i, j);
-        }
-
-        if (i == m.n_rows() - 1) break;
-        o << std::endl;
-    }
-
+    io::MatrixPrinter().print(m, o);
     return o;
 }
 

@@ -27,6 +27,7 @@ set(LINALGWRAP_SOURCES
 	ExceptionBase.cc
 	ExceptionSystem.cc
 	version.cc
+	io/Mathematica.cc
 )	
 
 # Dump the current version as an include file.

@@ -25,6 +25,9 @@
 
 namespace linalgwrap {
 
+// TODO consider specialising this class for 2 and 3 matrices.
+//      Lambdas are terribly slow and could be avoided ...
+
 // Forward definition of base class:
 template <typename... Matrices>
 class BlockDiagonalMatrixBase;
@@ -106,9 +109,11 @@ template <typename... Matrices>
 BlockDiagonalMatrix<Matrices...>::BlockDiagonalMatrix(
       std::tuple<Matrices...> blocks)
       : m_blocks{std::move(blocks)}, m_size{0} {
+#ifdef DEBUG
     // Assert that all matrix blocks are quadratic.
     tuple_for_each([](auto& mat) { assert_size(mat.n_rows(), mat.n_cols()); },
                    tuple_ref(m_blocks));
+#endif
 
     // Determine size of this matrix:
     // Lambda to add size of current block in:
