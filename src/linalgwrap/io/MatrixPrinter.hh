@@ -120,7 +120,7 @@ class MatrixPrinter {
 //
 
 inline MatrixPrinter::MatrixPrinter()
-      : m_max_screen_width(80), m_known_zero_char('*'){};
+      : m_max_screen_width(80), m_known_zero_char('*') {}
 
 inline void MatrixPrinter::max_screen_width(std::streamsize w) {
     m_max_screen_width = w;

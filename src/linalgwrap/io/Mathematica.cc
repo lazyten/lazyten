@@ -22,10 +22,10 @@
 namespace linalgwrap {
 namespace io {
 
-Mathematica::Mathematica() : m_thresh{1e-16}, m_check_for_thresh{false} {};
+Mathematica::Mathematica() : m_thresh{1e-16}, m_check_for_thresh{false} {}
 
 Mathematica::Mathematica(double thresh)
-      : m_thresh{thresh}, m_check_for_thresh{true} {};
+      : m_thresh{thresh}, m_check_for_thresh{true} {}
 
 const std::vector<std::string> Mathematica::extensions{"m"};
 
