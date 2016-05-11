@@ -28,9 +28,9 @@
 namespace linalgwrap {
 
 struct version {
-    static int constexpr major{VERSION_MAJOR};
-    static int constexpr minor{VERSION_MINOR};
-    static int constexpr patch{VERSION_PATCH};
+    static int constexpr major{linalgwrap_VERSION_MAJOR};
+    static int constexpr minor{linalgwrap_VERSION_MINOR};
+    static int constexpr patch{linalgwrap_VERSION_PATCH};
 
     // Return the version as a string
     static std::string version_string();

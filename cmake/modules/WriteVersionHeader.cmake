@@ -23,13 +23,14 @@ include(CMakeParseArguments)
 
 function(WRITE_VERSION_HEADER _filename)
 	# Write a header file which defines the macro contstants
-	# VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH according
-	# to the current project version or a version supplied
-	# via the VERSION flag.
+	# ${NAME}_VERSION_MAJOR, ${NAME}_VERSION_MINOR and
+	# ${NAME}_VERSION_PATCH according to the current 
+	# project's version and name or by a name and version
+	# supplied via the VERSION and NAME flags.
 
 
 	set(options )
-	set(oneValueArgs VERSION)
+	set(oneValueArgs VERSION NAME)
 	set(multiValueArgs )
 
 	cmake_parse_arguments(WVH "${options}" "${oneValueArgs}" "${multiValueArgs}"  ${ARGN})
@@ -46,6 +47,14 @@ function(WRITE_VERSION_HEADER _filename)
 		endif()
 	endif()
 
+	if("${WVH_NAME}" STREQUAL "")
+		if ("${PROJECT_NAME}" STREQUAL "")
+			message(FATAL_ERROR "No NAME specified for WRITE_VERSION_HEADER()")
+		else()
+			set(WVH_NAME "${PROJECT_NAME}")
+		endif()
+	endif()
+
 	# Split version into individual vars:
 	string(REPLACE "." ";" VERSION_LIST ${WVH_VERSION})
 	list(GET VERSION_LIST 0 WVH_MAJOR)
@@ -56,7 +65,7 @@ function(WRITE_VERSION_HEADER _filename)
 
 	file(WRITE "${_filename}"
 "#pragma once
-#define VERSION_MAJOR ${WVH_MAJOR}
-#define VERSION_MINOR ${WVH_MINOR}
-#define VERSION_PATCH ${WVH_PATCH}")
+#define ${WVH_NAME}_VERSION_MAJOR ${WVH_MAJOR}
+#define ${WVH_NAME}_VERSION_MINOR ${WVH_MINOR}
+#define ${WVH_NAME}_VERSION_PATCH ${WVH_PATCH}")
 endfunction()
