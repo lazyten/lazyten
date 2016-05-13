@@ -67,6 +67,9 @@ macro(drb_init)
 
 	# Parse the build type and generate a list of build types
 	# to perform
+	set(DRB_BUILD_TYPES "" CACHE INTERNAL 
+		"Build types actually performed by the DebugReleaseBuild module"
+		FORCE)
 	if (CMAKE_BUILD_TYPE MATCHES "Debug")
 		LIST(APPEND DRB_BUILD_TYPES "DEBUG")
 	endif()

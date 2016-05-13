@@ -62,11 +62,11 @@ endif()
 if (LINALGWRAP_WITH_EXTERNAL_CATCH AND LINALGWRAP_ENABLE_TESTS)
 	# We need to setup catch further down in the externals
 	# so add it to the dependencies
-	set(LINALGWRAP_DEPENDENCIES_TEST ${LINALGWRAP_DEPENDENCIES_TEST} law_catch)
+	set(LINALGWRAP_DEPENDENCIES_TEST ${LINALGWRAP_DEPENDENCIES_TEST} common_catch)
 elseif(LINALGWRAP_ENABLE_TESTS)
-	# Note: We need the target to have the name law_catch and not just "catch"
+	# Note: We need the target to have the name common_catch and not just "catch"
 	#       since rapidcheck uses this target name internally.
-	add_library(law_catch INTERFACE)
+	add_library(common_catch INTERFACE)
 
 	find_path(catch_INCLUDE_DIR catch.hpp
 		PATHS
@@ -83,8 +83,8 @@ catch_INCLUDE_DIR.")
 
 	message(STATUS "Found system-provided catch at ${catch_INCLUDE_DIR}/catch.hpp")
 
-	target_include_directories(law_catch INTERFACE ${catch_INCLUDE_DIR})
-	set(GSCF_DEPENDENCIES_TEST  ${LINALGWRAP_DEPENDENCIES_TEST} law_catch)
+	target_include_directories(common_catch INTERFACE ${catch_INCLUDE_DIR})
+	set(GSCF_DEPENDENCIES_TEST  ${LINALGWRAP_DEPENDENCIES_TEST} common_catch)
 endif()
 
 

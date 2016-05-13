@@ -77,11 +77,11 @@ if (LINALGWRAP_ENABLE_TESTS AND LINALGWRAP_WITH_EXTERNAL_RAPIDCHECK)
 	# Export definitions:
 	export(TARGETS rapidcheck
 		NAMESPACE Upstream::
-		FILE "${CMAKE_BINARY_DIR}/rapidcheckTargets.cmake"
+		FILE "${linalgwrap_BINARY_DIR}/rapidcheckTargets.cmake"
 	)
 
 	# And write a config file:
-	file(WRITE "${CMAKE_BINARY_DIR}/rapidcheckConfig.cmake"
+	file(WRITE "${linalgwrap_BINARY_DIR}/rapidcheckConfig.cmake"
 		"include(\"\${CMAKE_CURRENT_LIST_DIR}/rapidcheckTargets.cmake\")"
 	)
 
@@ -116,6 +116,9 @@ if (LINALGWRAP_ENABLE_TESTS AND LINALGWRAP_WITH_EXTERNAL_RAPIDCHECK)
 
 		message(STATUS "Enabled installation of external rapidcheck library.")
 	endif()
+
+	# For downstream compatibility:
+	add_library(common_rapidcheck ALIAS rapidcheck)
 endif()
 
 #
@@ -128,8 +131,8 @@ if(LINALGWRAP_ENABLE_TESTS AND LINALGWRAP_WITH_EXTERNAL_CATCH)
 	endif()
 
 	# Add dummy target
-	add_library(law_catch INTERFACE)
-	target_include_directories(law_catch INTERFACE "${CMAKE_CURRENT_LIST_DIR}/catch/include")
+	add_library(common_catch INTERFACE)
+	target_include_directories(common_catch INTERFACE "${CMAKE_CURRENT_LIST_DIR}/catch/include")
 
 	if(LINALGWRAP_INSTALL_CATCH)
 		install(FILES "${CMAKE_CURRENT_LIST_DIR}/catch/single_include/catch.hpp"
