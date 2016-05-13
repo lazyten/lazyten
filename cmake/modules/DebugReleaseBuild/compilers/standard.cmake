@@ -70,11 +70,6 @@ enable_if_compiles(CMAKE_CXX_FLAGS "-Wno-unused-parameter")
 # Make warnings errors, such that we cannot ignore them
 enable_if_compiles(CMAKE_CXX_FLAGS "-Werror")
 
-# Make shared libraries be position indipendant code (-fPIC)
-# by default
-set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fPIC")
-set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fPIC")
-
 #######################
 #-- Bug workarounds --#
 #######################
