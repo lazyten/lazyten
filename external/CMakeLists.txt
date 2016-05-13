@@ -77,11 +77,11 @@ if (LINALGWRAP_ENABLE_TESTS AND LINALGWRAP_WITH_EXTERNAL_RAPIDCHECK)
 	# Export definitions:
 	export(TARGETS rapidcheck
 		NAMESPACE Upstream::
-		FILE "${CMAKE_BINARY_DIR}/rapidcheckTargets.cmake"
+		FILE "${linalgwrap_BINARY_DIR}/rapidcheckTargets.cmake"
 	)
 
 	# And write a config file:
-	file(WRITE "${CMAKE_BINARY_DIR}/rapidcheckConfig.cmake"
+	file(WRITE "${linalgwrap_BINARY_DIR}/rapidcheckConfig.cmake"
 		"include(\"\${CMAKE_CURRENT_LIST_DIR}/rapidcheckTargets.cmake\")"
 	)
 

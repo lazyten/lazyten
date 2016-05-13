@@ -32,7 +32,7 @@ set(LINALGWRAP_SOURCES
 
 # Dump the current version as an include file.
 include(WriteVersionHeader)
-WRITE_VERSION_HEADER("${CMAKE_CURRENT_BINARY_DIR}/version_defs.hh")
+WRITE_VERSION_HEADER("${CMAKE_BINARY_DIR}/src/linalgwrap/version_defs.hh")
 
 # add the libraries for Debug and Release:
 drb_add_library(linalgwrap
@@ -79,7 +79,7 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/version_defs.hh"
 
 # Export the target specifications for linalgwrap.
 export(EXPORT LinalgwrapTargets
-	FILE "${CMAKE_BINARY_DIR}/linalgwrapTargets.cmake"
+	FILE "${PROJECT_BINARY_DIR}/linalgwrapTargets.cmake"
 	NAMESPACE Upstream::
 )
 
