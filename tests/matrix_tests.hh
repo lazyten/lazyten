@@ -139,6 +139,32 @@ struct ComparativeTests {
           const compmat_type& model, const sutmat_type& sut,
           const double tolerance = TestConstants::default_num_tol);
 
+    /** Test the l1 norm function */
+    static void test_norm_l1(
+          const compmat_type& model, const sutmat_type& sut,
+          const double tolerance = TestConstants::default_num_tol);
+
+    /** Test the linf norm function */
+    static void test_norm_linf(
+          const compmat_type& model, const sutmat_type& sut,
+          const double tolerance = TestConstants::default_num_tol);
+
+    /** Test the frobenius norm functions (norm_frobenius and
+     * norm_frobenius_squared) */
+    static void test_norm_frobenius(
+          const compmat_type& model, const sutmat_type& sut,
+          const double tolerance = TestConstants::default_num_tol);
+
+    /** Test the trace function */
+    static void test_trace(
+          const compmat_type& model, const sutmat_type& sut,
+          const double tolerance = TestConstants::default_num_tol);
+
+    /** Test the accumulate function */
+    static void test_accumulate(
+          const compmat_type& model, const sutmat_type& sut,
+          const double tolerance = TestConstants::default_num_tol);
+
     /** Test whether multiplication by a scalar yields the same
      *  values in model and sut */
     static void test_mutiply_scalar(
@@ -509,6 +535,84 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_readwrite_iterator(
             }
         }
     }
+}
+
+template <typename CompMatrix, typename SutMatrix>
+void ComparativeTests<CompMatrix, SutMatrix>::test_norm_l1(
+      const compmat_type& model, const sutmat_type& sut,
+      const double tolerance) {
+
+    scalar_type norm{0};
+    for (size_type col = 0; col < sut.n_cols(); ++col) {
+        scalar_type accu{0};
+        for (size_type row = 0; row < sut.n_rows(); ++row) {
+            accu += std::abs(sut(row, col));
+        }
+        norm = std::max(norm, accu);
+    }
+    RC_ASSERT(NumComp::is_equal(model.norm_l1(), norm, tolerance));
+}
+
+template <typename CompMatrix, typename SutMatrix>
+void ComparativeTests<CompMatrix, SutMatrix>::test_norm_linf(
+      const compmat_type& model, const sutmat_type& sut,
+      const double tolerance) {
+
+    scalar_type norm{0};
+    for (size_type row = 0; row < sut.n_rows(); ++row) {
+        scalar_type accu{0};
+        for (size_type col = 0; col < sut.n_cols(); ++col) {
+            accu += std::abs(sut(row, col));
+        }
+        norm = std::max(norm, accu);
+    }
+    RC_ASSERT(NumComp::is_equal(model.norm_linf(), norm, tolerance));
+}
+
+template <typename CompMatrix, typename SutMatrix>
+void ComparativeTests<CompMatrix, SutMatrix>::test_norm_frobenius(
+      const compmat_type& model, const sutmat_type& sut,
+      const double tolerance) {
+
+    scalar_type frobenius_squared{0};
+    for (size_type i = 0; i < sut.n_rows(); ++i) {
+        for (size_type j = 0; j < sut.n_cols(); ++j) {
+            frobenius_squared += sut(i, j) * sut(i, j);
+        }
+    }
+    RC_ASSERT(NumComp::is_equal(model.norm_frobenius_squared(),
+                                frobenius_squared, tolerance));
+
+    scalar_type frobenius = sqrt(frobenius_squared);
+    RC_ASSERT(NumComp::is_equal(model.norm_frobenius(), frobenius, tolerance));
+}
+
+template <typename CompMatrix, typename SutMatrix>
+void ComparativeTests<CompMatrix, SutMatrix>::test_trace(
+      const compmat_type& model, const sutmat_type& sut,
+      const double tolerance) {
+    RC_PRE(sut.n_rows() == sut.n_cols());
+
+    scalar_type res{0};
+    for (size_type i = 0; i < sut.n_cols(); ++i) {
+        res += sut(i, i);
+    }
+
+    RC_ASSERT(NumComp::is_equal(model.trace(), res, tolerance));
+}
+
+template <typename CompMatrix, typename SutMatrix>
+void ComparativeTests<CompMatrix, SutMatrix>::test_accumulate(
+      const compmat_type& model, const sutmat_type& sut,
+      const double tolerance) {
+    scalar_type res{0};
+    for (size_type i = 0; i < sut.n_rows(); ++i) {
+        for (size_type j = 0; j < sut.n_cols(); ++j) {
+            res += sut(i, j);
+        }
+    }
+
+    RC_ASSERT(NumComp::is_equal(model.accumulate(), res, tolerance));
 }
 
 template <typename CompMatrix, typename SutMatrix>

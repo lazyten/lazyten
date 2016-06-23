@@ -137,14 +137,28 @@ class Matrix_i : public Subscribable {
     /** \name Standard operations
      */
     ///@{
-    /** \brief Compute the trace fo this matrix
+    /** \brief Compute the trace of this matrix
      * Only works for quadratic matrices */
     scalar_type trace() const;
 
     /** Calculate the (signed) sum of all matrix entries. */
     scalar_type accumulate() const;
 
-    // TODO implement some matrix norm!
+    /** Calculate the l1 norm (maximum of the sums over columns) */
+    scalar_type norm_l1() const;
+
+    /** Calculate the linf norm (maximum of the sums over rows) */
+    scalar_type norm_linf() const;
+
+    /** Calculate the Frobenius norm (sqrt of all matrix elements
+     * squared
+     *
+     * \note This norm is not the matrix norm compatible to the l2 norm!
+     */
+    scalar_type norm_frobenius() const;
+
+    /** Calculate the Frobenius norm squared */
+    scalar_type norm_frobenius_squared() const;
     ///@}
 };
 
@@ -239,6 +253,61 @@ template <typename Scalar>
 inline typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::accumulate()
       const {
     return std::accumulate(begin(), end(), Constants<scalar_type>::zero);
+}
+
+template <typename Scalar>
+inline typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::norm_l1()
+      const {
+    // This way is real bad for the cache and hence really slow.
+    // One should do this in blocks of row indices, which fit the cache size.
+
+    // maximum of the colsums
+    //
+    scalar_type res(Constants<scalar_type>::zero);
+    for (auto col : range(n_cols())) {
+        // sum of absolute entries of this column
+        scalar_type colsum = Constants<scalar_type>::zero;
+        for (auto row : range(n_rows())) {
+            colsum += std::abs((*this)(row, col));
+        }
+        res = std::max(res, colsum);
+    }
+    return res;
+}
+
+template <typename Scalar>
+inline typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::norm_linf()
+      const {
+    // maximum of the rowsums
+    //
+    scalar_type res = Constants<scalar_type>::zero;
+    for (auto row : range(n_rows())) {
+        // sum of absolute entries of this row
+        scalar_type rowsum = Constants<scalar_type>::zero;
+        for (auto col : range(n_cols())) {
+            rowsum += std::abs((*this)(row, col));
+        }
+        res = std::max(res, rowsum);
+    }
+    return res;
+}
+
+template <typename Scalar>
+inline typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::norm_frobenius()
+      const {
+    // sqrt of square of all matrix elements
+    return std::sqrt(norm_frobenius_squared());
+}
+
+template <typename Scalar>
+inline typename Matrix_i<Scalar>::scalar_type
+Matrix_i<Scalar>::norm_frobenius_squared() const {
+    // sum of squares of all matrix elements
+    scalar_type sum = Constants<scalar_type>::zero;
+    for (auto it = begin(); it != end(); ++it) {
+        sum += (*it) * (*it);
+    }
+    return sum;
 }
 
 template <typename Scalar>

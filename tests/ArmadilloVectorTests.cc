@@ -47,9 +47,9 @@ TEST_CASE("ArmadilloVector class", "[ArmadilloVector]") {
         vector_type v{-3., 4.};
 
         REQUIRE(v.norm_squared() == 25.);
-        REQUIRE(v.l2_norm() == 5.);
-        REQUIRE(v.l1_norm() == 7.);
-        REQUIRE(v.linf_norm() == 4.);
+        REQUIRE(v.norm_l2() == 5.);
+        REQUIRE(v.norm_l1() == 7.);
+        REQUIRE(v.norm_linf() == 4.);
     }
 
     // TODO extend in order to test:
