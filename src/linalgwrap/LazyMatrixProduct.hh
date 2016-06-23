@@ -103,7 +103,7 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
      * the current object.
      */
     void push_factor(const LazyMatrixExpression<StoredMatrix>& e) {
-        // Check fitting dimenisionality of matrix expressions:
+        // Check fitting dimensionality of matrix expressions:
         assert_size(n_cols(), e.n_rows());
 
         // Place into m_factors by moving a copy there
@@ -113,7 +113,7 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
     /** \brief Push back all factors of a product onto another product
      */
     void push_factor(LazyMatrixProduct prod) {
-        // Check fitting dimenisionality of matrix expressions:
+        // Check fitting dimensionality of matrix expressions:
         assert_size(n_cols(), prod.n_rows());
 
         // Move all factors of m to the very end:
