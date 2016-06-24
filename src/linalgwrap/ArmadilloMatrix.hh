@@ -218,14 +218,49 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
         return m_arma[i];
     }
 
+    scalar_type accumulate() const { return arma::accu(m_arma); }
+    scalar_type trace() const { return arma::trace(m_arma); }
+
+    /** Calculate the l1 norm (maximum of the sums over columns) */
+    scalar_type norm_l1() const {
+        // l1 is the maximum of the sums over columns
+        // linf is the maximum of the sums over roles
+        //
+        // Since m_arma is stored as the transpose of the
+        // thing it actually represents, we can use linf
+        // on the m_arma here
+        return norm(m_arma, "inf");
+    }
+
+    /** Calculate the linf norm (maximum of the sums over rows) */
+    scalar_type norm_linf() const {
+        // l1 is the maximum of the sums over columns
+        // linf is the maximum of the sums over roles
+        //
+        // Since m_arma is stored as the transpose of the
+        // thing it actually represents, we can use l1
+        // on the m_arma here
+        return norm(m_arma, 1);
+    }
+
+    /** Calculate the Frobenius norm (sqrt of all matrix elements
+     * squared
+     *
+     * \note This norm is not the matrix norm compatible to the l2 norm!
+     */
+    scalar_type norm_frobenius() const { return norm(m_arma, "fro"); }
+
+    /** Calculate the Frobenius norm squared */
+    scalar_type norm_frobenius_squared() const {
+        // dot in arma is an elementwise dot product.
+        return arma::dot(m_arma, m_arma);
+    }
+
     //
     // StoredMatrix_i interface
     //
     /** Set all elements to zero */
     void set_zero() override { m_arma.zeros(); }
-
-    scalar_type accumulate() const { return arma::accu(m_arma); }
-    scalar_type trace() const { return arma::trace(m_arma); }
 
     scalar_type& operator()(size_type row, size_type col) override {
         assert_greater(row, n_rows());

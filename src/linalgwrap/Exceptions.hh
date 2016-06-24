@@ -121,6 +121,13 @@ DefException2(ExcTooLarge, T, T, << "Number " << arg1
 template <typename T>
 DefException2(ExcTooLargeOrEqual, T, T,
               << "Number " << arg1 << " must be smaller than " << arg2 << ".");
+/**
+ * Exception to indicate that two numbers, which should be exactly equal are
+ * not.
+ */
+template <typename T>
+DefException2(ExcNotEqual, T, T, << "Number " << arg1 << " must be equal to "
+                                 << arg2 << ".");
 
 //
 // Program logic
@@ -151,7 +158,7 @@ DefException1(ExcInvalidState, char *,
               << arg1);
 
 /**
- * Internal error ocurred inside a routine
+ * Internal error occurred inside a routine
  */
 DefExceptionMsg(ExcInternalError,
                 "An assertion inside an internal routine has failed. "
@@ -242,6 +249,21 @@ DefException1(ExcFileNotOpen, char *, << "Could not open file " << arg1);
     {                                                                          \
         assert_dbg(lhs < rhs,                                                  \
                    ::linalgwrap::ExcTooLargeOrEqual<decltype(lhs)>(lhs, rhs)); \
+    }
+
+/**
+ * Uses assert_dbg in order to check that a rhs is exactly equal to a lhs.
+ *
+ * Takes the following arguments
+ * <ol>
+ * <li> lhs number
+ * <li> rhs number
+ * </ol>
+ */
+#define assert_equal(lhs, rhs)                                          \
+    {                                                                   \
+        assert_dbg(lhs == rhs,                                          \
+                   ::linalgwrap::ExcNotEqual<decltype(lhs)>(lhs, rhs)); \
     }
 
 /**

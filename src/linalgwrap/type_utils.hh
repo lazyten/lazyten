@@ -18,6 +18,7 @@
 //
 
 #pragma once
+#include <complex>
 #include <type_traits>
 
 namespace linalgwrap {
@@ -54,5 +55,39 @@ struct make_void {
  * */
 template <typename... Ts>
 using void_t = typename detail::make_void<Ts...>::type;
+
+//@{
+/** \brief helper struct to extract the underlying real type from a
+ *         potentially complex scalar type.
+ *
+ * The real type is accessible via the member type "type".
+ *  */
+template <typename Scalar>
+struct RealTypeOf {
+    static_assert(std::is_scalar<Scalar>::value,
+                  "RealTypeOf can only operate on scalar types.");
+    typedef Scalar type;
+};
+
+template <typename Scalar>
+struct RealTypeOf<std::complex<Scalar>> {
+    typedef Scalar type;
+};
+//@}
+
+//@{
+/** \brief struct representing a type (std::true_type, std::false_type) which
+ *  indicates whether T is a complex scalar type
+ *
+ * The definition is done using SFINAE, such that even for types not having a
+ * typedef value_type this expression is valid.
+ *  */
+template <typename T, typename = void>
+struct IsComplexScalar : public std::false_type {};
+
+template <typename T>
+struct IsComplexScalar<T, void_t<typename T::value_type>>
+      : public std::is_same<std::complex<typename T::value_type>, T> {};
+//@}
 
 }  // namespace linalgwrap

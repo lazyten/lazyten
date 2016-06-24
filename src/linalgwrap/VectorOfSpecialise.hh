@@ -68,19 +68,20 @@ class VectorOfSpecialise<ArmadilloMatrix<Scalar>>
      * \note TransposeView<VectorOf> * VectorOf calls this routine,
      *       so there is no difference between these two.
      * */
-    scalar_type dot(const VectorOfBase<ArmadilloMatrix<Scalar>>& other) const;
+    scalar_type dot_with(
+          const VectorOfBase<ArmadilloMatrix<Scalar>>& other) const;
 
     /** Calculate the l2 norm squared */
     scalar_type norm_squared() const;
 
     /** Calculate the l2 norm */
-    scalar_type l2_norm() const;
+    scalar_type norm_l2() const;
 
     /** Calculate the l1 norm */
-    scalar_type l1_norm() const;
+    scalar_type norm_l1() const;
 
     /** Calculate the linf norm */
-    scalar_type linf_norm() const;
+    scalar_type norm_linf() const;
     ///@}
 };
 #endif
@@ -105,7 +106,7 @@ VectorOfSpecialise<ArmadilloMatrix<Scalar>>::VectorOfSpecialise(size_type size,
 
 template <typename Scalar>
 typename VectorOfSpecialise<ArmadilloMatrix<Scalar>>::scalar_type
-VectorOfSpecialise<ArmadilloMatrix<Scalar>>::dot(
+VectorOfSpecialise<ArmadilloMatrix<Scalar>>::dot_with(
       const VectorOfBase<ArmadilloMatrix<Scalar>>& other) const {
     typedef typename ArmadilloMatrix<Scalar>::storage_type storage_type;
     const storage_type& thismat = this->data();
@@ -117,24 +118,24 @@ VectorOfSpecialise<ArmadilloMatrix<Scalar>>::dot(
 template <typename Scalar>
 typename VectorOfSpecialise<ArmadilloMatrix<Scalar>>::scalar_type
 VectorOfSpecialise<ArmadilloMatrix<Scalar>>::norm_squared() const {
-    return dot(*this);
+    return this->dot_with(*this);
 }
 
 template <typename Scalar>
 typename VectorOfSpecialise<ArmadilloMatrix<Scalar>>::scalar_type
-VectorOfSpecialise<ArmadilloMatrix<Scalar>>::l2_norm() const {
+VectorOfSpecialise<ArmadilloMatrix<Scalar>>::norm_l2() const {
     return arma::norm(this->data());
 }
 
 template <typename Scalar>
 typename VectorOfSpecialise<ArmadilloMatrix<Scalar>>::scalar_type
-VectorOfSpecialise<ArmadilloMatrix<Scalar>>::l1_norm() const {
+VectorOfSpecialise<ArmadilloMatrix<Scalar>>::norm_l1() const {
     return arma::norm(this->data(), 1);
 }
 
 template <typename Scalar>
 typename VectorOfSpecialise<ArmadilloMatrix<Scalar>>::scalar_type
-VectorOfSpecialise<ArmadilloMatrix<Scalar>>::linf_norm() const {
+VectorOfSpecialise<ArmadilloMatrix<Scalar>>::norm_linf() const {
     return arma::norm(this->data(), "inf");
 }
 
