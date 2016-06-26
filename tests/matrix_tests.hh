@@ -543,14 +543,14 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_norm_l1(
       const double tolerance) {
 
     scalar_type norm{0};
-    for (size_type col = 0; col < sut.n_cols(); ++col) {
+    for (size_type col = 0; col < model.n_cols(); ++col) {
         scalar_type accu{0};
-        for (size_type row = 0; row < sut.n_rows(); ++row) {
-            accu += std::abs(sut(row, col));
+        for (size_type row = 0; row < model.n_rows(); ++row) {
+            accu += std::abs(model(row, col));
         }
         norm = std::max(norm, accu);
     }
-    RC_ASSERT(NumComp::is_equal(model.norm_l1(), norm, tolerance));
+    RC_ASSERT(NumComp::is_equal(sut.norm_l1(), norm, tolerance));
 }
 
 template <typename CompMatrix, typename SutMatrix>
@@ -559,14 +559,14 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_norm_linf(
       const double tolerance) {
 
     scalar_type norm{0};
-    for (size_type row = 0; row < sut.n_rows(); ++row) {
+    for (size_type row = 0; row < model.n_rows(); ++row) {
         scalar_type accu{0};
-        for (size_type col = 0; col < sut.n_cols(); ++col) {
-            accu += std::abs(sut(row, col));
+        for (size_type col = 0; col < model.n_cols(); ++col) {
+            accu += std::abs(model(row, col));
         }
         norm = std::max(norm, accu);
     }
-    RC_ASSERT(NumComp::is_equal(model.norm_linf(), norm, tolerance));
+    RC_ASSERT(NumComp::is_equal(sut.norm_linf(), norm, tolerance));
 }
 
 template <typename CompMatrix, typename SutMatrix>
@@ -575,30 +575,30 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_norm_frobenius(
       const double tolerance) {
 
     scalar_type frobenius_squared{0};
-    for (size_type i = 0; i < sut.n_rows(); ++i) {
-        for (size_type j = 0; j < sut.n_cols(); ++j) {
-            frobenius_squared += sut(i, j) * sut(i, j);
+    for (size_type i = 0; i < model.n_rows(); ++i) {
+        for (size_type j = 0; j < model.n_cols(); ++j) {
+            frobenius_squared += model(i, j) * model(i, j);
         }
     }
-    RC_ASSERT(NumComp::is_equal(model.norm_frobenius_squared(),
-                                frobenius_squared, tolerance));
+    RC_ASSERT(NumComp::is_equal(sut.norm_frobenius_squared(), frobenius_squared,
+                                tolerance));
 
     scalar_type frobenius = sqrt(frobenius_squared);
-    RC_ASSERT(NumComp::is_equal(model.norm_frobenius(), frobenius, tolerance));
+    RC_ASSERT(NumComp::is_equal(sut.norm_frobenius(), frobenius, tolerance));
 }
 
 template <typename CompMatrix, typename SutMatrix>
 void ComparativeTests<CompMatrix, SutMatrix>::test_trace(
       const compmat_type& model, const sutmat_type& sut,
       const double tolerance) {
-    RC_PRE(sut.n_rows() == sut.n_cols());
+    RC_PRE(model.n_rows() == model.n_cols());
 
     scalar_type res{0};
-    for (size_type i = 0; i < sut.n_cols(); ++i) {
-        res += sut(i, i);
+    for (size_type i = 0; i < model.n_cols(); ++i) {
+        res += model(i, i);
     }
 
-    RC_ASSERT(NumComp::is_equal(model.trace(), res, tolerance));
+    RC_ASSERT(NumComp::is_equal(sut.trace(), res, tolerance));
 }
 
 template <typename CompMatrix, typename SutMatrix>
@@ -606,13 +606,13 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_accumulate(
       const compmat_type& model, const sutmat_type& sut,
       const double tolerance) {
     scalar_type res{0};
-    for (size_type i = 0; i < sut.n_rows(); ++i) {
-        for (size_type j = 0; j < sut.n_cols(); ++j) {
-            res += sut(i, j);
+    for (size_type i = 0; i < model.n_rows(); ++i) {
+        for (size_type j = 0; j < model.n_cols(); ++j) {
+            res += model(i, j);
         }
     }
 
-    RC_ASSERT(NumComp::is_equal(model.accumulate(), res, tolerance));
+    RC_ASSERT(NumComp::is_equal(sut.accumulate(), res, tolerance));
 }
 
 template <typename CompMatrix, typename SutMatrix>
