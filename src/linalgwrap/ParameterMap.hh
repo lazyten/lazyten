@@ -143,6 +143,7 @@ class ParameterMap {
     const T& at(const std::string& key) const;
 
   private:
+    // TODO use unordered_map !!! (amortised constant []
     std::map<std::string, Entry> m_container;
 };
 

@@ -31,57 +31,57 @@ namespace detail {
  * */
 template <typename MatrixType>
 class VectorOfBase : public MatrixType {
-public:
-  typedef MatrixType base_type;
-  typedef typename base_type::scalar_type scalar_type;
-  typedef typename base_type::size_type size_type;
+  public:
+    typedef MatrixType base_type;
+    typedef typename base_type::scalar_type scalar_type;
+    typedef typename base_type::size_type size_type;
 
-  /** \name Constructors
-   */
-  ///@{
-  /** Construct a matrix of fixed size and optionally set the entries to
-   * zero
-   */
-  explicit VectorOfBase(size_type size, bool fill_zero);
-  ///@}
+    /** \name Constructors
+     */
+    ///@{
+    /** Construct a matrix of fixed size and optionally set the entries to
+     * zero
+     */
+    explicit VectorOfBase(size_type size, bool fill_zero);
+    ///@}
 
-  /** \name Vector information */
-  ///@{
-  /** Size of the vector */
-  size_type size() const;
+    /** \name Vector information */
+    ///@{
+    /** Size of the vector */
+    size_type size() const;
 
-  /** Number of columns */
-  size_type constexpr n_cols() const override;
-  ///@}
+    /** Number of columns */
+    size_type constexpr n_cols() const override;
+    ///@}
 
-  //@{
-  /** Vector element access (identical to [])*/
-  scalar_type operator()(size_type i) const;
-  scalar_type& operator()(size_type i);
-  //@}
+    //@{
+    /** Vector element access (identical to [])*/
+    scalar_type operator()(size_type i) const;
+    scalar_type& operator()(size_type i);
+    //@}
 
-  /** \name Scalar product and norms */
-  ///@{
-  /** Calculate the scalar product
-   *
-   * \note TransposeView<VectorOf> * VectorOf calls this routine,
-   *       so there is no difference between these two.
-   * */
-  scalar_type dot_with(const VectorOfBase& other) const;
+    /** \name Scalar product and norms */
+    ///@{
+    /** Calculate the scalar product
+     *
+     * \note TransposeView<VectorOf> * VectorOf calls this routine,
+     *       so there is no difference between these two.
+     * */
+    scalar_type dot_with(const VectorOfBase& other) const;
 
-  /** Calculate the l2 norm squared */
-  scalar_type norm_l2_squared() const;
+    /** Calculate the l2 norm squared */
+    scalar_type norm_l2_squared() const;
 
-  /** Calculate the l2 norm */
-  scalar_type norm_l2() const;
+    /** Calculate the l2 norm */
+    scalar_type norm_l2() const;
 
-  // TODO Maybe just keep implementations of linf and l1 from the matrix?
-  /** Calculate the l1 norm */
-  scalar_type norm_l1() const;
+    // TODO Maybe just keep implementations of linf and l1 from the matrix?
+    /** Calculate the l1 norm */
+    scalar_type norm_l1() const;
 
-  /** Calculate the linf norm */
-  scalar_type norm_linf() const;
-  ///@}
+    /** Calculate the linf norm */
+    scalar_type norm_linf() const;
+    ///@}
 };
 
 //
@@ -94,66 +94,66 @@ VectorOfBase<MatrixType>::VectorOfBase(size_type size, bool fill_zero)
 
 template <typename MatrixType>
 typename MatrixType::size_type VectorOfBase<MatrixType>::size() const {
-  return base_type::n_rows();
+    return base_type::n_rows();
 }
 
 template <typename MatrixType>
 typename MatrixType::scalar_type VectorOfBase<MatrixType>::operator()(
       size_type i) const {
-  return base_type::operator[](i);
+    return base_type::operator[](i);
 }
 
 template <typename MatrixType>
 typename MatrixType::scalar_type& VectorOfBase<MatrixType>::operator()(
       size_type i) {
-  return base_type::operator[](i);
+    return base_type::operator[](i);
 }
 
 template <typename MatrixType>
 constexpr typename MatrixType::size_type VectorOfBase<MatrixType>::n_cols()
       const {
-  return 1;
+    return 1;
 }
 
 template <typename MatrixType>
 typename MatrixType::scalar_type VectorOfBase<MatrixType>::dot_with(
       const VectorOfBase& other) const {
-  assert_size(other.size(), size());
+    assert_size(other.size(), size());
 
-  scalar_type res = Constants<scalar_type>::zero;
-  for (size_type i = 0; i < size(); ++i) {
-    res += (*this)[i] * other[i];
-  }
-  return res;
+    scalar_type res = Constants<scalar_type>::zero;
+    for (size_type i = 0; i < size(); ++i) {
+        res += (*this)[i] * other[i];
+    }
+    return res;
 }
 
 template <typename MatrixType>
 typename MatrixType::scalar_type VectorOfBase<MatrixType>::norm_l2_squared()
       const {
-  return this->dot_with(*this);
+    return this->dot_with(*this);
 }
 
 template <typename MatrixType>
 typename MatrixType::scalar_type VectorOfBase<MatrixType>::norm_l2() const {
-  return sqrt(norm_l2_squared());
+    return sqrt(norm_l2_squared());
 }
 
 template <typename MatrixType>
 typename MatrixType::scalar_type VectorOfBase<MatrixType>::norm_l1() const {
-  scalar_type res = Constants<scalar_type>::zero;
-  for (size_type i = 0; i < size(); ++i) {
-    res += std::abs((*this)[i]);
-  }
-  return res;
+    scalar_type res = Constants<scalar_type>::zero;
+    for (size_type i = 0; i < size(); ++i) {
+        res += std::abs((*this)[i]);
+    }
+    return res;
 }
 
 template <typename MatrixType>
 typename MatrixType::scalar_type VectorOfBase<MatrixType>::norm_linf() const {
-  scalar_type res = Constants<scalar_type>::zero;
-  for (size_type i = 0; i < size(); ++i) {
-    res = std::max(res, std::abs((*this)[i]));
-  }
-  return res;
+    scalar_type res = Constants<scalar_type>::zero;
+    for (size_type i = 0; i < size(); ++i) {
+        res = std::max(res, std::abs((*this)[i]));
+    }
+    return res;
 }
 
 }  // namespace detail

@@ -49,6 +49,19 @@ struct Constants {
     static constexpr scalar_type default_tolerance =
           std::numeric_limits<scalar_type>::epsilon();
 };
+
+template <typename Scalar>
+constexpr typename Constants<Scalar>::scalar_type Constants<Scalar>::zero;
+
+template <typename Scalar>
+constexpr typename Constants<Scalar>::scalar_type Constants<Scalar>::one;
+
+template <typename Scalar>
+constexpr typename Constants<Scalar>::scalar_type Constants<Scalar>::invalid;
+
+template <typename Scalar>
+constexpr typename Constants<Scalar>::scalar_type
+      Constants<Scalar>::default_tolerance;
 }
 
 #endif
