@@ -389,6 +389,11 @@ ArmadilloMatrix<Scalar> operator/(ArmadilloMatrix<Scalar> m, Scalar s) {
     return m;
 }
 
+template <typename Scalar>
+ArmadilloMatrix<Scalar> operator-(ArmadilloMatrix<Scalar> mat) {
+    return -Constants<Scalar>::one * mat;
+}
+
 //
 // Add and subtract small matrices
 //
