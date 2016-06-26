@@ -77,8 +77,8 @@ class ParameterMap {
         T& operator()(std::shared_ptr<void>);
 
       private:
-        /** A dummy m_t to return */
-        T m_t;
+        /** A dummy value to return */
+        static constexpr T* m_ptr = nullptr;
     };
 
     //
@@ -168,7 +168,7 @@ template <typename T>
 T& ParameterMap::DereferencePointerSubscriptionPointer<T, std::false_type>::
 operator()(std::shared_ptr<void>) {
     assert_dbg(false, ExcNotImplemented());
-    return m_t;
+    return *m_ptr;
 }
 
 //
