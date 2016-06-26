@@ -67,6 +67,17 @@ struct FunctionalityTests
         base_type::test_add_block_to(model, sut);
         base_type::test_readonly_iterator(model, sut);
         base_type::template test_multiply_by<stored_matrix_type>(model, sut);
+
+        base_type::test_norm_l1(model, sut);
+        base_type::test_norm_linf(model, sut);
+        base_type::test_norm_frobenius(model, sut);
+        if (model.n_rows() == model.n_cols()) {
+            base_type::test_trace(model, sut);
+        }
+        /* TODO check why this one causes problems
+        base_type::test_accumulate(model, sut);
+        */
+
         test_convert_to_stored(model, sut);
     }
 
