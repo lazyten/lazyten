@@ -158,6 +158,13 @@ DefException1(ExcInvalidState, char *,
               << arg1);
 
 /**
+ * The pointer is invalid (e.g. a nullptr) and should not be used.
+ */
+DefExceptionMsg(ExcInvalidPointer,
+                "The pointer you attempt to use is not valid. Check you are "
+                "not dereferencing a nullpointer or similar.");
+
+/**
  * Internal error occurred inside a routine
  */
 DefExceptionMsg(ExcInternalError,
