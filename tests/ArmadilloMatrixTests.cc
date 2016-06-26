@@ -40,6 +40,16 @@ TEST_CASE("ArmadilloMatrix class", "[ArmadilloMatrix]") {
     // The type of matrix we wish to test.
     typedef ArmadilloMatrix<double> matrix_type;
 
+    SECTION("Norm test") {
+        matrix_type m = {{1.0}, {-2.0}};
+        REQUIRE(m.norm_l1() == 3.);
+        REQUIRE(m.norm_linf() == 2.);
+
+        matrix_type n = {{1.0, -2.0}};
+        REQUIRE(n.norm_l1() == 2.);
+        REQUIRE(n.norm_linf() == 3.);
+    }
+
     SECTION("Default stored matrix tests") {
         typedef typename stored_matrix_tests::TestingLibrary<matrix_type>
               testinglib;
