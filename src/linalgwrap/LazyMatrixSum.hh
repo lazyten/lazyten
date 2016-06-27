@@ -1,4 +1,4 @@
-//
+
 // Copyright (C) 2016 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
@@ -120,6 +120,16 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
     /** \name Constructors for lazy sums
      */
     ///@{
+    /** \brief Create an empty matrix sum object
+     *
+     * An empty matrix sum object has size 0 times 0.
+     * It behaves as the additive identity (0), i.e. when
+     * retrieving elements, they will all be zero.
+     *
+     * When the first summand is added it inherits its size.
+     */
+    explicit LazyMatrixSum() : m_n_rows(0), m_n_cols(0) {}
+
     /** \brief Create a matrix sum object
      *
      * @param term   The first matrix expression term
@@ -173,7 +183,10 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
     //
     /** Push back a further lazy matrix term */
     void push_term(lazy_term_type term) {
-        // Check sizes
+        if (is_empty()) {
+            m_n_rows = term.n_rows();
+            m_n_cols = term.n_cols();
+        }
         assert_size(n_cols(), term.n_cols());
         assert_size(n_rows(), term.n_rows());
 
@@ -196,7 +209,10 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
      * */
     void push_term(const stored_matrix_type& mat,
                    scalar_type factor = Constants<scalar_type>::one) {
-        // Check sizes
+        if (is_empty()) {
+            m_n_rows = mat.n_rows();
+            m_n_cols = mat.n_cols();
+        }
         assert_size(n_cols(), mat.n_cols());
         assert_size(n_rows(), mat.n_rows());
 
@@ -207,7 +223,10 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
     }
 
     void push_term(LazyMatrixSum sum) {
-        // Check sizes
+        if (is_empty()) {
+            m_n_rows = sum.n_rows();
+            m_n_cols = sum.n_cols();
+        }
         assert_size(n_cols(), sum.n_cols());
         assert_size(n_rows(), sum.n_rows());
 
@@ -301,6 +320,7 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
     /** \brief Multiplication with a stored matrix */
     virtual stored_matrix_type operator*(
           const stored_matrix_type& m) const override {
+        assert_dbg(!is_empty(), ExcInvalidState("LazyMatrixSum is empty."));
         assert_size(n_cols(), m.n_rows());
 
         // TODO
@@ -340,6 +360,11 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
         return lazy_matrix_expression_ptr_type(new LazyMatrixSum(*this));
     }
 
+    /** \brief Is this object empty? */
+    bool is_empty() const {
+        return m_stored_terms.size() == 0 && m_lazy_terms.size() == 0;
+    }
+
     //
     // In-place scaling operators
     //
@@ -363,8 +388,6 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
     //
     // Operators with += or -=
     //
-    // TODO rewrite macros such that clang and YCM are both happy
-    //      and do not show random errors
     LazyMatrixSum_inplace_addsub_op(lazy_term_type);
     LazyMatrixSum_inplace_addsub_op(const LazyMatrixExpression<StoredMatrix>&);
     LazyMatrixSum_inplace_addsub_op(const stored_matrix_type&);
@@ -476,18 +499,19 @@ LazyMatrixSum<StoredMatrix> operator-(LazyMatrixSum<StoredMatrix> mat) {
 //
 // Further addition operators
 //
-LazyMatrixSum_outofplace_addsub_op(LazyMatrixProduct<StoredMatrix>)  //
-      LazyMatrixSum_outofplace_addsub_op(const StoredMatrix&)        //
-      LazyMatrixSum_outofplace_addsub_op(
-            const LazyMatrixExpression<StoredMatrix>&)  //
+/* clang-format off */
+LazyMatrixSum_outofplace_addsub_op(LazyMatrixProduct<StoredMatrix>)
+LazyMatrixSum_outofplace_addsub_op(const StoredMatrix&)
+LazyMatrixSum_outofplace_addsub_op(const LazyMatrixExpression<StoredMatrix>&)
 
-      LazyMatrixProduct_outofplace_addsub_op(const StoredMatrix&)  //
-      LazyMatrixProduct_outofplace_addsub_op(
-            const LazyMatrixExpression<StoredMatrix>&)  //
+LazyMatrixProduct_outofplace_addsub_op(const StoredMatrix&)
+LazyMatrixProduct_outofplace_addsub_op(
+      const LazyMatrixExpression<StoredMatrix>&)
 
-      template <typename StoredMatrix>
-      LazyMatrixSum<StoredMatrix> operator+(LazyMatrixSum<StoredMatrix> lhs,
-                                            LazyMatrixSum<StoredMatrix> rhs) {
+template <typename StoredMatrix>
+LazyMatrixSum<StoredMatrix> operator+(LazyMatrixSum<StoredMatrix> lhs,
+                                      LazyMatrixSum<StoredMatrix> rhs) {
+    /* clang-format on */
     lhs += rhs;
     return lhs;
 }
@@ -524,6 +548,9 @@ LazyMatrixSum<StoredMatrix> operator-(LazyMatrixProduct<StoredMatrix> lhs,
 template <typename StoredMatrix>
 typename LazyMatrixSum<StoredMatrix>::scalar_type LazyMatrixSum<StoredMatrix>::
 operator()(size_type row, size_type col) const {
+    if (is_empty()) return Constants<scalar_type>::zero;
+
+    assert_dbg(!is_empty(), ExcInvalidState("LazyMatrixSum is empty."));
     assert_range(0, row, n_rows());
     assert_range(0, col, n_cols());
     auto block = extract_block({row, row + 1}, {col, col + 1});
@@ -534,19 +561,20 @@ template <typename StoredMatrix>
 typename LazyMatrixSum<StoredMatrix>::stored_matrix_type
 LazyMatrixSum<StoredMatrix>::extract_block(Range<size_type> row_range,
                                            Range<size_type> col_range) const {
+    // Allocate storage and set elements to zero
+    stored_matrix_type res(row_range.length(), col_range.length(), true);
+
+    // if we are empty, this is all we need to do
+    if (is_empty()) return res;
+
     // Assertive checks:
+    assert_dbg(!is_empty(), ExcInvalidState("LazyMatrixSum is empty."));
     assert_greater(0, row_range.length());
     assert_greater(0, col_range.length());
     assert_greater_equal(row_range.last(), this->n_rows());
     assert_greater_equal(col_range.last(), this->n_cols());
 
-    // Allocate storage and set elements to zero
-    stored_matrix_type res(row_range.length(), col_range.length(), true);
-
-    // Add all terms to res
     add_block_to(res, row_range.first(), col_range.first());
-
-    // Return it
     return res;
 }
 
@@ -555,6 +583,9 @@ void LazyMatrixSum<StoredMatrix>::add_block_to(stored_matrix_type& in,
                                                size_type start_row,
                                                size_type start_col,
                                                scalar_type c_this) const {
+    // noop if we are empty.
+    if (is_empty()) return;
+
     assert_greater(0, in.n_rows());
     assert_greater(0, in.n_cols());
 
@@ -578,5 +609,5 @@ void LazyMatrixSum<StoredMatrix>::add_block_to(stored_matrix_type& in,
         term.add_block_to(in, start_row, start_col, c_this);
     }
 }
-}  // namespace linalg
+}  // namespace linalgwrap
 #endif

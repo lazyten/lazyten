@@ -133,19 +133,19 @@ void TestingLibrary<Matrix>::run_checks() const {
 
     // Standard operations and norms
     CHECK(rc::check(m_prefix + "l1 norm",
-                    m_gen.generate(comptests::test_norm_l1, eps)));
+                    m_gen.generate(comptests::test_norm_l1, 10 * eps)));
 
     CHECK(rc::check(m_prefix + "linf norm",
-                    m_gen.generate(comptests::test_norm_linf, eps)));
+                    m_gen.generate(comptests::test_norm_linf, 10 * eps)));
 
     CHECK(rc::check(m_prefix + "Frobenius norm",
                     m_gen.generate(comptests::test_norm_frobenius, 10 * eps)));
 
     CHECK(rc::check(m_prefix + "accumulate function",
-                    m_gen.generate(comptests::test_accumulate, 10 * eps)));
+                    m_gen.generate(comptests::test_accumulate, 100 * eps)));
 
     CHECK(rc::check(m_prefix + "trace calculation",
-                    m_gen.generate(comptests::test_trace, 10 * eps)));
+                    m_gen.generate(comptests::test_trace, 100 * eps)));
 
     // Operations
     CHECK(rc::check(m_prefix + "Multiplication by scalar",

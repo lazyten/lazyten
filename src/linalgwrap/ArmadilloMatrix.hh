@@ -229,7 +229,14 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
         // Since m_arma is stored as the transpose of the
         // thing it actually represents, we can use linf
         // on the m_arma here
-        return norm(m_arma, "inf");
+        if (m_arma.n_rows == 1) {
+            return norm(m_arma, 1);
+            // Arma wants to be clever and treats matrices of one row
+            // exactly like vectors (so here we do not need to transpose
+            // and use the inf norm)
+        } else {
+            return norm(m_arma, "inf");
+        }
     }
 
     /** Calculate the linf norm (maximum of the sums over rows) */
@@ -240,7 +247,14 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
         // Since m_arma is stored as the transpose of the
         // thing it actually represents, we can use l1
         // on the m_arma here
-        return norm(m_arma, 1);
+        if (m_arma.n_rows == 1) {
+            // Arma wants to be clever and treats matrices of one row
+            // exactly like vectors (so here we do not need to transpose
+            // and use the 1 norm)
+            return norm(m_arma, "inf");
+        } else {
+            return norm(m_arma, 1);
+        }
     }
 
     /** Calculate the Frobenius norm (sqrt of all matrix elements
@@ -373,6 +387,11 @@ template <typename Scalar>
 ArmadilloMatrix<Scalar> operator/(ArmadilloMatrix<Scalar> m, Scalar s) {
     m /= s;
     return m;
+}
+
+template <typename Scalar>
+ArmadilloMatrix<Scalar> operator-(ArmadilloMatrix<Scalar> mat) {
+    return -Constants<Scalar>::one * mat;
 }
 
 //

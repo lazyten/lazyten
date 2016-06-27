@@ -37,6 +37,42 @@ TEST_CASE("LazyMatrixSum", "[LazyMatrixSum]") {
     typedef SmallMatrix<scalar_type> stored_matrix_type;
     typedef stored_matrix_type model_matrix_type;
 
+    SECTION("Test access into empty LazyMatrixSum objects") {
+        LazyMatrixSum<stored_matrix_type> sum;
+        CHECK(sum.n_rows() == 0);
+        CHECK(sum.n_cols() == 0);
+
+        auto random_access = [&]() {
+            auto col = *rc::gen::arbitrary<size_t>().as("Column index");
+            auto row = *rc::gen::arbitrary<size_t>().as("Row index");
+            RC_ASSERT(0. == sum(col, row));
+        };
+        REQUIRE(rc::check("Random access into empty sum", random_access));
+    }
+
+    SECTION("Test empty LazyMatrixSum objects behave as zeros") {
+        typedef lazy_matrix_tests::FunctionalityTests<
+              stored_matrix_type, LazyMatrixSum<stored_matrix_type>>
+              testing_lib;
+
+        auto test_add_to_empty = [](stored_matrix_type toadd) {
+            stored_matrix_type tosub = -toadd;
+            LazyMatrixSum<stored_matrix_type> empty;
+
+            LazyMatrixSum<stored_matrix_type> sumres;
+            sumres += toadd;
+            testing_lib::run_all_tests(toadd, sumres);
+
+            auto added = empty + toadd;
+            testing_lib::run_all_tests(toadd, added);
+
+            auto subed = empty - toadd;
+            testing_lib::run_all_tests(tosub, subed);
+        };
+
+        REQUIRE(rc::check("Test adding terms to empty sum", test_add_to_empty));
+    }
+
     SECTION("Random function test") {
         auto random_test = [] {
             // The initial value:
