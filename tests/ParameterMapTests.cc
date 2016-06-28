@@ -86,6 +86,27 @@ TEST_CASE("ParameterMap tests", "[parametermap]") {
         REQUIRE_THROWS_AS(m.at<int>("blubb"), ParameterMap::ExcUnknownKey);
         REQUIRE(m.at<int>("i") == i);
     }
+
+    //
+    // ---------------------------------------------------------------
+    //
+
+    SECTION("Check for Getting the shared pointer back.") {
+        // Add data to map.
+        ParameterMap m{};
+        m.update_copy("string", s);
+        m.update_copy("integer", i);
+        m.update("matrix", make_subscription(mat, "ParameterMap_FirstTest"));
+
+        std::shared_ptr<int> iptr = m.at_ptr<int>("integer");
+        std::shared_ptr<std::string> sptr = m.at_ptr<std::string>("string");
+
+        REQUIRE(*iptr == i);
+        REQUIRE(*sptr == s);
+
+        REQUIRE_THROWS_AS(m.at_ptr<SmallMatrix<double>>("matrix"),
+                          ParameterMap::ExcWrongPointerRequested);
+    }
 #endif
 
     //
