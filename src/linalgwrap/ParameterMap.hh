@@ -35,6 +35,10 @@ namespace linalgwrap {
  *  accessed by the std::string key.
  */
 class ParameterMap {
+
+    // TODO: Use default argument in get functions (if key is not defined)
+    //       integral and basic types should be supplied by value.
+
   public:
     //
     // Exception declaration:
@@ -48,6 +52,10 @@ class ParameterMap {
     /** Exception thrown if a key is not valid */
     DefException1(ExcUnknownKey, std::string, << "The key " << arg1
                                               << " is unknown.");
+
+    DefExceptionMsg(ExcWrongPointerRequested,
+                    "Cannot return shared pointer if object was stored using a "
+                    "SubscriptionPointer.");
 
   private:
     //
@@ -101,6 +109,12 @@ class ParameterMap {
         template <typename T>
         const T& get(const std::string& key) const;
 
+        template <typename T>
+        std::shared_ptr<T> get_ptr(const std::string& key);
+
+        template <typename T>
+        std::shared_ptr<const T> get_ptr(const std::string& key) const;
+
       private:
         // The stored pointer
         std::shared_ptr<void> m_object_ptr;
@@ -122,6 +136,12 @@ class ParameterMap {
     template <typename T>
     void update(std::string key, SubscriptionPointer<T> object_ptr);
 
+    // TODO have simple overload for primitive types (int, double, ...
+    //      which calls update_copy automatically.
+    //
+    //      Have simple overload for Subscriabables which makes a subscription
+    //      automatically
+
     /** Insert or update a key with a copy of an element */
     template <typename T>
     void update_copy(std::string key, T object);
@@ -132,6 +152,8 @@ class ParameterMap {
     /** Check weather a key exists */
     bool exists(const std::string& key) const;
 
+    /** TODO: More functions: Clear, operator[], size, iterator */
+
     /** Get the value of an element
      */
     template <typename T>
@@ -141,6 +163,24 @@ class ParameterMap {
      */
     template <typename T>
     const T& at(const std::string& key) const;
+
+    /** Return the pointer to the value of a specific key.
+     *
+     * This only works if the data has been supplied to the
+     * parameter map via a shared pointer as well or has
+     * been supplied by update_copy().
+     */
+    template <typename T>
+    std::shared_ptr<T> at_ptr(const std::string& key);
+
+    /** Return the pointer to the value of a specific key.
+     *
+     * This only works if the data has been supplied to the
+     * parameter map via a shared pointer as well or has
+     * been supplied by update_copy().
+     */
+    template <typename T>
+    std::shared_ptr<const T> at_ptr(const std::string& key) const;
 
   private:
     // TODO use unordered_map !!! (amortised constant []
@@ -221,6 +261,27 @@ const T& ParameterMap::Entry::get(const std::string& key) const {
     }
 }
 
+template <typename T>
+std::shared_ptr<T> ParameterMap::Entry::get_ptr(const std::string& key) {
+    // check that the correct type is requested:
+    assert_dbg(m_type_name == typeid(T).name(),
+               ExcWrongTypeRequested(typeid(T).name(), key, m_type_name));
+
+    assert_dbg(!m_via_subscription_ptr, ExcWrongPointerRequested());
+    return std::static_pointer_cast<T>(m_object_ptr);
+}
+
+template <typename T>
+std::shared_ptr<const T> ParameterMap::Entry::get_ptr(
+      const std::string& key) const {
+    // check that the correct type is requested:
+    assert_dbg(m_type_name == typeid(T).name(),
+               ExcWrongTypeRequested(typeid(T).name(), key, m_type_name));
+
+    assert_dbg(!m_via_subscription_ptr, ExcWrongPointerRequested());
+    return std::static_pointer_cast<const T>(m_object_ptr);
+}
+
 //
 // ParameterMap
 //
@@ -258,6 +319,19 @@ const T& ParameterMap::at(const std::string& key) const {
     assert_dbg(exists(key), ExcUnknownKey(key));
     return m_container.at(key).get<T>(key);
 }
+
+template <typename T>
+std::shared_ptr<T> ParameterMap::at_ptr(const std::string& key) {
+    assert_dbg(exists(key), ExcUnknownKey(key));
+    return m_container.at(key).get_ptr<T>(key);
+}
+
+template <typename T>
+std::shared_ptr<const T> ParameterMap::at_ptr(const std::string& key) const {
+    return m_container.at(key).get_ptr<T>(key);
+}
+
+// TODO at_with_default function
 
 }  // linalgwrap
 #endif
