@@ -52,7 +52,7 @@ class DataWriter_i : public Subscribable {
     virtual bool write(const std::string& label,
                        const Matrix_i<Scalar>& mat) = 0;
 
-    /** Write a non-labelled matrix to the stream repersented by this class
+    /** Write a non-labelled matrix to the stream represented by this class
      * under the format represented by this class
      *
      * \return Is the writer still in a good state?
@@ -80,6 +80,15 @@ class DataWriter_i : public Subscribable {
     /** Is the writer still in a good state? */
     virtual bool good() const = 0;
 
+    /** Sanitise a label string, such that it satisfies the required format */
+    virtual std::string normalise_label(const std::string& label) const {
+        return label;
+    }
+
+    /** Check whether a label string is in the required format.*/
+    virtual bool is_valid_label(const std::string&) const { return true; }
+
+    /** Is the writer still in a good state? */
     operator bool() const { return good(); }
 };
 

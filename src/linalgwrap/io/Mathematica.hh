@@ -19,6 +19,7 @@
 
 #pragma once
 #include "FileType_i.hh"
+#include <regex>
 #include <vector>
 
 namespace linalgwrap {
@@ -53,6 +54,13 @@ class Mathematica : public FileType_i {
     /** Write a comment **/
     void write_comment(std::ostream&, const std::string&) const override;
 
+    /** Sanitise a label string, such that it satisfies the requirements of
+     * the FileType */
+    std::string normalise_label(const std::string& label) const override;
+
+    /** Check whether a label string is a valid mathematica label */
+    virtual bool is_valid_label(const std::string& label) const override;
+
     /** Extensions Mathematica files typically use */
     static const std::vector<std::string> extensions;
 
@@ -74,6 +82,11 @@ class Mathematica : public FileType_i {
 template <typename Matrix>
 void Mathematica::write(std::ostream& out, const std::string& label,
                         const Matrix& mat) const {
+    assert_dbg(is_valid_label(label),
+               ExcInvalidDataForFileType(" Mathematica labels need to consist "
+                                         "of only letters and numbers, so " +
+                                         label + " is not valid."));
+
     assert_throw(out, ExcIO());
     out << label << " = ";
     write(out, mat);
@@ -110,6 +123,16 @@ void Mathematica::write_elem(std::ostream& out, Scalar value) const {
 void Mathematica::write_comment(std::ostream& out,
                                 const std::string& comment) const {
     out << "(* " << comment << " *)" << std::endl;
+}
+
+std::string Mathematica::normalise_label(const std::string& label) const {
+    return std::regex_replace(label, std::regex("[^a-zA-Z0-9]"), "");
+}
+
+bool Mathematica::is_valid_label(const std::string& label) const {
+    // Mathematica labels (variable names) can only consist of
+    // letters or numbers
+    return std::regex_match(label, std::regex("[a-zA-Z0-9]*"));
 }
 
 }  // namespace io

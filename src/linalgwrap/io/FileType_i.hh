@@ -26,6 +26,12 @@
 namespace linalgwrap {
 namespace io {
 
+/** Exception to indicate that the provided data is not valid for this FileType,
+ * e.g.
+ * since it violates the specification of the file type */
+DefException1(ExcInvalidDataForFileType, std::string,
+              << "Invalid data was passed for the file type:" << arg1);
+
 /** \brief Marker interface to inherit all file type classes from
  *
  * All classes inheriting from this class should provide proper implementations
@@ -60,6 +66,16 @@ class FileType_i {
 
     /** Write a comment string **/
     virtual void write_comment(std::ostream&, const std::string&) const = 0;
+
+    /** Sanitise a label string, such that it satisfies the requirements of
+     * the FileType */
+    virtual std::string normalise_label(const std::string& label) const {
+        return label;
+    }
+
+    /** Check weather a label string satisfies the requirements of the FileType
+     */
+    virtual bool is_valid_label(const std::string&) const { return true; }
 };
 
 }  // namespace io

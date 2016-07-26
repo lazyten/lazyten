@@ -48,7 +48,7 @@ class FileTypeWriter : public DataWriter_i<Scalar> {
      *  Use the provided label string to indicate the matrix */
     bool write(const std::string& label, const Matrix_i<Scalar>& mat) override;
 
-    /** Write a non-labelled matrix to the stream repersented by this class
+    /** Write a non-labelled matrix to the stream represented by this class
      * under the format represented by this class */
     bool write(const Matrix_i<Scalar>& mat) override;
 
@@ -63,6 +63,16 @@ class FileTypeWriter : public DataWriter_i<Scalar> {
 
     /** Is the writer still in a good state? */
     bool good() const override;
+
+    /** Sanitise a label string, such that it satisfies the required format */
+    std::string normalise_label(const std::string& label) const override {
+        return m_ft.normalise_label(label);
+    }
+
+    /** Check whether a label string is in the required format.*/
+    bool is_valid_label(const std::string& label) const override {
+        return m_ft.is_valid_label(label);
+    }
 
   private:
     std::ostream& m_out;
