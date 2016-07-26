@@ -126,11 +126,16 @@ struct NumComp {
          * \param do_throw    Should the comparison throw an exception
          *                    if its not valid or just return false.
          *                    (default is true)
+         * \param verbose_throw  Be extra verbose on a throw (e.g. print the
+         *                       full matrices instead of just the problematic
+         *                       value.
          *
          */
         NumEqualMatrix(double tolerance = TestConstants::default_num_tol,
-                       bool do_throw = true)
-              : m_tolerance(tolerance), m_throw(do_throw) {}
+                       bool do_throw = true, bool verbose_throw = false)
+              : m_tolerance(tolerance),
+                m_throw(do_throw),
+                m_verbose_throw(verbose_throw) {}
 
         bool operator()(const Matrix_i<Scalar>& lhs,
                         const Matrix_i<Scalar>& rhs) const {
@@ -151,10 +156,20 @@ struct NumComp {
                                       m_throw))
                             return false;
                     } catch (const NumCompException& e) {
-                        throw NumCompException(
-                              e.lhs, e.rhs, e.error, e.tolerance,
-                              "Matrix entry (" + std::to_string(i) + "," +
-                                    std::to_string(j) + ") not equal.");
+                        std::stringstream ss;
+                        ss << "Matrix entry (" << i << "," << j
+                           << ") not equal";
+                        if (m_verbose_throw) {
+                            ss << "when comparing matrices " << std::endl
+                               << lhs << std::endl
+                               << "and" << std::endl
+                               << rhs << std::endl;
+                        } else {
+                            ss << ".";
+                        }
+
+                        throw NumCompException(e.lhs, e.rhs, e.error,
+                                               e.tolerance, ss.str());
                     }
                 }
             }
@@ -164,7 +179,9 @@ struct NumComp {
 
       private:
         const double m_tolerance;
+        // TODO unify into a "throw-type" of none, normal and verbose.
         const bool m_throw;
+        const bool m_verbose_throw;
     };
 
     /** \brief Check that two values are numerically equal
@@ -195,8 +212,8 @@ struct NumComp {
     static bool is_equal_matrix(
           const Matrix_i<Scalar>& lhs, const Matrix_i<Scalar>& rhs,
           const double tolerance = TestConstants::default_num_tol,
-          const bool do_throw = true) {
-        NumEqualMatrix<Scalar> eq_comp(tolerance, do_throw);
+          const bool do_throw = true, const bool verbose_throw = false) {
+        NumEqualMatrix<Scalar> eq_comp(tolerance, do_throw, verbose_throw);
         return eq_comp(lhs, rhs);
     }
 };
