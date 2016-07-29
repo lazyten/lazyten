@@ -62,11 +62,11 @@ class VectorOf : public detail::VectorOfSpecialise<MatrixType> {
 
     /** \name Vector operations
      *  \note For the outer Product of a Row and a column vector we take the
-     * default implementation in the \t MatrixType class. i
+     * default implementation in the \t MatrixType class.
      * The inner product is implemented in VectorOfBase or VectorOfSpecialise
-     * by the \t dot() function. Additionally a specialisation for the operation
-     * TransposeView<VectorOf> * VectorOf exists and internally calls the dot()
-     * function of this class.
+     * by the \t dot_with() function. Additionally a specialisation for the
+     * operation TransposeView<VectorOf> * VectorOf exists and internally calls
+     * the dot_with() function of this class.
      * */
     ///@{
     /** Scale vector by a scalar value */
