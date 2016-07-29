@@ -292,8 +292,11 @@ DefException1(ExcFileNotOpen, char *, << "Could not open file " << arg1);
 /**
  * Assert that a value is finite
  */
-#define assert_finite(value) \
-    { assert_dbg(std::isfinite(value), ExcNumberNotFinite(value)) }
+#define assert_finite(value)                                \
+    {                                                       \
+        assert_dbg(std::isfinite(value),                    \
+                   ::linalgwrap::ExcNumberNotFinite(value)) \
+    }
 
 }  // linalgwrap
 
