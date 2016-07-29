@@ -81,7 +81,7 @@ TEST_CASE("BlockView", "[BlockView]") {
 
         stored_matrix_type ret(rows.length(), cols.length());
 
-        if (rows.is_empty() || cols.is_empty()) {
+        if (rows.empty() || cols.empty()) {
             return ret;
         }
 
