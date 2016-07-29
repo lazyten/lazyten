@@ -83,7 +83,7 @@ class Range {
     value_type last() const;
 
     /** Is this range empty */
-    bool is_empty() const;
+    bool empty() const;
 
     /** Check whether the provided value is in range */
     bool contains(value_type i) const;
@@ -205,13 +205,13 @@ Range<T>::Range(std::pair<value_type, value_type> first_last)
 
 template <typename T>
 typename Range<T>::value_type Range<T>::first() const {
-    assert_dbg(!is_empty(), ExcEmptyRange());
+    assert_dbg(!empty(), ExcEmptyRange());
     return m_first;
 }
 
 template <typename T>
 typename Range<T>::value_type Range<T>::last() const {
-    assert_dbg(!is_empty(), ExcEmptyRange());
+    assert_dbg(!empty(), ExcEmptyRange());
     return m_last;
 }
 
@@ -226,7 +226,7 @@ typename Range<T>::size_type Range<T>::size() const {
 }
 
 template <typename T>
-bool Range<T>::is_empty() const {
+bool Range<T>::empty() const {
     return length() <= 0;
 }
 template <typename T>
@@ -236,14 +236,14 @@ bool Range<T>::contains(value_type i) const {
 
 template <typename T>
 typename Range<T>::value_type Range<T>::operator[](size_type i) const {
-    assert_dbg(!is_empty(), ExcEmptyRange());
+    assert_dbg(!empty(), ExcEmptyRange());
     assert_range(0, i, length());
     return m_first + i;
 }
 
 template <typename T>
 RangeIterator<T> Range<T>::begin() const {
-    if (is_empty()) return end();
+    if (empty()) return end();
     return RangeIterator<T>{m_first, m_last};
 }
 
@@ -273,7 +273,7 @@ Range<T>& Range<T>::operator-=(value_type i) {
 
 template <typename T>
 std::ostream& operator<<(std::ostream& o, const Range<T>& r) {
-    if (r.is_empty()) {
+    if (r.empty()) {
         o << "[0,0)";
     } else {
         o << "[" << r.first() << "," << r.last() << ")";

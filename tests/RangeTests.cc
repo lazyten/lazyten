@@ -63,7 +63,7 @@ struct RangeTests {
         // Access arbitrary element:
         const auto acc = *gen::inRange<T>(0, r.length());
 
-        if (r.is_empty()) {
+        if (r.empty()) {
 #ifdef DEBUG
             typedef typename range_type::ExcEmptyRange exc_type;
             RC_ASSERT_THROWS_AS(r[acc], exc_type);
@@ -78,7 +78,7 @@ struct RangeTests {
         range_type r{{value, value}};
 
         // it should be empty
-        RC_ASSERT(r.is_empty());
+        RC_ASSERT(r.empty());
 
         // length should be zero
         RC_ASSERT(r.length() == size_type{0});

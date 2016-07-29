@@ -183,7 +183,7 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
     //
     /** Push back a further lazy matrix term */
     void push_term(lazy_term_type term) {
-        if (is_empty()) {
+        if (empty()) {
             m_n_rows = term.n_rows();
             m_n_cols = term.n_cols();
         }
@@ -209,7 +209,7 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
      * */
     void push_term(const stored_matrix_type& mat,
                    scalar_type factor = Constants<scalar_type>::one) {
-        if (is_empty()) {
+        if (empty()) {
             m_n_rows = mat.n_rows();
             m_n_cols = mat.n_cols();
         }
@@ -223,7 +223,7 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
     }
 
     void push_term(LazyMatrixSum sum) {
-        if (is_empty()) {
+        if (empty()) {
             m_n_rows = sum.n_rows();
             m_n_cols = sum.n_cols();
         }
@@ -320,7 +320,7 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
     /** \brief Multiplication with a stored matrix */
     virtual stored_matrix_type operator*(
           const stored_matrix_type& m) const override {
-        assert_dbg(!is_empty(), ExcInvalidState("LazyMatrixSum is empty."));
+        assert_dbg(!empty(), ExcInvalidState("LazyMatrixSum is empty."));
         assert_size(n_cols(), m.n_rows());
 
         // TODO
@@ -350,7 +350,7 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
 
     /** \brief Print the expression tree to this outstream
      * */
-    virtual void print_tree(std::ostream& o) const override {
+    virtual void print_tree(std::ostream&) const override {
         // TODO to be implemented
     }
 
@@ -360,8 +360,9 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
         return lazy_matrix_expression_ptr_type(new LazyMatrixSum(*this));
     }
 
+    // TODO rename to empty() for consistency with STL containers
     /** \brief Is this object empty? */
-    bool is_empty() const {
+    bool empty() const {
         return m_stored_terms.size() == 0 && m_lazy_terms.size() == 0;
     }
 
@@ -548,9 +549,9 @@ LazyMatrixSum<StoredMatrix> operator-(LazyMatrixProduct<StoredMatrix> lhs,
 template <typename StoredMatrix>
 typename LazyMatrixSum<StoredMatrix>::scalar_type LazyMatrixSum<StoredMatrix>::
 operator()(size_type row, size_type col) const {
-    if (is_empty()) return Constants<scalar_type>::zero;
+    if (empty()) return Constants<scalar_type>::zero;
 
-    assert_dbg(!is_empty(), ExcInvalidState("LazyMatrixSum is empty."));
+    assert_dbg(!empty(), ExcInvalidState("LazyMatrixSum is empty."));
     assert_range(0, row, n_rows());
     assert_range(0, col, n_cols());
     auto block = extract_block({row, row + 1}, {col, col + 1});
@@ -565,10 +566,10 @@ LazyMatrixSum<StoredMatrix>::extract_block(Range<size_type> row_range,
     stored_matrix_type res(row_range.length(), col_range.length(), true);
 
     // if we are empty, this is all we need to do
-    if (is_empty()) return res;
+    if (empty()) return res;
 
     // Assertive checks:
-    assert_dbg(!is_empty(), ExcInvalidState("LazyMatrixSum is empty."));
+    assert_dbg(!empty(), ExcInvalidState("LazyMatrixSum is empty."));
     assert_greater(0, row_range.length());
     assert_greater(0, col_range.length());
     assert_greater_equal(row_range.last(), this->n_rows());
@@ -584,7 +585,7 @@ void LazyMatrixSum<StoredMatrix>::add_block_to(stored_matrix_type& in,
                                                size_type start_col,
                                                scalar_type c_this) const {
     // noop if we are empty.
-    if (is_empty()) return;
+    if (empty()) return;
 
     assert_greater(0, in.n_rows());
     assert_greater(0, in.n_cols());

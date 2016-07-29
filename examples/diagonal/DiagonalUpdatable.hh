@@ -80,7 +80,7 @@ class DiagonalUpdatable : public LazyMatrix_i<StoredMatrix> {
           Range<size_type> row_range,
           Range<size_type> col_range) const override {
         // At least one range is empty -> no work to be done:
-        if (row_range.is_empty() || col_range.is_empty()) {
+        if (row_range.empty() || col_range.empty()) {
             return stored_matrix_type{row_range.length(), col_range.length()};
         }
 
