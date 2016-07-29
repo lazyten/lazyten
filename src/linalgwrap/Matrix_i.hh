@@ -240,8 +240,8 @@ bool Matrix_i<Scalar>::is_symmetric(scalar_type tolerance) const {
     if (n_rows() != n_cols()) return false;
 
     // Check if lower and upper triangle agree:
-    for (auto i : range(n_rows())) {
-        for (auto j : range(i + 1, n_cols())) {
+    for (size_type i = 0; i < n_rows(); ++i) {
+        for (size_type j = 0; j < n_cols(); ++j) {
             if (std::abs((*this)(i, j) - (*this)(j, i)) > tolerance)
                 return false;
         }
@@ -264,10 +264,10 @@ inline typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::norm_l1()
     // maximum of the colsums
     //
     scalar_type res(Constants<scalar_type>::zero);
-    for (auto col : range(n_cols())) {
+    for (size_type col = 0; col < n_cols(); ++col) {
         // sum of absolute entries of this column
         scalar_type colsum = Constants<scalar_type>::zero;
-        for (auto row : range(n_rows())) {
+        for (size_type row = 0; row < n_rows(); ++row) {
             colsum += std::abs((*this)(row, col));
         }
         res = std::max(res, colsum);
@@ -281,10 +281,10 @@ inline typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::norm_linf()
     // maximum of the rowsums
     //
     scalar_type res = Constants<scalar_type>::zero;
-    for (auto row : range(n_rows())) {
+    for (size_type row = 0; row < n_rows(); ++row) {
         // sum of absolute entries of this row
         scalar_type rowsum = Constants<scalar_type>::zero;
-        for (auto col : range(n_cols())) {
+        for (size_type col = 0; col < n_cols(); ++col) {
             rowsum += std::abs((*this)(row, col));
         }
         res = std::max(res, rowsum);
