@@ -28,11 +28,11 @@ namespace io {
 class Mathematica : public FileType_i {
   public:
     /** Construct a Mathematica file type. */
-    Mathematica();
+    Mathematica(int precision = 16);
 
     /** Construct a Mathematica file type, which drops elements less than
      *  a given threshold */
-    Mathematica(double thresh);
+    Mathematica(double thresh, int precision = 16);
 
     /** \brief Write a matrix to a stream in mathematica format.
      *
@@ -73,6 +73,9 @@ class Mathematica : public FileType_i {
 
     //! Should we check for value being less then eps before writing it?
     bool m_check_for_thresh;
+
+    //! Precision to use
+    int m_precision;
 };
 
 //
@@ -116,7 +119,16 @@ void Mathematica::write_elem(std::ostream& out, Scalar value) const {
     if (m_check_for_thresh && std::abs(value) < m_thresh) {
         out << 0;
     } else {
-        out << value;
+        // Write to string stream and replace "e" by the "*^"
+        // Mathematica uses for scientific exponents.
+        std::stringstream ss;
+        ss << std::setprecision(m_precision) << value;
+        std::string res = ss.str();
+        size_t pos = res.find("e");
+        if (pos != std::string::npos) {
+            res.replace(pos, 1, "*^");
+        }
+        out << res;
     }
 }
 
