@@ -62,6 +62,7 @@ if ("${krims_DIR}" STREQUAL "krims_DIR-NOTFOUND")
 		# Proceed to configure krims
 		#
 		add_subdirectory(${PROJECT_SOURCE_DIR}/external/krims)
+		include_directories(${PROJECT_SOURCE_DIR}/external/krims/src)
 
 		# TODO check version of krims!
 
