@@ -42,7 +42,7 @@ option(LINALGWRAP_ENABLE_EXAMPLES "Build linalgwrap examples" ON)
 
 # enable the new version feature introduced in cmake 3.0.0
 cmake_policy(SET CMP0048 NEW)
-project(linalgwrap VERSION 0.1.0)
+project(linalgwrap VERSION 0.2.0)
 message("\n#")
 message("# Configuring ${PROJECT_NAME}")
 message("#")
@@ -89,3 +89,6 @@ endif()
 ##########################################################################
 # Finally install modules and packages:
 include(cmake/install_package.cmake)
+
+# and print a closing message
+message("#\n# Configuring ${PROJECT_NAME} done")
