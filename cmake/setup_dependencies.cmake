@@ -42,30 +42,9 @@ set(LINALGWRAP_DEFINITIONS "")
 set(LINALGWRAP_DEFINITIONS_DEBUG "")
 set(LINALGWRAP_DEFINITIONS_RELEASE "")
 
-#############
-#-- krims --#
-#############
-# Switch off building external krims by default.
-# (Needs to be done here such that in the current scope by default
-# this value is off, even if krims is build as a subproject to
-# another project where this variable was set to ON.)
-set(BUILD_EXTERNAL_KRIMS off)
-
-# Find at least version 0.0.0
-set(KRIMS_VERSION 0.0.0)
-include(cmake/findKrims.cmake)
-
-foreach (build ${DRB_BUILD_TYPES})
-	set(LINALGWRAP_DEPENDENCIES_${build} ${LINALGWRAP_DEPENDENCIES_${build}} ${krims_${build}_TARGET})
-endforeach()
-
 ############################
 #-- rapidcheck and catch --#
 ############################
-# Switch off building external rapidcheck by default.
-# (see above for reasons)
-set(BUILD_EXTERNAL_RAPIDCHECK off)
-
 if (LINALGWRAP_ENABLE_TESTS)
 	# We need to setup rapidcheck and catch for the tests:
 	include(cmake/findRapidcheck.cmake)
@@ -74,6 +53,17 @@ if (LINALGWRAP_ENABLE_TESTS)
 	include(cmake/findCatch.cmake)
 	set(LINALGWRAP_DEPENDENCIES_TEST ${LINALGWRAP_DEPENDENCIES_TEST} ${catch_TARGET})
 endif()
+
+#############
+#-- krims --#
+#############
+# Find at least version 0.0.0
+set(KRIMS_VERSION 0.0.0)
+include(cmake/findKrims.cmake)
+
+foreach (build ${DRB_BUILD_TYPES})
+	set(LINALGWRAP_DEPENDENCIES_${build} ${LINALGWRAP_DEPENDENCIES_${build}} ${krims_${build}_TARGET})
+endforeach()
 
 #################
 #-- armadillo --#

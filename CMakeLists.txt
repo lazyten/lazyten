@@ -43,9 +43,7 @@ option(LINALGWRAP_ENABLE_EXAMPLES "Build linalgwrap examples" ON)
 # enable the new version feature introduced in cmake 3.0.0
 cmake_policy(SET CMP0048 NEW)
 project(linalgwrap VERSION 0.2.0)
-message("\n#")
-message("# Configuring ${PROJECT_NAME}")
-message("#")
+message("\n# Configuring ${PROJECT_NAME}\n#")
 
 # Global include directories for this project:
 include_directories("${PROJECT_SOURCE_DIR}/src")  # for default sources
@@ -69,9 +67,6 @@ include(cmake/setup_optional.cmake)
 ##########################################################################
 # Pass on to subdirectories:
 
-# The external dependencies via submodules or similar
-add_subdirectory(external)
-
 # The src directory does most of the work: Here the library is build and 
 # installation is configured.
 add_subdirectory(src)
@@ -91,4 +86,4 @@ endif()
 include(cmake/install_package.cmake)
 
 # and print a closing message
-message("#\n# Configuring ${PROJECT_NAME} done")
+message("#\n# Configuring ${PROJECT_NAME} done\n")

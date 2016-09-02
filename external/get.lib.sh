@@ -57,6 +57,11 @@ if [ -f "$WHAT/$CHECKFILE" ]; then
 	fi
 	rm $TMP
 	exit 0
+elif [ "$BRANCH" ]; then
+	echo "-- Cloning  $WHAT (branch: $BRANCH)  from git"
+	git clone --branch "$BRANCH" --recursive "$FROM" "$WHAT" || exit 1
+	touch "$TIMEFILE"
+	exit 0
 else
 	echo "-- Cloning  $WHAT  from git"
 	git clone --recursive "$FROM" "$WHAT" || exit 1
