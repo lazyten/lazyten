@@ -40,7 +40,7 @@ option(AUTOCHECKOUT_MISSING_REPOS "Automatically checkout missing repositories" 
 #
 
 if (TARGET "${krims_DEBUG_TARGET}"  OR TARGET "${krims_RELEASE_TARGET}")
-	message(STATUS "Found target krims, assume krims already configured for build.")
+	message(STATUS "Found krims targets, assume krims already configured for build.")
 	return()
 endif()
 
@@ -58,9 +58,13 @@ if ("${krims_DIR}" STREQUAL "krims_DIR-NOTFOUND")
 			message(FATAL_ERROR "Getting krims from git failed with error: ${RES}")
 		endif()
 
+		#
+		# Proceed to configure krims
+		#
+		add_subdirectory(${PROJECT_SOURCE_DIR}/external/krims)
+
 		# TODO check version of krims!
 
-		set(BUILD_EXTERNAL_KRIMS on)
 		return()
 	endif()
 

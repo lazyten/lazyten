@@ -29,7 +29,7 @@
 #       LINALGWRAP_DEFINITIONS			definitions for all compilation
 #       LINALGWRAP_DEFINITIONS_DEBUG		definitions for debug mode
 #       LINALGWRAP_DEFINITIONS_RELEASE		definitions for release mode
-#       
+#
 
 ####################
 #-- C++ standard --#

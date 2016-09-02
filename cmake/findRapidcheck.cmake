@@ -30,7 +30,7 @@
 #
 # In case the rapidcheck library is not found and AUTOCHECKOUT_MISSING_LIBS is
 # set to ON, rapidcheck is automatically checked out into the external
-# subdirectory and BUILD_EXTERNAL_RAPIDCHECK is set to ON.
+# subdirectory and configured for building.
 #
 # Otherwise a fatal error is produced.
 #
@@ -64,7 +64,24 @@ if ("${rapidcheck_DIR}" STREQUAL "rapidcheck_DIR-NOTFOUND")
 			message(FATAL_ERROR "Getting rapidcheck from git failed with error: ${RES}")
 		endif()
 
-		set(BUILD_EXTERNAL_RAPIDCHECK on)
+		#
+		# Proceed to configure rapidcheck
+		#
+		# Set option such that rapidcheck tests are built.
+		set(RC_ENABLE_TESTS ON CACHE BOOL "Build RapidCheck tests")
+
+		# Change compiler flags (CMAKE_CXX_FLAGS) to make fresh build config
+		set(CMAKE_CXX_FLAGS_STORED_TMP ${CMAKE_CXX_FLAGS})
+		set(CMAKE_CXX_FLAGS "")
+		#enable_if_compiles(CMAKE_CXX_FLAGS "-Wno-gnu-zero-variadic-macro-arguments")
+
+		# Add the rapidcheck subdirectory and configure its built.
+		add_subdirectory(${PROJECT_SOURCE_DIR}/external/rapidcheck)
+
+		# undo the changes to the compiler flags:
+		set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_STORED_TMP})
+		unset(CMAKE_CXX_FLAGS_STORED_TMP)
+
 		return()
 	endif()
 
