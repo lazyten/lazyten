@@ -40,4 +40,6 @@ if [ ! -f "$PWD/get.lib.sh" ]; then
 	exit 1
 fi
 
-. "$PWD/get.lib.sh"
+. "$PWD/get.lib.sh" || exit 1
+update_repo "$FROM" "$WHAT" "$CHECKFILE" "$INTERVAL" "$BRANCH"
+exit $?
