@@ -26,6 +26,9 @@
 # The git repo to checkout
 FROM="https://github.com/linalgwrap/krims"
 
+# Branch to checkout (empty for default)
+BRANCH=""
+
 # Folder to check it out to
 WHAT="krims"
 
