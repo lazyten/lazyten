@@ -22,10 +22,10 @@
 
 #include "linalgwrap/Constants.hh"
 #include "linalgwrap/LazyMatrixExpression.hh"
-#include "linalgwrap/ParameterMap.hh"
 #include "linalgwrap/Range.hh"
 #include <algorithm>
 #include <iterator>
+#include <krims/ParameterMap.hh>
 #include <memory>
 #include <vector>
 
@@ -178,7 +178,7 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
     /** \brief Update the internal data of all objects in this expression
      *         given the ParameterMap
      * */
-    void update(const ParameterMap& map) override {
+    void update(const krims::ParameterMap& map) override {
         // Pass the call onto all factors:
         for (auto& expression : m_factors) {
             expression->update(map);
@@ -200,13 +200,6 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
         return res;
     }
 
-    /** \brief Print the expression tree to this outstream
-     * */
-    virtual void print_tree(std::ostream& o) const override {
-        // TODO to be implemented
-        assert_dbg(false, ExcNotImplemented());
-    }
-
     /** \brief Clone the expression */
     lazy_matrix_expression_ptr_type clone() const override {
         // return a copy enwrapped in the pointer type
@@ -226,7 +219,7 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
 
     LazyMatrixProduct& operator/=(scalar_type c) {
         assert_finite(c);
-        assert_dbg(c != 0, ExcDevideByZero());
+        assert_dbg(c != 0, krims::ExcDevideByZero());
         this->scale(Constants<scalar_type>::one / c);
         return *this;
     }
@@ -322,8 +315,8 @@ template <typename StoredMatrix>
 typename LazyMatrixProduct<StoredMatrix>::scalar_type
 LazyMatrixProduct<StoredMatrix>::operator()(size_type row,
                                             size_type col) const {
-    assert_range(0, row, n_rows());
-    assert_range(0, col, n_cols());
+    assert_range(0u, row, n_rows());
+    assert_range(0u, col, n_cols());
     auto block = extract_block({row, row + 1}, {col, col + 1});
     return block(0, 0);
 }
@@ -333,8 +326,8 @@ typename LazyMatrixProduct<StoredMatrix>::stored_matrix_type
 LazyMatrixProduct<StoredMatrix>::extract_block(
       Range<size_type> row_range, Range<size_type> col_range) const {
     // Assertive checks:
-    assert_greater(0, row_range.length());
-    assert_greater(0, col_range.length());
+    assert_greater(0u, row_range.length());
+    assert_greater(0u, col_range.length());
 
     assert_greater_equal(row_range.last(), this->n_rows());
     assert_greater_equal(col_range.last(), this->n_cols());

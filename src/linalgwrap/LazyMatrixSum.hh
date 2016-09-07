@@ -23,9 +23,10 @@
 #include "linalgwrap/Constants.hh"
 #include "linalgwrap/LazyMatrixExpression.hh"
 #include "linalgwrap/LazyMatrixProduct.hh"
-#include "linalgwrap/SubscriptionPointer.hh"
 #include <algorithm>
 #include <iterator>
+#include <krims/ParameterMap.hh>
+#include <krims/SubscriptionPointer.hh>
 #include <vector>
 
 namespace linalgwrap {
@@ -98,7 +99,7 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
 
       private:
         scalar_type m_coefficient;
-        SubscriptionPointer<const stored_matrix_type> m_matrix_ptr;
+        krims::SubscriptionPointer<const stored_matrix_type> m_matrix_ptr;
     };
 
     /** Have an alias for the StoredTerm class */
@@ -310,7 +311,7 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
     /** \brief Update the internal data of all objects in this expression
      *         given the ParameterMap
      * */
-    void update(const ParameterMap& map) override {
+    void update(const krims::ParameterMap& map) override {
         // Pass the call onto all factors:
         for (auto& expression : m_lazy_terms) {
             expression.update(map);
@@ -320,7 +321,7 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
     /** \brief Multiplication with a stored matrix */
     virtual stored_matrix_type operator*(
           const stored_matrix_type& m) const override {
-        assert_dbg(!empty(), ExcInvalidState("LazyMatrixSum is empty."));
+        assert_dbg(!empty(), krims::ExcInvalidState("LazyMatrixSum is empty."));
         assert_size(n_cols(), m.n_rows());
 
         // TODO
@@ -348,19 +349,12 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
         return res;
     }
 
-    /** \brief Print the expression tree to this outstream
-     * */
-    virtual void print_tree(std::ostream&) const override {
-        // TODO to be implemented
-    }
-
     /** \brief Clone the expression */
     lazy_matrix_expression_ptr_type clone() const override {
         // return a copy enwrapped in the pointer type
         return lazy_matrix_expression_ptr_type(new LazyMatrixSum(*this));
     }
 
-    // TODO rename to empty() for consistency with STL containers
     /** \brief Is this object empty? */
     bool empty() const {
         return m_stored_terms.size() == 0 && m_lazy_terms.size() == 0;
@@ -381,7 +375,7 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
      */
     LazyMatrixSum& operator/=(scalar_type c) {
         assert_finite(c);
-        assert_dbg(c != 0, ExcDevideByZero());
+        assert_dbg(c != 0, krims::ExcDevideByZero());
         this->scale(Constants<scalar_type>::one / c);
         return *this;
     }
@@ -551,9 +545,9 @@ typename LazyMatrixSum<StoredMatrix>::scalar_type LazyMatrixSum<StoredMatrix>::
 operator()(size_type row, size_type col) const {
     if (empty()) return Constants<scalar_type>::zero;
 
-    assert_dbg(!empty(), ExcInvalidState("LazyMatrixSum is empty."));
-    assert_range(0, row, n_rows());
-    assert_range(0, col, n_cols());
+    assert_dbg(!empty(), krims::ExcInvalidState("LazyMatrixSum is empty."));
+    assert_range(0u, row, n_rows());
+    assert_range(0u, col, n_cols());
     auto block = extract_block({row, row + 1}, {col, col + 1});
     return block(0, 0);
 }
@@ -569,9 +563,9 @@ LazyMatrixSum<StoredMatrix>::extract_block(Range<size_type> row_range,
     if (empty()) return res;
 
     // Assertive checks:
-    assert_dbg(!empty(), ExcInvalidState("LazyMatrixSum is empty."));
-    assert_greater(0, row_range.length());
-    assert_greater(0, col_range.length());
+    assert_dbg(!empty(), krims::ExcInvalidState("LazyMatrixSum is empty."));
+    assert_greater(0u, row_range.length());
+    assert_greater(0u, col_range.length());
     assert_greater_equal(row_range.last(), this->n_rows());
     assert_greater_equal(col_range.last(), this->n_cols());
 
@@ -587,8 +581,8 @@ void LazyMatrixSum<StoredMatrix>::add_block_to(stored_matrix_type& in,
     // noop if we are empty.
     if (empty()) return;
 
-    assert_greater(0, in.n_rows());
-    assert_greater(0, in.n_cols());
+    assert_greater(0u, in.n_rows());
+    assert_greater(0u, in.n_cols());
 
     // check that we do not overshoot the row index
     assert_greater_equal(start_row + in.n_rows(), this->n_rows());

@@ -20,7 +20,7 @@
 #ifndef LINALG_ABSTRACT_MATRIX_HPP_
 #define LINALG_ABSTRACT_MATRIX_HPP_
 
-#include "linalgwrap/LazyMatrix_i.hh"
+#include "linalgwrap/LazyMatrixExpression.hh"
 #include <memory>
 
 namespace linalgwrap {
@@ -67,7 +67,8 @@ class LazyMatrixWrapper : public LazyMatrixExpression<StoredMatrix> {
 
     /** \brief Constructor from inner_matrix_type (for implicit conversion) */
     explicit LazyMatrixWrapper(inner_matrix_type&& inner)
-          : m_inner{std::make_shared<inner_matrix_type>(inner)} {}
+          : m_inner{std::make_shared<inner_matrix_type>(
+                  std::forward<inner_matrix_type>(inner))} {}
 
     /** \brief Constructor from inner_matrix_type (for explicit conversion)
      *
@@ -147,7 +148,7 @@ class LazyMatrixWrapper : public LazyMatrixExpression<StoredMatrix> {
      *
      *  In this case does nothing.
      * */
-    void update(const ParameterMap&) override {
+    void update(const krims::ParameterMap&) override {
         // Do nothing.
     }
 
@@ -156,13 +157,6 @@ class LazyMatrixWrapper : public LazyMatrixExpression<StoredMatrix> {
         // TODO assume that stored_matrix_type and inner_matrix_type
         //      can be multiplied together.
         return (*m_inner) * m;
-    }
-
-    /** \brief Print the expression tree to this outstream
-     * */
-    void print_tree(std::ostream& o) const override {
-        // We are the leaf, just print the name of inner:
-        o << m_inner->name();
     }
 
     /** \brief Clone the expression */
@@ -178,8 +172,8 @@ class LazyMatrixWrapper : public LazyMatrixExpression<StoredMatrix> {
 /** \brief Convenience function to construct a LazyMatrixWrapper */
 template <typename StoredMatrix, typename InnerMatrix, typename... Args>
 LazyMatrixWrapper<StoredMatrix, InnerMatrix> make_lazy_matrix(Args&&... args) {
-    return LazyMatrixWrapper<StoredMatrix, InnerMatrix>(
-          std::move(std::make_shared<InnerMatrix>(args...)));
+    return LazyMatrixWrapper<StoredMatrix, InnerMatrix>(std::move(
+          std::make_shared<InnerMatrix>(std::forward<Args>(args)...)));
 }
 
 }  // namespace linalg

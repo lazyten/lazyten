@@ -24,12 +24,9 @@
 #
 set(LINALGWRAP_TESTS_SOURCES
 	NumComp.cc
-	ExceptionTests.cc
 	RangeTests.cc
-	SubscriptionTests.cc
 	ArmadilloMatrixTests.cc
 	ArmadilloVectorTests.cc
-	ParameterMapTests.cc
 	LazyMatrixWrapperTests.cc
 	LazyMatrixProductTests.cc
 	LazyMatrixSumTests.cc

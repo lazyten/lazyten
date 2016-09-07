@@ -179,7 +179,7 @@ VectorOf<MatrixType>& VectorOf<MatrixType>::operator*=(scalar_type s) {
 
 template <typename MatrixType>
 VectorOf<MatrixType>& VectorOf<MatrixType>::operator/=(scalar_type s) {
-    assert_dbg(s != 0, ExcDevideByZero());
+    assert_dbg(s != 0, krims::ExcDevideByZero());
     assert_finite(s);
     base_type::operator/=(s);
     return (*this);

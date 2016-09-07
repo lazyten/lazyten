@@ -41,7 +41,7 @@ struct RangeTests {
             RC_ASSERT(r.length() == static_cast<size_type>(t2 - t1));
         } else {
 #ifdef DEBUG
-            RC_ASSERT_THROWS_AS((Range<T>{t1, t2}), ExcTooLarge<T>);
+            RC_ASSERT_THROWS_AS((Range<T>{t1, t2}), krims::ExcTooLarge<T>);
 #endif
         }
     }
@@ -128,9 +128,9 @@ struct RangeTests {
         range_type r{0, 1};
         auto it = std::end(r);
 
-        CHECK_THROWS_AS(*it, ExcIteratorPastEnd);
-        CHECK_THROWS_AS(++it, ExcIteratorPastEnd);
-        CHECK_THROWS_AS(it++, ExcIteratorPastEnd);
+        CHECK_THROWS_AS(*it, krims::ExcIteratorPastEnd);
+        CHECK_THROWS_AS(++it, krims::ExcIteratorPastEnd);
+        CHECK_THROWS_AS(it++, krims::ExcIteratorPastEnd);
 #endif
     }
 };
@@ -139,9 +139,6 @@ struct RangeTests {
 
 TEST_CASE("Range tests", "[range]") {
     using namespace range_tests;
-
-    // Make sure that the program does not get aborted
-    AssertDbgEffect::set(ExceptionEffect::THROW);
 
     SECTION("Range construction") {
         REQUIRE(rc::check("Range construction (size_t)",

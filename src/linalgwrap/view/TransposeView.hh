@@ -187,7 +187,7 @@ inline TransposeViewBase<Matrix>::operator stored_matrix_type() const {
     // is wrong
     // If this assertion is removed we get a never-ending loop ...
     assert_dbg(!IsStoredMatrix<Matrix>::value,
-               ExcDisabled(
+               krims::ExcDisabled(
                      "Conversion to stored matrix is not available for a "
                      "TransposeView of this stored matrix type. This usually "
                      "means that there has not been a proper specialisation of "
@@ -209,8 +209,8 @@ inline typename TransposeViewBase<Matrix>::stored_matrix_type
 TransposeViewBase<Matrix>::extract_block(Range<size_type> row_range,
                                          Range<size_type> col_range) const {
     // Assertive checks:
-    assert_greater(0, row_range.length());
-    assert_greater(0, col_range.length());
+    assert_greater(0u, row_range.length());
+    assert_greater(0u, col_range.length());
 
     assert_greater_equal(row_range.last(), this->n_rows());
     assert_greater_equal(col_range.last(), this->n_cols());
@@ -239,7 +239,7 @@ inline typename TransposeViewBase<Matrix>::stored_matrix_type
     // If we really need it than we can still think of something clever.
     assert_dbg(
           base_type::is_stored_matrix_view,
-          ExcDisabled(
+          krims::ExcDisabled(
                 "The operation \"TransposeView<LazyMatrix> * "
                 "StoredMatrix\" is disabled because it is pretty "
                 "expensive in the current implementation. Allowed are only "
@@ -258,7 +258,7 @@ inline typename TransposeViewBase<Matrix>::stored_matrix_type
 
     // TODO seek an alternative for a product of two sparse matrices:
 
-    // Explanaition of the loop below:
+    // Explanation of the loop below:
     //
     // We want the result:
     // res(i,col) = \sum_k inner^T(i,k) * m(k,col)

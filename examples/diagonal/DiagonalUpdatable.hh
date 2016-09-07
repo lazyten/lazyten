@@ -19,8 +19,8 @@
 
 #pragma once
 #include <initializer_list>
+#include <krims/ParameterMap.hh>
 #include <linalgwrap/Constants.hh>
-#include <linalgwrap/Exceptions.hh>
 #include <linalgwrap/LazyMatrix_i.hh>
 #include <linalgwrap/SmallVector.hh>
 
@@ -94,7 +94,7 @@ class DiagonalUpdatable : public LazyMatrix_i<StoredMatrix> {
         size_type end = std::min(row_range.last(), col_range.last());
 
         for (size_t i = start; i < end; ++i) {
-            res(i - start, i - start) = m_diagonal[0];
+            res(i - start, i - start) = m_diagonal[i];
         }
         return res;
     }
@@ -116,14 +116,14 @@ class DiagonalUpdatable : public LazyMatrix_i<StoredMatrix> {
     }
 
     /** \brief Provide an update mechanism */
-    void update(const ParameterMap& m) override {
-        auto diagonal = m.at<SmallVector<scalar_type>>("diagonal");
+    void update(const krims::ParameterMap& m) override {
+        const auto& diagonal = m.at<SmallVector<scalar_type>>("diagonal");
 
         // check that we have no size changes
         assert_size(diagonal.size(), m_diagonal.size());
 
         // assign:
-        m_diagonal = std::move(diagonal);
+        m_diagonal = diagonal;
     }
 
   private:

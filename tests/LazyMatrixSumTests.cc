@@ -27,9 +27,6 @@ namespace tests {
 using namespace rc;
 
 TEST_CASE("LazyMatrixSum", "[LazyMatrixSum]") {
-    // Make sure that the program does not get aborted
-    AssertDbgEffect::set(ExceptionEffect::THROW);
-
     // TODO  Test swap function
     // TODO  Test constructors
 

@@ -88,21 +88,6 @@ class StoredMatrix_i : public Matrix_i<Scalar> {
     //! The const_iterator type
     typedef typename base_type::const_iterator const_iterator;
 
-    friend void swap(StoredMatrix_i& rhs, StoredMatrix_i& lhs) {
-        using std::swap;
-        swap(static_cast<base_type&>(rhs), static_cast<base_type&>(lhs));
-        swap(rhs.m_name, lhs.m_name);
-    }
-
-    //
-    // Stored matrices can have a name
-    //
-    /** Get the name of the matrix */
-    std::string name() const { return m_name; }
-
-    /** Set the name of the matrix */
-    void name(const std::string& name) { m_name = name; }
-
     //
     // Modifying functions
     //
@@ -116,7 +101,7 @@ class StoredMatrix_i : public Matrix_i<Scalar> {
      */
     virtual scalar_type& operator[](size_type i) {
         // Check that we do not overshoot.
-        assert_range(0, i, this->n_cols() * this->n_rows());
+        assert_range(0u, i, this->n_cols() * this->n_rows());
 
         const size_type i_row = i / this->n_cols();
         const size_type i_col = i % this->n_cols();
@@ -168,10 +153,6 @@ class StoredMatrix_i : public Matrix_i<Scalar> {
     // TODO
     //   function to get actual number of non-zero entries
     //   function to get estimated/implicitly known number of non-zero entries
-
-  protected:
-    //! some name identifying the matrix, or empty
-    std::string m_name;
 };
 
 //@{

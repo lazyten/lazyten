@@ -146,7 +146,7 @@ void MatrixPrinter::print(const Matrix_i<Scalar>& mat,
     // TODO Truncate the number of rows and columns which are
     // printed once it gets too many
 
-    assert_dbg(out, ExcIO());
+    assert_dbg(out, krims::ExcIO());
 
     // Save ostream state
     // Upon destruction of this class the state is automatically

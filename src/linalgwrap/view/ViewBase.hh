@@ -22,7 +22,7 @@
 #include "linalgwrap/IsView.hh"
 #include "linalgwrap/LazyMatrixExpression.hh"
 #include "linalgwrap/StoredMatrix_i.hh"
-#include "linalgwrap/SubscriptionPointer.hh"
+#include <krims/SubscriptionPointer.hh>
 #include <type_traits>
 
 namespace linalgwrap {
@@ -86,11 +86,12 @@ class ViewBaseMatrixContainer {
     /** Access the inner matrix as a reference */
     inner_matrix_type& inner_matrix();
 
-    std::string identifier() const;
+    /** The identifier passed upon object construction */
+    std::string identifier() const { return m_inner_ptr.subscriber_id(); }
 
   private:
     //! Store a copy of the inner lazy matrix expression:
-    SubscriptionPointer<inner_matrix_type> m_inner_ptr;
+    krims::SubscriptionPointer<inner_matrix_type> m_inner_ptr;
 };
 
 /** \brief Struct allowing access to the type of the innermost matrix
@@ -165,28 +166,23 @@ class ViewBase<Matrix, false>
     /** \brief Update the internal data of all objects in this expression
      *         given the ParameterMap
      * */
-    void update(const ParameterMap& map) override { do_update<Matrix>(map); }
-
-    /** \brief Print the expression tree to this outstream
-     * */
-    void print_tree(std::ostream& o) const override {
-        o << container_type::identifier() << " of ";
-        container_type::inner_matrix().print_tree(o);
+    void update(const krims::ParameterMap& map) override {
+        do_update<Matrix>(map);
     }
 
   private:
     template <typename InnerMatrix>
     typename std::enable_if<std::is_const<InnerMatrix>::value>::type do_update(
-          const ParameterMap&) {
+          const krims::ParameterMap&) {
         // Cannot call update for const matrix
         // TODO would be nice to have this error at compile time instead!
-        assert_dbg(true,
-                   ExcInvalidState("Update not available for const matrix"));
+        assert_dbg(true, krims::ExcInvalidState(
+                               "Update not available for const matrix"));
     }
 
     template <typename InnerMatrix>
     typename std::enable_if<!std::is_const<InnerMatrix>::value>::type do_update(
-          const ParameterMap& map) {
+          const krims::ParameterMap& map) {
         container_type::inner_matrix().update(map);
     }
 };
@@ -214,16 +210,15 @@ class ViewBase<Matrix, true>
      * \param identifier Identifier for the type of View calling this
      *                   constructor.
      */
-    ViewBase(inner_matrix_type& inner, const std::string& identifier);
+    ViewBase(inner_matrix_type& inner, const std::string& identifier)
+          : container_type(inner, identifier) {}
 
     /** \brief Update the internal data of all objects in this expression
      *         given the ParameterMap
      * */
-    void update(const ParameterMap&) override;
-
-    /** \brief Print the expression tree to this outstream
-     * */
-    void print_tree(std::ostream& o) const override;
+    void update(const krims::ParameterMap&) override {
+        // Do nothing, since the underlying object is a stored matrix
+    }
 };
 
 //
@@ -255,37 +250,6 @@ template <typename Matrix>
 const typename ViewBaseMatrixContainer<Matrix>::inner_matrix_type&
 ViewBaseMatrixContainer<Matrix>::inner_matrix() const {
     return *m_inner_ptr;
-}
-
-template <typename Matrix>
-std::string ViewBaseMatrixContainer<Matrix>::identifier() const {
-    return m_inner_ptr.subscriber_id();
-}
-
-//
-// ViewBase of lazy
-//
-
-// TODO
-
-//
-// ViewBase of stored
-//
-
-template <typename Matrix>
-ViewBase<Matrix, true>::ViewBase(inner_matrix_type& inner,
-                                 const std::string& identifier)
-      : container_type(inner, identifier) {}
-
-template <typename Matrix>
-void ViewBase<Matrix, true>::update(const ParameterMap&) {
-    // Do nothing, since the underlying object is a stored matrix
-}
-
-template <typename Matrix>
-void ViewBase<Matrix, true>::print_tree(std::ostream& o) const {
-    o << container_type::identifier() << " of "
-      << container_type::inner_matrix().name();
 }
 
 }  // detail
