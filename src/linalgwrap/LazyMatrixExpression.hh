@@ -225,28 +225,6 @@ struct IsLazyMatrix<Matrix, void_t<typename Matrix::stored_matrix_type>>
 //@}
 
 //
-// CallUpadateIfAvail class
-//
-/** \brief Call the update function of a lazy matrix if it is
- *         available. Else give rise to an InvalidState exception
- */
-template <typename Matrix, bool = std::is_const<Matrix>::value>
-struct CallUpdateIfAvail {
-    void operator()(Matrix&, const ParameterMap&) const {
-        assert_dbg(true,
-                   ExcInvalidState("Update not available for const matrix"));
-    }
-};
-
-// Specialisation of the above class
-template <typename Matrix>
-struct CallUpdateIfAvail<Matrix, false> {
-    void operator()(Matrix& matrix, const ParameterMap& map) const {
-        matrix.update(map);
-    }
-};
-
-//
 // Multiplication
 //
 /** Multiply two lazy matrix expressions */
