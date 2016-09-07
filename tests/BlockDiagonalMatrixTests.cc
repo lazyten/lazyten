@@ -38,15 +38,15 @@ TEST_CASE("BlockDiagonalMatrix class", "[BlockDiagonalMatrix]") {
                                   {3.0, 4.0}};  // second row
         lazy_matrix_type lazy{stored};
 
-        auto diag1 = make_block_diagonal(stored_matrix_type{stored},
-                                         stored_matrix_type{stored});
+        auto diag1 = make_block_diagonal(stored, stored);
         auto diag2 = make_block_diagonal(std::move(lazy), std::move(stored));
+
+        CHECK(diag1.n_rows() == 4u);
+        CHECK(diag2.n_rows() == 4u);
 
         auto res = diag1 + diag2;
         auto res2 = diag2 * diag1;
 
-        CHECK(diag1.n_rows() == 4u);
-        CHECK(diag2.n_rows() == 4u);
         CHECK(res.n_rows() == 4u);
 
         CHECK(diag1(0, 0) == 1.);
