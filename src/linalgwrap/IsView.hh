@@ -18,8 +18,8 @@
 //
 
 #pragma once
-#include "linalgwrap/type_utils.hh"
 #include "linalgwrap/view/ViewBase.hh"
+#include <krims/TypeUtils.hh>
 
 namespace linalgwrap {
 namespace view {
@@ -40,7 +40,7 @@ struct IsViewImpl : public std::false_type {};
 
 //! Implementation of IsView, which is true if we have a view.
 template <typename Matrix>
-struct IsViewImpl<Matrix, void_t<typename Matrix::inner_matrix_type>>
+struct IsViewImpl<Matrix, krims::VoidType<typename Matrix::inner_matrix_type>>
       : public std::is_base_of<view::detail::ViewBaseMatrixContainer<
                                      typename Matrix::inner_matrix_type>,
                                Matrix> {};

@@ -25,13 +25,13 @@
 #include "linalgwrap/Exceptions.hh"
 #include "linalgwrap/SmallMatrix.hh"
 #include "linalgwrap/io/MatrixPrinter.hh"
-#include "linalgwrap/type_utils.hh"
 #include <complex>
 #include <cstddef>
 #include <iomanip>
 #include <ios>
 #include <iostream>
 #include <krims/Subscribable.hh>
+#include <krims/TypeUtils.hh>
 #include <numeric>
 #include <string>
 #include <utility>
@@ -175,7 +175,7 @@ template <typename T, typename = void>
 struct IsMatrix : public std::false_type {};
 
 template <typename T>
-struct IsMatrix<T, void_t<typename T::scalar_type>>
+struct IsMatrix<T, krims::VoidType<typename T::scalar_type>>
       : public std::is_base_of<Matrix_i<typename T::scalar_type>, T> {};
 //@}
 
