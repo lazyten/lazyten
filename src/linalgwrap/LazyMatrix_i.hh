@@ -64,13 +64,6 @@ class LazyMatrix_i : public LazyMatrixExpression<StoredMatrix> {
     typedef typename base_type::lazy_matrix_expression_ptr_type
           lazy_matrix_expression_ptr_type;
 
-    // Swapping:
-    friend void swap(LazyMatrix_i& first, LazyMatrix_i& second) {
-        using std::swap;
-        swap(first.m_name, second.m_name);
-        swap(static_cast<base_type&>(first), static_cast<base_type&>(second));
-    }
-
     //
     // Partial implementation of the interface of a LazyMatrixExpression
     //
@@ -79,9 +72,6 @@ class LazyMatrix_i : public LazyMatrixExpression<StoredMatrix> {
      * */
     virtual void update(const krims::ParameterMap&) override {
         assert_dbg(false, krims::ExcNotImplemented());
-    void print_tree(std::ostream& o) const override {
-        // just print the name of this leaf
-        o << name();
     }
 
     /** A default implementation of the matrix-matrix product.
@@ -91,16 +81,6 @@ class LazyMatrix_i : public LazyMatrixExpression<StoredMatrix> {
      * more performant implementation for your matrix available.
      */
     stored_matrix_type operator*(const stored_matrix_type& in) const override;
-
-    /** Get the name of the matrix */
-    std::string name() const { return m_name; }
-
-    /** Set the name of the matrix */
-    void name(const std::string& name) { m_name = name; }
-
-  protected:
-    //! some name identifying the matrix, or empty
-    std::string m_name;
 };
 
 template <typename StoredMatrix>

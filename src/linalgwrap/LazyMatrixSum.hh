@@ -349,19 +349,12 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
         return res;
     }
 
-    /** \brief Print the expression tree to this outstream
-     * */
-    virtual void print_tree(std::ostream&) const override {
-        // TODO to be implemented
-    }
-
     /** \brief Clone the expression */
     lazy_matrix_expression_ptr_type clone() const override {
         // return a copy enwrapped in the pointer type
         return lazy_matrix_expression_ptr_type(new LazyMatrixSum(*this));
     }
 
-    // TODO rename to empty() for consistency with STL containers
     /** \brief Is this object empty? */
     bool empty() const {
         return m_stored_terms.size() == 0 && m_lazy_terms.size() == 0;

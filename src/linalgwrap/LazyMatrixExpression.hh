@@ -190,9 +190,6 @@ class LazyMatrixExpression
     }
     ///@}
 
-    /** \brief Print the expression tree to this outstream */
-    virtual void print_tree(std::ostream& o) const = 0;
-
     /** \brief Update the internal data of all objects in this expression
      * given the ParameterMap
      * */

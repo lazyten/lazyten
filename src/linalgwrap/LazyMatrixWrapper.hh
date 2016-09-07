@@ -159,13 +159,6 @@ class LazyMatrixWrapper : public LazyMatrixExpression<StoredMatrix> {
         return (*m_inner) * m;
     }
 
-    /** \brief Print the expression tree to this outstream
-     * */
-    void print_tree(std::ostream& o) const override {
-        // We are the leaf, just print the name of inner:
-        o << m_inner->name();
-    }
-
     /** \brief Clone the expression */
     lazy_matrix_expression_ptr_type clone() const override {
         // return a copy enwrapped in the pointer type

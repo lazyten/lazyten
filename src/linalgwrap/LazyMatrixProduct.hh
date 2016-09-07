@@ -200,13 +200,6 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
         return res;
     }
 
-    /** \brief Print the expression tree to this outstream
-     * */
-    virtual void print_tree(std::ostream& o) const override {
-        // TODO to be implemented
-        assert_dbg(false, ExcNotImplemented());
-    }
-
     /** \brief Clone the expression */
     lazy_matrix_expression_ptr_type clone() const override {
         // return a copy enwrapped in the pointer type
