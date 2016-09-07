@@ -24,7 +24,6 @@
 #include "linalgwrap/DefaultMatrixIterator.hh"
 #include "linalgwrap/Exceptions.hh"
 #include "linalgwrap/SmallMatrix.hh"
-#include "linalgwrap/Subscribable.hh"
 #include "linalgwrap/io/MatrixPrinter.hh"
 #include "linalgwrap/type_utils.hh"
 #include <complex>
@@ -32,6 +31,7 @@
 #include <iomanip>
 #include <ios>
 #include <iostream>
+#include <krims/Subscribable.hh>
 #include <numeric>
 #include <string>
 #include <utility>
@@ -47,11 +47,11 @@ class MatrixIteratorDefaultCore;
 /** \brief Abstract matrix interface class
  *
  * This interface and hence all classes derived from it are subscribable using
- * the SubscriptionPointer class. This should be used very little and only when
- * other means (e.g. using shared pointers) is not possible.
+ * the krims::SubscriptionPointer class. This should be used very little and
+ * only when other means (e.g. using shared pointers) is not possible.
  * */
 template <typename Scalar>
-class Matrix_i : public Subscribable {
+class Matrix_i : public krims::Subscribable {
   public:
     typedef size_t size_type;
     typedef Scalar scalar_type;
@@ -144,6 +144,8 @@ class Matrix_i : public Subscribable {
     /** Calculate the (signed) sum of all matrix entries. */
     scalar_type accumulate() const;
 
+    // TODO ideas: max(), min()
+
     /** Calculate the l1 norm (maximum of the sums over columns) */
     scalar_type norm_l1() const;
 
@@ -197,7 +199,7 @@ template <typename Scalar>
 typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::operator[](
       size_type i) const {
     // Check that we do not overshoot.
-    assert_range(0, i, n_cols() * n_rows());
+    assert_range(0u, i, n_cols() * n_rows());
 
     const size_type i_row = i / n_cols();
     const size_type i_col = i % n_cols();

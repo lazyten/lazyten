@@ -23,8 +23,8 @@
 #include "linalgwrap/Exceptions.hh"
 #include "linalgwrap/Matrix_i.hh"
 #include "linalgwrap/StoredMatrix_i.hh"
-#include "linalgwrap/SubscriptionPointer.hh"
 #include <iterator>
+#include <krims/SubscriptionPointer.hh>
 #include <type_traits>
 
 namespace linalgwrap {
@@ -216,7 +216,7 @@ class MatrixIteratorDefaultCore
 
   private:
     index_type m_index;
-    SubscriptionPointer<matrix_type> m_matrix_ptr;
+    krims::SubscriptionPointer<matrix_type> m_matrix_ptr;
 
     /** The function to enforce the reference. If Constness
      *  then we can be sure, that Matrix::operator() returns a value
@@ -254,11 +254,12 @@ constexpr bool MatrixIteratorCoreBase<Matrix, Constness>::is_const_iterator;
 template <typename Matrix, bool Constness>
 void MatrixIteratorDefaultCore<Matrix, Constness>::assert_valid_state() const {
     assert_dbg(m_matrix_ptr,
-               ExcInvalidState("MatrixIterator does not point to any matrix"));
+               krims::ExcInvalidState(
+                     "MatrixIterator does not point to any matrix"));
 
     assert_dbg(m_index.first != base_type::invalid_pos.first &&
                      m_index.second != base_type::invalid_pos.second,
-               ExcIteratorPastEnd());
+               krims::ExcIteratorPastEnd());
 }
 
 template <typename Matrix, bool Constness>

@@ -1,4 +1,4 @@
-//
+
 // Copyright (C) 2016 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
@@ -237,7 +237,7 @@ bool Range<T>::contains(value_type i) const {
 template <typename T>
 typename Range<T>::value_type Range<T>::operator[](size_type i) const {
     assert_dbg(!empty(), ExcEmptyRange());
-    assert_range(0, i, length());
+    assert_range(0u, i, length());
     return m_first + i;
 }
 
@@ -255,11 +255,11 @@ RangeIterator<T> Range<T>::end() const {
 template <typename T>
 Range<T>& Range<T>::operator+=(value_type i) {
     if (i > 0) {
-        assert_dbg(m_first + i >= m_first, ExcOverflow());
-        assert_dbg(m_last + i >= m_last, ExcOverflow());
+        assert_dbg(m_first + i >= m_first, krims::ExcOverflow());
+        assert_dbg(m_last + i >= m_last, krims::ExcOverflow());
     } else {
-        assert_dbg(m_first + i <= m_first, ExcUnderflow());
-        assert_dbg(m_last + i <= m_last, ExcUnderflow());
+        assert_dbg(m_first + i <= m_first, krims::ExcUnderflow());
+        assert_dbg(m_last + i <= m_last, krims::ExcUnderflow());
     }
 
     m_first += i;
@@ -298,7 +298,7 @@ Range<T>& operator-(Range<T> r, T i) {
 
 template <typename T>
 Range<T>& operator-(T /*i*/, Range<T> /*r*/) {
-    assert_dbg(false, ExcNotImplemented());
+    assert_dbg(false, krims::ExcNotImplemented());
 }
 
 //
@@ -307,7 +307,7 @@ Range<T>& operator-(T /*i*/, Range<T> /*r*/) {
 
 template <typename T>
 void RangeIterator<T>::assert_valid_state() const {
-    assert_dbg(!is_past_the_end(), ExcIteratorPastEnd());
+    assert_dbg(!is_past_the_end(), krims::ExcIteratorPastEnd());
 }
 
 template <typename T>

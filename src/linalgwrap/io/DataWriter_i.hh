@@ -18,8 +18,8 @@
 //
 
 #pragma once
+#include <krims/Subscribable.hh>
 #include <linalgwrap/Matrix_i.hh>
-#include <linalgwrap/Subscribable.hh>
 
 namespace linalgwrap {
 namespace io {
@@ -41,7 +41,7 @@ namespace io {
  * \tparam Scalar   The scalar type to use for all data.
  */
 template <typename Scalar>
-class DataWriter_i : public Subscribable {
+class DataWriter_i : public krims::Subscribable {
   public:
     /** Write a labelled matrix to the ostream under the format represented by
      * this class.

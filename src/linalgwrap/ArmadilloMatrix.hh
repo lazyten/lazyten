@@ -128,7 +128,7 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
 
     /** Divide all matrix entries by a scalar value */
     ArmadilloMatrix& operator/=(scalar_type s) {
-        assert_dbg(s != 0, ExcDevideByZero());
+        assert_dbg(s != 0, krims::ExcDevideByZero());
         assert_finite(s);
         m_arma /= s;
         return *this;
@@ -299,8 +299,8 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
     virtual ArmadilloMatrix<scalar_type> extract_block(
           Range<size_type> row_range, Range<size_type> col_range) const {
         // Assertive checks:
-        assert_greater(0, row_range.length());
-        assert_greater(0, col_range.length());
+        assert_greater(0u, row_range.length());
+        assert_greater(0u, col_range.length());
 
         assert_greater_equal(row_range.last(), this->n_rows());
         assert_greater_equal(col_range.last(), this->n_cols());
@@ -336,8 +336,8 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
     void add_block_to(ArmadilloMatrix<scalar_type>& in, size_type start_row,
                       size_type start_col,
                       scalar_type c_this = Constants<scalar_type>::one) const {
-        assert_greater(0, in.n_rows());
-        assert_greater(0, in.n_cols());
+        assert_greater(0u, in.n_rows());
+        assert_greater(0u, in.n_cols());
 
         // check that we do not overshoot the indices
         assert_greater_equal(start_row + in.n_rows(), this->n_rows());
@@ -458,10 +458,8 @@ ArmadilloMatrix<Scalar>::ArmadilloMatrix(
               list_of_lists.size(),
               list_of_lists.size() > 0 ? list_of_lists.begin()->size() : 0,
               false) {
-#ifdef DEBUG
     size_type n_rows = list_of_lists.size();
     size_type n_cols = n_rows > 0 ? list_of_lists.begin()->size() : 0;
-#endif
 
     // Assert all columns have equal length.
     assert_element_sizes(list_of_lists, n_cols);
@@ -473,11 +471,11 @@ ArmadilloMatrix<Scalar>::ArmadilloMatrix(
             (*this)(i, j) = elem;
             ++j;
         }
-        assert_dbg(j == n_cols, ExcInternalError());
+        assert_dbg(j == n_cols, krims::ExcInternalError());
         ++i;
     }
 
-    assert_dbg(i == n_rows, ExcInternalError());
+    assert_dbg(i == n_rows, krims::ExcInternalError());
 }
 
 template <typename Scalar>

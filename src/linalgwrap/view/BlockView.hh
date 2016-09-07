@@ -194,8 +194,8 @@ BlockViewBase<Matrix>::BlockViewBase(inner_matrix_type& mat,
         m_col_range(col_range) {
 
     // Assertions
-    assert_greater(0, row_range.length());
-    assert_greater(0, col_range.length());
+    assert_greater(0u, row_range.length());
+    assert_greater(0u, col_range.length());
     assert_greater_equal(row_range.last(), base_type::inner_matrix().n_rows());
     assert_greater_equal(col_range.last(), base_type::inner_matrix().n_cols());
 }
@@ -215,8 +215,8 @@ typename BlockViewBase<Matrix>::size_type BlockViewBase<Matrix>::n_cols()
 template <typename Matrix>
 typename BlockViewBase<Matrix>::scalar_type BlockViewBase<Matrix>::operator()(
       size_type row, size_type col) const {
-    assert_range(0, row, n_rows());
-    assert_range(0, col, n_cols());
+    assert_range(0u, row, n_rows());
+    assert_range(0u, col, n_cols());
 
     // Return the element plus the offset:
     return base_type::inner_matrix()(row + m_row_range.first(),
@@ -228,8 +228,8 @@ inline typename BlockViewBase<Matrix>::stored_matrix_type
 BlockViewBase<Matrix>::extract_block(Range<size_type> row_range,
                                      Range<size_type> col_range) const {
     // Assertive checks:
-    assert_greater(0, row_range.length());
-    assert_greater(0, col_range.length());
+    assert_greater(0u, row_range.length());
+    assert_greater(0u, col_range.length());
 
     // Assertive checks:
     assert_greater_equal(row_range.last(), n_rows());
@@ -253,8 +253,8 @@ inline void BlockViewBase<Matrix>::add_block_to(stored_matrix_type& in,
                                                 size_type start_row,
                                                 size_type start_col,
                                                 scalar_type c_this) const {
-    assert_greater(0, in.n_rows());
-    assert_greater(0, in.n_cols());
+    assert_greater(0u, in.n_rows());
+    assert_greater(0u, in.n_cols());
 
     // check that we do not overshoot the indices
     assert_greater_equal(start_row + in.n_rows(), n_rows());
@@ -284,13 +284,13 @@ inline typename BlockViewBase<Matrix>::stored_matrix_type
 
     // For lazy matrices it is probably best to inform the user that we need
     // to do some heavy operation in the other case and disable the operation.
-    assert_dbg(
-          IsStoredMatrix<Matrix>::value,
-          ExcDisabled("The operation \"BlockView<LazyMatrix> * StoredMatrix\" "
-                      "is disabled because it is potentially pretty expensive. "
-                      "You should either rearrange the order in which the "
-                      "operations are performed or else explicitly convert a "
-                      "subexpression to its stored matrix type."));
+    assert_dbg(IsStoredMatrix<Matrix>::value,
+               krims::ExcDisabled(
+                     "The operation \"BlockView<LazyMatrix> * StoredMatrix\" "
+                     "is disabled because it is potentially pretty expensive. "
+                     "You should either rearrange the order in which the "
+                     "operations are performed or else explicitly convert a "
+                     "subexpression to its stored matrix type."));
 
     // TODO
     // For all other cases we need to either extract the block and perform
@@ -298,7 +298,7 @@ inline typename BlockViewBase<Matrix>::stored_matrix_type
     // and do the multiplication manually. Both can be problematic in some
     // cases, so we bail out by throwing a not-implemented exception.
     // One can perhaps find some nice trade-off when to do what someday ...
-    assert_dbg(false, ExcNotImplemented());
+    assert_dbg(false, krims::ExcNotImplemented());
 
     // Return a dummy
     return stored_matrix_type{n_rows(), m.n_cols()};

@@ -77,10 +77,8 @@ class LazyMatrix_i : public LazyMatrixExpression<StoredMatrix> {
     /** \brief Update the internal data of all objects in this expression
      *         given the ParameterMap
      * */
-    virtual void update(const ParameterMap&) override {
-        assert_dbg(false, ExcNotImplemented());
-    }
-
+    virtual void update(const krims::ParameterMap&) override {
+        assert_dbg(false, krims::ExcNotImplemented());
     void print_tree(std::ostream& o) const override {
         // just print the name of this leaf
         o << name();

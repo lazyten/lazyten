@@ -96,7 +96,7 @@ void TestingLibrary<Matrix>::once_test_initialiser_list_constructor() const {
     }
 
 #ifdef DEBUG
-    CHECK_THROWS_AS((matrix_type{{1.0, 2.0}, {1.0}}), ExcSizeMismatch);
+    CHECK_THROWS_AS((matrix_type{{1.0, 2.0}, {1.0}}), krims::ExcSizeMismatch);
 #endif
 }
 

@@ -30,9 +30,6 @@ TEST_CASE("LazyMatrixWrapper class", "[LazyMatrixWrapper]") {
     // Test constructor
     // Test swapping
 
-    // Make sure that the program does not get aborted
-    AssertDbgEffect::set(ExceptionEffect::THROW);
-
     typedef double scalar_type;
     typedef SmallMatrix<scalar_type> stored_matrix_type;
     typedef LazyMatrixWrapper<stored_matrix_type, stored_matrix_type>

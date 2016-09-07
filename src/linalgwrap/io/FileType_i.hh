@@ -54,14 +54,14 @@ class FileType_i {
     template <typename Scalar>
     void write(std::ostream&, const std::string&,
                const Matrix_i<Scalar>&) const {
-        assert_dbg(false, ExcNotImplemented());
+        assert_dbg(false, krims::ExcNotImplemented());
     }
 
     /** Write a non-labelled matrix to the ostream under the format represented
      * by this class. */
     template <typename Scalar>
     void write(std::ostream&, const Matrix_i<Scalar>&) const {
-        assert_dbg(false, ExcNotImplemented());
+        assert_dbg(false, krims::ExcNotImplemented());
     }
 
     /** Write a comment string **/

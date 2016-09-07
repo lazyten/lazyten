@@ -23,9 +23,9 @@
 #include "linalgwrap/LazyMatrixProduct.hh"
 #include "linalgwrap/LazyMatrixSum.hh"
 #include "linalgwrap/Matrix_i.hh"
-#include "linalgwrap/ParameterMap.hh"
 #include "linalgwrap/Range.hh"
 #include "linalgwrap/StoredMatrix_i.hh"
+#include <krims/ParameterMap.hh>
 #include <memory>
 #include <ostream>
 
@@ -107,8 +107,8 @@ class LazyMatrixExpression
     virtual stored_matrix_type extract_block(Range<size_type> row_range,
                                              Range<size_type> col_range) const {
         // Assertive checks:
-        assert_greater(0, row_range.length());
-        assert_greater(0, col_range.length());
+        assert_greater(0u, row_range.length());
+        assert_greater(0u, col_range.length());
         assert_greater_equal(row_range.last(), this->n_rows());
         assert_greater_equal(col_range.last(), this->n_cols());
 
@@ -167,8 +167,8 @@ class LazyMatrixExpression
     virtual void add_block_to(
           stored_matrix_type& in, size_type start_row, size_type start_col,
           scalar_type c_this = Constants<scalar_type>::one) const {
-        assert_greater(0, in.n_rows());
-        assert_greater(0, in.n_cols());
+        assert_greater(0u, in.n_rows());
+        assert_greater(0u, in.n_cols());
 
         // check that we do not overshoot the indices
         assert_greater_equal(start_row + in.n_rows(), this->n_rows());
@@ -179,8 +179,10 @@ class LazyMatrixExpression
               extract_block({start_row, start_row + in.n_rows()},
                             {start_col, start_col + in.n_cols()});
 
-        assert_dbg(extracted.n_rows() == in.n_rows(), ExcInternalError());
-        assert_dbg(extracted.n_cols() == in.n_cols(), ExcInternalError());
+        assert_dbg(extracted.n_rows() == in.n_rows(),
+                   krims::ExcInternalError());
+        assert_dbg(extracted.n_cols() == in.n_cols(),
+                   krims::ExcInternalError());
 
         // Add it to in via the equivalent function
         // in the stored matrix
@@ -194,7 +196,7 @@ class LazyMatrixExpression
     /** \brief Update the internal data of all objects in this expression
      * given the ParameterMap
      * */
-    virtual void update(const ParameterMap& map) = 0;
+    virtual void update(const krims::ParameterMap& map) = 0;
 
     /** \brief Multiplication with a stored matrix */
     virtual stored_matrix_type operator*(
@@ -270,7 +272,7 @@ StoredMatrix operator*(const StoredMatrix& lhs,
                        const LazyMatrixExpression<StoredMatrix>& rhs) {
     assert_dbg(
           false,
-          ExcDisabled(
+          krims::ExcDisabled(
                 "The operation \"StoredMatrix * LazyMatrixExpression\" is "
                 "disabled because it is usually pretty expensive. "
                 "Use \"StoredMatrix * LazyMatrixExpression * StoredMatrix\" "

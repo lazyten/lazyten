@@ -17,5 +17,16 @@
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#define CATCH_CONFIG_MAIN
+#define CATCH_CONFIG_RUNNER
 #include <catch.hpp>
+#include <krims/ExceptionSystem.hh>
+
+int main(int argc, char* const argv[]) {
+    // Make sure that the program does not get aborted,
+    // but all krims exceptions throw instead.
+    krims::AssertDbgEffect::set_throw();
+
+    // Run catch:
+    int result = Catch::Session().run(argc, argv);
+    return result;
+}

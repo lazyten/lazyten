@@ -99,14 +99,14 @@ void Mathematica::write(std::ostream& out, const std::string& label,
                                          "of only letters and numbers, so " +
                                          label + " is not valid."));
 
-    assert_throw(out, ExcIO());
+    assert_throw(out, krims::ExcIO());
     out << label << " = ";
     write(out, mat);
 }
 
 template <typename Scalar>
 void Mathematica::write(std::ostream& out, const Matrix_i<Scalar>& mat) const {
-    assert_throw(out, ExcIO());
+    assert_throw(out, krims::ExcIO());
     if (mat.n_rows() == 0 || mat.n_cols() == 0) return;
 
     out << "{";
@@ -124,7 +124,7 @@ void Mathematica::write(std::ostream& out, const Matrix_i<Scalar>& mat) const {
 
 template <typename Scalar>
 void Mathematica::write_elem(std::ostream& out, Scalar value) const {
-    assert_dbg(out, ExcIO());
+    assert_dbg(out, krims::ExcIO());
     if (m_check_for_thresh && std::abs(value) < m_thresh) {
         out << 0;
     } else {

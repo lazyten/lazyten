@@ -34,9 +34,6 @@ using namespace rc;
 
 #ifdef LINALGWRAP_HAVE_ARMADILLO
 TEST_CASE("ArmadilloMatrix class", "[ArmadilloMatrix]") {
-    // Make sure that the program does not get aborted
-    AssertDbgEffect::set(ExceptionEffect::THROW);
-
     // The type of matrix we wish to test.
     typedef ArmadilloMatrix<double> matrix_type;
 

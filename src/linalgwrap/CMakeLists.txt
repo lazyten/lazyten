@@ -23,12 +23,9 @@
 # set the source files.
 #
 set(LINALGWRAP_SOURCES
-	ParameterMap.cc
-	ExceptionBase.cc
-	ExceptionSystem.cc
 	version.cc
 	io/Mathematica.cc
-)	
+)
 
 # Dump the current version as an include file.
 include_krims_cmake_module(WriteVersionHeader)
