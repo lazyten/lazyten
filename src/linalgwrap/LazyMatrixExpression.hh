@@ -218,7 +218,8 @@ template <typename Matrix, typename = void>
 struct IsLazyMatrix : public std::false_type {};
 
 template <typename Matrix>
-struct IsLazyMatrix<Matrix, void_t<typename Matrix::stored_matrix_type>>
+struct IsLazyMatrix<Matrix,
+                    krims::VoidType<typename Matrix::stored_matrix_type>>
       : public std::is_base_of<
               LazyMatrixExpression<typename Matrix::stored_matrix_type>,
               Matrix> {};

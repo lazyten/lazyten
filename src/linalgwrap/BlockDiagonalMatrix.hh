@@ -24,9 +24,7 @@
 #include <utility>
 
 namespace linalgwrap {
-
-// TODO consider specialising this class for 2 and 3 matrices.
-//      Lambdas are terribly slow and could be avoided ...
+// TODO Review and improve this class
 
 // Forward definition of base class:
 template <typename... Matrices>
@@ -44,61 +42,98 @@ class BlockDiagonalMatrix : public BlockDiagonalMatrixBase<Matrices...> {
                   "Empty BlockDiagonalMatrix objects with zero matrices along "
                   "the diagonal are not permitted.");
 
-    /** Construct a block diagonal matrix from a tuple of matrices
-     *
-     * The matrices will be arranged as blocks along the diagonal.
-     *
-     * Matrices have to be square matrices!
-     * */
-    explicit BlockDiagonalMatrix(std::tuple<Matrices...> blocks);
-
+    /** \name Constructors */
+    ///@{
     /** Construct a block diagonal matrix from a bunch of matrices
      *
      * The matrices will be arranged as blocks along the diagonal.
      *
      * Matrices have to be square matrices!
      * */
-    explicit BlockDiagonalMatrix(Matrices... blocks);
+    explicit BlockDiagonalMatrix(Matrices&&... blocks)
+          : BlockDiagonalMatrix{std::tuple<Matrices&&...>{
+                  std::forward<Matrices>(blocks)...}} {}
+
+    /** Construct a block diagonal matrix from a tuple of matrices
+     *
+     * The matrices will be arranged as blocks along the diagonal.
+     *
+     * Matrices have to be square matrices!
+     * */
+    explicit BlockDiagonalMatrix(std::tuple<Matrices&&...> blocks);
+
+    /** Construct a block diagonal matrix from a bunch of matrix
+     *  references. The matrices will be copied, so be careful.
+     *
+     * The matrices will be arranged as blocks along the diagonal.
+     *
+     * Matrices have to be square matrices!
+     * */
+    explicit BlockDiagonalMatrix(const Matrices&... blocks)
+          : BlockDiagonalMatrix{std::move(Matrices{blocks})...} {}
+    ///@}
 
     /** \brief Const access to the matrix blocks */
-    std::tuple<const Matrices&...> blocks() const override;
+    std::tuple<const Matrices&...> blocks() const override { return m_blocks; }
 
     //
     // Matrix_i interface
     //
     /** \brief Number of rows of the matrix */
-    size_type n_rows() const override;
+    size_type n_rows() const override { return m_size; }
 
     /** \brief Number of columns of the matrix */
-    size_type n_cols() const override;
+    size_type n_cols() const override {
+        // By construction this matrix is quadratic:
+        return n_rows();
+    }
 
     /** \brief return an element of the matrix    */
     scalar_type operator()(size_type row, size_type col) const override;
 
     // TODO implement interface of StoredMatrix_i
 
+    // TODO implement extract_block and add_block_to sensibly
+
   private:
     /** The Matrix blocks along the diagonal */
     std::tuple<Matrices...> m_blocks;
 
-    /** Cache for the size of the matrix: */
+    /** The cached total size of the Matrix */
     size_type m_size;
+
+    /** \brief Map which maps the index past-the-end of a block to the
+     * appropriate block.
+     *
+     * Using this map and the map::upper_bound function we can quickly find
+     * the block which contains a certain element of which we only know
+     * its index.
+     *
+     * E.g. consider a BlockDiagonalMatrix with the block sizes 4,5 and 7.
+     * The content of this map would be
+     * 4  -> block1  (has indices 0 to 3)
+     * 9  -> block2  (has indices 4 to 8)
+     * 16 -> block3  (has indices 9 to 15)
+     */
+    std::map<size_type, Matrix_i<scalar_type>*> m_start_index_to_block;
 };
 
-/** \name make_block_diagonal helper functions */
-///@{
-/** \brief Construct a block diagonal matrix from a tuple of matrices
- *  which will be arranged along the diagonal.
- */
+//@{
 template <typename... Matrices>
-BlockDiagonalMatrix<Matrices...> make_block_diagonal(
-      std::tuple<Matrices...>&& blocks);
+BlockDiagonalMatrix<typename std::decay<Matrices>::type...> make_block_diagonal(
+      Matrices&&... blocks) {
+    return BlockDiagonalMatrix<typename std::decay<Matrices>::type...>(
+          std::forward<Matrices>(blocks)...);
+}
 
-/** \brief Construct a block diagonal matrix from matrices
- *  which will be arranged along the diagonal.
- */
 template <typename... Matrices>
-BlockDiagonalMatrix<Matrices...> make_block_diagonal(Matrices&&... blocks);
+BlockDiagonalMatrix<typename std::decay<Matrices>::type...> make_block_diagonal(
+      std::tuple<Matrices...>&& blocks) {
+    return BlockDiagonalMatrix<typename std::decay<Matrices>::type...>{
+          std::move(blocks)};
+}
+
+//@}
 ///@}
 
 //
@@ -107,37 +142,15 @@ BlockDiagonalMatrix<Matrices...> make_block_diagonal(Matrices&&... blocks);
 
 template <typename... Matrices>
 BlockDiagonalMatrix<Matrices...>::BlockDiagonalMatrix(
-      std::tuple<Matrices...> blocks)
+      std::tuple<Matrices&&...> blocks)
       : m_blocks{std::move(blocks)}, m_size{0} {
-#ifdef DEBUG
-    // Assert that all matrix blocks are quadratic.
-    tuple_for_each([](auto& mat) { assert_size(mat.n_rows(), mat.n_cols()); },
-                   tuple_ref(m_blocks));
-#endif
+    auto build_sizemap = [&](Matrix_i<scalar_type>& mat) {
+        assert_dbg(mat.n_rows() == mat.n_cols(), ExcMatrixNotSquare());
 
-    // Determine size of this matrix:
-    // Lambda to add size of current block in:
-    auto add_size = [&](auto& mat) { m_size += mat.n_rows(); };
-
-    // Run over all blocks:
-    tuple_for_each(add_size, tuple_ref(m_blocks));
-}
-
-template <typename... Matrices>
-BlockDiagonalMatrix<Matrices...>::BlockDiagonalMatrix(Matrices... blocks)
-      : BlockDiagonalMatrix<Matrices...>{std::forward_as_tuple(blocks...)} {}
-
-template <typename... Matrices>
-typename BlockDiagonalMatrix<Matrices...>::size_type
-BlockDiagonalMatrix<Matrices...>::n_rows() const {
-    return m_size;
-}
-
-template <typename... Matrices>
-typename BlockDiagonalMatrix<Matrices...>::size_type
-BlockDiagonalMatrix<Matrices...>::n_cols() const {
-    // By construction this matrix is quadratic:
-    return n_rows();
+        m_size += mat.n_rows();
+        m_start_index_to_block[m_size] = &mat;
+    };
+    tuple_for_each(build_sizemap, m_blocks);
 }
 
 template <typename... Matrices>
@@ -147,69 +160,26 @@ BlockDiagonalMatrix<Matrices...>::operator()(size_type row,
     assert_greater(row, n_rows());
     assert_greater(col, n_cols());
 
-    // In this function we iterate over the tuple of matrix blocks,
-    // i.e. down the block diagonal.
+    // Find the block which contains the row index:
+    auto offset_blockptr = m_start_index_to_block.upper_bound(row);
+    assert_dbg(offset_blockptr != m_start_index_to_block.end(),
+               krims::ExcInternalError());
 
-    scalar_type res = Constants<scalar_type>::zero;
-    size_type cur_block_start_index = 0;
-    size_type cur_block_end_index = 0;
+    // Get past-the-end index of the block and reference to the block
+    const size_type end = offset_blockptr->first;
+    const Matrix_i<scalar_type>& block = *(offset_blockptr->second);
 
-    // Predicate that asserts that the current matrix block contains
-    // the element we are interested in.
-    auto block_of_interest = [&](auto& mat) {
-        // current start index is the old end index;
-        cur_block_start_index = cur_block_end_index;
+    // Compute start index:
+    const size_type start = end - block.n_rows();
+    assert_dbg(start <= row, krims::ExcInternalError());
+    assert_dbg(row < end, krims::ExcInternalError());
 
-        // Update the end index: Matrices are by assumption quadratic.
-        cur_block_end_index += mat.n_rows();
-
-        // Row index is in the appropriate range:
-        // => This block either contains the element,
-        //    or the result is zero
-        const bool row_in_range =
-              cur_block_start_index <= row && row < cur_block_end_index;
-        return row_in_range;
-    };
-
-    // End recursion (since we passed the block of interest)
-    auto extract_value = [&](auto& mat) {
-        const bool col_in_range =
-              cur_block_start_index <= col && col < cur_block_end_index;
-
-        if (col_in_range) {
-            // col is in the range of the block -> return the value
-            res = mat(row - cur_block_start_index, col - cur_block_start_index);
-        } else {
-            // col is not in the range of the block -> result has to be zero
-            res = 0.0;
-        }
-    };
-
-    // Extract the value res from the first block of interest:
-    tuple_for_first(block_of_interest, extract_value, blocks());
-
-    return res;
-}
-
-template <typename... Matrices>
-inline std::tuple<const Matrices&...> BlockDiagonalMatrix<Matrices...>::blocks()
-      const {
-    return m_blocks;
-}
-
-//
-// Out of place functions
-//
-
-template <typename... Matrices>
-inline BlockDiagonalMatrix<Matrices...> make_block_diagonal(
-      std::tuple<Matrices...>&& blocks) {
-    return BlockDiagonalMatrix<Matrices...>(std::move(blocks));
-}
-
-template <typename... Matrices>
-inline BlockDiagonalMatrix<Matrices...> make_block_diagonal(
-      Matrices&&... blocks) {
-    return BlockDiagonalMatrix<Matrices...>{std::move(blocks)...};
+    if (col < start || col >= end) {
+        // Col index is not in the same block, hence we are in an
+        // off-diagonal zero block
+        return Constants<scalar_type>::zero;
+    } else {
+        return block(row - start, col - start);
+    }
 }
 }  // namespace linalgwrap

@@ -18,10 +18,11 @@
 //
 
 #pragma once
+#include "detail/GenericFunctionals.hh"
 #include "linalgwrap/BlockDiagonalMatrix.hh"
 #include "linalgwrap/LazyMatrixExpression.hh"
 #include "linalgwrap/StoredMatrix_i.hh"
-#include "linalgwrap/tuple_utils.hh"
+#include <krims/TupleUtils.hh>
 
 namespace linalgwrap {
 // Forward definition of BlockDiagonalMatrix class
@@ -192,10 +193,15 @@ auto operator/(const BlockDiagonalMatrixBase<Matrix, OtherMatrices...>& bm,
 // --------------------------------------------------
 //
 
+// TODO: problem for C++11 since no explicit return type
 template <typename... MatricesLHS, typename... MatricesRHS>
 auto operator+(const BlockDiagonalMatrixBase<MatricesLHS...>& lhs,
                const BlockDiagonalMatrixBase<MatricesRHS...>& rhs) {
-    auto plus = [](auto& x, auto& y) { return x + y; };
+    // Generic lambdas are not part of c++11, so we cannot use them
+    // auto plus = [](auto& x, auto& y) { return x + y; };
+
+    // Use generic plus functor instead
+    detail::PlusFctr plus;
 
     // Apply it to all elements of the tuple:
     auto result = tuple_map(std::move(plus), lhs.blocks(), rhs.blocks());
@@ -207,7 +213,11 @@ auto operator+(const BlockDiagonalMatrixBase<MatricesLHS...>& lhs,
 template <typename... MatricesLHS, typename... MatricesRHS>
 auto operator-(const BlockDiagonalMatrixBase<MatricesLHS...>& lhs,
                const BlockDiagonalMatrixBase<MatricesRHS...>& rhs) {
-    auto bminus = [](auto& x, auto& y) { return x - y; };
+    // Generic lambdas are not part of c++11, so we cannot use them
+    // auto bminus = [](auto& x, auto& y) { return x - y; };
+
+    // use generic minus functor:
+    detail::MinusFctr bminus;
 
     // Apply it to all elements of the tuple:
     auto result = tuple_map(std::move(bminus), lhs.blocks(), rhs.blocks());
@@ -219,7 +229,9 @@ auto operator-(const BlockDiagonalMatrixBase<MatricesLHS...>& lhs,
 template <typename... MatricesLHS, typename... MatricesRHS>
 auto operator*(const BlockDiagonalMatrixBase<MatricesLHS...>& lhs,
                const BlockDiagonalMatrixBase<MatricesRHS...>& rhs) {
-    auto times = [](auto& x, auto& y) { return x * y; };
+    // Avoid generic lambda (C++14 and above only)
+    // auto times = [](auto& x, auto& y) { return x * y; };
+    detail::MultipliesFctr times;
 
     // Apply it to all elements of the tuple:
     auto result = tuple_map(std::move(times), lhs.blocks(), rhs.blocks());
@@ -230,7 +242,9 @@ auto operator*(const BlockDiagonalMatrixBase<MatricesLHS...>& lhs,
 
 template <typename... Matrices>
 auto operator-(const BlockDiagonalMatrixBase<Matrices...>& bm) {
-    auto uminus = [](auto& x) { return -x; };
+    // Avoid generic lambda (C++14 and above only)
+    // auto uminus = [](auto& x) { return -x; };
+    detail::NegateFctr uminus;
 
     // Apply it to all elements of the tuple:
     auto result = tuple_map(std::move(uminus), bm.blocks());
@@ -242,7 +256,9 @@ auto operator-(const BlockDiagonalMatrixBase<Matrices...>& bm) {
 template <typename Matrix, typename... OtherMatrices>
 auto operator*(const BlockDiagonalMatrixBase<Matrix, OtherMatrices...>& bm,
                typename Matrix::scalar_type s) {
-    auto scalemult = [&](auto& x) { return s * x; };
+    // Avoid generic lambda (C++14 and above only)
+    // auto scalemult = [&](auto& x) { return s * x; };
+    detail::ScaleByFctr<typename Matrix::scalar_type> scalemult{s};
 
     // Apply it to all elements of the tuple:
     auto result = tuple_map(std::move(scalemult), bm.blocks());
@@ -260,7 +276,9 @@ auto operator*(typename Matrix::scalar_type s,
 template <typename Matrix, typename... OtherMatrices>
 auto operator/(const BlockDiagonalMatrixBase<Matrix, OtherMatrices...>& bm,
                typename Matrix::scalar_type s) {
-    auto scalediv = [&](auto& x) { return x / s; };
+    // Avoid generic lambda (C++14 and above only)
+    // auto scalediv = [&](auto& x) { return x / s; };
+    detail::DivideByFctr<typename Matrix::scalar_type> scalediv{s};
 
     // Apply it to all elements of the tuple:
     auto result = tuple_map(std::move(scalediv), bm.blocks());

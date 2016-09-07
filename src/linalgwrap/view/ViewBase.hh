@@ -111,8 +111,8 @@ struct ViewInnermostMatrixType {
 };
 
 template <typename Matrix>
-struct ViewInnermostMatrixType<Matrix,
-                               void_t<typename Matrix::inner_matrix_type>> {
+struct ViewInnermostMatrixType<
+      Matrix, krims::VoidType<typename Matrix::inner_matrix_type>> {
     typedef typename std::conditional<IsView<Matrix>::value,
                                       typename Matrix::inner_matrix_type,
                                       Matrix>::type type;

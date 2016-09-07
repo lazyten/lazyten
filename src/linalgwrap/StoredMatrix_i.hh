@@ -23,7 +23,7 @@
 #include "linalgwrap/Constants.hh"
 #include "linalgwrap/DefaultMatrixIterator.hh"
 #include "linalgwrap/Matrix_i.hh"
-#include "linalgwrap/type_utils.hh"
+#include <krims/TypeUtils.hh>
 
 namespace linalgwrap {
 
@@ -168,7 +168,7 @@ template <typename Matrix, typename = void>
 struct IsStoredMatrix : public std::false_type {};
 
 template <typename Matrix>
-struct IsStoredMatrix<Matrix, void_t<typename Matrix::scalar_type>>
+struct IsStoredMatrix<Matrix, krims::VoidType<typename Matrix::scalar_type>>
       : public std::is_base_of<StoredMatrix_i<typename Matrix::scalar_type>,
                                Matrix> {};
 //@}
