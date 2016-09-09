@@ -60,7 +60,8 @@ class Mathematica : public FileType_i {
     /** Sanitise a label string, such that it satisfies the requirements of
      * the FileType */
     std::string normalise_label(const std::string& label) const override {
-        return std::regex_replace(label, std::regex("[^a-zA-Z0-9]"), "");
+        return std::regex_replace(label, std::regex("[^a-zA-Z0-9]"),
+                                  std::string(""));
     }
 
     /** Check whether a label string is a valid mathematica label */
