@@ -28,7 +28,8 @@ namespace gen {
 // TODO implement into rapidcheck in some sensible way
 template <typename Model, typename GenerationFunc>
 auto commandsScaledLength(const Model &initialState, double scale,
-                          GenerationFunc &&genFunc) {
+                          GenerationFunc &&genFunc)
+      -> decltype(commands<Model>(initialState, genFunc)) {
 
     /// Generate a sequence of commands where the commands themself
     /// get passed the size ``size``.

@@ -157,35 +157,46 @@ public std::conditional<
 //! Add two block diagonal matrices
 template <typename... MatricesLHS, typename... MatricesRHS>
 auto operator+(const BlockDiagonalMatrixBase<MatricesLHS...>& lhs,
-               const BlockDiagonalMatrixBase<MatricesRHS...>& rhs);
+               const BlockDiagonalMatrixBase<MatricesRHS...>& rhs)
+      -> decltype(make_block_diagonal(tuple_map(detail::PlusFctr{},
+                                                lhs.blocks(), rhs.blocks())));
 
 //! Subtract two block diagonal matrices
 template <typename... MatricesLHS, typename... MatricesRHS>
 auto operator-(const BlockDiagonalMatrixBase<MatricesLHS...>& lhs,
-               const BlockDiagonalMatrixBase<MatricesRHS...>& rhs);
+               const BlockDiagonalMatrixBase<MatricesRHS...>& rhs)
+      -> decltype(lhs + (-rhs));
 
 //! Multiply two block diagonal matrices
 template <typename... MatricesLHS, typename... MatricesRHS>
 auto operator*(const BlockDiagonalMatrixBase<MatricesLHS...>& lhs,
-               const BlockDiagonalMatrixBase<MatricesRHS...>& rhs);
+               const BlockDiagonalMatrixBase<MatricesRHS...>& rhs)
+      -> decltype(make_block_diagonal(tuple_map(detail::MultipliesFctr{},
+                                                lhs.blocks(), rhs.blocks())));
 
 //! Unary minus on a block diagonal matrix
 template <typename... Matrices>
-auto operator-(const BlockDiagonalMatrixBase<Matrices...>& bm);
+auto operator-(const BlockDiagonalMatrixBase<Matrices...>& bm)
+      -> decltype(make_block_diagonal(tuple_map(detail::NegateFctr{},
+                                                bm.blocks())));
 
 //@{
 //! Scale a block diagonal matrix
 template <typename Matrix, typename... OtherMatrices>
 auto operator*(const BlockDiagonalMatrixBase<Matrix, OtherMatrices...>& bm,
-               typename Matrix::scalar_type s);
+               typename Matrix::scalar_type s)
+      -> decltype(make_block_diagonal(
+            tuple_map(detail::ScaleByFctr<typename Matrix::scalar_type>{s},
+                      bm.blocks())));
 
 template <typename Matrix, typename... OtherMatrices>
 auto operator*(typename Matrix::scalar_type s,
-               const BlockDiagonalMatrixBase<Matrix, OtherMatrices...>& bm);
+               const BlockDiagonalMatrixBase<Matrix, OtherMatrices...>& bm)
+      -> decltype(bm * s);
 
 template <typename Matrix, typename... OtherMatrices>
 auto operator/(const BlockDiagonalMatrixBase<Matrix, OtherMatrices...>& bm,
-               typename Matrix::scalar_type s);
+               typename Matrix::scalar_type s) -> decltype(bm * (1 / s));
 //@}
 ///@}
 
@@ -193,18 +204,16 @@ auto operator/(const BlockDiagonalMatrixBase<Matrix, OtherMatrices...>& bm,
 // --------------------------------------------------
 //
 
-// TODO: problem for C++11 since no explicit return type
 template <typename... MatricesLHS, typename... MatricesRHS>
 auto operator+(const BlockDiagonalMatrixBase<MatricesLHS...>& lhs,
-               const BlockDiagonalMatrixBase<MatricesRHS...>& rhs) {
+               const BlockDiagonalMatrixBase<MatricesRHS...>& rhs)
+      -> decltype(make_block_diagonal(tuple_map(detail::PlusFctr{},
+                                                lhs.blocks(), rhs.blocks()))) {
     // Generic lambdas are not part of c++11, so we cannot use them
     // auto plus = [](auto& x, auto& y) { return x + y; };
 
-    // Use generic plus functor instead
-    detail::PlusFctr plus;
-
-    // Apply it to all elements of the tuple:
-    auto result = tuple_map(std::move(plus), lhs.blocks(), rhs.blocks());
+    // Apply generic plus functor to all elements of the tuple:
+    auto result = tuple_map(detail::PlusFctr{}, lhs.blocks(), rhs.blocks());
 
     // Return the result enwrapped inside a BlockDiagonalMatrix:
     return make_block_diagonal(std::move(result));
@@ -212,15 +221,13 @@ auto operator+(const BlockDiagonalMatrixBase<MatricesLHS...>& lhs,
 
 template <typename... MatricesLHS, typename... MatricesRHS>
 auto operator-(const BlockDiagonalMatrixBase<MatricesLHS...>& lhs,
-               const BlockDiagonalMatrixBase<MatricesRHS...>& rhs) {
+               const BlockDiagonalMatrixBase<MatricesRHS...>& rhs)
+      -> decltype(lhs + (-rhs)) {
     // Generic lambdas are not part of c++11, so we cannot use them
     // auto bminus = [](auto& x, auto& y) { return x - y; };
 
-    // use generic minus functor:
-    detail::MinusFctr bminus;
-
-    // Apply it to all elements of the tuple:
-    auto result = tuple_map(std::move(bminus), lhs.blocks(), rhs.blocks());
+    // Apply generic minus functor  to all elements of the tuple:
+    auto result = tuple_map(detail::MinusFctr{}, lhs.blocks(), rhs.blocks());
 
     // Return the result enwrapped inside a BlockDiagonalMatrix:
     return make_block_diagonal(std::move(result));
@@ -228,26 +235,29 @@ auto operator-(const BlockDiagonalMatrixBase<MatricesLHS...>& lhs,
 
 template <typename... MatricesLHS, typename... MatricesRHS>
 auto operator*(const BlockDiagonalMatrixBase<MatricesLHS...>& lhs,
-               const BlockDiagonalMatrixBase<MatricesRHS...>& rhs) {
+               const BlockDiagonalMatrixBase<MatricesRHS...>& rhs)
+      -> decltype(make_block_diagonal(tuple_map(detail::MultipliesFctr{},
+                                                lhs.blocks(), rhs.blocks()))) {
     // Avoid generic lambda (C++14 and above only)
     // auto times = [](auto& x, auto& y) { return x * y; };
-    detail::MultipliesFctr times;
 
-    // Apply it to all elements of the tuple:
-    auto result = tuple_map(std::move(times), lhs.blocks(), rhs.blocks());
+    // Apply generic multiplication functor to all elements of the tuple:
+    auto result =
+          tuple_map(detail::MultipliesFctr{}, lhs.blocks(), rhs.blocks());
 
     // Return the result enwrapped inside a BlockDiagonalMatrix:
     return make_block_diagonal(std::move(result));
 }
 
 template <typename... Matrices>
-auto operator-(const BlockDiagonalMatrixBase<Matrices...>& bm) {
+auto operator-(const BlockDiagonalMatrixBase<Matrices...>& bm)
+      -> decltype(make_block_diagonal(tuple_map(detail::NegateFctr{},
+                                                bm.blocks()))) {
     // Avoid generic lambda (C++14 and above only)
     // auto uminus = [](auto& x) { return -x; };
-    detail::NegateFctr uminus;
 
-    // Apply it to all elements of the tuple:
-    auto result = tuple_map(std::move(uminus), bm.blocks());
+    // Apply generic negation functor to all elements of the tuple:
+    auto result = tuple_map(detail::NegateFctr{}, bm.blocks());
 
     // Return the result enwrapped inside a BlockDiagonalMatrix:
     return make_block_diagonal(std::move(result));
@@ -255,7 +265,10 @@ auto operator-(const BlockDiagonalMatrixBase<Matrices...>& bm) {
 
 template <typename Matrix, typename... OtherMatrices>
 auto operator*(const BlockDiagonalMatrixBase<Matrix, OtherMatrices...>& bm,
-               typename Matrix::scalar_type s) {
+               typename Matrix::scalar_type s)
+      -> decltype(make_block_diagonal(
+            tuple_map(detail::ScaleByFctr<typename Matrix::scalar_type>{s},
+                      bm.blocks()))) {
     // Avoid generic lambda (C++14 and above only)
     // auto scalemult = [&](auto& x) { return s * x; };
     detail::ScaleByFctr<typename Matrix::scalar_type> scalemult{s};
@@ -269,13 +282,14 @@ auto operator*(const BlockDiagonalMatrixBase<Matrix, OtherMatrices...>& bm,
 
 template <typename Matrix, typename... OtherMatrices>
 auto operator*(typename Matrix::scalar_type s,
-               const BlockDiagonalMatrixBase<Matrix, OtherMatrices...>& bm) {
+               const BlockDiagonalMatrixBase<Matrix, OtherMatrices...>& bm)
+      -> decltype(bm * s) {
     return bm * s;
 }
 
 template <typename Matrix, typename... OtherMatrices>
 auto operator/(const BlockDiagonalMatrixBase<Matrix, OtherMatrices...>& bm,
-               typename Matrix::scalar_type s) {
+               typename Matrix::scalar_type s) -> decltype(bm * (1 / s)) {
     // Avoid generic lambda (C++14 and above only)
     // auto scalediv = [&](auto& x) { return x / s; };
     detail::DivideByFctr<typename Matrix::scalar_type> scalediv{s};
