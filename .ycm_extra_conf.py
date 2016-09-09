@@ -61,6 +61,7 @@ flags = [
     '-isystem', '../krims/src',
     '-isystem', '../rapidcheck/ext/catch/include',
     '-isystem', '../rapidcheck/include',
+    '-isystem', '/usr/lib/ycmd/clang_includes',
 ]
 
 def DirectoryOfThisScript():
