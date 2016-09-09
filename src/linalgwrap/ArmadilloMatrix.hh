@@ -458,8 +458,10 @@ ArmadilloMatrix<Scalar>::ArmadilloMatrix(
               list_of_lists.size(),
               list_of_lists.size() > 0 ? list_of_lists.begin()->size() : 0,
               false) {
+#ifdef DEBUG
     size_type n_rows = list_of_lists.size();
     size_type n_cols = n_rows > 0 ? list_of_lists.begin()->size() : 0;
+#endif
 
     // Assert all columns have equal length.
     assert_element_sizes(list_of_lists, n_cols);

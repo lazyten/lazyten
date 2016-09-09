@@ -41,10 +41,6 @@ env:
     - DEPEND_PKG="libarmadillo-dev libboost-dev"
 
 matrix:
-  allow_failures:
-    # gcc-4.8 (c++11 and without tests, since rapidcheck does not compile like this)
-    - env: CC_COMPILER="gcc" CXX_COMPILER="g++" EXTRA_OPTS="-DLINALGWRAP_ENABLE_TESTS=OFF"
-  #
   include:
     # Clang 3.5 with disabled c++14 support
     - install:
@@ -55,7 +51,7 @@ matrix:
       - sudo apt-get install -y ninja-build g++-4.9 $DEPEND_PKG
       compiler: clang
       env: CC_COMPILER="clang" CXX_COMPILER="clang++" TESTCASE="linalgwrap_tests_RELEASE"
-        EXTRA_OPTS="-DDRB_HAS_CXX14_SUPPORT=OFF -DDRB_HIGHEST_CXX_SUPPORT=11"
+        EXTRA_OPTS="-DDRB_MAXIMUM_CXX_STANDARD=11
     #
     # Clang 3.8 (has c++14)
     - install:
