@@ -22,11 +22,8 @@
 #include <linalgwrap/ArmadilloMatrix.hh>
 #include <rapidcheck.h>
 
-// Generators for neccessary matrices
+// Generators for necessary matrices
 #include "generators.hh"
-
-// Numerical equality and comparison
-#include "NumComp.hh"
 
 namespace linalgwrap {
 namespace tests {
@@ -50,9 +47,13 @@ TEST_CASE("ArmadilloMatrix class", "[ArmadilloMatrix]") {
     SECTION("Default stored matrix tests") {
         typedef typename stored_matrix_tests::TestingLibrary<matrix_type>
               testinglib;
-        testinglib lib("ArmadilloMatrix: ",
-                       0.01 * TestConstants::default_num_tol);
-        lib.run_checks();
+
+        // Decrease tolerance:
+        auto lowertol = NumCompConstants::change_temporary(
+              00.1 * krims::NumCompConstants::default_tolerance_factor);
+
+        // Run tests:
+        testinglib("ArmadilloMatrix: ").run_checks();
     }
 }
 #endif

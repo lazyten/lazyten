@@ -56,16 +56,14 @@ class TestingLibrary
      *  \param model_generator  Generator that takes the args and returns a
      *                          model matrix
      *  \param prefix A prefix to use in the rapidcheck description string
-     *  \param tolerance Numeric tolerance used for comparison in (some) checks.
-     *                   It is not used for the check of basic equivalence,
-     *                   where we require an agreement of 10*machine_epsilon.
      */
     TestingLibrary(
           std::function<genarg_type(void)> args_generator,
-          std::function<view_type(genarg_type)> lazy_generator,
+          std::function<view_type(genarg_type)> view_generator,
           std::function<stored_matrix_type(genarg_type)> model_generator,
-          std::string prefix = "",
-          double tolerance = TestConstants::default_num_tol);
+          std::string prefix = "")
+          : base_type{args_generator, view_generator, model_generator, prefix} {
+    }
 
     void run_checks() const;
 };
@@ -147,15 +145,6 @@ struct StandardViewGenerators {
 //
 // --------------------------------------------------------
 //
-
-template <typename View, typename ViewGenArg>
-TestingLibrary<View, ViewGenArg>::TestingLibrary(
-      std::function<genarg_type(void)> args_generator,
-      std::function<view_type(genarg_type)> view_generator,
-      std::function<stored_matrix_type(genarg_type)> model_generator,
-      std::string prefix, double tolerance)
-      : base_type{args_generator, view_generator, model_generator, prefix,
-                  tolerance} {}
 
 template <typename View, typename ViewGenArg>
 void TestingLibrary<View, ViewGenArg>::run_checks() const {

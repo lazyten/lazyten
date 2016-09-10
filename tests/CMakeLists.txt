@@ -23,7 +23,6 @@
 # The sources for the test executable
 #
 set(LINALGWRAP_TESTS_SOURCES
-	NumComp.cc
 	RangeTests.cc
 	ArmadilloMatrixTests.cc
 	ArmadilloVectorTests.cc

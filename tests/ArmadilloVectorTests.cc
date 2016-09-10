@@ -61,9 +61,7 @@ TEST_CASE("ArmadilloVector class", "[ArmadilloVector]") {
     SECTION("Default stored vector tests") {
         typedef typename stored_matrix_tests::TestingLibrary<vector_type>
               testinglib;
-        testinglib lib("ArmadilloVector: ",
-                       0.01 * TestConstants::default_num_tol);
-        lib.run_checks();
+        testinglib("ArmadilloVector: ").run_checks();,
     }
     */
 }

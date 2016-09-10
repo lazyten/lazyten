@@ -101,7 +101,7 @@ TEST_CASE("LazyMatrixSum", "[LazyMatrixSum]") {
                   typename test_library::op_DivideScalar>;
 
             // Run the check:
-            test_library().run_check(in, genCommands(), 0.7);
+            test_library().run_check(in, genCommands(), 0.65);
         };
 
         REQUIRE(

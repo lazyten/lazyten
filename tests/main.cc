@@ -20,11 +20,24 @@
 #define CATCH_CONFIG_RUNNER
 #include <catch.hpp>
 #include <krims/ExceptionSystem.hh>
+#include <krims/NumComp.hh>
 
 int main(int argc, char* const argv[]) {
     // Make sure that the program does not get aborted,
     // but all krims exceptions throw instead.
     krims::AssertDbgEffect::set_throw();
+
+    // Throw in case a numerical comparison fails with very detailed
+    // information
+    krims::NumCompConstants::default_failure_action =
+          krims::NumCompActionType::ThrowVerbose;
+
+    // Increase numerical tolerance a little (1000*MachineEpsilon)
+    // krims::NumCompConstants::default_tolerance_factor = 1000.;
+    //
+    // TODO to be more compatible with original tests increase
+    // even further for now. One should however tune this better.
+    krims::NumCompConstants::default_tolerance_factor = 4503.6;
 
     // Run catch:
     int result = Catch::Session().run(argc, argv);
