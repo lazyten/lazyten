@@ -475,8 +475,8 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_readonly_iterator(
             RC_ASSERT(it.row() == it_const.row());
             RC_ASSERT(it.col() == it_const.col());
 
-            if (std::abs(model(i, j) >
-                         10. * std::numeric_limits<scalar_type>::epsilon())) {
+            if (std::abs(model(i, j)) >
+                10. * std::numeric_limits<scalar_type>::epsilon()) {
                 // Larger than zero element -> expect to be present
                 RC_ASSERT(it.row() == i);
                 RC_ASSERT(it.col() == j);
