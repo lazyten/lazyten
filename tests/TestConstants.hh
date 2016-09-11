@@ -19,7 +19,6 @@
 
 #pragma once
 #include <cstddef>
-#include <limits>
 
 namespace linalgwrap {
 namespace tests {
@@ -50,15 +49,6 @@ struct TestConstants {
      */
     static constexpr int min_matrix_entry_magnitude = -6;
     static constexpr double min_matrix_entry = 1e-6;
-
-    //
-    // Numerical tolerance for numerical comparison:
-    //
-    /** The default numeric tolerance when comparing computed values
-     * for equality. Usually comparison operations will interpret
-     * this as tolerance towards the *relative* error
-     */
-    static constexpr double default_num_tol = 1e-12;
 };
 }
 }

@@ -21,6 +21,13 @@
 #include <rapidcheck.h>
 #include <rapidcheck/state.h>
 
+/** Make a rapidcheck assertion with captures disabled
+ *
+ * This is required for the krims::numcomp function to work
+ * properly --- which I personally value more)
+ * */
+#define RC_ASSERT_NC(expression) RC_ASSERT((expression));
+
 namespace rc {
 namespace state {
 namespace gen {

@@ -24,7 +24,7 @@
 #include <rapidcheck/state.h>
 
 // have an extra verbose output for rapidcheck function tests:
-//#define HAVE_MATRIX_RC_CLASSIFY
+// #define HAVE_MATRIX_RC_CLASSIFY
 
 namespace linalgwrap {
 namespace tests {
@@ -493,7 +493,9 @@ struct StatefulTestingLibrary {
      *
      * \param initial_state The initial state to use
      * \param generation_func  The generation functor for the commands
-     * \param scale    The scaling to apply to the command length
+     * \param scale    The scaling to apply to the command length.
+     *                 Smaller scaling means smaller command chains and
+     *                 hence tests which are easier to pass.
      */
     template <typename GenFunc>
     void run_check(const model_type& initial_state, GenFunc&& generation_func,

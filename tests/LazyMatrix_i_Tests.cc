@@ -89,9 +89,9 @@ TEST_CASE("LazyMatrix_i abstract class", "[LazyMatrix_i]") {
                                                   decltype(args_generator())>
               testlib;
 
-        testlib lib{args_generator, lazy_generator, model_generator,
-                    "LazyMatrix_i: ", TestConstants::default_num_tol};
-        lib.run_checks();
+        testlib{args_generator, lazy_generator, model_generator,
+                "LazyMatrix_i: "}
+              .run_checks();
     }
 }
 

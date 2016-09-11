@@ -59,9 +59,9 @@ TEST_CASE("LazyMatrixWrapper class", "[LazyMatrixWrapper]") {
                                                   decltype(args_generator())>
               testlib;
 
-        testlib lib{args_generator, lazy_generator, model_generator,
-                    "LazyMatrixWrapper: ", TestConstants::default_num_tol};
-        lib.run_checks();
+        testlib{args_generator, lazy_generator, model_generator,
+                "LazyMatrixWrapper: "}
+              .run_checks();
     }
 }
 

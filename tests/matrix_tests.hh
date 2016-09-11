@@ -18,12 +18,12 @@
 //
 
 #pragma once
-#include "NumComp.hh"
 #include "TestConstants.hh"
 #include "generators.hh"
+#include "rapidcheck_utils.hh"
 #include <functional>
+#include <linalgwrap/MatrixTestingUtils.hh>
 #include <linalgwrap/Range.hh>
-#include <rapidcheck.h>
 
 // have a debug print of all generated matrices
 // #define HAVE_MATRIX_DEBUG_PRINT
@@ -31,6 +31,7 @@
 namespace linalgwrap {
 namespace tests {
 using namespace rc;
+using namespace krims;
 
 /** Namespace for the components for standard matrix tests.
  **/
@@ -58,7 +59,7 @@ struct ComparativeTests {
     /** std::function type which describes the call signature of all
      *  static test functions in this class. */
     typedef std::function<void(const compmat_type&, const sutmat_type&,
-                               const double)>
+                               const NumCompAccuracyLevel)>
           testfunction_type;
 
     static_assert(
@@ -70,19 +71,19 @@ struct ComparativeTests {
     /** Test wheather the two matrices are identical */
     static void test_equivalence(
           const compmat_type& model, const sutmat_type& sut,
-          const double tolerance = TestConstants::default_num_tol);
+          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
 
     /** Test copying the sut */
     static void test_copy(
           const compmat_type& model, const sutmat_type& sut,
-          const double tolerance = TestConstants::default_num_tol);
+          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
 
     /** Test read-only element access via () and [] at
      *  random places. Compare resulting values of the
      *  sut with the model */
     static void test_element_access(
           const compmat_type& model, const sutmat_type& sut,
-          const double tolerance = TestConstants::default_num_tol);
+          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
 
     /** Test read-write element access via () at a random place.
      *  compare result against a model at all places except the
@@ -90,7 +91,7 @@ struct ComparativeTests {
      */
     static void test_setting_elements_indexed(
           const compmat_type& model, const sutmat_type& sut,
-          const double tolerance = TestConstants::default_num_tol);
+          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
 
     /** Test read-write element access via [] at a random place.
      *  compare result against a model at all places except the
@@ -98,7 +99,7 @@ struct ComparativeTests {
      */
     static void test_setting_elements_vectorised(
           const compmat_type& model, const sutmat_type& sut,
-          const double tolerance = TestConstants::default_num_tol);
+          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
 
     /** Test whether extracting a random block in the sut yields the data
      *  of that same block in the model i
@@ -108,7 +109,7 @@ struct ComparativeTests {
      *  */
     static void test_extract_block(
           const compmat_type& model, const sutmat_type& sut,
-          const double tolerance = TestConstants::default_num_tol);
+          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
 
     /** Test adding a block of the sut matrix to a different stored
      *  matrix. The yielded result is compared against the equivalent
@@ -120,7 +121,7 @@ struct ComparativeTests {
      *  */
     static void test_add_block_to(
           const compmat_type& model, const sutmat_type& sut,
-          const double tolerance = TestConstants::default_num_tol);
+          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
 
     /** Test whether using an iterator yields the same values as
      *  the entries in the model
@@ -130,52 +131,52 @@ struct ComparativeTests {
      *  */
     static void test_readonly_iterator(
           const compmat_type& model, const sutmat_type& sut,
-          const double tolerance = TestConstants::default_num_tol);
+          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
 
     /** Test whether modifying element entries using an iterator
      *  works.
      **/
     static void test_readwrite_iterator(
           const compmat_type& model, const sutmat_type& sut,
-          const double tolerance = TestConstants::default_num_tol);
+          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
 
     /** Test the l1 norm function */
     static void test_norm_l1(
           const compmat_type& model, const sutmat_type& sut,
-          const double tolerance = TestConstants::default_num_tol);
+          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
 
     /** Test the linf norm function */
     static void test_norm_linf(
           const compmat_type& model, const sutmat_type& sut,
-          const double tolerance = TestConstants::default_num_tol);
+          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
 
     /** Test the frobenius norm functions (norm_frobenius and
      * norm_frobenius_squared) */
     static void test_norm_frobenius(
           const compmat_type& model, const sutmat_type& sut,
-          const double tolerance = TestConstants::default_num_tol);
+          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
 
     /** Test the trace function */
     static void test_trace(
           const compmat_type& model, const sutmat_type& sut,
-          const double tolerance = TestConstants::default_num_tol);
+          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
 
     /** Test the accumulate function */
     static void test_accumulate(
           const compmat_type& model, const sutmat_type& sut,
-          const double tolerance = TestConstants::default_num_tol);
+          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
 
     /** Test whether multiplication by a scalar yields the same
      *  values in model and sut */
     static void test_mutiply_scalar(
           const compmat_type& model, const sutmat_type& sut,
-          const double tolerance = TestConstants::default_num_tol);
+          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
 
     /** Test whether division by a scalar yields the same
      *  values in model and sut */
     static void test_divide_scalar(
           const compmat_type& model, const sutmat_type& sut,
-          const double tolerance = TestConstants::default_num_tol);
+          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
 
     /** Test whether addition of another arbitrary matrix gives
      *  rise to the same results in model and sut.
@@ -183,7 +184,7 @@ struct ComparativeTests {
     template <typename OtherMatrix>
     static void test_add(
           const compmat_type& model, const sutmat_type& sut,
-          const double tolerance = TestConstants::default_num_tol);
+          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
 
     /** Test whether subtraction of another arbitrary matrix gives
      *  rise to the same results in model and sut.
@@ -191,7 +192,7 @@ struct ComparativeTests {
     template <typename OtherMatrix>
     static void test_subtract(
           const compmat_type& model, const sutmat_type& sut,
-          const double tolerance = TestConstants::default_num_tol);
+          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
 
     /** Test whether the multiplication with another arbitrary matrix
      *  gives rise to the same result in model and sut.
@@ -199,7 +200,7 @@ struct ComparativeTests {
     template <typename OtherMatrix>
     static void test_multiply_by(
           const compmat_type& model, const sutmat_type& sut,
-          const double tolerance = TestConstants::default_num_tol);
+          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
 
     /** \brief Helper class to simplify setup and calling the above functions
      *  from rapidcheck.
@@ -230,34 +231,26 @@ struct ComparativeTests {
          *                        matrix in the same state as the test matrix
          *                        yielded by sutgenerator when applied to the
          *                        same core model matrix.
-         * \param tolerance     Default numeric tolerance to use.
          */
         RapidcheckTestableGenerator(
               std::function<GenArg(void)> args_generator,
               std::function<sutmat_type(GenArg)> sut_generator,
-              std::function<compmat_type(GenArg)> model_generator,
-              double tolerance = TestConstants::default_num_tol);
+              std::function<compmat_type(GenArg)> model_generator);
 
         /* Return a std::function object that calls the supplied
          * function func with the generated model and sut.
          *
-         * Uses the tolerance supplied upon class construction
+         * Uses either the specified or the default tolerance.
          */
-        std::function<void(void)> generate(testfunction_type func) const;
-
-        /* Return a std::function object that calls the supplied
-         * function func with the generated model and sut.
-         *
-         * Uses a different tolerance.
-         */
-        std::function<void(void)> generate(testfunction_type func,
-                                           double tolerance) const;
+        std::function<void(void)> generate(
+              testfunction_type func,
+              const NumCompAccuracyLevel tolerance =
+                    NumCompAccuracyLevel::Default) const;
 
       private:
         std::function<GenArg(void)> m_args_generator;
         std::function<sutmat_type(GenArg)> m_sut_generator;
         std::function<compmat_type(GenArg)> m_model_generator;
-        double m_tolerance;
     };
 };
 
@@ -306,37 +299,38 @@ void matrix_product(const Matrix1& lhs, const Matrix2& rhs, Matrix3& out) {
 template <typename CompMatrix, typename SutMatrix>
 void ComparativeTests<CompMatrix, SutMatrix>::test_equivalence(
       const compmat_type& model, const sutmat_type& sut,
-      const double tolerance) {
-    RC_ASSERT(NumComp::is_equal_matrix(model, sut, tolerance));
+      const NumCompAccuracyLevel tolerance) {
+    RC_ASSERT_NC(model == numcomp(sut).tolerance(tolerance));
 }
 
 template <typename CompMatrix, typename SutMatrix>
 void ComparativeTests<CompMatrix, SutMatrix>::test_copy(
       const compmat_type& model, const sutmat_type& sut,
-      const double tolerance) {
+      const NumCompAccuracyLevel tolerance) {
     sutmat_type copy{sut};
 
     // check that it is identical to the model
-    RC_ASSERT(NumComp::is_equal_matrix(copy, model, tolerance));
+    RC_ASSERT_NC(model == numcomp(copy).tolerance(tolerance));
 }
 
 template <typename CompMatrix, typename SutMatrix>
 void ComparativeTests<CompMatrix, SutMatrix>::test_element_access(
       const compmat_type& model, const sutmat_type& sut,
-      const double tolerance) {
+      const NumCompAccuracyLevel tolerance) {
     size_type row = *gen::inRange<size_type>(0, model.n_rows()).as("row index");
     size_type col = *gen::inRange<size_type>(0, model.n_cols()).as("col index");
     size_type i = *gen::inRange<size_type>(0, model.n_rows() * model.n_cols())
                          .as("vectorised index");
 
-    RC_ASSERT(NumComp::is_equal(model(row, col), sut(row, col), tolerance));
-    RC_ASSERT(NumComp::is_equal(model[i], sut[i], tolerance));
+    RC_ASSERT_NC(model(row, col) ==
+                 (numcomp(sut(row, col)).tolerance(tolerance)));
+    RC_ASSERT_NC(model[i] == numcomp(sut[i]).tolerance(tolerance));
 }
 
 template <typename CompMatrix, typename SutMatrix>
 void ComparativeTests<CompMatrix, SutMatrix>::test_setting_elements_indexed(
       const compmat_type& model, const sutmat_type& sut,
-      const double tolerance) {
+      const NumCompAccuracyLevel tolerance) {
 
     auto modify_row =
           *gen::inRange<size_type>(0, model.n_rows()).as("Row to modify");
@@ -354,11 +348,11 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_setting_elements_indexed(
     for (auto row : range(model.n_rows())) {
         for (auto col : range(model.n_cols())) {
             if (row == modify_row && col == modify_col) {
-                RC_ASSERT(
-                      NumComp::is_equal(sut_copy(row, col), value, tolerance));
+                RC_ASSERT_NC(sut_copy(row, col) ==
+                             numcomp(value).tolerance(tolerance));
             } else {
-                RC_ASSERT(NumComp::is_equal(sut_copy(row, col), model(row, col),
-                                            tolerance));
+                RC_ASSERT_NC(sut_copy(row, col) ==
+                             numcomp(model(row, col)).tolerance(tolerance));
             }
         }
     }
@@ -367,7 +361,7 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_setting_elements_indexed(
 template <typename CompMatrix, typename SutMatrix>
 void ComparativeTests<CompMatrix, SutMatrix>::test_setting_elements_vectorised(
       const compmat_type& model, const sutmat_type& sut,
-      const double tolerance) {
+      const NumCompAccuracyLevel tolerance) {
     auto index = *gen::inRange<size_type>(0, model.n_rows() * model.n_cols())
                         .as("Index to modify");
     auto value = *gen::arbitrary<scalar_type>().as("New value");
@@ -381,9 +375,9 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_setting_elements_vectorised(
     // Check it:
     for (auto i : range(model.n_rows() * model.n_cols())) {
         if (i == index) {
-            RC_ASSERT(NumComp::is_equal(sut_copy[i], value, tolerance));
+            RC_ASSERT_NC(sut_copy[i] == numcomp(value).tolerance(tolerance));
         } else {
-            RC_ASSERT(NumComp::is_equal(sut_copy[i], model[i], tolerance));
+            RC_ASSERT_NC(sut_copy[i] == numcomp(model[i]).tolerance(tolerance));
         }
     }
 }
@@ -391,7 +385,7 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_setting_elements_vectorised(
 template <typename CompMatrix, typename SutMatrix>
 void ComparativeTests<CompMatrix, SutMatrix>::test_extract_block(
       const compmat_type& model, const sutmat_type& sut,
-      const double tolerance) {
+      const NumCompAccuracyLevel tolerance) {
 
     size_type min_range_size = 1;
     Range<size_type> rows =
@@ -413,8 +407,8 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_extract_block(
         for (size_type col : cols) {
             size_type i = row - rows.first();
             size_type j = col - cols.first();
-            RC_ASSERT(
-                  NumComp::is_equal(model(row, col), block(i, j), tolerance));
+            RC_ASSERT_NC(model(row, col) ==
+                         numcomp(block(i, j)).tolerance(tolerance));
         }
     }
 }
@@ -422,7 +416,7 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_extract_block(
 template <typename CompMatrix, typename SutMatrix>
 void ComparativeTests<CompMatrix, SutMatrix>::test_add_block_to(
       const compmat_type& model, const sutmat_type& sut,
-      const double tolerance) {
+      const NumCompAccuracyLevel tolerance) {
     // the return type of extract_block and the type add_block_to expects
     // is identical. Hence we can use this trick in order to obtain the
     // type of matrix we need to generate.
@@ -459,11 +453,9 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_add_block_to(
     // Check that the result is correct:
     for (auto row : range(n_rows)) {
         for (auto col : range(n_cols)) {
-            RC_ASSERT(NumComp::is_equal(
-                  inmat(row, col),
-                  inmat_copy(row, col) +
-                        c_this * sut(row + r_offset, col + c_offset),
-                  tolerance));
+            auto res = inmat_copy(row, col) +
+                       c_this * sut(row + r_offset, col + c_offset);
+            RC_ASSERT_NC(inmat(row, col) == numcomp(res).tolerance(tolerance));
         }
     }
 }
@@ -471,7 +463,7 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_add_block_to(
 template <typename CompMatrix, typename SutMatrix>
 void ComparativeTests<CompMatrix, SutMatrix>::test_readonly_iterator(
       const compmat_type& model, const sutmat_type& sut,
-      const double tolerance) {
+      const NumCompAccuracyLevel tolerance) {
     auto it_const = sut.cbegin();
     auto it = sut.begin();
 
@@ -483,18 +475,16 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_readonly_iterator(
             RC_ASSERT(it.row() == it_const.row());
             RC_ASSERT(it.col() == it_const.col());
 
-            if (!NumComp::is_equal(
-                      model(i, j), 0.,
-                      10. * std::numeric_limits<scalar_type>::epsilon(),
-                      false)) {
+            if (std::abs(model(i, j)) >
+                10. * std::numeric_limits<scalar_type>::epsilon()) {
                 // Larger than zero element -> expect to be present
                 RC_ASSERT(it.row() == i);
                 RC_ASSERT(it.col() == j);
-                RC_ASSERT(NumComp::is_equal(*it, model(i, j), tolerance));
+                RC_ASSERT_NC(model(i, j) == numcomp(*it).tolerance(tolerance));
             }
 
             if (it.indices() <= std::make_pair(i, j)) {
-                // increment iterators if neccessary and continue
+                // increment iterators if necessary and continue
                 ++it;
                 ++it_const;
             }
@@ -502,14 +492,15 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_readonly_iterator(
     }
 
     for (auto it = std::begin(sut); it != std::end(sut); ++it) {
-        RC_ASSERT(NumComp::is_equal(*it, model(it.row(), it.col())));
+        RC_ASSERT_NC(model(it.row(), it.col()) ==
+                     numcomp(*it).tolerance(tolerance));
     }
 }
 
 template <typename CompMatrix, typename SutMatrix>
 void ComparativeTests<CompMatrix, SutMatrix>::test_readwrite_iterator(
       const compmat_type& model, const sutmat_type& sut,
-      const double tolerance) {
+      const NumCompAccuracyLevel tolerance) {
     auto modify_row =
           *gen::inRange<size_type>(0, model.n_rows()).as("Row to modify");
     auto modify_col =
@@ -528,10 +519,11 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_readwrite_iterator(
     for (size_type i = 0; i < model.n_rows(); ++i) {
         for (size_type j = 0; j < model.n_cols(); ++j) {
             if (i == modify_row && j == modify_col) {
-                RC_ASSERT(NumComp::is_equal(sut_copy(i, j), value, tolerance));
+                RC_ASSERT_NC(sut_copy(i, j) ==
+                             numcomp(value).tolerance(tolerance));
             } else {
-                RC_ASSERT(NumComp::is_equal(model(i, j), sut_copy(i, j),
-                                            tolerance));
+                RC_ASSERT_NC(model(i, j) ==
+                             numcomp(sut_copy(i, j)).tolerance(tolerance));
             }
         }
     }
@@ -540,7 +532,7 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_readwrite_iterator(
 template <typename CompMatrix, typename SutMatrix>
 void ComparativeTests<CompMatrix, SutMatrix>::test_norm_l1(
       const compmat_type& model, const sutmat_type& sut,
-      const double tolerance) {
+      const NumCompAccuracyLevel tolerance) {
 
     scalar_type norm{0};
     for (size_type col = 0; col < model.n_cols(); ++col) {
@@ -550,13 +542,13 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_norm_l1(
         }
         norm = std::max(norm, accu);
     }
-    RC_ASSERT(NumComp::is_equal(sut.norm_l1(), norm, tolerance));
+    RC_ASSERT_NC(sut.norm_l1() == numcomp(norm).tolerance(tolerance));
 }
 
 template <typename CompMatrix, typename SutMatrix>
 void ComparativeTests<CompMatrix, SutMatrix>::test_norm_linf(
       const compmat_type& model, const sutmat_type& sut,
-      const double tolerance) {
+      const NumCompAccuracyLevel tolerance) {
 
     scalar_type norm{0};
     for (size_type row = 0; row < model.n_rows(); ++row) {
@@ -566,13 +558,13 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_norm_linf(
         }
         norm = std::max(norm, accu);
     }
-    RC_ASSERT(NumComp::is_equal(sut.norm_linf(), norm, tolerance));
+    RC_ASSERT_NC(sut.norm_linf() == numcomp(norm).tolerance(tolerance));
 }
 
 template <typename CompMatrix, typename SutMatrix>
 void ComparativeTests<CompMatrix, SutMatrix>::test_norm_frobenius(
       const compmat_type& model, const sutmat_type& sut,
-      const double tolerance) {
+      const NumCompAccuracyLevel tolerance) {
 
     scalar_type frobenius_squared{0};
     for (size_type i = 0; i < model.n_rows(); ++i) {
@@ -580,17 +572,18 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_norm_frobenius(
             frobenius_squared += model(i, j) * model(i, j);
         }
     }
-    RC_ASSERT(NumComp::is_equal(sut.norm_frobenius_squared(), frobenius_squared,
-                                tolerance));
+    RC_ASSERT_NC(sut.norm_frobenius_squared() ==
+                 numcomp(frobenius_squared).tolerance(tolerance));
 
     scalar_type frobenius = sqrt(frobenius_squared);
-    RC_ASSERT(NumComp::is_equal(sut.norm_frobenius(), frobenius, tolerance));
+    RC_ASSERT_NC(sut.norm_frobenius() ==
+                 numcomp(frobenius).tolerance(tolerance));
 }
 
 template <typename CompMatrix, typename SutMatrix>
 void ComparativeTests<CompMatrix, SutMatrix>::test_trace(
       const compmat_type& model, const sutmat_type& sut,
-      const double tolerance) {
+      const NumCompAccuracyLevel tolerance) {
     RC_PRE(model.n_rows() == model.n_cols());
 
     scalar_type res{0};
@@ -598,13 +591,13 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_trace(
         res += model(i, i);
     }
 
-    RC_ASSERT(NumComp::is_equal(sut.trace(), res, tolerance));
+    RC_ASSERT_NC(sut.trace() == numcomp(res).tolerance(tolerance));
 }
 
 template <typename CompMatrix, typename SutMatrix>
 void ComparativeTests<CompMatrix, SutMatrix>::test_accumulate(
       const compmat_type& model, const sutmat_type& sut,
-      const double tolerance) {
+      const NumCompAccuracyLevel tolerance) {
     scalar_type res{0};
     for (size_type i = 0; i < model.n_rows(); ++i) {
         for (size_type j = 0; j < model.n_cols(); ++j) {
@@ -612,13 +605,13 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_accumulate(
         }
     }
 
-    RC_ASSERT(NumComp::is_equal(sut.accumulate(), res, tolerance));
+    RC_ASSERT_NC(sut.accumulate() == numcomp(res).tolerance(tolerance));
 }
 
 template <typename CompMatrix, typename SutMatrix>
 void ComparativeTests<CompMatrix, SutMatrix>::test_mutiply_scalar(
       const compmat_type& model, const sutmat_type& sut,
-      const double tolerance) {
+      const NumCompAccuracyLevel tolerance) {
     // Generate an arbitrary factor:
     auto c = *gen::arbitrary<scalar_type>().as("Coefficient");
 
@@ -633,14 +626,14 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_mutiply_scalar(
         }
     }
 
-    RC_ASSERT(NumComp::is_equal_matrix(res, res_model, tolerance));
-    RC_ASSERT(NumComp::is_equal_matrix(res2, res_model, tolerance));
+    RC_ASSERT_NC(res_model == numcomp(res).tolerance(tolerance));
+    RC_ASSERT_NC(res_model == numcomp(res2).tolerance(tolerance));
 }
 
 template <typename CompMatrix, typename SutMatrix>
 void ComparativeTests<CompMatrix, SutMatrix>::test_divide_scalar(
       const compmat_type& model, const sutmat_type& sut,
-      const double tolerance) {
+      const NumCompAccuracyLevel tolerance) {
     // Generate an arbitrary factor:
     auto c = *gen::nonZero<scalar_type>().as("Coefficient");
 
@@ -653,14 +646,14 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_divide_scalar(
             res_model(row, col) = model(row, col) / c;
         }
     }
-    RC_ASSERT(NumComp::is_equal_matrix(res, res_model, tolerance));
+    RC_ASSERT_NC(res_model == numcomp(res).tolerance(tolerance));
 }
 
 template <typename CompMatrix, typename SutMatrix>
 template <typename OtherMatrix>
 void ComparativeTests<CompMatrix, SutMatrix>::test_multiply_by(
       const compmat_type& model, const sutmat_type& sut,
-      const double tolerance) {
+      const NumCompAccuracyLevel tolerance) {
     // The size of the other matrix to multiply mlhs with:
     // Note: the RHS of inRange is exclusive
     auto othersize =
@@ -679,7 +672,7 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_multiply_by(
     auto result = sut * mrhs;
 
     // Check that the results are equivalent
-    RC_ASSERT(NumComp::is_equal_matrix(result_model, result, tolerance));
+    RC_ASSERT_NC(result_model == numcomp(result).tolerance(tolerance));
 }
 
 /** Test whether addition of another arbitrary matrix gives
@@ -689,7 +682,7 @@ template <typename CompMatrix, typename SutMatrix>
 template <typename OtherMatrix>
 void ComparativeTests<CompMatrix, SutMatrix>::test_add(
       const compmat_type& model, const sutmat_type& sut,
-      const double tolerance) {
+      const NumCompAccuracyLevel tolerance) {
     // generate another matrix of the same size:
     auto madd = *gen::fixed_size<OtherMatrix>(model.n_rows(), model.n_cols())
                        .as("Matrix to add");
@@ -706,7 +699,7 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_add(
     }
 
     // Check that the results are equivalent
-    RC_ASSERT(NumComp::is_equal_matrix(res_model, res, tolerance));
+    RC_ASSERT_NC(res_model == numcomp(res).tolerance(tolerance));
 }
 
 /** Test whether subtraction of another arbitrary matrix gives
@@ -716,7 +709,7 @@ template <typename CompMatrix, typename SutMatrix>
 template <typename OtherMatrix>
 void ComparativeTests<CompMatrix, SutMatrix>::test_subtract(
       const compmat_type& model, const sutmat_type& sut,
-      const double tolerance) {
+      const NumCompAccuracyLevel tolerance) {
     // generate another matrix of the same size:
     auto msub = *gen::fixed_size<OtherMatrix>(model.n_rows(), model.n_cols())
                        .as("Matrix to subtract");
@@ -733,7 +726,7 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_subtract(
     }
 
     // Check that the results are equivalent
-    RC_ASSERT(NumComp::is_equal_matrix(res_model, res, tolerance));
+    RC_ASSERT_NC(res_model == numcomp(res).tolerance(tolerance));
 }
 
 template <typename CompMatrix, typename SutMatrix>
@@ -742,19 +735,18 @@ ComparativeTests<CompMatrix, SutMatrix>::RapidcheckTestableGenerator<GenArg>::
       RapidcheckTestableGenerator(
             std::function<GenArg(void)> args_generator,
             std::function<sutmat_type(GenArg)> sut_generator,
-            std::function<compmat_type(GenArg)> model_generator,
-            double tolerance)
+            std::function<compmat_type(GenArg)> model_generator)
       : m_args_generator(args_generator),
         m_sut_generator(sut_generator),
-        m_model_generator(model_generator),
-        m_tolerance(tolerance) {}
+        m_model_generator(model_generator) {}
 
 template <typename CompMatrix, typename SutMatrix>
 template <typename GenArg>
 std::function<void(void)>
 ComparativeTests<CompMatrix, SutMatrix>::RapidcheckTestableGenerator<
-      GenArg>::generate(testfunction_type func, double tolerance) const {
-    // Return a lamda which calls the test appropriately.
+      GenArg>::generate(testfunction_type func,
+                        const NumCompAccuracyLevel tolerance) const {
+    // Return a lambda which calls the test appropriately.
     return [=] {
         // Generate the args:
         GenArg arg = m_args_generator();
@@ -770,14 +762,6 @@ ComparativeTests<CompMatrix, SutMatrix>::RapidcheckTestableGenerator<
     };
 }
 
-template <typename CompMatrix, typename SutMatrix>
-template <typename GenArg>
-std::function<void(void)>
-ComparativeTests<CompMatrix, SutMatrix>::RapidcheckTestableGenerator<
-      GenArg>::generate(testfunction_type func) const {
-    return generate(func, m_tolerance);
-}
-
 }  // matrix_tests
 }  // namespace tests
-}  // namescpace linalgwrap
+}  // namespace linalgwrap

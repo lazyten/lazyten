@@ -22,6 +22,7 @@
 #include "rapidcheck_utils.hh"
 #include <catch.hpp>
 #include <linalgwrap/LazyMatrixExpression.hh>
+#include <linalgwrap/MatrixTestingUtils.hh>
 #include <rapidcheck.h>
 
 // have an extra verbose output for rapidcheck function tests:
@@ -87,7 +88,7 @@ struct FunctionalityTests
         stored_matrix_type sm = static_cast<stored_matrix_type>(sut);
 
         // Check that it is equivalent to the model:
-        RC_ASSERT(NumComp::is_equal_matrix(sm, model));
+        RC_ASSERT_NC(sm == numcomp(model));
     }
 };
 
@@ -117,21 +118,21 @@ class TestingLibrary {
      *  \param model_generator  Generator that takes the args and returns a
      *                          model matrix
      *  \param prefix A prefix to use in the rapidcheck description string
-     *  \param tolerance Numeric tolerance used for comparison in (some) checks.
-     *                   It is not used for the check of basic equivalence,
-     *                   where we require an agreement of 10*machine_epsilon.
      */
     TestingLibrary(
           std::function<genarg_type(void)> args_generator,
           std::function<matrix_type(genarg_type)> lazy_generator,
           std::function<stored_matrix_type(genarg_type)> model_generator,
-          std::string prefix = "",
-          double tolerance = TestConstants::default_num_tol);
+          std::string prefix = "")
+          : m_prefix{prefix},
+            m_gen{args_generator, lazy_generator, model_generator} {}
 
     void run_checks() const;
 
     /** Disable the matrix * stored test */
-    void disable_run_matrix_times_stored();
+    void disable_run_matrix_times_stored() {
+        m_run_matrix_times_stored = false;
+    }
 
   protected:
     // The testing library we use
@@ -156,26 +157,14 @@ class TestingLibrary {
 //
 
 template <typename LazyMatrix, typename LazyGenArg>
-TestingLibrary<LazyMatrix, LazyGenArg>::TestingLibrary(
-      std::function<genarg_type(void)> args_generator,
-      std::function<matrix_type(genarg_type)> lazy_generator,
-      std::function<stored_matrix_type(genarg_type)> model_generator,
-      std::string prefix, double tolerance)
-      : m_prefix{prefix},
-        m_gen{args_generator, lazy_generator, model_generator, tolerance} {}
-
-template <typename LazyMatrix, typename LazyGenArg>
-void TestingLibrary<LazyMatrix, LazyGenArg>::disable_run_matrix_times_stored() {
-    m_run_matrix_times_stored = false;
-}
-
-template <typename LazyMatrix, typename LazyGenArg>
 void TestingLibrary<LazyMatrix, LazyGenArg>::run_checks() const {
-    const double eps = std::numeric_limits<scalar_type>::epsilon();
+    const NumCompAccuracyLevel eps10 =
+          NumCompAccuracyLevel::TenMachinePrecision;
+    const NumCompAccuracyLevel low = NumCompAccuracyLevel::Lower;
 
     // Test basic equivalence:
     CHECK(rc::check(m_prefix + "Equivalence of View to model expression",
-                    m_gen.generate(comptests::test_equivalence, 10. * eps)));
+                    m_gen.generate(comptests::test_equivalence, eps10)));
 
     // Read-only element access
     CHECK(rc::check(m_prefix + "Element access via () and []",
@@ -209,7 +198,8 @@ void TestingLibrary<LazyMatrix, LazyGenArg>::run_checks() const {
         CHECK(rc::check(
               m_prefix + "Multiply a stored matrix",
               m_gen.generate(
-                    comptests::template test_multiply_by<stored_matrix_type>)));
+                    comptests::template test_multiply_by<stored_matrix_type>,
+                    low)));
     }
     CHECK(rc::check(
           m_prefix + "Multiply a lazy matrix",

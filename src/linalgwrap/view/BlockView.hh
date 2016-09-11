@@ -275,13 +275,6 @@ inline typename BlockViewBase<Matrix>::stored_matrix_type
 
     assert_size(n_cols(), m.n_rows());
 
-    // If this structure does not actually change the number of cols, we can
-    // just multiply in the inner matrix:
-    if (base_type::inner_matrix().n_cols() == m.n_rows()) {
-        assert_size(base_type::inner_matrix().n_cols(), n_cols());
-        return base_type::inner_matrix() * m;
-    }
-
     // For lazy matrices it is probably best to inform the user that we need
     // to do some heavy operation in the other case and disable the operation.
     assert_dbg(IsStoredMatrix<Matrix>::value,
@@ -293,6 +286,19 @@ inline typename BlockViewBase<Matrix>::stored_matrix_type
                      "subexpression to its stored matrix type."));
 
     // TODO
+    // If this structure does not actually change the number of cols, we can
+    // just multiply the part of the inner matrix we really need. But I cannot
+    // be bothered to do that right now. One probably needs a matrix iterator
+    // and some rather clever thinking in order to not do something stupid
+    // A very crude (and probably wrong) implementation could be to do the
+    // multiplication in the inner matrix and then cut off those rows we do
+    //  not care about in the resulting matrix, i.e.
+    // if (base_type::inner_matrix().n_cols() == m.n_rows()) {
+    //     assert_size(base_type::inner_matrix().n_cols(), n_cols());
+    //     auto res = base_type::inner_matrix() * m;
+    //     return res.extract_block(range(n_rows()), range(res.n_cols()));
+    // }
+    //
     // For all other cases we need to either extract the block and perform
     // the multiplication on it or else go over each element via an iterator
     // and do the multiplication manually. Both can be problematic in some

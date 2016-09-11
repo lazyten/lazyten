@@ -83,13 +83,15 @@ TEST_CASE("TransposeView", "[TransposeView]") {
         // Generator for the stored view
         standard_generators::stored_view_generator svg(make_view);
 
-        // Test library for the stored view
-        testlib lib{args_generator, svg, model_generator,
-                    "ScaleView(stored matrix): ",
-                    0.1 * TestConstants::default_num_tol};
+        // Decrease numeric tolerance for this scope,
+        // ie results need to be more exact for passing
+        auto lowertol = NumCompConstants::change_temporary(
+              0.1 * krims::NumCompConstants::default_tolerance_factor);
 
-        // Run the tests:
-        lib.run_checks();
+        // Test library for the stored view
+        testlib{args_generator, svg, model_generator,
+                "TransposeView(stored matrix): "}
+              .run_checks();
     }
 
     SECTION("Default view tests on the lazy view") {
@@ -104,12 +106,17 @@ TEST_CASE("TransposeView", "[TransposeView]") {
         // Generator for the lazy view
         standard_generators::lazy_view_generator lvg(make_view);
 
+        // Decrease numeric tolerance for this scope,
+        // ie results need to be more exact for passing
+        auto lowertol = NumCompConstants::change_temporary(
+              0.1 * krims::NumCompConstants::default_tolerance_factor);
+
         // Test library for the lazy view
         testlib lib{args_generator, lvg, model_generator,
-                    "ScaleView(lazy matrix): ",
-                    0.1 * TestConstants::default_num_tol};
+                    "TransposeView(lazy matrix): "};
 
-        // Run the tests:
+        // Disable the matrix_times_stored tests since this is not implemented
+        // by the TransposeView<Lazy Matrix> yet.
         lib.disable_run_matrix_times_stored();
         lib.run_checks();
     }
@@ -126,13 +133,15 @@ TEST_CASE("TransposeView", "[TransposeView]") {
         // Generator for the scale-view view
         standard_generators::view_view_generator vvg(make_view);
 
-        // Test library for the scale-view view
-        testlib lib{args_generator, vvg, model_generator,
-                    "ScaleView(inner stored view): ",
-                    0.1 * TestConstants::default_num_tol};
+        // Decrease numeric tolerance for this scope,
+        // ie results need to be more exact for passing
+        auto lowertol = NumCompConstants::change_temporary(
+              0.1 * krims::NumCompConstants::default_tolerance_factor);
 
-        // Run the tests:
-        lib.run_checks();
+        // Test library for the scale-view view
+        testlib{args_generator, vvg, model_generator,
+                "TransposeView(inner stored view): "}
+              .run_checks();
     }
 
 }  // TEST_CASE

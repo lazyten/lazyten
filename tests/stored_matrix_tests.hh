@@ -46,8 +46,8 @@ class TestingLibrary {
      *  - Copying a stored matrix
      *  - Setting and getting elements via [], () or iterator
      */
-    TestingLibrary(std::string prefix = "",
-                   double tolerance = TestConstants::default_num_tol);
+    TestingLibrary(std::string prefix = "")
+          : m_prefix{prefix}, m_gen{argsgen, identity, identity} {}
 
     void run_checks() const;
 
@@ -79,10 +79,6 @@ class TestingLibrary {
 //
 
 template <typename Matrix>
-TestingLibrary<Matrix>::TestingLibrary(std::string prefix, double tolerance)
-      : m_prefix{prefix}, m_gen{argsgen, identity, identity, tolerance} {}
-
-template <typename Matrix>
 void TestingLibrary<Matrix>::once_test_initialiser_list_constructor() const {
     matrix_type m{{11.0, 12.0}, {21.0, 22.0}, {31.0, 32.0}};
 
@@ -102,7 +98,10 @@ void TestingLibrary<Matrix>::once_test_initialiser_list_constructor() const {
 
 template <typename Matrix>
 void TestingLibrary<Matrix>::run_checks() const {
-    const double eps = std::numeric_limits<scalar_type>::epsilon();
+    // Shorter aliases:
+    const NumCompAccuracyLevel high = NumCompAccuracyLevel::Higher;
+    const NumCompAccuracyLevel extreme = NumCompAccuracyLevel::Extreme;
+    const NumCompAccuracyLevel eps = NumCompAccuracyLevel::MachinePrecision;
 
     // Test construction from initialiser list
     once_test_initialiser_list_constructor();
@@ -115,9 +114,9 @@ void TestingLibrary<Matrix>::run_checks() const {
     CHECK(rc::check(m_prefix + "Element access via () and []",
                     m_gen.generate(comptests::test_element_access, eps)));
     CHECK(rc::check(m_prefix + "Element access via extract_block",
-                    m_gen.generate(comptests::test_extract_block)));
+                    m_gen.generate(comptests::test_extract_block, eps)));
     CHECK(rc::check(m_prefix + "Data access via add_block_to",
-                    m_gen.generate(comptests::test_add_block_to)));
+                    m_gen.generate(comptests::test_add_block_to, eps)));
     CHECK(rc::check(m_prefix + "Read-only iterator of small matrices",
                     m_gen.generate(comptests::test_readonly_iterator, eps)));
 
@@ -133,19 +132,19 @@ void TestingLibrary<Matrix>::run_checks() const {
 
     // Standard operations and norms
     CHECK(rc::check(m_prefix + "l1 norm",
-                    m_gen.generate(comptests::test_norm_l1, 10 * eps)));
+                    m_gen.generate(comptests::test_norm_l1, extreme)));
 
     CHECK(rc::check(m_prefix + "linf norm",
-                    m_gen.generate(comptests::test_norm_linf, 10 * eps)));
+                    m_gen.generate(comptests::test_norm_linf, extreme)));
 
     CHECK(rc::check(m_prefix + "Frobenius norm",
-                    m_gen.generate(comptests::test_norm_frobenius, 10 * eps)));
+                    m_gen.generate(comptests::test_norm_frobenius, extreme)));
 
     CHECK(rc::check(m_prefix + "accumulate function",
-                    m_gen.generate(comptests::test_accumulate, 100 * eps)));
+                    m_gen.generate(comptests::test_accumulate, high)));
 
     CHECK(rc::check(m_prefix + "trace calculation",
-                    m_gen.generate(comptests::test_trace, 100 * eps)));
+                    m_gen.generate(comptests::test_trace, high)));
 
     // Operations
     CHECK(rc::check(m_prefix + "Multiplication by scalar",
