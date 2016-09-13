@@ -384,8 +384,8 @@ struct MultiplyScalar : CommandBase<TestingTraits> {
     scalar_type scalar;
 
     MultiplyScalar(const model_type&)
-          : scalar{*rc::gen::nonZero<scalar_type>().as(
-                  "Scalar to multiply with")} {}
+          : scalar{*rc::gen::scale(0.7, rc::gen::nonZero<scalar_type>())
+                          .as("Scalar to multiply with")} {}
 
     void apply(model_type& model) const override {
         // Multiply all entries
@@ -426,8 +426,8 @@ struct DivideScalar : CommandBase<TestingTraits> {
     scalar_type scalar;
 
     DivideScalar(const model_type&)
-          : scalar{*rc::gen::nonZero<scalar_type>().as("Scalar to divide by")} {
-    }
+          : scalar{*rc::gen::scale(0.7, rc::gen::nonZero<scalar_type>())
+                          .as("Scalar to divide by")} {}
 
     void apply(model_type& model) const override {
         // Multiply all entries
@@ -501,7 +501,7 @@ struct StatefulTestingLibrary {
     void run_check(const model_type& initial_state, GenFunc&& generation_func,
                    double scale = 1.0) const {
 
-        //! The global space used for stroing matrices the lazy matrix
+        //! The global space used for strong matrices the lazy matrix
         //  expressions point to indirectly
         std::list<stored_matrix_type> stored_matrices;
 

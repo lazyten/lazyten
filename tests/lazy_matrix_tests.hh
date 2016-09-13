@@ -61,13 +61,26 @@ struct FunctionalityTests
     /** \brief Run all standard tests in order to compare/test model and sut. */
     static void run_all_tests(const compmat_type& model,
                               const sutmat_type& sut) {
+        // Shorter aliases:
+        const NumCompAccuracyLevel low = NumCompAccuracyLevel::Lower;
+
+        // Norm value after which numerically problematic tests are left out
+        // Especially tests summing a lot of matrix entries (with potentially
+        // different sign) can be problematic and hence are left out
+        // once the norm gets to large.
+        const double problematic_norm =
+              1e-2 / NumCompConstants::default_tolerance_factor;
+
         base_type::test_copy(model, sut);
+
         base_type::test_element_access(model, sut);
         base_type::test_equivalence(model, sut);
         base_type::test_extract_block(model, sut);
         base_type::test_add_block_to(model, sut);
         base_type::test_readonly_iterator(model, sut);
-        base_type::template test_multiply_by<stored_matrix_type>(model, sut);
+
+        base_type::template test_multiply_by<stored_matrix_type>(model, sut,
+                                                                 low);
 
         base_type::test_norm_l1(model, sut);
         base_type::test_norm_linf(model, sut);
@@ -75,20 +88,24 @@ struct FunctionalityTests
         if (model.n_rows() == model.n_cols()) {
             base_type::test_trace(model, sut);
         }
-        /* TODO check why this one causes problems
-        base_type::test_accumulate(model, sut);
-        */
 
         test_convert_to_stored(model, sut);
+
+        if (model.norm_frobenius_squared() < problematic_norm) {
+            // Problematic tests, which are left out once norm is too large
+            base_type::test_accumulate(model, sut, low);
+        }
     }
 
     /** Test conversion of the sut metrix to its stored_matrix_type */
     static void test_convert_to_stored(const compmat_type& model,
-                                       const sutmat_type& sut) {
+                                       const sutmat_type& sut,
+                                       const NumCompAccuracyLevel tolerance =
+                                             NumCompAccuracyLevel::Default) {
         stored_matrix_type sm = static_cast<stored_matrix_type>(sut);
 
         // Check that it is equivalent to the model:
-        RC_ASSERT_NC(sm == numcomp(model));
+        RC_ASSERT_NC(sm == numcomp(model).tolerance(tolerance));
     }
 };
 
@@ -158,13 +175,12 @@ class TestingLibrary {
 
 template <typename LazyMatrix, typename LazyGenArg>
 void TestingLibrary<LazyMatrix, LazyGenArg>::run_checks() const {
-    const NumCompAccuracyLevel eps10 =
-          NumCompAccuracyLevel::TenMachinePrecision;
     const NumCompAccuracyLevel low = NumCompAccuracyLevel::Lower;
+    const NumCompAccuracyLevel sloppy = NumCompAccuracyLevel::Sloppy;
 
     // Test basic equivalence:
-    CHECK(rc::check(m_prefix + "Equivalence of View to model expression",
-                    m_gen.generate(comptests::test_equivalence, eps10)));
+    CHECK(rc::check(m_prefix + "Equivalence of matrix to model expression",
+                    m_gen.generate(comptests::test_equivalence)));
 
     // Read-only element access
     CHECK(rc::check(m_prefix + "Element access via () and []",
@@ -176,12 +192,28 @@ void TestingLibrary<LazyMatrix, LazyGenArg>::run_checks() const {
     CHECK(rc::check(m_prefix + "Read-only iterator of small matrices",
                     m_gen.generate(comptests::test_readonly_iterator)));
 
+    // Standard operations and norms
+    CHECK(rc::check(m_prefix + "l1 norm",
+                    m_gen.generate(comptests::test_norm_l1)));
+
+    CHECK(rc::check(m_prefix + "linf norm",
+                    m_gen.generate(comptests::test_norm_linf)));
+
+    CHECK(rc::check(m_prefix + "Frobenius norm",
+                    m_gen.generate(comptests::test_norm_frobenius)));
+
+    CHECK(rc::check(m_prefix + "accumulate function",
+                    m_gen.generate(comptests::test_accumulate, low)));
+
+    CHECK(rc::check(m_prefix + "trace calculation",
+                    m_gen.generate(comptests::test_trace, low)));
+
     // Operations
     typedef LazyMatrixWrapper<stored_matrix_type, stored_matrix_type>
           lazy_matrix_type;
 
     CHECK(rc::check(m_prefix + "Multiplication by scalar",
-                    m_gen.generate(comptests::test_mutiply_scalar)));
+                    m_gen.generate(comptests::test_multiply_scalar)));
     CHECK(rc::check(m_prefix + "Divide by scalar",
                     m_gen.generate(comptests::test_divide_scalar)));
     CHECK(rc::check(
@@ -203,8 +235,8 @@ void TestingLibrary<LazyMatrix, LazyGenArg>::run_checks() const {
     }
     CHECK(rc::check(
           m_prefix + "Multiply a lazy matrix",
-          m_gen.generate(
-                comptests::template test_multiply_by<lazy_matrix_type>)));
+          m_gen.generate(comptests::template test_multiply_by<lazy_matrix_type>,
+                         sloppy)));
 }
 
 }  // namespace lazy_matrix_tests
