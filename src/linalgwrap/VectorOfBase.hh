@@ -35,6 +35,7 @@ class VectorOfBase : public MatrixType {
     typedef MatrixType base_type;
     typedef typename base_type::scalar_type scalar_type;
     typedef typename base_type::size_type size_type;
+    typedef MatrixType matrix_type;
 
     /** \name Constructors
      */

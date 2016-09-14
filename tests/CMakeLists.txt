@@ -30,6 +30,7 @@ set(LINALGWRAP_TESTS_SOURCES
 	LazyMatrixProductTests.cc
 	LazyMatrixSumTests.cc
 	LazyMatrix_i_Tests.cc
+	DiagonalMatrixTests.cc
 	ScaleViewTests.cc
 	TransposeViewTests.cc
 	BlockViewTests.cc

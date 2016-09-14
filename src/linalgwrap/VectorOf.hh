@@ -32,6 +32,7 @@ class VectorOf : public detail::VectorOfSpecialise<MatrixType> {
     typedef detail::VectorOfSpecialise<MatrixType> base_type;
     typedef typename base_type::scalar_type scalar_type;
     typedef typename base_type::size_type size_type;
+    typedef typename base_type::matrix_type matrix_type;
 
     /** \name Constructors
      */
