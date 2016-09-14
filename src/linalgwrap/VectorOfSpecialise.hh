@@ -31,6 +31,7 @@ class VectorOfSpecialise : public VectorOfBase<MatrixType> {
     typedef VectorOfBase<MatrixType> base_type;
     typedef typename base_type::scalar_type scalar_type;
     typedef typename base_type::size_type size_type;
+    typedef typename base_type::matrix_type matrix_type;
 
     /** Construct a VectorOfSpecialise, pass all data to base_type */
     explicit VectorOfSpecialise(size_type size, bool fill_zero);
@@ -57,6 +58,7 @@ class VectorOfSpecialise<ArmadilloMatrix<Scalar>>
     typedef VectorOfBase<ArmadilloMatrix<Scalar>> base_type;
     typedef typename base_type::scalar_type scalar_type;
     typedef typename base_type::size_type size_type;
+    typedef typename base_type::matrix_type matrix_type;
 
     /** Construct a VectorOfSpecialise, pass all data to base_type */
     explicit VectorOfSpecialise(size_type size, bool fill_zero);
