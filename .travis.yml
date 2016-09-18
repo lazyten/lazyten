@@ -35,7 +35,7 @@ env:
     - CORES=2
     #
     # Use a known-to-work rapidcheck seed
-    - RC_PARAMS="seed=16920708173099178154 verbose_progress=1 verbose_shrinking=1"
+    - RC_PARAMS="seed=16920708173099178154 verbose_progress=1 noshrink=1"
     #
     # Dependencies we need to install
     - DEPEND_PKG="libarmadillo-dev libboost-dev"
