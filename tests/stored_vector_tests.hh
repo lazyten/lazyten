@@ -102,6 +102,7 @@ class TestingLibrary {
     }
 
     void once_test_initialiser_list_constructor() const;
+    void once_test_conversion_from_indexable() const;
     void once_test_as_scalar() const;
 
     std::string m_prefix;
@@ -133,6 +134,18 @@ void TestingLibrary<Matrix>::once_test_initialiser_list_constructor() const {
 }
 
 template <typename Matrix>
+void TestingLibrary<Matrix>::once_test_conversion_from_indexable() const {
+    // TODO convert into standard test in vector_tests.hh
+
+    model_type m({1., 2., 3., 4., 5.});
+    vector_type v(m);
+
+    for (size_type i = 0; i < v.size(); ++i) {
+        CHECK(v[i] == m[i]);
+    }
+}
+
+template <typename Matrix>
 void TestingLibrary<Matrix>::once_test_as_scalar() const {
     // TODO convert into standard test in indexable_tests.hh
 
@@ -154,6 +167,7 @@ void TestingLibrary<Matrix>::run_checks() const {
 
     once_test_initialiser_list_constructor();
     once_test_as_scalar();
+    once_test_conversion_from_indexable();
 
     // Copying and ==
     /* XXX

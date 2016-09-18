@@ -47,6 +47,13 @@ namespace linalgwrap {
  *   Vector_i(const std::vector<scalar_type>& v);
  *   ```
  *
+ * - Construct from an arbitrary indexable:
+ *   ```
+ *   template <typename Indexable, typename = typename std::enable_if<
+ *                                      IsIndexable<Indexable>::value>::type>
+ *   explicit ArmadilloVector(const Indexable& i);
+ *   ```
+ *
  * Furthermore an implementation of the default vector operations
  * +, -, +=, -= as well as multiplication and division by a scalar
  * both in-place (*=) and out-of-place (*) should be provided
