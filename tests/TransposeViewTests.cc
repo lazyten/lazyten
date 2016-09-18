@@ -67,11 +67,6 @@ TEST_CASE("TransposeView", "[TransposeView]") {
         return transposed;
     };
 
-    // Decrease numeric tolerance for this scope.
-    // ie results need to be exact up to a machine epsilon for passing
-    auto lowertol = NumCompConstants::change_temporary(
-          0.01 * krims::NumCompConstants::default_tolerance_factor);
-
     // Generators for the test case views:
     typedef view_tests::StandardViewGenerators<TestTypes, std::tuple<>>
           standard_generators;
@@ -89,7 +84,7 @@ TEST_CASE("TransposeView", "[TransposeView]") {
         standard_generators::stored_view_generator svg(make_view);
 
         // Test library for the stored view
-        testlib{args_generator, svg, model_generator,
+        testlib{args_generator, model_generator, svg,
                 "TransposeView(stored matrix): "}
               .run_checks();
     }
@@ -107,7 +102,7 @@ TEST_CASE("TransposeView", "[TransposeView]") {
         standard_generators::lazy_view_generator lvg(make_view);
 
         // Test library for the lazy view
-        testlib lib{args_generator, lvg, model_generator,
+        testlib lib{args_generator, model_generator, lvg,
                     "TransposeView(lazy matrix): "};
 
         // Disable the matrix_times_stored tests since this is not implemented
@@ -129,7 +124,7 @@ TEST_CASE("TransposeView", "[TransposeView]") {
         standard_generators::view_view_generator vvg(make_view);
 
         // Test library for the scale-view view
-        testlib{args_generator, vvg, model_generator,
+        testlib{args_generator, model_generator, vvg,
                 "TransposeView(inner stored view): "}
               .run_checks();
     }

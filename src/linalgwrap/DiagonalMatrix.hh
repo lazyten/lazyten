@@ -19,7 +19,6 @@
 
 #pragma once
 #include "LazyMatrixExpression.hh"
-#include "VectorOf.hh"
 #include <krims/SubscriptionPointer.hh>
 
 namespace linalgwrap {
@@ -33,10 +32,15 @@ class DiagonalMatrix : public LazyMatrixExpression<StoredMatrix> {
     typedef typename base_type::scalar_type scalar_type;
     typedef typename base_type::lazy_matrix_expression_ptr_type
           lazy_matrix_expression_ptr_type;
-    typedef VectorOf<stored_matrix_type> small_vector_type;
+    typedef typename StoredMatrix::vector_type stored_vector_type;
+
+    /** The key the update method checks for in order to update the internal
+     * Diagonal state. If you provide a new diagonal using this key,
+     * the internal diagonal will be updated. */
+    static const std::string update_key;
 
     /** Construct from reference to diagonal elements */
-    DiagonalMatrix(const small_vector_type& diagonal)
+    DiagonalMatrix(const stored_vector_type& diagonal)
           : m_diagonal_ptr{"DiagonalMatrix", diagonal} {}
 
     /** Number of rows */
@@ -105,10 +109,8 @@ class DiagonalMatrix : public LazyMatrixExpression<StoredMatrix> {
      * given the ParameterMap
      * */
     void update(const krims::ParameterMap& map) override {
-        const std::string diagonal_key = "diagonal";
-
-        if (map.exists(diagonal_key)) {
-            auto new_diagonal_ptr = map.at_ptr<small_vector_type>(diagonal_key);
+        if (map.exists(update_key)) {
+            auto new_diagonal_ptr = map.at_ptr<stored_vector_type>(update_key);
             assert_size(m_diagonal_ptr->size(), new_diagonal_ptr->size());
             m_diagonal_ptr = new_diagonal_ptr;
         }
@@ -133,13 +135,21 @@ class DiagonalMatrix : public LazyMatrixExpression<StoredMatrix> {
     }
 
   private:
-    krims::SubscriptionPointer<const small_vector_type> m_diagonal_ptr;
+    krims::SubscriptionPointer<const stored_vector_type> m_diagonal_ptr;
 };
 
 template <typename StoredVector>
-DiagonalMatrix<typename StoredVector::matrix_type> make_diagonalmatrix(
+DiagonalMatrix<typename StoredVector::matrix_type> make_diagmat(
       const StoredVector& v) {
     return DiagonalMatrix<typename StoredVector::matrix_type>(v);
 }
+
+//
+// -----------------------------------------------------------------
+//
+
+template <typename StoredMatrix>
+const std::string DiagonalMatrix<StoredMatrix>::update_key =
+      "DiagonalMatrix::diagonal";
 
 }  // namespace linalgwrap

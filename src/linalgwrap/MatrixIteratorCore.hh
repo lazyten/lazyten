@@ -307,6 +307,10 @@ typename std::conditional<
       const typename MatrixIteratorDefaultCore<Matrix, Constness>::pointer,
       typename MatrixIteratorDefaultCore<Matrix, Constness>::pointer>::type
 MatrixIteratorDefaultCore<Matrix, Constness>::ptr_to_value() const {
+    // TODO maybe this function should be explictly disabled (throw ExcDisabled)
+    // for matrices which do compute entries on the fly, since it is very
+    // expensive.
+
     // Get the current element --- by value or by reference ---
     // and make a reference out of it using the EnforceReference
     // functor

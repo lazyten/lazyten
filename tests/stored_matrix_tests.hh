@@ -1,4 +1,4 @@
-//
+
 // Copyright (C) 2016 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
@@ -47,31 +47,29 @@ class TestingLibrary {
      *  - Setting and getting elements via [], () or iterator
      */
     TestingLibrary(std::string prefix = "")
-          : m_prefix{prefix}, m_gen{argsgen, identity, identity} {}
+          : m_prefix{prefix}, m_gen{argsgen} {}
 
     void run_checks() const;
 
   private:
-    // The testing library we use
-    typedef matrix_tests::ComparativeTests<matrix_type, matrix_type> comptests;
-
-    // The caller type we use
-    typedef
-          typename comptests::template RapidcheckTestableGenerator<matrix_type>
-                callgen_type;
+    // The testing library and caller type
+    typedef matrix_type data_type;   // The args we generate
+    typedef matrix_type model_type;  // The model we generate
+    typedef matrix_tests::ComparativeTests<model_type, matrix_type> comptests;
+    typedef RCTestableGenerator<model_type, matrix_type, data_type> gen_type;
 
     /** Identity operation on the matrix */
     static constexpr matrix_type identity(matrix_type m) { return m; };
 
     /** Argument generation */
     static constexpr matrix_type argsgen() {
-        return *gen::arbitrary<matrix_type>().as("Matrix");
+        return *gen::numeric_tensor<matrix_type>().as("Matrix");
     };
 
     void once_test_initialiser_list_constructor() const;
 
     std::string m_prefix;
-    callgen_type m_gen;
+    gen_type m_gen;
 };
 
 //
@@ -101,6 +99,7 @@ void TestingLibrary<Matrix>::run_checks() const {
     // Shorter aliases:
     const NumCompAccuracyLevel high = NumCompAccuracyLevel::Higher;
     const NumCompAccuracyLevel low = NumCompAccuracyLevel::Lower;
+    const NumCompAccuracyLevel supersloppy = NumCompAccuracyLevel::SuperSloppy;
     const NumCompAccuracyLevel sloppy = NumCompAccuracyLevel::Sloppy;
     const NumCompAccuracyLevel eps = NumCompAccuracyLevel::MachinePrecision;
 
@@ -108,8 +107,9 @@ void TestingLibrary<Matrix>::run_checks() const {
     once_test_initialiser_list_constructor();
 
     // Test copying stored matrices
-    CHECK(rc::check(m_prefix + "Test copying stored matrices",
-                    m_gen.generate(comptests::test_copy, eps)));
+    // TODO change all calls to
+    CHECK(m_gen.run_test(m_prefix + "Test copying stored matrices",
+                         comptests::test_copy, eps));
 
     // Read-only element access
     CHECK(rc::check(m_prefix + "Element access via () and []",
@@ -142,7 +142,7 @@ void TestingLibrary<Matrix>::run_checks() const {
                     m_gen.generate(comptests::test_norm_frobenius)));
 
     CHECK(rc::check(m_prefix + "accumulate function",
-                    m_gen.generate(comptests::test_accumulate, low)));
+                    m_gen.generate(comptests::test_accumulate, sloppy)));
 
     CHECK(rc::check(m_prefix + "trace calculation",
                     m_gen.generate(comptests::test_trace, low)));
@@ -158,7 +158,7 @@ void TestingLibrary<Matrix>::run_checks() const {
                     m_gen.generate(comptests::template test_subtract<Matrix>)));
     CHECK(rc::check(m_prefix + "Matrix multiplication",
                     m_gen.generate(comptests::template test_multiply_by<Matrix>,
-                                   sloppy)));
+                                   supersloppy)));
 }
 
 }  // namespace stored_matrix_tests

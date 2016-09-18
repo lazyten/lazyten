@@ -91,11 +91,6 @@ TEST_CASE("BlockView", "[BlockView]") {
         return ret;
     };
 
-    // Decrease numeric tolerance for this scope.
-    // ie results need to be exact up to a machine epsilon for passing
-    auto lowertol = NumCompConstants::change_temporary(
-          0.01 * krims::NumCompConstants::default_tolerance_factor);
-
     // Generators for the test case views:
     typedef view_tests::StandardViewGenerators<
           TestTypes, std::pair<range_type, range_type>>
@@ -117,7 +112,7 @@ TEST_CASE("BlockView", "[BlockView]") {
         standard_generators::stored_view_generator svg(make_view);
 
         // Test library for the stored view
-        testlib{args_generator, svg, model_generator,
+        testlib{args_generator, model_generator, svg,
                 "BlockView(stored matrix): "}
               .run_checks();
     }
@@ -136,7 +131,7 @@ TEST_CASE("BlockView", "[BlockView]") {
         standard_generators::lazy_view_generator lvg(make_view);
 
         // Test library for the lazy view
-        testlib lib{args_generator, lvg, model_generator,
+        testlib lib{args_generator, model_generator, lvg,
                     "BlockView(lazy matrix): "};
 
         // Disable the matrix_times_stored tests since this is not implemented
@@ -158,7 +153,7 @@ TEST_CASE("BlockView", "[BlockView]") {
         // Generator for the scale-view view
         standard_generators::view_view_generator vvg(make_view);
         // Test library for the scale-view view
-        testlib lib{args_generator, vvg, model_generator,
+        testlib lib{args_generator, model_generator, vvg,
                     "BlockView(inner stored view): "};
 
         // Disable the matrix_times_stored tests since this is not implemented

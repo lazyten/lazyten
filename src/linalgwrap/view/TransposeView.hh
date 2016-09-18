@@ -18,7 +18,6 @@
 //
 
 #pragma once
-#include "linalgwrap/VectorOf.hh"
 #include "linalgwrap/view/ViewBase.hh"
 #include "linalgwrap/view/make_view.hh"
 
@@ -142,12 +141,6 @@ class TransposeView : public TransposeViewSpecialise<Matrix> {
     /** \brief Clone the view */
     lazy_matrix_expression_ptr_type clone() const override;
 };
-
-/** \brief Special multiplication operator for the scalar product */
-template <typename MatrixType>
-typename MatrixType::scalar_type operator*(
-      const TransposeView<VectorOf<MatrixType>>& lhs,
-      const VectorOf<MatrixType>& rhs);
 
 //
 // ---------------------------------------------------
@@ -301,17 +294,6 @@ template <typename Matrix>
 typename TransposeView<Matrix>::lazy_matrix_expression_ptr_type
 TransposeView<Matrix>::clone() const {
     return lazy_matrix_expression_ptr_type(new TransposeView(*this));
-}
-
-//
-// out-of-scope functions:
-//
-
-template <typename MatrixType>
-inline typename MatrixType::scalar_type operator*(
-      const TransposeView<VectorOf<MatrixType>>& lhs,
-      const VectorOf<MatrixType>& rhs) {
-    return lhs.inner_matrix().dot(rhs);
 }
 
 }  // namespace detail

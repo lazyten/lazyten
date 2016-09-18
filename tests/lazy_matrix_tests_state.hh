@@ -339,9 +339,8 @@ struct MultiplyMatrix : CommandBase<TestingTraits> {
     MultiplyMatrix(const model_type& model)
           : term{*FixedSizeMatrix<MatrixTermType>::fixed_size(
                         model.n_cols(),
-                        *gen::inRange<size_type>(
-                               1, TestConstants::max_matrix_size + 1)
-                               .as("No of columns of multiplied matrix"))
+                        *gen::numeric_size<2>().as(
+                              "No of columns of multiplied matrix"))
                         .as("Matrix to multiply the current state with.")} {}
 
     void apply(model_type& model) const override {
@@ -384,8 +383,8 @@ struct MultiplyScalar : CommandBase<TestingTraits> {
     scalar_type scalar;
 
     MultiplyScalar(const model_type&)
-          : scalar{*rc::gen::scale(0.7, rc::gen::nonZero<scalar_type>())
-                          .as("Scalar to multiply with")} {}
+          : scalar{*gen::numeric_nonZero<scalar_type>().as(
+                  "Scalar to multiply with")} {}
 
     void apply(model_type& model) const override {
         // Multiply all entries
@@ -426,8 +425,8 @@ struct DivideScalar : CommandBase<TestingTraits> {
     scalar_type scalar;
 
     DivideScalar(const model_type&)
-          : scalar{*rc::gen::scale(0.7, rc::gen::nonZero<scalar_type>())
-                          .as("Scalar to divide by")} {}
+          : scalar{*gen::numeric_nonZero<scalar_type>().as(
+                  "Scalar to divide by")} {}
 
     void apply(model_type& model) const override {
         // Multiply all entries

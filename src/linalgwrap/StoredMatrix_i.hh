@@ -74,6 +74,10 @@ class Matrix_i;
  * Note that the operator() functions in derived classes are expected to return
  * zero even if an element is known to be zero by some sparsity pattern or
  * similar. Modification of a non-existing element should fail, however.
+ *
+ * The following types should also be defined:
+ *  - vector_type  The type of the corresponding vector;
+ *
  */
 template <typename Scalar>
 class StoredMatrix_i : public Matrix_i<Scalar> {

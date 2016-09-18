@@ -17,7 +17,7 @@
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "generators/ArmadilloMatrix.hh"
-#include "generators/FixedSizeMatrix.hh"
+#include "generators/Arbitrary.hh"
+#include "generators/FixedSize.hh"
 #include "generators/LazyMatrixWrapper.hh"
 #include "generators/RangeWithin.hh"

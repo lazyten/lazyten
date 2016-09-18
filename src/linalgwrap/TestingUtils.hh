@@ -18,10 +18,6 @@
 //
 
 #pragma once
-#include "linalgwrap/SmallMatrix.hh"
-
-namespace linalgwrap {
-/** Using statement to define a SmallVector */
-template <typename Scalar>
-using SmallVector = typename SmallMatrix<Scalar>::vector_type;
-}  // end namespace linalgwrap
+#include "TestingUtils/gen.hh"
+#include "TestingUtils/krims_NumComp.hh"
+#include "TestingUtils/rc_Arbitrary.hh"

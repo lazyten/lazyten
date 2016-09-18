@@ -81,6 +81,9 @@ class Matrix_i : public krims::Subscribable {
 
     /** \brief Number of columns of the matrix */
     virtual size_type n_cols() const = 0;
+
+    /** \brief Return the number of elements of the matrix */
+    virtual size_type n_elem() const { return n_rows() * n_cols(); }
     ///@}
 
     /** \name Data access

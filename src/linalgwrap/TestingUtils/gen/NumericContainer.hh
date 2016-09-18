@@ -18,10 +18,31 @@
 //
 
 #pragma once
-#include "linalgwrap/SmallMatrix.hh"
+#include "Numeric.hh"
+#include "NumericSize.hh"
 
 namespace linalgwrap {
-/** Using statement to define a SmallVector */
-template <typename Scalar>
-using SmallVector = typename SmallMatrix<Scalar>::vector_type;
-}  // end namespace linalgwrap
+namespace gen {
+
+/** \brief Generator for a container filled with numeric values
+ *
+ * Generate ``count`` numeric values and place them into the container.
+ */
+template <typename Container>
+rc::Gen<Container> numeric_container(size_t count) {
+    return rc::gen::container<Container>(
+          count, numeric<typename Container::value_type>());
+}
+
+/** \brief Generator for a container filled with numeric values
+ *
+ * The number of values the container contains is determined
+ * using numeric_size()
+ */
+template <typename Container>
+rc::Gen<Container> numeric_container() {
+    return rc::gen::exec(
+          [] { return *numeric_container<Container>(*numeric_size<1>()); });
+}
+}  // gen
+}  // linalgwrap
