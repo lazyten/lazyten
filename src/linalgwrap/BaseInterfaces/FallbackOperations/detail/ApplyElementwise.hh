@@ -51,7 +51,7 @@ class ApplyElementwiseIterator
 
     /** Construct from inner iterator and operation */
     ApplyElementwiseIterator(inner_iterator_type inner, Operation op)
-          : m_inner{std::move(inner)}, m_op{std::forward<Operation>(op)} {}
+          : m_inner(std::move(inner)), m_op(std::forward<Operation>(op)) {}
 
     /** Default-construct */
     ApplyElementwiseIterator() : m_inner{}, m_op{} {}
