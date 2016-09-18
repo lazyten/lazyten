@@ -59,10 +59,10 @@ class TestingLibrary
      */
     TestingLibrary(
           std::function<genarg_type(void)> args_generator,
-          std::function<view_type(genarg_type)> view_generator,
           std::function<stored_matrix_type(genarg_type)> model_generator,
+          std::function<view_type(genarg_type)> view_generator,
           std::string prefix = "")
-          : base_type{args_generator, view_generator, model_generator, prefix} {
+          : base_type{args_generator, model_generator, view_generator, prefix} {
     }
 
     void run_checks() const;

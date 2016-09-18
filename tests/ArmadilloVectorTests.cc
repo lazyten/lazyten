@@ -17,22 +17,24 @@
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "stored_matrix_tests.hh"
+#include "stored_vector_tests.hh"
 #include <catch.hpp>
 #include <linalgwrap/ArmadilloVector.hh>
 #include <rapidcheck.h>
 
 namespace linalgwrap {
 namespace tests {
+namespace armadillo_vector_tests {
 using namespace rc;
+using namespace linalgwrap::tests::stored_vector_tests;
 
 #ifdef LINALGWRAP_HAVE_ARMADILLO
-TEST_CASE("ArmadilloVector class", "[ArmadilloVector]") {
-    // The type of vector we wish to test.
-    typedef ArmadilloVector<double> vector_type;
+template <typename S>
+using testinglib = TestingLibrary<ArmadilloVector<S>>;
 
-    // TODO this is just a compile test, not a unit test!
+TEST_CASE("ArmadilloVector class", "[ArmadilloVector]") {
     SECTION("Test initializer_list construction") {
+        typedef ArmadilloVector<double> vector_type;
         vector_type v{3., 4.};
 
         REQUIRE(v[0] == 3.);
@@ -41,31 +43,37 @@ TEST_CASE("ArmadilloVector class", "[ArmadilloVector]") {
     }
 
     SECTION("Test vector norm") {
+        typedef ArmadilloVector<double> vector_type;
         vector_type v{-3., 4.};
 
-        REQUIRE(v.norm_squared() == 25.);
-        REQUIRE(v.norm_l2() == 5.);
-        REQUIRE(v.norm_l1() == 7.);
-        REQUIRE(v.norm_linf() == 4.);
+        REQUIRE(norm_l2_squared(v) == 25.);
+        REQUIRE(norm_l2(v) == 5.);
+        REQUIRE(norm_l1(v) == 7.);
+        REQUIRE(norm_linf(v) == 4.);
+        REQUIRE(accumulate(v) == 1.);
     }
 
-    // TODO extend in order to test:
-    // l1, l2, linf norm
-    // norm_squared
-    // construction from initialiser list
-    // +, -, +=, -=, *=, *, /, /=
-    // size() function
-    // vector operator() (with one size type)
-
-    /*
     SECTION("Default stored vector tests") {
-        typedef typename stored_matrix_tests::TestingLibrary<vector_type>
-              testinglib;
-        testinglib("ArmadilloVector: ").run_checks();,
+        {
+            // Decrease tolerance to require a more accurate numerical agreement
+            // for passing.
+            auto lowertol = NumCompConstants::change_temporary(
+                  0.1 * krims::NumCompConstants::default_tolerance_factor);
+
+            // Run tests:
+            testinglib<double>("ArmadilloVector<double>: ").run_checks();
+        }
+
+        // TODO improve the accuracy for complex vectors:
+        // run this at 0.1 * tolerance as well.
+        auto highertol = NumCompConstants::change_temporary(
+              10. * krims::NumCompConstants::default_tolerance_factor);
+        testinglib<std::complex<double>>("ArmadilloVector<compex double>: ")
+              .run_checks();
     }
-    */
 }
 #endif
 
+}  // armadillo_vector_tests
 }  // tests
 }  // linalgwrap

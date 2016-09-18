@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include "linalgwrap/ArmadilloVector.hh"
 #include "linalgwrap/Constants.hh"
 #include "linalgwrap/Exceptions.hh"
 #include "linalgwrap/Range.hh"
@@ -40,6 +41,9 @@ class Matrix_i;
 
 template <typename Scalar>
 class StoredMatrix_i;
+
+template <typename Scalar>
+class ArmadilloVector;
 
 /** A class for a dense stored matrix, currently implemented using armadillo.
  *
@@ -71,6 +75,9 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
     typedef StoredMatrix_i<Scalar> base_type;
     typedef typename base_type::scalar_type scalar_type;
     typedef typename base_type::size_type size_type;
+
+    /** The corresponding vector type */
+    typedef ArmadilloVector<Scalar> vector_type;
 
     /** The type of the storage object used to store the data
      *  of the ArmadilloMatrix */

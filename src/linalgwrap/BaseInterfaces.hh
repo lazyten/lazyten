@@ -18,10 +18,17 @@
 //
 
 #pragma once
-#include "linalgwrap/SmallMatrix.hh"
+/** \file Includes the most basic inferfaces along with the
+ * default implementation for all important operations */
 
-namespace linalgwrap {
-/** Using statement to define a SmallVector */
-template <typename Scalar>
-using SmallVector = typename SmallMatrix<Scalar>::vector_type;
-}  // end namespace linalgwrap
+/** Signal the calling of fallback functions by printing to cerr
+ *  (useful for debugging whether the specialisations have worked) */
+//#define LINALGWRAP_SIGNAL_FALLBACK
+
+// Basic interfaces
+#include "BaseInterfaces/Indexable_i.hh"
+#include "BaseInterfaces/StoredVector_i.hh"
+#include "BaseInterfaces/Vector_i.hh"
+
+// Default implementations for important Vector operations.
+#include "BaseInterfaces/FallbackOperations.hh"

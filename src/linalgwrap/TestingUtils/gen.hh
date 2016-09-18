@@ -18,10 +18,18 @@
 //
 
 #pragma once
-#include "linalgwrap/SmallMatrix.hh"
+#include "gen/Numeric.hh"
+#include "gen/NumericConstants.hh"
+#include "gen/NumericContainer.hh"
+#include "gen/NumericNonZero.hh"
+#include "gen/NumericSize.hh"
+#include "gen/NumericTensor.hh"
 
 namespace linalgwrap {
-/** Using statement to define a SmallVector */
-template <typename Scalar>
-using SmallVector = typename SmallMatrix<Scalar>::vector_type;
-}  // end namespace linalgwrap
+namespace gen {
+// Import rapidcheck gen into this namespace
+// such that all generators are available via
+// linalgwrap::gen::
+using namespace rc::gen;
+}  // namespace gen
+}  // namespace linalgwrap

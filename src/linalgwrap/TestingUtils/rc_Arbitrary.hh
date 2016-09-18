@@ -18,10 +18,21 @@
 //
 
 #pragma once
-#include "linalgwrap/SmallMatrix.hh"
+#include <complex>
+#include <rapidcheck.h>
 
-namespace linalgwrap {
-/** Using statement to define a SmallVector */
+// This file provides specialisations for the arbitrary generator of
+// rapdidcheck.
+
+// Note since this specialises the Arbitrary class, this code is deliberately
+// put into the rc namespace.
+namespace rc {
+
 template <typename Scalar>
-using SmallVector = typename SmallMatrix<Scalar>::vector_type;
-}  // end namespace linalgwrap
+struct Arbitrary<std::complex<Scalar>> {
+    static Gen<std::complex<Scalar>> arbitrary() {
+        return rc::gen::construct<std::complex<Scalar>>(
+              rc::gen::arbitrary<Scalar>(), rc::gen::arbitrary<Scalar>());
+    }
+};
+}  // namespace rc

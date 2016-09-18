@@ -67,6 +67,11 @@ TEST_CASE("LazyMatrixSum", "[LazyMatrixSum]") {
             testing_lib::run_all_tests(tosub, subed);
         };
 
+        // Increase numeric tolerance for this scope,
+        // ie results need to be less exact for passing
+        auto highertol = NumCompConstants::change_temporary(
+              10. * krims::NumCompConstants::default_tolerance_factor);
+
         REQUIRE(rc::check("Test adding terms to empty sum", test_add_to_empty));
     }
 
@@ -83,9 +88,10 @@ TEST_CASE("LazyMatrixSum", "[LazyMatrixSum]") {
             stored_matrix_type mat1 =
                   *gen::arbitrary<stored_matrix_type>().as("Matrix summand 1");
 
-            stored_matrix_type mat2 = *gen::fixed_size<stored_matrix_type>(
-                                             mat1.n_rows(), mat1.n_cols())
-                                             .as("Matrix summand 2");
+            stored_matrix_type mat2 =
+                  *gen::scale(0.9, gen::numeric_tensor<stored_matrix_type>(
+                                         mat1.n_rows(), mat1.n_cols()))
+                         .as("Matrix summand 2");
 
             return std::make_pair(mat1, mat2);
         };
@@ -116,7 +122,12 @@ TEST_CASE("LazyMatrixSum", "[LazyMatrixSum]") {
                                                   decltype(args_generator())>
               testinglib;
 
-        testinglib{args_generator, sut_generator, model_generator,
+        // Increase numeric tolerance for this scope,
+        // ie results need to be less exact for passing
+        auto highertol = NumCompConstants::change_temporary(
+              10. * krims::NumCompConstants::default_tolerance_factor);
+
+        testinglib{args_generator, model_generator, sut_generator,
                    "LazyMatrixSum: "}
               .run_checks();
     }
@@ -125,7 +136,7 @@ TEST_CASE("LazyMatrixSum", "[LazyMatrixSum]") {
         // Increase numeric tolerance for this scope,
         // ie results need to be less exact for passing
         auto highertol = NumCompConstants::change_temporary(
-              10. * krims::NumCompConstants::default_tolerance_factor);
+              100. * krims::NumCompConstants::default_tolerance_factor);
 
         auto random_test = [] {
             // The initial value:
@@ -157,7 +168,7 @@ TEST_CASE("LazyMatrixSum", "[LazyMatrixSum]") {
                   typename test_library::op_DivideScalar>;
 
             // Run the check:
-            test_library().run_check(in, genCommands(), 0.65);
+            test_library().run_check(in, genCommands(), 0.6);
         };
 
         REQUIRE(

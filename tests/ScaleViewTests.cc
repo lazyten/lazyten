@@ -51,9 +51,7 @@ TEST_CASE("ScaleView", "[ScaleView]") {
 
     // Generator for the args
     auto args_generator = [] {
-        scalar_type fac = *gen::scale(0.66, gen::arbitrary<scalar_type>())
-                                 .as("Scaling factor");
-        RC_PRE(std::abs(fac) < 1e14);
+        scalar_type fac = *gen::numeric<scalar_type>().as("Scaling factor");
         stored_matrix_type mat =
               *gen::arbitrary<stored_matrix_type>().as("Inner matrix");
         return std::make_pair(mat, fac);
@@ -63,15 +61,6 @@ TEST_CASE("ScaleView", "[ScaleView]") {
     auto model_generator = [](std::pair<stored_matrix_type, scalar_type> t) {
         return t.second * t.first;
     };
-
-    // Decrease numeric tolerance for this scope,
-    // ie results need to be more exact for passing
-    // Note: Unlike BlockView and TransposeView we cannot go as low as
-    // 0.01 * default here, since this gives numerical trouble if the
-    // scaling factor in the args_generator above is chosen too large
-    // and  the inner matrix contains small entries.
-    auto lowertol = NumCompConstants::change_temporary(
-          0.1 * krims::NumCompConstants::default_tolerance_factor);
 
     // Generators for the test case views:
     typedef view_tests::StandardViewGenerators<TestTypes, scalar_type>
@@ -90,7 +79,7 @@ TEST_CASE("ScaleView", "[ScaleView]") {
         standard_generators::stored_view_generator svg(make_view);
 
         // Test library for the stored view
-        testlib{args_generator, svg, model_generator,
+        testlib{args_generator, model_generator, svg,
                 "ScaleView(stored matrix): "}
               .run_checks();
     }
@@ -108,7 +97,7 @@ TEST_CASE("ScaleView", "[ScaleView]") {
         standard_generators::lazy_view_generator lvg(make_view);
 
         // Test library for the stored view
-        testlib lib{args_generator, lvg, model_generator,
+        testlib lib{args_generator, model_generator, lvg,
                     "ScaleView(lazy matrix): "};
 
         // Run the tests:
@@ -128,7 +117,7 @@ TEST_CASE("ScaleView", "[ScaleView]") {
         standard_generators::view_view_generator vvg(make_view);
 
         // Test library for the scale-view view
-        testlib lib{args_generator, vvg, model_generator,
+        testlib lib{args_generator, model_generator, vvg,
                     "ScaleView(inner stored view): "};
 
         // Run the tests:

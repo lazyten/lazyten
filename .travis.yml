@@ -35,7 +35,7 @@ env:
     - CORES=2
     #
     # Use a known-to-work rapidcheck seed
-    - RC_PARAMS="seed=16920708173099178154 verbose_progress=1 verbose_shrinking=1"
+    - RC_PARAMS="seed=16920708173099178154 verbose_progress=1 noshrink=1"
     #
     # Dependencies we need to install
     - DEPEND_PKG="libarmadillo-dev libboost-dev"
@@ -51,7 +51,7 @@ matrix:
       - sudo apt-get install -y ninja-build g++-4.9 $DEPEND_PKG
       compiler: clang
       env: CC_COMPILER="clang" CXX_COMPILER="clang++" TESTCASE="linalgwrap_tests_RELEASE"
-        EXTRA_OPTS="-DDRB_MAXIMUM_CXX_STANDARD=11
+        EXTRA_OPTS="-DDRB_MAXIMUM_CXX_STANDARD=11"
     #
     # Clang 3.8 (has c++14)
     - install:

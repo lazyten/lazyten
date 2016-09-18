@@ -18,10 +18,16 @@
 //
 
 #pragma once
-#include "linalgwrap/SmallMatrix.hh"
+#include <cstddef>
 
 namespace linalgwrap {
-/** Using statement to define a SmallVector */
-template <typename Scalar>
-using SmallVector = typename SmallMatrix<Scalar>::vector_type;
-}  // end namespace linalgwrap
+namespace gen {
+
+/* \brief The maximum an arbitrary numeric value may be. */
+static constexpr long double max_value = 1e6;
+
+/** \brief The minimum an arbitrary numeric value may be */
+static constexpr long double min_value = 1e-6;
+
+}  // namespace gen
+}  // namespace linalgwrap

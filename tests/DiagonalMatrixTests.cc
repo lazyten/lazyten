@@ -25,7 +25,6 @@
 
 namespace linalgwrap {
 namespace tests {
-using namespace rc;
 
 TEST_CASE("DiagonalMatrix class", "[DiagonalMatrix]") {
     // Test constructor
@@ -39,13 +38,13 @@ TEST_CASE("DiagonalMatrix class", "[DiagonalMatrix]") {
 
     // Generator for the args
     auto args_generator = [] {
-        // TODO allow zero-sized matrices
         auto val_size =
-              *gen::inRange<size_type>(1u, TestConstants::max_matrix_size + 1)
-                     .as("DiagonalMatrix size");
-        auto vals = *gen::container<std::vector<scalar_type>>(
-                           val_size, gen::matrix_element<scalar_type>())
-                           .as("diagonal values");
+              *gen::scale(0.7, gen::numeric_size<1>().as("Diagonal size"));
+        // TODO allow zero-sized matrices
+        RC_PRE(val_size > 0u);
+        auto vals =
+              *gen::numeric_container<std::vector<scalar_type>>(val_size).as(
+                    "diagonal values");
         return vector_type{vals};
     };
 
@@ -63,7 +62,7 @@ TEST_CASE("DiagonalMatrix class", "[DiagonalMatrix]") {
       public:
         DiagonalMatrix<stored_matrix_type> operator()(vector_type diag) {
             m_diag_ptr.reset(new vector_type{std::move(diag)});
-            return make_diagonalmatrix(*m_diag_ptr);
+            return make_diagmat(*m_diag_ptr);
         }
 
       private:
@@ -80,7 +79,7 @@ TEST_CASE("DiagonalMatrix class", "[DiagonalMatrix]") {
         auto lowertol = NumCompConstants::change_temporary(
               0.01 * krims::NumCompConstants::default_tolerance_factor);
 
-        testlib{args_generator, diagonal_generator{}, model_generator,
+        testlib{args_generator, model_generator, diagonal_generator{},
                 "DiagonalMatrix: "}
               .run_checks();
     }

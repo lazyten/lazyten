@@ -18,36 +18,30 @@
 //
 
 #pragma once
-#include "MatrixElement.hh"
-#include <linalgwrap/StoredMatrix_i.hh>
+#include <linalgwrap/LazyMatrixWrapper.hh>
+#include <linalgwrap/TestingUtils.hh>
 #include <rapidcheck.h>
 
 namespace rc {
 
 template <typename Matrix>
 struct FixedSizeMatrix {
-    static_assert(
-          std::is_base_of<
-                ::linalgwrap::StoredMatrix_i<typename Matrix::scalar_type>,
-                Matrix>::value,
-          "Matrix must be a child class of StoredMatrix_i");
-
     typedef typename Matrix::size_type size_type;
-    typedef typename Matrix::scalar_type scalar_type;
-
     static Gen<Matrix> fixed_size(size_type n_rows, size_type n_cols) {
-        auto callable = [=] {
-            // allocate memory, but don't initialise
-            Matrix m(n_rows, n_cols, false);
+        return linalgwrap::gen::numeric_tensor<Matrix>(n_rows, n_cols);
+    }
+};
 
-            // set to arbitrary values
-            for (size_type i = 0; i < m.n_rows() * m.n_cols(); ++i) {
-                m[i] = *gen::matrix_element<scalar_type>();
-            }
+template <typename StoredMatrix, typename InnerMatrix>
+struct FixedSizeMatrix<
+      ::linalgwrap::LazyMatrixWrapper<StoredMatrix, InnerMatrix>> {
+    typedef typename ::linalgwrap::LazyMatrixWrapper<StoredMatrix, InnerMatrix>
+          generated_type;
+    typedef typename generated_type::size_type size_type;
 
-            return m;
-        };
-        return gen::exec(callable);
+    static Gen<generated_type> fixed_size(size_type n_rows, size_type n_cols) {
+        return gen::construct<generated_type>(
+              linalgwrap::gen::numeric_tensor<InnerMatrix>(n_rows, n_cols));
     }
 };
 

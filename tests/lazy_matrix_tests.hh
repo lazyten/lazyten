@@ -1,4 +1,4 @@
-//
+
 // Copyright (C) 2016 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
@@ -22,7 +22,7 @@
 #include "rapidcheck_utils.hh"
 #include <catch.hpp>
 #include <linalgwrap/LazyMatrixExpression.hh>
-#include <linalgwrap/MatrixTestingUtils.hh>
+#include <linalgwrap/TestingUtils.hh>
 #include <rapidcheck.h>
 
 // have an extra verbose output for rapidcheck function tests:
@@ -138,11 +138,11 @@ class TestingLibrary {
      */
     TestingLibrary(
           std::function<genarg_type(void)> args_generator,
-          std::function<matrix_type(genarg_type)> lazy_generator,
           std::function<stored_matrix_type(genarg_type)> model_generator,
+          std::function<matrix_type(genarg_type)> lazy_generator,
           std::string prefix = "")
           : m_prefix{prefix},
-            m_gen{args_generator, lazy_generator, model_generator} {}
+            m_gen{args_generator, model_generator, lazy_generator} {}
 
     void run_checks() const;
 
@@ -152,16 +152,14 @@ class TestingLibrary {
     }
 
   protected:
-    // The testing library we use
+    // The testing library and caller type
     typedef matrix_tests::ComparativeTests<stored_matrix_type, matrix_type>
           comptests;
-
-    // The caller type we use
-    typedef typename comptests::template RapidcheckTestableGenerator<LazyGenArg>
-          callgen_type;
+    typedef RCTestableGenerator<stored_matrix_type, matrix_type, genarg_type>
+          gen_type;
 
     std::string m_prefix;
-    callgen_type m_gen;
+    gen_type m_gen;
 
   private:
     // The TransposeView * stored operation is not yet implemented for
@@ -179,8 +177,9 @@ void TestingLibrary<LazyMatrix, LazyGenArg>::run_checks() const {
     const NumCompAccuracyLevel sloppy = NumCompAccuracyLevel::Sloppy;
 
     // Test basic equivalence:
-    CHECK(rc::check(m_prefix + "Equivalence of matrix to model expression",
-                    m_gen.generate(comptests::test_equivalence)));
+    // TODO change all calls to
+    CHECK(m_gen.run_test(m_prefix + "Equivalence of matrix to model expression",
+                         comptests::test_equivalence));
 
     // Read-only element access
     CHECK(rc::check(m_prefix + "Element access via () and []",
@@ -213,9 +212,9 @@ void TestingLibrary<LazyMatrix, LazyGenArg>::run_checks() const {
           lazy_matrix_type;
 
     CHECK(rc::check(m_prefix + "Multiplication by scalar",
-                    m_gen.generate(comptests::test_multiply_scalar)));
+                    m_gen.generate(comptests::test_multiply_scalar, low)));
     CHECK(rc::check(m_prefix + "Divide by scalar",
-                    m_gen.generate(comptests::test_divide_scalar)));
+                    m_gen.generate(comptests::test_divide_scalar, low)));
     CHECK(rc::check(
           m_prefix + "Add a stored matrix",
           m_gen.generate(comptests::template test_add<stored_matrix_type>)));
@@ -231,7 +230,7 @@ void TestingLibrary<LazyMatrix, LazyGenArg>::run_checks() const {
               m_prefix + "Multiply a stored matrix",
               m_gen.generate(
                     comptests::template test_multiply_by<stored_matrix_type>,
-                    low)));
+                    sloppy)));
     }
     CHECK(rc::check(
           m_prefix + "Multiply a lazy matrix",

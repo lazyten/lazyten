@@ -1,4 +1,4 @@
-//
+
 // Copyright (C) 2016 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
@@ -39,7 +39,6 @@ TEST_CASE("LazyMatrixProduct", "[LazyMatrixProduct]") {
     SECTION("Default lazy matrix tests") {
         typedef double scalar_type;
         typedef SmallMatrix<scalar_type> stored_matrix_type;
-        typedef typename stored_matrix_type::size_type size_type;
         typedef LazyMatrixWrapper<stored_matrix_type, stored_matrix_type>
               lazy_matrix_type;
         typedef LazyMatrixProduct<stored_matrix_type> product_type;
@@ -47,17 +46,16 @@ TEST_CASE("LazyMatrixProduct", "[LazyMatrixProduct]") {
         // Generator for the args
         auto args_generator = []() {
             stored_matrix_type mat1 =
-                  *gen::scale(0.8, gen::arbitrary<stored_matrix_type>())
+                  *gen::scale(0.8, gen::numeric_tensor<stored_matrix_type>())
                          .as("Matrix factor 1");
 
             // The size of the other matrix to multiply mat1 with:
             // Note: the RHS of inRange is exclusive
-            auto othersize = *gen::inRange<size_type>(
-                                    1, TestConstants::max_matrix_size + 1)
-                                    .as("Number of columns of the 2nd matrix");
+            auto othersize = *gen::numeric_size<2>().as(
+                  "Number of columns of the 2nd matrix");
 
             stored_matrix_type mat2 =
-                  *gen::scale(0.8, gen::fixed_size<stored_matrix_type>(
+                  *gen::scale(0.8, gen::numeric_tensor<stored_matrix_type>(
                                          mat1.n_cols(), othersize))
                          .as("Matrix factor 2");
 
@@ -92,9 +90,9 @@ TEST_CASE("LazyMatrixProduct", "[LazyMatrixProduct]") {
         // since sometimes we have have rather in the matrices generated
         // by args_generator already.
         auto highertol = NumCompConstants::change_temporary(
-              5. * krims::NumCompConstants::default_tolerance_factor);
+              10. * krims::NumCompConstants::default_tolerance_factor);
 
-        testinglib{args_generator, sut_generator, model_generator,
+        testinglib{args_generator, model_generator, sut_generator,
                    "LazyMatrixProduct: "}
               .run_checks();
     }
@@ -103,7 +101,7 @@ TEST_CASE("LazyMatrixProduct", "[LazyMatrixProduct]") {
         // Increase numeric tolerance for this scope,
         // ie results need to be less exact for passing
         auto highertol = NumCompConstants::change_temporary(
-              10. * krims::NumCompConstants::default_tolerance_factor);
+              100. * krims::NumCompConstants::default_tolerance_factor);
 
         auto random_test = [] {
             model_matrix_type in(2, 3);

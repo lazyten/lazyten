@@ -18,10 +18,10 @@
 //
 
 #pragma once
-#include "linalgwrap/SmallMatrix.hh"
+#include "FallbackOperations/macro_defs.hh"
 
-namespace linalgwrap {
-/** Using statement to define a SmallVector */
-template <typename Scalar>
-using SmallVector = typename SmallMatrix<Scalar>::vector_type;
-}  // end namespace linalgwrap
+#include "FallbackOperations/op_comparison.hh"
+#include "FallbackOperations/op_dot.hh"
+#include "FallbackOperations/op_elementwise.hh"
+#include "FallbackOperations/op_minmax.hh"
+#include "FallbackOperations/op_norm.hh"

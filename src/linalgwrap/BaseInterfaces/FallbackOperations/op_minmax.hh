@@ -18,10 +18,23 @@
 //
 
 #pragma once
-#include "linalgwrap/SmallMatrix.hh"
+#include "linalgwrap/BaseInterfaces/Indexable_i.hh"
+#include "macro_defs.hh"
 
 namespace linalgwrap {
-/** Using statement to define a SmallVector */
-template <typename Scalar>
-using SmallVector = typename SmallMatrix<Scalar>::vector_type;
-}  // end namespace linalgwrap
+
+/** Compute the minimum of all values of an indexable object */
+template <typename Indexable>
+ValidIndexableScalarT<Indexable> min(const Indexable& i) {
+    linalgwrap_called_fallback();
+    return *std::min_element(i.begin(), i.end());
+}
+
+/** Compute the maximum of all values of an indexable object */
+template <typename Indexable>
+ValidIndexableScalarT<Indexable> max(const Indexable& i) {
+    linalgwrap_called_fallback();
+    return *std::max_element(i.begin(), i.end());
+}
+
+}  // namespace linalgwrap

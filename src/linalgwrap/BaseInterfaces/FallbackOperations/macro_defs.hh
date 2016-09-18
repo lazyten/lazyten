@@ -18,10 +18,20 @@
 //
 
 #pragma once
-#include "linalgwrap/SmallMatrix.hh"
-
 namespace linalgwrap {
-/** Using statement to define a SmallVector */
-template <typename Scalar>
-using SmallVector = typename SmallMatrix<Scalar>::vector_type;
-}  // end namespace linalgwrap
+
+#ifdef LINALGWRAP_SIGNAL_FALLBACK
+
+#include <iostream>
+#define linalgwrap_called_fallback()                                      \
+    {                                                                     \
+        std::cerr << "Note:  Called fallback for " << __PRETTY_FUNCTION__ \
+                  << std::endl;                                           \
+    }
+
+#else
+#define linalgwrap_called_fallback() \
+    {}
+#endif
+
+}  // namespace linalgwrap

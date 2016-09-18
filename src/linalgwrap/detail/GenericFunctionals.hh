@@ -18,7 +18,11 @@
 //
 
 #pragma once
-#include <type_traits>
+#include <cmath>
+#include <complex>
+#include <cstdlib>
+#include <krims/TypeUtils.hh>
+
 namespace linalgwrap {
 namespace detail {
 struct PlusFctr {
@@ -75,6 +79,42 @@ struct DivideByFctr {
     template <typename T>
     auto operator()(const T& t) -> decltype(t / sfac) {
         return t / sfac;
+    }
+};
+
+struct AbsFctr {
+    template <typename Scalar>
+    auto operator()(const Scalar& s) const -> decltype(std::abs(s)) {
+        return std::abs(s);
+    }
+};
+
+struct SqrtFctr {
+    template <typename Scalar>
+    auto operator()(const Scalar& s) const -> decltype(std::sqrt(s)) {
+        return std::sqrt(s);
+    }
+};
+
+struct SquareFctr {
+    template <typename Scalar>
+    auto operator()(const Scalar& s) const -> decltype(s * s) {
+        return s * s;
+    }
+};
+
+struct ConjFctr {
+    template <typename Scalar>
+    auto operator()(const std::complex<Scalar>& s) const
+          -> decltype(std::conj(s)) {
+        return std::conj(s);
+    }
+
+    template <typename Scalar>
+    typename std::enable_if<!krims::IsComplexNumber<Scalar>::value,
+                            Scalar>::type
+    operator()(const Scalar& s) const {
+        return s;
     }
 };
 

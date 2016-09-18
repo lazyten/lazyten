@@ -46,6 +46,13 @@ class Range {
     typedef T value_type;
     typedef size_t size_type;
 
+    // If T is a signed type use the signed equivalent of size_type
+    // to compute the differences, else use size_type;
+    typedef
+          typename std::conditional<std::is_signed<T>::value,
+                                    typename std::make_signed<size_type>::type,
+                                    size_type>::type diff_type;
+
     DefExceptionMsg(
           ExcEmptyRange,
           "The range object you attempted to use represents an empty range"
@@ -217,7 +224,7 @@ typename Range<T>::value_type Range<T>::last() const {
 
 template <typename T>
 typename Range<T>::size_type Range<T>::length() const {
-    return m_last - m_first;
+    return static_cast<diff_type>(m_last) - static_cast<diff_type>(m_first);
 }
 
 template <typename T>
