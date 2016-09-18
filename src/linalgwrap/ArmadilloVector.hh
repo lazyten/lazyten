@@ -95,7 +95,13 @@ class ArmadilloVector : public StoredVector_i<Scalar> {
         std::copy(first, last, m_arma.begin());
     }
 
-    // TODO construct from Indexable_i
+    /** \brief Construct from Arbitrary Indexable_i */
+    template <typename Indexable, typename = typename std::enable_if<
+                                        IsIndexable<Indexable>::value>::type>
+    explicit ArmadilloVector(const Indexable& i)
+          : ArmadilloVector(i.n_elem(), false) {
+        std::copy(i.begin(), i.end(), m_arma.begin());
+    }
 
     /** \brief Construct from inner storage object */
     explicit ArmadilloVector(storage_type inner) : m_arma(std::move(inner)) {}

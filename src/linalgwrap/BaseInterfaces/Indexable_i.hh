@@ -117,4 +117,11 @@ using ValidIndexableScalarT =
 template <typename T>
 using ValidIndexableT = typename std::enable_if<IsIndexable<T>::value, T>::type;
 
+/** Convert an indexable with only one element into this scalar element */
+template <typename Scalar>
+Scalar as_scalar(const Indexable_i<Scalar>& i) {
+    assert_size(i.n_elem(), 1);
+    return i[0];
+}
+
 }  // namespace linalgwrap

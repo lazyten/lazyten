@@ -22,14 +22,13 @@
 #include "generators.hh"
 #include "indexable_tests.hh"
 #include "rapidcheck_utils.hh"
+#include "vector_tests.hh"
 #include <functional>
 #include <linalgwrap/Range.hh>
 #include <linalgwrap/TestingUtils.hh>
 
 // have a debug print of all generated matrices
 // #define HAVE_MATRIX_DEBUG_PRINT
-
-// TODO use a system similar to vector_tests and indexable_tests
 
 namespace linalgwrap {
 namespace tests {
@@ -62,6 +61,9 @@ struct ComparativeTests {
     static_assert(std::is_same<size_type, typename Model::size_type>::value,
                   "The size types of Sut and Model have to agree");
 
+    // The related comptest types for indexables and vectors
+    typedef indexable_tests::ComparativeTests<Model, Sut> idx_cmptests;
+
     // TODO test swap function!
 
     // TODO use stuff from indexable_tests.hh and vector_tests.hh
@@ -80,9 +82,7 @@ struct ComparativeTests {
           const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
 
     /** Test copying the sut */
-    static void test_copy(
-          const compmat_type& model, const sutmat_type& sut,
-          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
+    linalgwrap_declare_comptest(test_copy);
 
     /** Test read-only element access via () and [] at
      *  random places. Compare resulting values of the
@@ -148,30 +148,20 @@ struct ComparativeTests {
           const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
 
     /** Test the l1 norm function */
-    static void test_norm_l1(
-          const compmat_type& model, const sutmat_type& sut,
-          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
+    linalgwrap_declare_comptest(test_norm_l1);
 
     /** Test the linf norm function */
-    static void test_norm_linf(
-          const compmat_type& model, const sutmat_type& sut,
-          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
+    linalgwrap_declare_comptest(test_norm_linf);
 
     /** Test the frobenius norm functions (norm_frobenius and
      * norm_frobenius_squared) */
-    static void test_norm_frobenius(
-          const compmat_type& model, const sutmat_type& sut,
-          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
+    linalgwrap_declare_comptest(test_norm_frobenius);
 
     /** Test the trace function */
-    static void test_trace(
-          const compmat_type& model, const sutmat_type& sut,
-          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
+    linalgwrap_declare_comptest(test_trace);
 
     /** Test the accumulate function */
-    static void test_accumulate(
-          const compmat_type& model, const sutmat_type& sut,
-          const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
+    linalgwrap_declare_comptest(test_accumulate);
 
     /** Test whether multiplication by a scalar yields the same
      *  values in model and sut */
@@ -262,13 +252,9 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_equivalence(
     RC_ASSERT_NC(model == numcomp(sut).tolerance(tolerance));
 }
 
-template <typename CompMatrix, typename SutMatrix>
-void ComparativeTests<CompMatrix, SutMatrix>::test_copy(
-      const compmat_type& model, const sutmat_type& sut,
-      const NumCompAccuracyLevel tolerance) {
+linalgwrap_define_comptest(test_copy) {
     // TODO exists in indexable_tests
-    indexable_tests::ComparativeTests<CompMatrix, SutMatrix>::test_copy(
-          model, sut, tolerance);
+    idx_cmptests::test_copy(model, sut, tolerance);
 }
 
 template <typename CompMatrix, typename SutMatrix>
@@ -281,9 +267,7 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_element_access(
                  (numcomp(sut(row, col)).tolerance(tolerance)));
 
     // TODO exists partially in indexable_tests.hh
-    indexable_tests::ComparativeTests<
-          CompMatrix, SutMatrix>::test_element_access_vectorised(model, sut,
-                                                                 tolerance);
+    idx_cmptests::test_element_access_vectorised(model, sut, tolerance);
 }
 
 template <typename CompMatrix, typename SutMatrix>
@@ -488,11 +472,7 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_readwrite_iterator(
     }
 }
 
-template <typename CompMatrix, typename SutMatrix>
-void ComparativeTests<CompMatrix, SutMatrix>::test_norm_l1(
-      const compmat_type& model, const sutmat_type& sut,
-      const NumCompAccuracyLevel tolerance) {
-
+linalgwrap_define_comptest(test_norm_l1) {
     scalar_type norm{0};
     for (size_type col = 0; col < model.n_cols(); ++col) {
         scalar_type accu{0};
@@ -501,14 +481,10 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_norm_l1(
         }
         norm = std::max(norm, accu);
     }
-    RC_ASSERT_NC(sut.norm_l1() == numcomp(norm).tolerance(tolerance));
+    RC_ASSERT_NC(norm_l1(sut) == numcomp(norm).tolerance(tolerance));
 }
 
-template <typename CompMatrix, typename SutMatrix>
-void ComparativeTests<CompMatrix, SutMatrix>::test_norm_linf(
-      const compmat_type& model, const sutmat_type& sut,
-      const NumCompAccuracyLevel tolerance) {
-
+linalgwrap_define_comptest(test_norm_linf) {
     scalar_type norm{0};
     for (size_type row = 0; row < model.n_rows(); ++row) {
         scalar_type accu{0};
@@ -517,32 +493,25 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_norm_linf(
         }
         norm = std::max(norm, accu);
     }
-    RC_ASSERT_NC(sut.norm_linf() == numcomp(norm).tolerance(tolerance));
+    RC_ASSERT_NC(norm_linf(sut) == numcomp(norm).tolerance(tolerance));
 }
 
-template <typename CompMatrix, typename SutMatrix>
-void ComparativeTests<CompMatrix, SutMatrix>::test_norm_frobenius(
-      const compmat_type& model, const sutmat_type& sut,
-      const NumCompAccuracyLevel tolerance) {
-
+linalgwrap_define_comptest(test_norm_frobenius) {
     scalar_type frobenius_squared{0};
     for (size_type i = 0; i < model.n_rows(); ++i) {
         for (size_type j = 0; j < model.n_cols(); ++j) {
             frobenius_squared += model(i, j) * model(i, j);
         }
     }
-    RC_ASSERT_NC(sut.norm_frobenius_squared() ==
+    RC_ASSERT_NC(norm_frobenius_squared(sut) ==
                  numcomp(frobenius_squared).tolerance(tolerance));
 
     scalar_type frobenius = std::sqrt(frobenius_squared);
-    RC_ASSERT_NC(sut.norm_frobenius() ==
+    RC_ASSERT_NC(norm_frobenius(sut) ==
                  numcomp(frobenius).tolerance(tolerance));
 }
 
-template <typename CompMatrix, typename SutMatrix>
-void ComparativeTests<CompMatrix, SutMatrix>::test_trace(
-      const compmat_type& model, const sutmat_type& sut,
-      const NumCompAccuracyLevel tolerance) {
+linalgwrap_define_comptest(test_trace) {
     RC_PRE(model.n_rows() == model.n_cols());
 
     scalar_type res{0};
@@ -550,23 +519,12 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_trace(
         res += model(i, i);
     }
 
-    RC_ASSERT_NC(sut.trace() == numcomp(res).tolerance(tolerance));
+    RC_ASSERT_NC(trace(sut) == numcomp(res).tolerance(tolerance));
 }
 
-template <typename CompMatrix, typename SutMatrix>
-void ComparativeTests<CompMatrix, SutMatrix>::test_accumulate(
-      const compmat_type& model, const sutmat_type& sut,
-      const NumCompAccuracyLevel tolerance) {
+linalgwrap_define_comptest(test_accumulate) {
     // TODO exists in indexable_tests.hh
-
-    scalar_type res{0};
-    for (size_type i = 0; i < model.n_rows(); ++i) {
-        for (size_type j = 0; j < model.n_cols(); ++j) {
-            res += model(i, j);
-        }
-    }
-
-    RC_ASSERT_NC(sut.accumulate() == numcomp(res).tolerance(tolerance));
+    idx_cmptests::test_accumulate(model, sut, tolerance);
 }
 
 template <typename CompMatrix, typename SutMatrix>
