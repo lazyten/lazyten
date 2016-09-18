@@ -112,7 +112,7 @@ class ApplyElementwiseContainer {
 
     ApplyElementwiseContainer(const Indexable& i, Operation op_)
           : inner_ptr{"ApplyElementwiseContainer", i},
-            op{std::forward<Operation>(op_)} {}
+            op(std::forward<Operation>(op_)) {}
 
     /** \name Iterators
      */
