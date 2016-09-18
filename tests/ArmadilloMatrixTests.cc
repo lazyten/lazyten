@@ -35,13 +35,32 @@ TEST_CASE("ArmadilloMatrix class", "[ArmadilloMatrix]") {
     typedef ArmadilloMatrix<double> matrix_type;
 
     SECTION("Norm test") {
-        matrix_type m = {{1.0}, {-2.0}};
-        REQUIRE(m.norm_l1() == 3.);
-        REQUIRE(m.norm_linf() == 2.);
+        matrix_type m = {{1.0},  //
+                         {-2.0}};
+        CHECK(m.n_cols() == 1);
+        CHECK(m.n_rows() == 2);
+        CHECK(m(0, 0) == 1.0);
+        CHECK(m(1, 0) == -2.0);
+        CHECK(norm_l1(m) == 3.);
+        CHECK(norm_linf(m) == 2.);
 
         matrix_type n = {{1.0, -2.0}};
-        REQUIRE(n.norm_l1() == 2.);
-        REQUIRE(n.norm_linf() == 3.);
+        CHECK(n.n_cols() == 2);
+        CHECK(n.n_rows() == 1);
+        CHECK(n(0, 0) == 1.0);
+        CHECK(n(0, 1) == -2.0);
+        CHECK(norm_l1(n) == 2.);
+        CHECK(norm_linf(n) == 3.);
+
+        matrix_type l{{1.0, 0.0},  //
+                      {-2.0, 2.0}};
+        CHECK(norm_l1(l) == 3.);
+        CHECK(norm_linf(l) == 4.);
+
+        matrix_type k{{1.0, -2.0},  //
+                      {0.0, 0.0}};
+        CHECK(norm_l1(k) == 2.);
+        CHECK(norm_linf(k) == 3.);
     }
 
     SECTION("Default stored matrix tests") {

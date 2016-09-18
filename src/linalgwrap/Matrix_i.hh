@@ -136,35 +136,6 @@ class Matrix_i : public krims::Subscribable {
 
     // TODO ideas: is_real, is_hermetian, is_real_symmetric
     ///@}
-
-    /** \name Standard operations
-     */
-    ///@{
-    /** \brief Compute the trace of this matrix
-     * Only works for quadratic matrices */
-    scalar_type trace() const;
-
-    /** Calculate the (signed) sum of all matrix entries. */
-    scalar_type accumulate() const;
-
-    // TODO ideas: max(), min()
-
-    /** Calculate the l1 norm (maximum of the sums over columns) */
-    scalar_type norm_l1() const;
-
-    /** Calculate the linf norm (maximum of the sums over rows) */
-    scalar_type norm_linf() const;
-
-    /** Calculate the Frobenius norm (sqrt of all matrix elements
-     * squared
-     *
-     * \note This norm is not the matrix norm compatible to the l2 norm!
-     */
-    scalar_type norm_frobenius() const;
-
-    /** Calculate the Frobenius norm squared */
-    scalar_type norm_frobenius_squared() const;
-    ///@}
 };
 
 //@{
@@ -190,6 +161,45 @@ struct IsMatrix<T, krims::VoidType<typename T::scalar_type>>
  *  */
 template <typename Scalar>
 std::ostream& operator<<(std::ostream& o, const Matrix_i<Scalar>& m);
+
+/** Compute the trace of the matrix
+ *
+ * \note only sensible for square matrices
+ */
+template <typename Scalar>
+Scalar trace(const Matrix_i<Scalar>& m);
+
+/** Accumulate all matrix values */
+template <typename Scalar>
+Scalar accumulate(const Matrix_i<Scalar>& m) {
+    return std::accumulate(m.begin(), m.end(), Constants<Scalar>::zero);
+}
+
+/** Compute the l1 norm (maximum of the sums over columns) */
+template <typename Scalar>
+Scalar norm_l1(const Matrix_i<Scalar>& m);
+
+/** Calculate the linf norm (maximum of the sums over rows) */
+template <typename Scalar>
+Scalar norm_linf(const Matrix_i<Scalar>& m);
+
+/** Calculate the Frobenius norm (sqrt of all matrix elements
+ * squared
+ *
+ * \note This norm is not the matrix norm compatible to the l2 norm!
+ */
+template <typename Scalar>
+Scalar norm_frobenius(const Matrix_i<Scalar>& m) {
+    // sqrt of square of all matrix elements
+    return std::sqrt(norm_frobenius_squared(m));
+}
+
+/** Calculate the Frobenius norm squared
+ *
+ * \note This norm is not the matrix norm compatible to the l2 norm!
+ */
+template <typename Scalar>
+Scalar norm_frobenius_squared(const Matrix_i<Scalar>& m);
 
 //
 // ---------------------------------------------------------------
@@ -254,26 +264,24 @@ bool Matrix_i<Scalar>::is_symmetric(scalar_type tolerance) const {
     return true;
 }
 
-template <typename Scalar>
-inline typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::accumulate()
-      const {
-    return std::accumulate(begin(), end(), Constants<scalar_type>::zero);
-}
+//
+// Out of scope
+//
 
 template <typename Scalar>
-inline typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::norm_l1()
-      const {
+Scalar norm_l1(const Matrix_i<Scalar>& m) {
+    typedef typename Matrix_i<Scalar>::size_type size_type;
     // This way is real bad for the cache and hence really slow.
     // One should do this in blocks of row indices, which fit the cache size.
 
     // maximum of the colsums
     //
-    scalar_type res(Constants<scalar_type>::zero);
-    for (size_type col = 0; col < n_cols(); ++col) {
+    Scalar res(Constants<Scalar>::zero);
+    for (size_type col = 0; col < m.n_cols(); ++col) {
         // sum of absolute entries of this column
-        scalar_type colsum = Constants<scalar_type>::zero;
-        for (size_type row = 0; row < n_rows(); ++row) {
-            colsum += std::abs((*this)(row, col));
+        Scalar colsum = Constants<Scalar>::zero;
+        for (size_type row = 0; row < m.n_rows(); ++row) {
+            colsum += std::abs(m(row, col));
         }
         res = std::max(res, colsum);
     }
@@ -281,16 +289,15 @@ inline typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::norm_l1()
 }
 
 template <typename Scalar>
-inline typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::norm_linf()
-      const {
-    // maximum of the rowsums
-    //
-    scalar_type res = Constants<scalar_type>::zero;
-    for (size_type row = 0; row < n_rows(); ++row) {
+Scalar norm_linf(const Matrix_i<Scalar>& m) {
+    typedef typename Matrix_i<Scalar>::size_type size_type;
+
+    Scalar res = Constants<Scalar>::zero;
+    for (size_type row = 0; row < m.n_rows(); ++row) {
         // sum of absolute entries of this row
-        scalar_type rowsum = Constants<scalar_type>::zero;
-        for (size_type col = 0; col < n_cols(); ++col) {
-            rowsum += std::abs((*this)(row, col));
+        Scalar rowsum = Constants<Scalar>::zero;
+        for (size_type col = 0; col < m.n_cols(); ++col) {
+            rowsum += std::abs(m(row, col));
         }
         res = std::max(res, rowsum);
     }
@@ -298,37 +305,27 @@ inline typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::norm_linf()
 }
 
 template <typename Scalar>
-inline typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::norm_frobenius()
-      const {
-    // sqrt of square of all matrix elements
-    return std::sqrt(norm_frobenius_squared());
-}
-
-template <typename Scalar>
-inline typename Matrix_i<Scalar>::scalar_type
-Matrix_i<Scalar>::norm_frobenius_squared() const {
+Scalar norm_frobenius_squared(const Matrix_i<Scalar>& m) {
     // sum of squares of all matrix elements
-    scalar_type sum = Constants<scalar_type>::zero;
-    for (auto it = begin(); it != end(); ++it) {
+    Scalar sum = Constants<Scalar>::zero;
+    for (auto it = m.begin(); it != m.end(); ++it) {
         sum += (*it) * (*it);
     }
     return sum;
 }
 
 template <typename Scalar>
-inline typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::trace() const {
-    assert_dbg(n_rows() == n_cols(), ExcMatrixNotSquare());
+Scalar trace(const Matrix_i<Scalar>& m) {
+    typedef typename Matrix_i<Scalar>::size_type size_type;
+    assert_dbg(m.n_rows() == m.n_cols(), ExcMatrixNotSquare());
 
-    scalar_type trace{Constants<scalar_type>::zero};
-    for (size_type i = 0; i < n_rows(); ++i) {
-        trace += (*this)(i, i);
+    Scalar trace{Constants<Scalar>::zero};
+    for (size_type i = 0; i < m.n_rows(); ++i) {
+        trace += m(i, i);
     }
     return trace;
 }
 
-//
-// Out of scope
-//
 template <typename Scalar>
 std::ostream& operator<<(std::ostream& o, const Matrix_i<Scalar>& m) {
     io::MatrixPrinter().print(m, o);

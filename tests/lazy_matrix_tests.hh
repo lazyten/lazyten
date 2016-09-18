@@ -91,9 +91,12 @@ struct FunctionalityTests
 
         test_convert_to_stored(model, sut);
 
-        if (model.norm_frobenius_squared() < problematic_norm) {
+        if (norm_frobenius_squared(model) < problematic_norm) {
+            RC_TAG("Small norm: Some tests not run.");
             // Problematic tests, which are left out once norm is too large
             base_type::test_accumulate(model, sut, low);
+        } else {
+            RC_TAG("All tests ran.");
         }
     }
 

@@ -121,7 +121,7 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
      * This is due to the fact that armadillo matrices are column-major,
      * but we are row-major.
      */
-    explicit ArmadilloMatrix(storage_type inner);
+    explicit ArmadilloMatrix(storage_type inner) : m_arma(inner) {}
     ///@}
 
     /** \name Matrix operations */
@@ -155,6 +155,23 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
         // and this is what we need to envelope into the new ArmadilloMatrix.
         return ArmadilloMatrix(tres);
     }
+
+    //    // TODO neu
+    //    /** Multiply with a vector => maybe put this in StoredMatrix_i*/
+    //    template <typename Vector>
+    //    Vector operator*(const Vector& v) const;
+    //
+    //    ArmadilloVector<Scalar> operator*(const ArmadilloVector<Scalar>& v)
+    //    const;
+    //
+    //    /** Multiply with a vector => maybe put this in StoredMatrix_i*/
+    //    template <typename Vector>
+    //    Vector apply(const Vector& v) const;
+    //
+    //    /** Multiply with a vector => maybe put this in StoredMatrix_i*/
+    //    template <typename Vector>
+    //    std::vector<Vector> apply(const std::vector<Vector>& vs) const;
+    //    // END TODO
 
     /* Add a small matrix to this one */
     ArmadilloMatrix& operator+=(const ArmadilloMatrix& other) {
@@ -223,58 +240,6 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
         // we store the transpose of what we represent internally
         // this give the correct interface (row-major access)
         return m_arma[i];
-    }
-
-    scalar_type accumulate() const { return arma::accu(m_arma); }
-    scalar_type trace() const { return arma::trace(m_arma); }
-
-    /** Calculate the l1 norm (maximum of the sums over columns) */
-    scalar_type norm_l1() const {
-        // l1 is the maximum of the sums over columns
-        // linf is the maximum of the sums over roles
-        //
-        // Since m_arma is stored as the transpose of the
-        // thing it actually represents, we can use linf
-        // on the m_arma here
-        if (m_arma.n_rows == 1) {
-            return norm(m_arma, 1);
-            // Arma wants to be clever and treats matrices of one row
-            // exactly like vectors (so here we do not need to transpose
-            // and use the inf norm)
-        } else {
-            return norm(m_arma, "inf");
-        }
-    }
-
-    /** Calculate the linf norm (maximum of the sums over rows) */
-    scalar_type norm_linf() const {
-        // l1 is the maximum of the sums over columns
-        // linf is the maximum of the sums over roles
-        //
-        // Since m_arma is stored as the transpose of the
-        // thing it actually represents, we can use l1
-        // on the m_arma here
-        if (m_arma.n_rows == 1) {
-            // Arma wants to be clever and treats matrices of one row
-            // exactly like vectors (so here we do not need to transpose
-            // and use the 1 norm)
-            return norm(m_arma, "inf");
-        } else {
-            return norm(m_arma, 1);
-        }
-    }
-
-    /** Calculate the Frobenius norm (sqrt of all matrix elements
-     * squared
-     *
-     * \note This norm is not the matrix norm compatible to the l2 norm!
-     */
-    scalar_type norm_frobenius() const { return norm(m_arma, "fro"); }
-
-    /** Calculate the Frobenius norm squared */
-    scalar_type norm_frobenius_squared() const {
-        // dot in arma is an elementwise dot product.
-        return arma::dot(m_arma, m_arma);
     }
 
     //
@@ -419,6 +384,52 @@ ArmadilloMatrix<Scalar> operator+(ArmadilloMatrix<Scalar> lhs,
 }
 
 //
+// Specialisation of operations:
+//
+/** Compute the trace of the matrix
+ *
+ * \note only sensible for square matrices
+ */
+template <typename Scalar>
+Scalar trace(const ArmadilloMatrix<Scalar>& m) {
+    return arma::trace(m.data());
+}
+
+/** Accumulate all matrix values */
+template <typename Scalar>
+Scalar accumulate(const ArmadilloMatrix<Scalar>& m) {
+    return arma::accu(m.data());
+}
+
+/** Compute the l1 norm (maximum of the sums over columns) */
+template <typename Scalar>
+Scalar norm_l1(const ArmadilloMatrix<Scalar>& m);
+
+/** Calculate the linf norm (maximum of the sums over rows) */
+template <typename Scalar>
+Scalar norm_linf(const ArmadilloMatrix<Scalar>& m);
+
+/** Calculate the Frobenius norm (sqrt of all matrix elements
+ * squared
+ *
+ * \note This norm is not the matrix norm compatible to the l2 norm!
+ */
+template <typename Scalar>
+Scalar norm_frobenius(const ArmadilloMatrix<Scalar>& m) {
+    return arma::norm(m.data(), "fro");
+}
+
+/** Calculate the Frobenius norm squared
+ *
+ * \note This norm is not the matrix norm compatible to the l2 norm!
+ */
+template <typename Scalar>
+Scalar norm_frobenius_squared(const ArmadilloMatrix<Scalar>& m) {
+    // dot in arma is an elementwise dot product.
+    return arma::cdot(m.data(), m.data());
+}
+
+//
 // ---------------------------------------------------
 //
 
@@ -483,12 +494,40 @@ ArmadilloMatrix<Scalar>::ArmadilloMatrix(
         assert_dbg(j == n_cols, krims::ExcInternalError());
         ++i;
     }
-
     assert_dbg(i == n_rows, krims::ExcInternalError());
 }
 
 template <typename Scalar>
-ArmadilloMatrix<Scalar>::ArmadilloMatrix(storage_type inner) : m_arma(inner) {}
+Scalar norm_l1(const ArmadilloMatrix<Scalar>& m) {
+    // l1 is the maximum of the sums over columns
+    // linf is the maximum of the sums over rows
+    //
+    // Since m.data() is stored as the transpose of the
+    // thing it actually represents, we can use linf
+    // on the m.data() here --- in theory
+    //
+    if (m.data().n_rows == 1) {
+        // Arma wants to be clever and treats matrices of one row
+        // exactly like vectors (so here we do not need to transpose
+        // and use the inf norm)
+        return norm(m.data(), 1);
+    } else {
+        return norm(m.data(), "inf");
+    }
+}
+
+template <typename Scalar>
+Scalar norm_linf(const ArmadilloMatrix<Scalar>& m) {
+    // See norm_l1 for reasons why we need the condition here
+    // Note that m.data() is the *transpose* of the actual matrix
+    // we represent. Therefore we calculate the l1 norm of it here.
+    //
+    if (m.data().n_rows == 1) {
+        return norm(m.data(), "inf");
+    } else {
+        return norm(m.data(), 1);
+    }
+}
 
 #else
 template <typename Scalar>
