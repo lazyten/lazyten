@@ -250,25 +250,6 @@ ArmadilloVector<Scalar> operator+(ArmadilloVector<Scalar> lhs,
 // Specialisations of fallback operations
 //
 
-// TODO I do not know why, but armadillo had trouble with accumulating
-// complex matrices or taking the dot and cdot of them
-inline double dot(const ArmadilloVector<double>& A,
-                  const ArmadilloVector<double>& B) {
-    return arma::dot(A.data(), B.data());
-}
-
-inline double cdot(const ArmadilloVector<double>& A,
-                   const ArmadilloVector<double>& B) {
-    // arma does the complex conjugate in the first argument as well.
-    return arma::cdot(A.data(), B.data());
-}
-
-// -- accumulate
-inline double accumulate(const ArmadilloVector<double>& A) {
-    return arma::accu(A.data());
-}
-
-/*
 // -- dot
 template <typename Scalar1, typename Scalar2>
 typename std::common_type<Scalar1, Scalar2>::type dot(
@@ -283,13 +264,11 @@ typename std::common_type<Scalar1, Scalar2>::type cdot(
     return arma::cdot(A.data(), B.data());
 }
 
-
 // -- accumulate
 template <typename Scalar>
 Scalar accumulate(const ArmadilloVector<Scalar>& A) {
     return arma::accu(A.data());
 }
-*/
 
 // -- minmax
 template <typename Scalar>
