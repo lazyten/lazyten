@@ -25,9 +25,6 @@
 #include <linalgwrap/TestingUtils.hh>
 #include <rapidcheck.h>
 
-// have an extra verbose output for rapidcheck function tests:
-//# define HAVE_LAZYMATRIX_RC_CLASSIFY
-
 namespace linalgwrap {
 namespace tests {
 using namespace rc;
@@ -92,11 +89,15 @@ struct FunctionalityTests
         test_convert_to_stored(model, sut);
 
         if (norm_frobenius_squared(model) < problematic_norm) {
+#ifdef LINALGWRAP_TESTS_VERBOSE
             RC_TAG("Small norm: Some tests not run.");
+#endif
             // Problematic tests, which are left out once norm is too large
             base_type::test_accumulate(model, sut, low);
         } else {
+#ifdef LINALGWRAP_TESTS_VERBOSE
             RC_TAG("All tests ran.");
+#endif
         }
     }
 

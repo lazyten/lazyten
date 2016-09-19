@@ -18,7 +18,7 @@
 //
 
 #pragma once
-#include <linalgwrap/ArmadilloMatrix.hh>
+#include <linalgwrap/Armadillo.hh>
 #include <linalgwrap/LazyMatrixWrapper.hh>
 #include <linalgwrap/TestingUtils.hh>
 #include <rapidcheck.h>

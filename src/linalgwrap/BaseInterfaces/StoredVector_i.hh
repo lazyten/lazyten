@@ -18,11 +18,15 @@
 //
 
 #pragma once
-#include "Vector_i.hh"
+#include "MutableVector_i.hh"
 
 namespace linalgwrap {
 
-/** \brief Abstract vector interface class to represent a stored column vector
+/** \brief Abstract vector interface class to represent a vector, that
+ *   manages its storage.
+ *
+ * If the object is not const both read and write access to the data is
+ * given.
  *
  * We expect any implementing class to also provide the following constructors:
  * - Construct vector of fixed size and optionally fill with zeros or leave
@@ -53,15 +57,13 @@ namespace linalgwrap {
  *                                      IsIndexable<Indexable>::value>::type>
  *   explicit ArmadilloVector(const Indexable& i);
  *   ```
- *
- * Furthermore an implementation of the default vector operations
- * +, -, +=, -= as well as multiplication and division by a scalar
- * both in-place (*=) and out-of-place (*) should be provided
+ * The default vector operations (see MutalbeVector_i for details) should
+ * also be implemented between stored vectors of the same kind.
  *
  * The following types should also be defined:
  *  - iterator  The type returned by begin()
  *  - const_iterator The type returned by cbegin()
- *  - matrix_type  The type of the corresponding matrix.
+ *  - matrix_type  The type of the corresponding stored matrix.
  *
  * The following methods should be implemented:
  *  - ``begin()``, ``cbegin()``  Return an iterator or a constant iterator
@@ -70,25 +72,8 @@ namespace linalgwrap {
  *    position past-the-end of the stride of memory.
  */
 template <typename Scalar>
-class StoredVector_i : public Vector_i<Scalar> {
-  public:
-    typedef Vector_i<Scalar> base_type;
-    typedef typename base_type::size_type size_type;
-    typedef typename base_type::scalar_type scalar_type;
-
-    /** \name Data access
-     *        Access to vector data
-     */
-    ///@{
-    /** \brief return an element of the vector   */
-    virtual scalar_type operator()(size_type i) const = 0;
-
-    /** \brief return an element of the vector    */
-    virtual scalar_type& operator()(size_type i) = 0;
-
-    /** \brief return an element of the vector   */
-    virtual scalar_type& operator[](size_type i) = 0;
-    ///@}
+class StoredVector_i : public MutableVector_i<Scalar> {
+    // Just forward from MutableVector_i
 };
 
 //@{

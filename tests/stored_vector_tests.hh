@@ -18,10 +18,7 @@
 //
 
 #pragma once
-#include "RCTestableGenerator.hh"
-#include "generators.hh"
-#include "vector_tests.hh"
-#include <catch.hpp>
+#include "mutable_vector_tests.hh"
 
 namespace linalgwrap {
 namespace tests {
@@ -29,93 +26,90 @@ namespace tests {
 /** Namespace for default tests for stored vectors */
 namespace stored_vector_tests {
 
-template <typename Scalar>
-struct VectorModel : private std::vector<Scalar>, public Vector_i<Scalar> {
-    typedef Vector_i<Scalar> base_type;
+/** \brief Standard test functions which test a certain
+ *  functionality by executing it in the SutVector
+ *  and in a ModelVector and comparing the results
+ *  afterwards.
+ *
+ *  \tparam Model  Model vector used for comparison
+ *  \tparam Sut   System under test vector.
+ *                      The thing we test.
+ **/
+template <typename Model, typename Sut>
+struct ComparativeTests
+      : public mutable_vector_tests::ComparativeTests<Model, Sut> {
+    typedef indexable_tests::ComparativeTests<Model, Sut> base_type;
+    typedef typename base_type::model_type model_type;
+    typedef typename base_type::sut_type sut_type;
     typedef typename base_type::size_type size_type;
     typedef typename base_type::scalar_type scalar_type;
-    typedef typename std::vector<Scalar> container_type;
+    typedef typename base_type::real_type real_type;
 
-    // Bring in important stuff from std::vector
-    using typename container_type::iterator;
-    using typename container_type::const_iterator;
-    using container_type::begin;
-    using container_type::cbegin;
-    using container_type::end;
-    using container_type::cend;
+    /** Run all comparative tests (including the ones from indexable_tests,
+     * vector_tests and mutable_vector_tests) */
+    template <typename Args>
+    static void run_all(const RCTestableGenerator<Model, Sut, Args>& gen,
+                        const std::string& prefix) {
 
-    // Implement what is needed to be a Vector_i
-    size_type size() const override { return container_type::size(); }
-    size_type n_elem() const override { return size(); }
-    Scalar operator()(size_type i) const override { return (*this)[i]; }
-    Scalar operator[](size_type i) const override {
-        return container_type::operator[](i);
+        once_test_conversion_from_indexable();
+        once_test_initialiser_list_constructor();
+        once_test_as_scalar();
+
+        base_type::run_all(gen, prefix);
     }
 
-    // Some extra stuff we need for testing
-    Scalar& operator()(size_type i) { return (*this)[i]; }
-    Scalar& operator[](size_type i) { return container_type::operator[](i); }
-
-    VectorModel(std::vector<Scalar> v) : container_type(v) {}
-    VectorModel(size_type c, bool initialise) : container_type(c) {
-        if (initialise) {
-            for (auto& elem : *this) elem = 0;
-        }
-    }
+    static void once_test_initialiser_list_constructor();
+    static void once_test_conversion_from_indexable();
+    static void once_test_as_scalar();
 };
 
-template <typename Vector>
-class TestingLibrary {
-  public:
+template <typename Vector,
+          typename Model =
+                indexable_tests::VectorModel<typename Vector::scalar_type>>
+struct GeneratorLibrary {
+    /** The type we test */
     typedef Vector vector_type;
-    typedef typename vector_type::size_type size_type;
+
+    /** The scalar type of the vector */
     typedef typename vector_type::scalar_type scalar_type;
-    typedef typename vector_type::real_type real_type;
 
-    /** Construct a testing library instance in order to check
-     *  all basic functionality of a stored vector
-     *
-     *  \param prefix A prefix to use in the rapidcheck description string
-     */
-    TestingLibrary(std::string prefix = "")
-          : m_prefix{prefix}, m_gen{argsgen} {}
+    /** The return type of the argsgen function */
+    typedef std::vector<scalar_type> args_type;
 
-    //, m_gen{argsgen, identity, identity} {}
+    /** The type of the model we use */
+    typedef Model model_type;
 
-    void run_checks() const;
+    /** The type of the testable generator */
+    typedef RCTestableGenerator<model_type, vector_type, args_type> gen_type;
 
-  private:
-    // The testing library and caller type
-    typedef std::vector<scalar_type> data_type;
-    typedef VectorModel<scalar_type> model_type;
-    typedef vector_tests::ComparativeTests<model_type, vector_type> comptests;
-    typedef RCTestableGenerator<model_type, vector_type, data_type> gen_type;
-
-    static constexpr bool cplx = krims::IsComplexNumber<scalar_type>::value;
-    static constexpr double genscale = cplx ? 0.8 : 1.0;
-
-    /** Argument generation */
-    static constexpr data_type argsgen() {
+    /** The argument generator we use */
+    static constexpr args_type argsgen() {
         return *gen::scale(genscale,
                            gen::numeric_container<std::vector<scalar_type>>())
                       .as("Vector data");
     }
 
-    void once_test_initialiser_list_constructor() const;
-    void once_test_conversion_from_indexable() const;
-    void once_test_as_scalar() const;
+    /** Get the generator for the specified vector type */
+    static gen_type generator() { return gen_type(argsgen); }
 
-    std::string m_prefix;
-    gen_type m_gen;
+  private:
+    static constexpr bool cplx = krims::IsComplexNumber<scalar_type>::value;
+    static constexpr double genscale = cplx ? 0.8 : 1.0;
 };
+
+template <typename Model, typename Sut, typename Args>
+void run_with_generator(const RCTestableGenerator<Model, Sut, Args>& gen,
+                        const std::string prefix = "") {
+    ComparativeTests<Model, Sut>::run_all(gen, prefix);
+}
 
 //
 // ---------------------------------------
 //
 
-template <typename Matrix>
-void TestingLibrary<Matrix>::once_test_initialiser_list_constructor() const {
-    vector_type v{11.0, 22.0, 33.0, 44.0};
+template <typename Model, typename Sut>
+void ComparativeTests<Model, Sut>::once_test_initialiser_list_constructor() {
+    sut_type v{11.0, 22.0, 33.0, 44.0};
 
     CHECK((v.n_elem() == 4));
     CHECK((v.size() == 4));
@@ -125,7 +119,7 @@ void TestingLibrary<Matrix>::once_test_initialiser_list_constructor() const {
         CHECK((v[i] == 11. * (i + 1)));
     }
 
-    vector_type vref(4);
+    Sut vref(4);
     vref[0] = 11.0;
     vref[1] = 22.0;
     vref[2] = 33.0;
@@ -133,99 +127,21 @@ void TestingLibrary<Matrix>::once_test_initialiser_list_constructor() const {
     CHECK(v == vref);
 }
 
-template <typename Matrix>
-void TestingLibrary<Matrix>::once_test_conversion_from_indexable() const {
-    // TODO convert into standard test in vector_tests.hh
-
+template <typename Model, typename Sut>
+void ComparativeTests<Model, Sut>::once_test_conversion_from_indexable() {
     model_type m({1., 2., 3., 4., 5.});
-    vector_type v(m);
+    Sut v(m);
 
     for (size_type i = 0; i < v.size(); ++i) {
         CHECK(v[i] == m[i]);
     }
 }
 
-template <typename Matrix>
-void TestingLibrary<Matrix>::once_test_as_scalar() const {
-    // TODO convert into standard test in indexable_tests.hh
-
-    vector_type v{42.};
+template <typename Model, typename Sut>
+void ComparativeTests<Model, Sut>::once_test_as_scalar() {
+    Sut v{42.};
     scalar_type s = as_scalar(v);
     CHECK(s == v[0]);
-}
-
-template <typename Matrix>
-void TestingLibrary<Matrix>::run_checks() const {
-    // Shorter aliases:
-    const NumCompAccuracyLevel deflvl = NumCompAccuracyLevel::Default;
-    const NumCompAccuracyLevel low = NumCompAccuracyLevel::Lower;
-    const NumCompAccuracyLevel sloppy = NumCompAccuracyLevel::Sloppy;
-    const NumCompAccuracyLevel supersloppy = NumCompAccuracyLevel::SuperSloppy;
-    const NumCompAccuracyLevel eps = NumCompAccuracyLevel::MachinePrecision;
-    const NumCompAccuracyLevel eps10 =
-          NumCompAccuracyLevel::TenMachinePrecision;
-
-    once_test_initialiser_list_constructor();
-    once_test_as_scalar();
-    once_test_conversion_from_indexable();
-
-    // Copying and ==
-    /* XXX
-    CHECK(m_gen.run_test(m_prefix + "Test ==", comptests::test_equivalence,
-                         eps));
-                         */
-    CHECK(m_gen.run_test(m_prefix + "Test copying stored vectors",
-                         comptests::test_copy, eps));
-
-    // Read-only element access:
-    CHECK(m_gen.run_test(m_prefix + "Element access via []",
-                         comptests::test_element_access_vectorised, eps));
-    CHECK(m_gen.run_test(m_prefix + "Element access via ()",
-                         comptests::test_element_access, eps));
-    CHECK(m_gen.run_test(m_prefix + "Read-only iterator.",
-                         comptests::test_readonly_iterator, eps));
-
-    // Read-write element access
-    CHECK(m_gen.run_test(m_prefix + "Altering elements via ()",
-                         comptests::test_setting_elements, eps));
-    CHECK(m_gen.run_test(m_prefix + "Altering elements via []",
-                         comptests::test_setting_elements_vectorised, eps));
-    CHECK(m_gen.run_test(m_prefix + "Altering elements via iterator",
-                         comptests::test_readwrite_iterator, eps));
-
-    // Standard operations and norms
-    CHECK(m_gen.run_test(m_prefix + "l1 norm", comptests::test_norm_l1, eps10));
-    CHECK(m_gen.run_test(m_prefix + "l2 norm", comptests::test_norm_l2, eps10));
-    CHECK(m_gen.run_test(m_prefix + "linf norm", comptests::test_norm_linf,
-                         eps10));
-    CHECK(m_gen.run_test(m_prefix + "accumulate function",
-                         comptests::test_accumulate,
-                         cplx ? supersloppy : sloppy));
-    CHECK(m_gen.run_test(m_prefix + "dot and cdot function with vector_type",
-                         comptests::template test_dot<vector_type>,
-                         cplx ? supersloppy : low));
-    CHECK(m_gen.run_test(
-          m_prefix + "dot and cdot function with real model vector",
-          comptests::template test_dot<VectorModel<real_type>>,
-          cplx ? sloppy : low));
-    CHECK(m_gen.run_test(m_prefix + "elementwise functions",
-                         comptests::test_elementwise));
-
-    if (!cplx) {
-        CHECK(m_gen.run_test(m_prefix + "min and max function",
-                             comptests::test_minmax, eps));
-    }
-
-    // Operations
-    CHECK(m_gen.run_test(m_prefix + "Multiplication by scalar",
-                         comptests::test_multiply_scalar));
-    CHECK(m_gen.run_test(m_prefix + "Divide by scalar",
-                         comptests::test_divide_scalar,
-                         cplx ? sloppy : deflvl));
-    CHECK(m_gen.run_test(m_prefix + "Add a vector",
-                         comptests::template test_add<vector_type>));
-    CHECK(m_gen.run_test(m_prefix + "Subtract a vector",
-                         comptests::template test_subtract<vector_type>));
 }
 
 }  // namespace stored_matrix_tests

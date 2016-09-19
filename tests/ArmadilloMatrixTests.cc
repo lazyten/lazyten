@@ -19,7 +19,7 @@
 
 #include "stored_matrix_tests.hh"
 #include <catch.hpp>
-#include <linalgwrap/ArmadilloMatrix.hh>
+#include <linalgwrap/Armadillo/ArmadilloMatrix.hh>
 #include <rapidcheck.h>
 
 // Generators for necessary matrices
