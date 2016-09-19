@@ -18,27 +18,21 @@
 //
 
 #pragma once
+#ifdef LINALGWRAP_HAVE_ARMADILLO
 
-#include "linalgwrap/ArmadilloVector.hh"
+#include "ArmadilloVector.hh"
 #include "linalgwrap/Constants.hh"
 #include "linalgwrap/Exceptions.hh"
 #include "linalgwrap/Range.hh"
 #include "linalgwrap/StoredMatrix_i.hh"
+#include <armadillo>
 #include <initializer_list>
 #include <memory>
 #include <type_traits>
 
-#ifdef LINALGWRAP_HAVE_ARMADILLO
-#include <armadillo>
-#endif
-
 namespace linalgwrap {
-#ifdef LINALGWRAP_HAVE_ARMADILLO
 
 // Forward-declare the interface class
-template <typename Scalar>
-class Matrix_i;
-
 template <typename Scalar>
 class StoredMatrix_i;
 
@@ -529,11 +523,5 @@ Scalar norm_linf(const ArmadilloMatrix<Scalar>& m) {
     }
 }
 
-#else
-template <typename Scalar>
-class ArmadilloMatrix {
-    static_assert(false, "ArmadilloMatrix is not available");
-};
-#endif  // LINALGWRAP_HAVE_ARMADILLO
-
 }  // namespace linalgwrap
+#endif  // LINALGWRAP_HAVE_ARMADILLO

@@ -19,18 +19,17 @@
 
 #include "stored_vector_tests.hh"
 #include <catch.hpp>
-#include <linalgwrap/ArmadilloVector.hh>
+#include <linalgwrap/Armadillo/ArmadilloVector.hh>
 #include <rapidcheck.h>
 
 namespace linalgwrap {
 namespace tests {
 namespace armadillo_vector_tests {
 using namespace rc;
-using namespace linalgwrap::tests::stored_vector_tests;
 
 #ifdef LINALGWRAP_HAVE_ARMADILLO
 template <typename S>
-using testinglib = TestingLibrary<ArmadilloVector<S>>;
+using genlib = stored_vector_tests::GeneratorLibrary<ArmadilloVector<S>>;
 
 TEST_CASE("ArmadilloVector class", "[ArmadilloVector]") {
     SECTION("Test initializer_list construction") {
@@ -60,16 +59,18 @@ TEST_CASE("ArmadilloVector class", "[ArmadilloVector]") {
             auto lowertol = NumCompConstants::change_temporary(
                   0.1 * krims::NumCompConstants::default_tolerance_factor);
 
-            // Run tests:
-            testinglib<double>("ArmadilloVector<double>: ").run_checks();
+            stored_vector_tests::run_with_generator(
+                  genlib<double>::generator(), "ArmadilloVector<double>: ");
         }
 
         // TODO improve the accuracy for complex vectors:
         // run this at 0.1 * tolerance as well.
         auto highertol = NumCompConstants::change_temporary(
               10. * krims::NumCompConstants::default_tolerance_factor);
-        testinglib<std::complex<double>>("ArmadilloVector<compex double>: ")
-              .run_checks();
+
+        stored_vector_tests::run_with_generator(
+              genlib<std::complex<double>>::generator(),
+              "ArmadilloVector<complex double>: ");
     }
 }
 #endif

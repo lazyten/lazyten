@@ -27,9 +27,6 @@
 #include <linalgwrap/Range.hh>
 #include <linalgwrap/TestingUtils.hh>
 
-// have a debug print of all generated matrices
-// #define HAVE_MATRIX_DEBUG_PRINT
-
 namespace linalgwrap {
 namespace tests {
 using namespace rc;

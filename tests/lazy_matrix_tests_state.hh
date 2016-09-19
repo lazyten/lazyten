@@ -19,12 +19,10 @@
 
 #pragma once
 #include "lazy_matrix_tests.hh"
+#include "macro_defs.hh"
 #include "matrix_tests.hh"
 #include <rapidcheck.h>
 #include <rapidcheck/state.h>
-
-// have an extra verbose output for rapidcheck function tests:
-// #define HAVE_MATRIX_RC_CLASSIFY
 
 namespace linalgwrap {
 namespace tests {
@@ -168,11 +166,6 @@ struct CommandBase : rc::state::Command<typename TestingTraits::model_type,
      *          to sut already.
      * */
     void run_common_tests(const model_type& model, const sut_type& sut) const {
-#ifdef HAVE_MATRIX_DEBUG_PRINT
-        std::cout << model << std::endl;
-        std::cout << "------------------------------------" << std::endl;
-#endif
-
         // Apply to a copy of the model, which has been advanced to the
         // same state
         model_type model_copy{model};
@@ -223,7 +216,7 @@ struct AddMatrix : CommandBase<TestingTraits> {
         const MatrixTermType& term_ref = sut.copy_to_internal_storage(term);
         sut.set_matrix(sut.matrix() + term_ref);
 
-#ifdef HAVE_MATRIX_RC_CLASSIFY
+#ifdef LINALGWRAP_TESTS_VERBOSE
         RC_CLASSIFY(true, "AddMatrix");
 #endif
 
@@ -275,7 +268,7 @@ struct SubtractMatrix : CommandBase<TestingTraits> {
         const MatrixTermType& term_ref = sut.copy_to_internal_storage(term);
         sut.set_matrix(sut.matrix() - term_ref);
 
-#ifdef HAVE_MATRIX_RC_CLASSIFY
+#ifdef LINALGWRAP_TESTS_VERBOSE
         RC_CLASSIFY(true, "SubtractMatrix");
 #endif
         base_type::run_common_tests(model, sut);
@@ -312,7 +305,7 @@ struct UnaryMinusMatrix : CommandBase<TestingTraits> {
         // Swap the signs:
         sut.set_matrix(-sut.matrix());
 
-#ifdef HAVE_MATRIX_RC_CLASSIFY
+#ifdef LINALGWRAP_TESTS_VERBOSE
         RC_CLASSIFY(true, "UnaryMinusMatrix");
 #endif
         base_type::run_common_tests(model, sut);
@@ -358,7 +351,7 @@ struct MultiplyMatrix : CommandBase<TestingTraits> {
         const MatrixTermType& term_ref = sut.copy_to_internal_storage(term);
         sut.set_matrix(sut.matrix() * term_ref);
 
-#ifdef HAVE_MATRIX_RC_CLASSIFY
+#ifdef LINALGWRAP_TESTS_VERBOSE
         RC_CLASSIFY(true, "MultiplyMatrix");
 #endif
         base_type::run_common_tests(model, sut);
@@ -400,7 +393,7 @@ struct MultiplyScalar : CommandBase<TestingTraits> {
         // Apply to sut:
         sut.set_matrix(scalar * sut.matrix());
 
-#ifdef HAVE_MATRIX_RC_CLASSIFY
+#ifdef LINALGWRAP_TESTS_VERBOSE
         RC_CLASSIFY(true, "MultiplyScalar");
 #endif
         base_type::run_common_tests(model, sut);
@@ -442,7 +435,7 @@ struct DivideScalar : CommandBase<TestingTraits> {
         // Apply to sut:
         sut.set_matrix(sut.matrix() / scalar);
 
-#ifdef HAVE_MATRIX_RC_CLASSIFY
+#ifdef LINALGWRAP_TESTS_VERBOSE
         RC_CLASSIFY(true, "MultiplyScalar");
 #endif
         base_type::run_common_tests(model, sut);

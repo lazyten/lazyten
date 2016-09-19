@@ -22,7 +22,8 @@
 
 namespace linalgwrap {
 
-/** \brief Abstract vector interface class to represent a vector
+/** \brief Abstract vector interface class to represent a vector,
+ * from which we can only read data.
  *
  * The following types should also be defined:
  *  - iterator  The type returned by begin()

@@ -27,6 +27,7 @@
 
 // Basic interfaces
 #include "BaseInterfaces/Indexable_i.hh"
+#include "BaseInterfaces/MutableVector_i.hh"
 #include "BaseInterfaces/StoredVector_i.hh"
 #include "BaseInterfaces/Vector_i.hh"
 

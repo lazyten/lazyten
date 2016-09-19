@@ -18,15 +18,16 @@
 //
 
 #pragma once
+#include "RCTestableGenerator.hh"
+#include "generators.hh"
 #include "rapidcheck_utils.hh"
+#include <catch.hpp>
 #include <functional>
 #include <linalgwrap/BaseInterfaces.hh>
 #include <linalgwrap/TestingUtils.hh>
 
 namespace linalgwrap {
 namespace tests {
-using namespace rc;
-using namespace krims;
 
 // Macro to declare a test
 #define linalgwrap_declare_comptest(__testname)                          \
@@ -54,11 +55,54 @@ using namespace krims;
 /** Namespace for the components for standard tests for all
  * indexable objects **/
 namespace indexable_tests {
+using namespace rc;
+using namespace krims;
+
+/** Model implementation of a MutableVector for use in the comparative tests */
+template <typename Scalar>
+struct VectorModel : private std::vector<Scalar>,
+                     public MutableVector_i<Scalar> {
+    typedef Vector_i<Scalar> base_type;
+    typedef typename base_type::size_type size_type;
+    typedef typename base_type::scalar_type scalar_type;
+    typedef typename std::vector<Scalar> container_type;
+
+    // Bring in important stuff from std::vector
+    using typename container_type::iterator;
+    using typename container_type::const_iterator;
+    using container_type::begin;
+    using container_type::cbegin;
+    using container_type::end;
+    using container_type::cend;
+
+    // Implement what is needed to be a Vector_i
+    size_type size() const override { return container_type::size(); }
+    size_type n_elem() const override { return size(); }
+    Scalar operator()(size_type i) const override { return (*this)[i]; }
+    Scalar operator[](size_type i) const override {
+        return container_type::operator[](i);
+    }
+
+    // Some extra stuff we need for testing
+    Scalar& operator()(size_type i) override { return (*this)[i]; }
+    Scalar& operator[](size_type i) override {
+        return container_type::operator[](i);
+    }
+
+    VectorModel(std::vector<Scalar> v) : container_type(v) {}
+    VectorModel(size_type c, bool initialise) : container_type(c) {
+        if (initialise) {
+            for (auto& elem : *this) elem = 0;
+        }
+    }
+};
 
 /** \brief Standard test functions which test a certain
  *  functionality by executing it in the Sut indexable
  *  and in a Model indexable and comparing the results
  *  afterwards.
+ *
+ *  tests for indexables
  *
  *  \tparam Model  Model indexable used for comparison
  *  \tparam Sut   System under test indexable.
@@ -71,6 +115,8 @@ struct ComparativeTests {
     typedef typename sut_type::size_type size_type;
     typedef typename sut_type::scalar_type scalar_type;
     typedef typename krims::RealTypeOf<scalar_type>::type real_type;
+
+    static constexpr bool cplx = krims::IsComplexNumber<scalar_type>::value;
 
     static_assert(std::is_same<size_type, typename Model::size_type>::value,
                   "The size types of Sut and Model have to agree");
@@ -106,6 +152,11 @@ struct ComparativeTests {
 
     /** Test the elementwise functions abs, conj, sqrt and square */
     linalgwrap_declare_comptest(test_elementwise);
+
+    /** Run all comparative tests */
+    template <typename Args>
+    static void run_all(const RCTestableGenerator<Model, Sut, Args>& gen,
+                        const std::string& prefix);
 
   private:
     /** Inner struct for conditional minmax test.
@@ -249,6 +300,43 @@ linalgwrap_define_comptest(test_elementwise) {
                      model[i] * model[i]);
         RC_ASSERT_NC(numcomp(rconj[i]).tolerance(tolerance) ==
                      std::conj(model[i]));
+    }
+}
+
+template <typename Model, typename Sut>
+template <typename Args>
+void ComparativeTests<Model, Sut>::run_all(
+      const RCTestableGenerator<Model, Sut, Args>& gen,
+      const std::string& prefix) {
+    const NumCompAccuracyLevel low = NumCompAccuracyLevel::Lower;
+    const NumCompAccuracyLevel sloppy = NumCompAccuracyLevel::Sloppy;
+    const NumCompAccuracyLevel supersloppy = NumCompAccuracyLevel::SuperSloppy;
+    const NumCompAccuracyLevel eps = NumCompAccuracyLevel::MachinePrecision;
+
+#ifdef DEBUG_GENERATORS
+    std::cout << sut << std::endl;
+    std::cout << "-------------------------" << std::endl;
+#endif
+
+    CHECK(gen.run_test(prefix + "==", test_equivalence, eps));
+
+    CHECK(gen.run_test(prefix + "Copying", test_copy, eps));
+
+    CHECK(gen.run_test(prefix + "Element access via []",
+                       test_element_access_vectorised, eps));
+    CHECK(gen.run_test(prefix + "Read-only iterator.", test_readonly_iterator,
+                       eps));
+
+    CHECK(gen.run_test(prefix + "Accumulate function", test_accumulate,
+                       cplx ? supersloppy : sloppy));
+    CHECK(gen.run_test(prefix + "Dot and cdot function with indexable",
+                       test_dot<Sut>, cplx ? sloppy : low));
+    CHECK(gen.run_test(prefix + "Dot and cdot function with real model vector",
+                       test_dot<VectorModel<real_type>>, cplx ? sloppy : low));
+    CHECK(gen.run_test(prefix + "Elementwise functions", test_elementwise));
+
+    if (!cplx) {
+        CHECK(gen.run_test(prefix + "Min and max function", test_minmax, eps));
     }
 }
 

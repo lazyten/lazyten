@@ -19,7 +19,8 @@
 
 #pragma once
 #ifdef LINALGWRAP_HAVE_ARMADILLO
-#include "linalgwrap/ArmadilloMatrix.hh"
+
+#include "ArmadilloMatrix.hh"
 #include "linalgwrap/BaseInterfaces.hh"
 #include <armadillo>
 #include <iterator>
