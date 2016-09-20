@@ -24,6 +24,7 @@
 #
 set(LINALGWRAP_TESTS_SOURCES
 	# Vector and Matrix LA interfaces
+	BuiltinVectorTests.cc
 	ArmadilloMatrixTests.cc
 	ArmadilloVectorTests.cc
 
