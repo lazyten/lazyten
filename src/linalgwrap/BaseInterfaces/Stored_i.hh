@@ -18,21 +18,15 @@
 //
 
 #pragma once
-/** \file Includes the most basic inferfaces along with the
- * default implementation for all important operations */
 
-/** Signal the calling of fallback functions by printing to cerr
- *  (useful for debugging whether the specialisations have worked) */
-//#define LINALGWRAP_SIGNAL_FALLBACK
-
-// Basic interfaces
-#include "BaseInterfaces/Indexable_i.hh"
-#include "BaseInterfaces/Stored_i.hh"
-
-// Vectors
-#include "BaseInterfaces/IsStoredVector.hh"
-#include "BaseInterfaces/MutableVector_i.hh"
-#include "BaseInterfaces/Vector_i.hh"
-
-// Default implementations for important Vector operations.
-#include "BaseInterfaces/FallbackOperations.hh"
+namespace linalgwrap {
+/** Marker interface to assert that the objects derived off this class are
+ * stored, i.e. that they manage their own storage allocation and deallocation
+ * internally.
+ *
+ * This has certain implications on the type of constructors which are to be
+ * present.
+ * See IsStoredVector.hh for details.
+ */
+struct Stored_i {};
+}

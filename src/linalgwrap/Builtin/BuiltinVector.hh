@@ -27,7 +27,7 @@ namespace linalgwrap {
 
 /** A very basic class for a stored vector */
 template <typename Scalar>
-class BuiltinVector : public StoredVector_i<Scalar> {
+class BuiltinVector : public Stored_i, public MutableVector_i<Scalar> {
   public:
     typedef StoredVector_i<Scalar> base_type;
     typedef typename base_type::scalar_type scalar_type;

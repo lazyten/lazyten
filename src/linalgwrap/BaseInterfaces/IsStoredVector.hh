@@ -19,16 +19,22 @@
 
 #pragma once
 #include "MutableVector_i.hh"
+#include "Stored_i.hh"
 
 namespace linalgwrap {
 
-/** \brief Abstract vector interface class to represent a vector, that
- *   manages its storage.
+/** \brief struct representing a type (std::true_type, std::false_type) which
+ *  indicates whether T is a stored vector.
+ *
+ *  A stored vector is a mutable vector, which also inherits off the
+ *  Stored_i marker class.
+ *
+ *  The expectation is that it satisfies the following:
  *
  * If the object is not const both read and write access to the data is
  * given.
  *
- * We expect any implementing class to also provide the following constructors:
+ * We expect any stored vector class to also provide the following constructors:
  * - Construct vector of fixed size and optionally fill with zeros or leave
  *   memory unassigned:
  *   ```
@@ -63,7 +69,7 @@ namespace linalgwrap {
  * The following types should also be defined:
  *  - iterator  The type returned by begin()
  *  - const_iterator The type returned by cbegin()
- *  - matrix_type  The type of the corresponding stored matrix.
+ *  - matrix_type  The type of the corresponding stored matrix (or void if none)
  *
  * The following methods should be implemented:
  *  - ``begin()``, ``cbegin()``  Return an iterator or a constant iterator
@@ -71,21 +77,11 @@ namespace linalgwrap {
  *  - ``end()``, ``cend()``   Return an iterator/constant iterator to the
  *    position past-the-end of the stride of memory.
  */
-template <typename Scalar>
-class StoredVector_i : public MutableVector_i<Scalar> {
-    // Just forward from MutableVector_i
-};
-
-//@{
-/** \brief struct representing a type (std::true_type, std::false_type) which
- *  indicates whether T is a stored vector.
- *  */
-template <typename T, typename = void>
-struct IsStoredVector : public std::false_type {};
 
 template <typename T>
-struct IsStoredVector<T, krims::VoidType<typename T::scalar_type>>
-      : public std::is_base_of<StoredVector_i<typename T::scalar_type>, T> {};
-//@}
+struct IsStoredVector : public std::integral_constant<
+                              bool, IsMutableVector<T>::value &&
+                                          std::is_base_of<Stored_i, T>::value> {
+};
 
 }  // namespace linalgwrap
