@@ -29,7 +29,7 @@ using namespace rc;
 
 #ifdef LINALGWRAP_HAVE_ARMADILLO
 template <typename S>
-using genlib = stored_vector_tests::GeneratorLibrary<ArmadilloVector<S>>;
+using genlib = vector_tests::GeneratorLibrary<ArmadilloVector<S>>;
 
 TEST_CASE("ArmadilloVector class", "[ArmadilloVector]") {
     SECTION("Test initializer_list construction") {
@@ -60,7 +60,7 @@ TEST_CASE("ArmadilloVector class", "[ArmadilloVector]") {
                   0.1 * krims::NumCompConstants::default_tolerance_factor);
 
             stored_vector_tests::run_with_generator(
-                  genlib<double>::generator(), "ArmadilloVector<double>: ");
+                  genlib<double>::testgenerator(), "ArmadilloVector<double>: ");
         }
 
         // TODO improve the accuracy for complex vectors:
@@ -69,7 +69,7 @@ TEST_CASE("ArmadilloVector class", "[ArmadilloVector]") {
               10. * krims::NumCompConstants::default_tolerance_factor);
 
         stored_vector_tests::run_with_generator(
-              genlib<std::complex<double>>::generator(),
+              genlib<std::complex<double>>::testgenerator(),
               "ArmadilloVector<complex double>: ");
     }
 }

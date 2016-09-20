@@ -33,7 +33,7 @@ template <typename Scalar>
 class ArmadilloMatrix;
 
 template <typename Scalar>
-class ArmadilloVector : public StoredVector_i<Scalar> {
+class ArmadilloVector : public MutableVector_i<Scalar>, public Stored_i {
     static_assert(
           std::is_same<double, Scalar>::value ||
                 std::is_same<float, Scalar>::value ||
@@ -51,7 +51,7 @@ class ArmadilloVector : public StoredVector_i<Scalar> {
           "int, unsigned long");
 
   public:
-    typedef StoredVector_i<Scalar> base_type;
+    typedef MutableVector_i<Scalar> base_type;
     typedef typename base_type::scalar_type scalar_type;
     typedef typename base_type::size_type size_type;
     typedef typename base_type::real_type real_type;

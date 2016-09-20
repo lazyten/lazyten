@@ -92,6 +92,17 @@ struct RCTestableGenerator {
             model_generator([](args_type t) { return model_type{t}; }),
             sut_generator([](args_type t) { return sut_type{t}; }) {}
 
+    /** \brief Construct a RCTestableGenerator object.
+     *
+     * Use explicit conversion to the model_type to obtain
+     * the model from the args
+     */
+    RCTestableGenerator(std::function<args_type(void)> args_generator_,
+                        std::function<sut_type(args_type)> sut_generator_)
+          : args_generator(args_generator_),
+            model_generator([](args_type t) { return model_type{t}; }),
+            sut_generator(sut_generator_) {}
+
     /* Return a std::function object that creates random arguments of type
      * args_type, then passes them to the model_generator and the sut_generator
      * to generate a model and a sut and then calles the testfunction func

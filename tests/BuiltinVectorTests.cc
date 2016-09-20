@@ -26,7 +26,7 @@ namespace builtin_vector_tests {
 using namespace rc;
 
 template <typename S>
-using genlib = stored_vector_tests::GeneratorLibrary<BuiltinVector<S>>;
+using genlib = vector_tests::GeneratorLibrary<BuiltinVector<S>>;
 
 TEST_CASE("BuiltinVector class", "[BuiltinVector]") {
     SECTION("Default stored vector tests") {
@@ -35,11 +35,11 @@ TEST_CASE("BuiltinVector class", "[BuiltinVector]") {
         auto lowertol = NumCompConstants::change_temporary(
               0.1 * krims::NumCompConstants::default_tolerance_factor);
 
-        stored_vector_tests::run_with_generator(genlib<double>::generator(),
+        stored_vector_tests::run_with_generator(genlib<double>::testgenerator(),
                                                 "BuiltinVector<double>: ");
 
         stored_vector_tests::run_with_generator(
-              genlib<std::complex<double>>::generator(),
+              genlib<std::complex<double>>::testgenerator(),
               "BuiltinVector<complex double>: ");
     }
 }
