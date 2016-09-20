@@ -48,6 +48,9 @@ class MutableVector_i : public Vector_i<Scalar> {
     /** \brief return an element of the vector   */
     virtual scalar_type& operator[](size_type i) = 0;
     ///@}
+
+    /** Set all elements of the vector to zero */
+    virtual void set_zero() = 0;
 };
 
 //@{

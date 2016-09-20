@@ -51,7 +51,7 @@ class ArmadilloVector : public StoredVector_i<Scalar> {
           "int, unsigned long");
 
   public:
-    typedef Vector_i<Scalar> base_type;
+    typedef StoredVector_i<Scalar> base_type;
     typedef typename base_type::scalar_type scalar_type;
     typedef typename base_type::size_type size_type;
     typedef typename base_type::real_type real_type;
@@ -62,14 +62,11 @@ class ArmadilloVector : public StoredVector_i<Scalar> {
     /** The type of the storage object used to store the data
      *  of the ArmadilloVector */
     typedef arma::Col<Scalar> storage_type;
+    typedef const storage_type const_storage_type;
 
     //! The iterator types from armadillo
     typedef typename storage_type::iterator iterator;
     typedef typename storage_type::const_iterator const_iterator;
-
-    //
-    // Interface of Vector_i
-    //
 
     /** \name Constructors */
     ///@{
@@ -87,7 +84,8 @@ class ArmadilloVector : public StoredVector_i<Scalar> {
           : m_arma(list) {}
 
     /** \brief Construct from std::vector */
-    explicit ArmadilloVector(const std::vector<scalar_type>& v) : m_arma(v) {}
+    explicit ArmadilloVector(std::vector<scalar_type> v)
+          : m_arma(std::move(v)) {}
 
     /** \brief Construct from input iterator */
     template <class InputIterator>
@@ -99,9 +97,8 @@ class ArmadilloVector : public StoredVector_i<Scalar> {
     /** \brief Construct from Arbitrary Indexable_i */
     template <typename Indexable, typename = typename std::enable_if<
                                         IsIndexable<Indexable>::value>::type>
-    explicit ArmadilloVector(const Indexable& i)
-          : ArmadilloVector(i.n_elem(), false) {
-        std::copy(i.begin(), i.end(), m_arma.begin());
+    explicit ArmadilloVector(Indexable i) : ArmadilloVector(i.n_elem(), false) {
+        std::move(i.begin(), i.end(), m_arma.begin());
     }
 
     /** \brief Construct from inner storage object */
@@ -141,6 +138,9 @@ class ArmadilloVector : public StoredVector_i<Scalar> {
         return m_arma[i];
     }
     ///@}
+
+    /** Set all elements of the vector to zero */
+    void set_zero() override { m_arma.zeros(); }
 
     /** \name Iterators
      */
@@ -205,7 +205,10 @@ class ArmadilloVector : public StoredVector_i<Scalar> {
     ///@}
 
     /** Read-only access to the inner storage */
-    const storage_type& data() const { return m_arma; }
+    const_storage_type& data() const { return m_arma; }
+
+    /** Read-write access to the inner storage (use with caution) */
+    storage_type& data() { return m_arma; }
 
   protected:
     storage_type m_arma;

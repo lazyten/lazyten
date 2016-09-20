@@ -48,14 +48,14 @@ namespace linalgwrap {
  *
  * - Construct from a std::vector<Scalar>:
  *   ```
- *   Vector_i(const std::vector<scalar_type>& v);
+ *   Vector_i(std::vector<scalar_type> v);
  *   ```
  *
  * - Construct from an arbitrary indexable:
  *   ```
  *   template <typename Indexable, typename = typename std::enable_if<
  *                                      IsIndexable<Indexable>::value>::type>
- *   explicit ArmadilloVector(const Indexable& i);
+ *   explicit ArmadilloVector(Indexable i);
  *   ```
  * The default vector operations (see MutalbeVector_i for details) should
  * also be implemented between stored vectors of the same kind.

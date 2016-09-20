@@ -75,18 +75,19 @@ struct VectorModel : private std::vector<Scalar>,
     using container_type::end;
     using container_type::cend;
 
-    // Implement what is needed to be a Vector_i
+    // Implement what is needed to be a ModifyableVector_i
     size_type size() const override { return container_type::size(); }
     size_type n_elem() const override { return size(); }
     Scalar operator()(size_type i) const override { return (*this)[i]; }
     Scalar operator[](size_type i) const override {
         return container_type::operator[](i);
     }
-
-    // Some extra stuff we need for testing
     Scalar& operator()(size_type i) override { return (*this)[i]; }
     Scalar& operator[](size_type i) override {
         return container_type::operator[](i);
+    }
+    void set_zero() override {
+        for (auto& elem : *this) elem = 0;
     }
 
     VectorModel(std::vector<Scalar> v) : container_type(v) {}
