@@ -46,6 +46,9 @@ struct ComparativeTests : public vector_tests::ComparativeTests<Model, Sut> {
     typedef typename base_type::scalar_type scalar_type;
     typedef typename base_type::real_type real_type;
 
+    /** Test setting all elements to zero */
+    linalgwrap_declare_comptest(test_setzero);
+
     /** Test read-write element access via () at a random place.
      *  compare result against a model at all places except the
      *  changed entry.
@@ -83,6 +86,9 @@ struct ComparativeTests : public vector_tests::ComparativeTests<Model, Sut> {
     template <typename OtherVector>
     linalgwrap_declare_comptest(test_subtract);
 
+    /** Test set_zero() function */
+    static void test_initialiser_setzero();
+
     /** Run all comparative tests (including the ones from vector_tests and
      * indexable_tests) */
     template <typename Args>
@@ -93,6 +99,19 @@ struct ComparativeTests : public vector_tests::ComparativeTests<Model, Sut> {
 //
 // -------------------------------------------------------
 //
+
+linalgwrap_define_comptest(test_setzero) {
+    sut_type sut_copy{sut};
+    sut_copy.set_zero();
+    RC_ASSERT_NC(model == numcomp(sut).tolerance(tolerance));
+
+    model_type model_copy{model};
+    for (size_type i = 0; i < model.n_elem(); ++i) {
+        model_copy[i] = scalar_type(0);
+    }
+
+    RC_ASSERT_NC(model_copy == numcomp(sut_copy).tolerance(tolerance));
+}
 
 linalgwrap_define_comptest(test_setting_elements) {
     auto modify_index =
@@ -234,6 +253,7 @@ void ComparativeTests<Model, Sut>::run_all(
     const NumCompAccuracyLevel eps = NumCompAccuracyLevel::MachinePrecision;
 
     // Read-write element access
+    CHECK(gen.run_test(prefix + "set_zero function", test_setzero, eps));
     CHECK(gen.run_test(prefix + "Altering elements via ()",
                        test_setting_elements, eps));
     CHECK(gen.run_test(prefix + "Altering elements via []",

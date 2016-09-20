@@ -23,18 +23,29 @@
 # The sources for the test executable
 #
 set(LINALGWRAP_TESTS_SOURCES
-	RangeTests.cc
+	# Vector and Matrix LA interfaces
 	ArmadilloMatrixTests.cc
 	ArmadilloVectorTests.cc
+
+	# Helper classes
+	RangeTests.cc
+
+	# Lazy matrices
+	LazyMatrix_i_Tests.cc
 	LazyMatrixWrapperTests.cc
 	LazyMatrixProductTests.cc
 	LazyMatrixSumTests.cc
-	LazyMatrix_i_Tests.cc
-	DiagonalMatrixTests.cc
+
+	# Views
+	BlockViewTests.cc
 	ScaleViewTests.cc
 	TransposeViewTests.cc
-	BlockViewTests.cc
+
+	# Lazy matrix implementations
 	BlockDiagonalMatrixTests.cc
+	DiagonalMatrixTests.cc
+
+	# main of the test suite
 	main.cc
 )
 
