@@ -29,6 +29,54 @@ using namespace krims;
  **/
 namespace vector_tests {
 
+/** \brief Generator library for vector tests
+ *
+ * \tparam Vector The vector type to test.
+ * \tparam Args The arguments the argsgen function produces
+ * \tparam Model The model type to use
+ */
+template <typename Vector,
+          typename Args = std::vector<typename Vector::scalar_type>,
+          typename Model =
+                indexable_tests::VectorModel<typename Vector::scalar_type>>
+struct GeneratorLibrary {
+    /** The args type to use */
+    typedef Args args_type;
+
+    /** The type of model to use */
+    typedef Model model_type;
+
+    /** The vector to test */
+    typedef Vector vector_type;
+
+    /** The type of the testable generator */
+    typedef RCTestableGenerator<model_type, vector_type, args_type>
+          testgen_type;
+
+    /** The argument generator we use */
+    static constexpr args_type argsgen() {
+        return *gen::scale(genscale, gen::numeric_container<args_type>())
+                      .as("Data");
+    }
+
+    /** Get the generator for tests using the specified generator for the vector
+     *
+     * \param vectorgen The generator to generate the vector to test from the
+     * arguments. By default a simple conversion is performed.
+     */
+    static testgen_type testgenerator(std::function<Vector(Args)> vectorgen =
+                                            [](args_type t) {
+                                                return Vector(t);
+                                            }) {
+        return testgen_type(argsgen, vectorgen);
+    }
+
+  private:
+    static constexpr bool cplx =
+          krims::IsComplexNumber<typename Vector::scalar_type>::value;
+    static constexpr double genscale = cplx ? 0.8 : 1.0;
+};
+
 /** \brief Standard test functions which test a certain
  *  functionality by executing it in the SutVector
  *  and in a ModelVector and comparing the results

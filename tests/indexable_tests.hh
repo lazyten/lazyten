@@ -61,7 +61,8 @@ using namespace krims;
 /** Model implementation of a MutableVector for use in the comparative tests */
 template <typename Scalar>
 struct VectorModel : private std::vector<Scalar>,
-                     public MutableVector_i<Scalar> {
+                     public MutableVector_i<Scalar>,
+                     public Stored_i {
     typedef Vector_i<Scalar> base_type;
     typedef typename base_type::size_type size_type;
     typedef typename base_type::scalar_type scalar_type;
@@ -91,11 +92,21 @@ struct VectorModel : private std::vector<Scalar>,
     }
 
     VectorModel(std::vector<Scalar> v) : container_type(v) {}
+
     VectorModel(size_type c, bool initialise) : container_type(c) {
         if (initialise) {
             for (auto& elem : *this) elem = 0;
         }
     }
+
+    VectorModel(std::initializer_list<Scalar> il) : container_type(il) {}
+
+    template <typename Iterator>
+    VectorModel(Iterator begin, Iterator end) : container_type(begin, end) {}
+
+    template <typename Indexable, typename = typename std::enable_if<
+                                        IsIndexable<Indexable>::value>::type>
+    VectorModel(Indexable i) : container_type(i.begin(), i.end()) {}
 };
 
 /** \brief Standard test functions which test a certain
@@ -195,8 +206,12 @@ linalgwrap_define_comptest(test_equivalence) {
 linalgwrap_define_comptest(test_copy) {
     sut_type copy{sut};
 
+    sut_type copy2{sut};
+    copy2 = copy;
+
     // check that it is identical to the model
     RC_ASSERT_NC(model == numcomp(copy).tolerance(tolerance));
+    RC_ASSERT_NC(model == numcomp(copy2).tolerance(tolerance));
 }
 
 linalgwrap_define_comptest(test_element_access_vectorised) {
@@ -232,11 +247,8 @@ linalgwrap_define_comptest(test_accumulate) {
 }
 
 linalgwrap_define_comptest_tmpl(test_dot, OtherIndexable) {
-    OtherIndexable ind{
-          *gen::numeric_container<
-                 std::vector<typename OtherIndexable::scalar_type>>(
-                 model.n_elem())
-                 .as("Indexable to dot with")};
+    OtherIndexable ind = *gen::numeric_tensor<OtherIndexable>(model.n_elem())
+                                .as("Indexable to dot with");
 
     auto res = dot(sut, ind);
     auto cres = cdot(sut, ind);

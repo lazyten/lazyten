@@ -96,6 +96,12 @@ struct ComparativeTests : public vector_tests::ComparativeTests<Model, Sut> {
                         const std::string& prefix);
 };
 
+template <typename Model, typename Sut, typename Args>
+void run_with_generator(const RCTestableGenerator<Model, Sut, Args>& gen,
+                        const std::string prefix = "") {
+    ComparativeTests<Model, Sut>::run_all(gen, prefix);
+}
+
 //
 // -------------------------------------------------------
 //

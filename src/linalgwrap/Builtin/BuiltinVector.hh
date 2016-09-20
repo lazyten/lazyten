@@ -20,16 +20,20 @@
 #pragma once
 
 #include "linalgwrap/BaseInterfaces.hh"
+#include "linalgwrap/VectorMemoryWrapper.hh"
 #include <iterator>
 #include <memory>
 
 namespace linalgwrap {
 
-/** A very basic class for a stored vector */
+/** \brief A very basic class for a stored vector
+ *
+ * \note This class is not intended to be fast. It just is a fallback.
+ * */
 template <typename Scalar>
-class BuiltinVector : public Stored_i, public MutableVector_i<Scalar> {
+class BuiltinVector : public VectorMemoryWrapper<Scalar*>, public Stored_i {
   public:
-    typedef StoredVector_i<Scalar> base_type;
+    typedef VectorMemoryWrapper<Scalar*> base_type;
     typedef typename base_type::scalar_type scalar_type;
     typedef typename base_type::size_type size_type;
     typedef typename base_type::real_type real_type;
@@ -38,13 +42,11 @@ class BuiltinVector : public Stored_i, public MutableVector_i<Scalar> {
     /** The corresponding matrix type */
     typedef void matrix_type;
 
+    //@{
     /** The type of the storage object used to store the data */
     typedef std::unique_ptr<scalar_type[]> storage_type;
     typedef const std::unique_ptr<const scalar_type[]> const_storage_type;
-
-    //! The iterator types
-    typedef scalar_type* iterator;
-    typedef const scalar_type* const_iterator;
+    //@}
 
     /** \name Constructors */
     ///@{
@@ -53,34 +55,35 @@ class BuiltinVector : public Stored_i, public MutableVector_i<Scalar> {
      * \param fill_zero   If true all entries are set to zero
      */
     explicit BuiltinVector(size_type size, bool fill_zero = true)
-          : m_data(new scalar_type[size]), m_size(size) {
-        if (fill_zero) set_zero();
+          : base_type(), m_data(new scalar_type[size]) {
+        base_type::initialise(m_data.get(), size);
+        if (fill_zero) base_type::set_zero();
     }
 
     /** \brief Construct from initialiser list */
     BuiltinVector(std::initializer_list<Scalar> list)
           : BuiltinVector(list.size(), false) {
-        std::move(std::begin(list), std::end(list), begin());
+        std::move(std::begin(list), std::end(list), base_type::begin());
     }
 
     /** \brief Construct from std::vector */
     explicit BuiltinVector(std::vector<scalar_type> v)
           : BuiltinVector(v.size(), false) {
-        std::move(std::begin(v), std::end(v), begin());
+        std::move(std::begin(v), std::end(v), base_type::begin());
     }
 
     /** \brief Construct from input iterator */
     template <class InputIterator>
     BuiltinVector(InputIterator first, InputIterator last)
           : BuiltinVector(std::distance(first, last), false) {
-        std::move(first, last, begin());
+        std::move(first, last, base_type::begin());
     }
 
     /** \brief Construct from Arbitrary Indexable_i */
     template <typename Indexable, typename = typename std::enable_if<
                                         IsIndexable<Indexable>::value>::type>
     explicit BuiltinVector(Indexable i) : BuiltinVector(i.n_elem(), false) {
-        std::move(i.begin(), i.end(), begin());
+        std::move(i.begin(), i.end(), base_type::begin());
     }
     ///@}
 
@@ -90,128 +93,46 @@ class BuiltinVector : public Stored_i, public MutableVector_i<Scalar> {
 
     /** Copy assignment operator */
     BuiltinVector& operator=(const BuiltinVector& other) {
-        // TODO test this function!
-        //
-        if (m_size != other.m_size) {
+        if (base_type::size() != other.size()) {
             // size is different: Reallocate memory:
-            m_size = other.m_size;
+            base_type::m_size = other.m_size;
             m_data.reset(new scalar_type[other.m_size]);
         }
-
-        std::copy(other.begin(), other.end(), begin());
+        std::copy(other.begin(), other.end(), base_type::begin());
+        return *this;
     }
 
     /** Copy constructor */
     BuiltinVector(const BuiltinVector& other)
           : BuiltinVector(other.m_size, false) {
-        std::copy(other.begin(), other.end(), begin());
+        std::copy(other.begin(), other.end(), base_type::begin());
     }
-
-    /** \name Size of the vector */
-    size_type n_elem() const override { return m_size; }
-
-    /** \name Size of the vector */
-    size_type size() const override { return m_size; }
-
-    /** \name Data access
-     */
-    ///@{
-    /** \brief return an element of the vector    */
-    scalar_type operator()(size_type i) const override {
-        assert_range(0, i, n_elem());
-        return m_data[i];
-    }
-
-    /** \brief return an element of the vector */
-    scalar_type operator[](size_type i) const override {
-        assert_range(0, i, n_elem());
-        return m_data[i];
-    }
-
-    /** \brief return an element of the vector    */
-    scalar_type& operator()(size_type i) override {
-        assert_range(0, i, n_elem());
-        return m_data[i];
-    }
-
-    /** \brief return an element of the vector */
-    scalar_type& operator[](size_type i) override {
-        assert_range(0, i, n_elem());
-        return m_data[i];
-    }
-    ///@}
-
-    /** Set all elements of the vector to zero */
-    virtual void set_zero() override {
-        std::fill(begin(), end(), Constants<scalar_type>::zero);
-    }
-
-    /** \name Iterators
-     */
-    ///@{
-    /** Return an iterator to the beginning */
-    iterator begin() { return m_data.get(); }
-
-    /** Return a const_iterator to the beginning */
-    const_iterator begin() const { return m_data.get(); }
-
-    /** Return a const_iterator to the beginning */
-    const_iterator cbegin() const { return m_data.get(); }
-
-    /** Return an iterator to the end */
-    iterator end() { return m_data.get() + m_size; }
-
-    /** Return a const_iterator to the end */
-    const_iterator end() const { return m_data.get() + m_size; }
-
-    /** Return a const_iterator to the end */
-    const_iterator cend() const { return m_data.get() + m_size; }
-    ///@}
 
     /** \name Vector operations */
     ///@{
     /** Scale vector by a scalar value */
     BuiltinVector& operator*=(scalar_type s) {
-        assert_finite(s);
-        std::transform(begin(), end(), begin(),
-                       [&](scalar_type& v) { return v * s; });
+        base_type::operator*=(s);
         return *this;
     }
 
     /** Divide all vector entries by a scalar value */
     BuiltinVector& operator/=(scalar_type s) {
-        assert_nonzero(s);
-        assert_finite(s);
-        std::transform(begin(), end(), begin(),
-                       [&](scalar_type& v) { return v / s; });
+        base_type::operator/=(s);
         return *this;
     }
 
     /* Add a vector to this one */
     BuiltinVector& operator+=(const BuiltinVector& other) {
-        assert_size(n_elem(), other.n_elem());
-        std::transform(
-              begin(), end(), std::begin(other), begin(),
-              [](scalar_type& v1, scalar_type& v2) { return v1 + v2; });
+        base_type::operator+=(other);
         return *this;
     }
 
     /* Add a vector to this one */
     BuiltinVector& operator-=(const BuiltinVector& other) {
-        assert_size(n_elem(), other.n_elem());
-        std::transform(
-              begin(), end(), std::begin(other), begin(),
-              [](scalar_type& v1, scalar_type& v2) { return v1 - v2; });
+        base_type::operator-=(other);
         return *this;
     }
-
-    bool operator==(const BuiltinVector& other) const {
-        if (m_size != other.m_size) return false;
-        return std::equal(begin(), end(), std::begin(other));
-    }
-
-    // Note != taken from default implementation
-
     ///@}
 
     /** Read-only access to the inner storage */
@@ -222,7 +143,6 @@ class BuiltinVector : public Stored_i, public MutableVector_i<Scalar> {
 
   protected:
     storage_type m_data;
-    size_type m_size;
 };
 
 //

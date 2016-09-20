@@ -63,40 +63,6 @@ struct ComparativeTests
     static void once_test_as_scalar();
 };
 
-template <typename Vector,
-          typename Model =
-                indexable_tests::VectorModel<typename Vector::scalar_type>>
-struct GeneratorLibrary {
-    /** The type we test */
-    typedef Vector vector_type;
-
-    /** The scalar type of the vector */
-    typedef typename vector_type::scalar_type scalar_type;
-
-    /** The return type of the argsgen function */
-    typedef std::vector<scalar_type> args_type;
-
-    /** The type of the model we use */
-    typedef Model model_type;
-
-    /** The type of the testable generator */
-    typedef RCTestableGenerator<model_type, vector_type, args_type> gen_type;
-
-    /** The argument generator we use */
-    static constexpr args_type argsgen() {
-        return *gen::scale(genscale,
-                           gen::numeric_container<std::vector<scalar_type>>())
-                      .as("Vector data");
-    }
-
-    /** Get the generator for the specified vector type */
-    static gen_type generator() { return gen_type(argsgen); }
-
-  private:
-    static constexpr bool cplx = krims::IsComplexNumber<scalar_type>::value;
-    static constexpr double genscale = cplx ? 0.8 : 1.0;
-};
-
 template <typename Model, typename Sut, typename Args>
 void run_with_generator(const RCTestableGenerator<Model, Sut, Args>& gen,
                         const std::string prefix = "") {
