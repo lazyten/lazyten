@@ -69,7 +69,9 @@ namespace linalgwrap {
  * The following types should also be defined:
  *  - iterator  The type returned by begin()
  *  - const_iterator The type returned by cbegin()
- *  - matrix_type  The type of the corresponding stored matrix (or void if none)
+ *  - type_family  The struct containing the corresponding vector and matrix
+ *                 types which are compatible to this vector type
+ *                 (see Armadillo folder for an example)
  *
  * The following methods should be implemented:
  *  - ``begin()``, ``cbegin()``  Return an iterator or a constant iterator

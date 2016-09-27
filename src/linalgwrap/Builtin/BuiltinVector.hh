@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include "BuiltinTypes.hh"
 #include "linalgwrap/BaseInterfaces.hh"
 #include "linalgwrap/VectorMemoryWrapper.hh"
 #include <iterator>
@@ -38,9 +39,8 @@ class BuiltinVector : public VectorMemoryWrapper<Scalar*>, public Stored_i {
     typedef typename base_type::size_type size_type;
     typedef typename base_type::real_type real_type;
 
-    // TODO currently there is none
-    /** The corresponding matrix type */
-    typedef void matrix_type;
+    /** The corresponding family of builtin linear algebra types */
+    typedef BuiltinTypes type_family;
 
     //@{
     /** The type of the storage object used to store the data */

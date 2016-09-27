@@ -20,17 +20,13 @@
 #pragma once
 #ifdef LINALGWRAP_HAVE_ARMADILLO
 
-#include "ArmadilloMatrix.hh"
+#include "ArmadilloTypes.hh"
 #include "linalgwrap/BaseInterfaces.hh"
 #include <armadillo>
 #include <iterator>
 
 /** A class for an armadillo column vector with the interface of linalgwrap */
 namespace linalgwrap {
-
-// Forward-declare
-template <typename Scalar>
-class ArmadilloMatrix;
 
 template <typename Scalar>
 class ArmadilloVector : public MutableVector_i<Scalar>, public Stored_i {
@@ -56,8 +52,8 @@ class ArmadilloVector : public MutableVector_i<Scalar>, public Stored_i {
     typedef typename base_type::size_type size_type;
     typedef typename base_type::real_type real_type;
 
-    /** The corresponding matrix type */
-    typedef ArmadilloMatrix<Scalar> matrix_type;
+    /** The corresponding family of armadillo interface types */
+    typedef ArmadilloTypes type_family;
 
     /** The type of the storage object used to store the data
      *  of the ArmadilloVector */

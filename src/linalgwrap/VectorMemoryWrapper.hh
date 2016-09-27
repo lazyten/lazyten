@@ -51,6 +51,9 @@ struct MakeConstIterator<const T*> {
 };
 }  // namespace detail
 
+// TODO VectorMemoryWrapper is maybe not the best name for this guy
+// Think about renaming it to something else some day.
+
 /** \brief Simple class to offer a vector-like view into an arbitrary stride
  * of memory.
  *
@@ -60,8 +63,7 @@ struct MakeConstIterator<const T*> {
  * \tparam Iterator   the iterator which represents the range of memory
  * \tparam ConstIterator   the type of the equivalent const iterator.
  *                         If missing it will either be deduced or if not
- * possible
- *                         a constant access view will be employed.
+ *                         possible a constant access view will be employed.
  */
 template <typename Iterator,
           typename ConstIterator =

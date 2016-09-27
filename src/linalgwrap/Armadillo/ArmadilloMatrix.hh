@@ -20,7 +20,7 @@
 #pragma once
 #ifdef LINALGWRAP_HAVE_ARMADILLO
 
-#include "ArmadilloVector.hh"
+#include "ArmadilloTypes.hh"
 #include "linalgwrap/Constants.hh"
 #include "linalgwrap/Exceptions.hh"
 #include "linalgwrap/Range.hh"
@@ -35,9 +35,6 @@ namespace linalgwrap {
 // Forward-declare the interface class
 template <typename Scalar>
 class StoredMatrix_i;
-
-template <typename Scalar>
-class ArmadilloVector;
 
 /** A class for a dense stored matrix, currently implemented using armadillo.
  *
@@ -70,8 +67,11 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
     typedef typename base_type::scalar_type scalar_type;
     typedef typename base_type::size_type size_type;
 
+    /** The corresponding family of armadillo interface types */
+    typedef ArmadilloTypes type_family;
+
     /** The corresponding vector type */
-    typedef ArmadilloVector<Scalar> vector_type;
+    typedef type_family::vector<scalar_type> vector_type;
 
     /** The type of the storage object used to store the data
      *  of the ArmadilloMatrix */

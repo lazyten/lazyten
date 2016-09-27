@@ -139,9 +139,11 @@ class DiagonalMatrix : public LazyMatrixExpression<StoredMatrix> {
 };
 
 template <typename StoredVector>
-DiagonalMatrix<typename StoredVector::matrix_type> make_diagmat(
-      const StoredVector& v) {
-    return DiagonalMatrix<typename StoredVector::matrix_type>(v);
+DiagonalMatrix<typename StoredVector::type_family::template matrix<
+      typename StoredVector::scalar_type>>
+make_diagmat(const StoredVector& v) {
+    return DiagonalMatrix<typename StoredVector::type_family::template matrix<
+          typename StoredVector::scalar_type>>(v);
 }
 
 //
