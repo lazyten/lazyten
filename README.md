@@ -62,13 +62,13 @@ of the present version of ``linalgwrap`` can also be found in the material on
 most notably the [MWM 2016 Poster](http://docs.mfhs.eu/conferences/2016_mwm/linalgwrap_lazy_linear_algebra_library.pdf).
 
 ### BaseInterfaces
-- The classes in [src/linalgwrap/BaseInterfaces](BaseInterfaces)
+- The classes in [BaseInterfaces](src/linalgwrap/BaseInterfaces)
   define the vector interface which is used inside ``linalgwrap``.
 - Fallback implementations for many important operations are provided
   in case a particular linear-algebra backend does not support these.
   This also minimises the effort to get a first working link to a new
   linear algebra backend.
-- Implementations of backends (e.g. [src/linalgwrap/Armadillo](Armadillo))
+- Implementations of backends (e.g. [Armadillo](src/linalgwrap/Armadillo))
   use this interface and specialise the default implementations
   such that the backend library performs the actual work.
 - Our goal is to forward as much of the performance optimisations of the
@@ -76,7 +76,7 @@ most notably the [MWM 2016 Poster](http://docs.mfhs.eu/conferences/2016_mwm/lina
   one backend.
 
 ### Builtin
-- [src/linalgwrap/Builtin](Builtin) contains a builtin vector class,
+- [Builtin](src/linalgwrap/Builtin) contains a builtin vector class,
   which is used as fallback.
 
 ### Lazy matrices
@@ -96,19 +96,19 @@ most notably the [MWM 2016 Poster](http://docs.mfhs.eu/conferences/2016_mwm/lina
   Lazy matrix expressions are only evaluated if a
   vector-apply is performed or if the
   user explicitly asks for it.
-- Currently the [src/linalgwrap/DiagonalMatrix.hh](DiagonalMatrix)
+- Currently the [DiagonalMatrix](src/linalgwrap/DiagonalMatrix.hh)
   is available as an example of a builtin lazy matrix.
-- Another example is the class [examples/diagonal/DiagonalUpdatable.hh](DiagonalUpdatable)
-  of the [examples/diagonal](diagonal) example program.
+- Another example is the class [DiagonalUpdatable](examples/diagonal/DiagonalUpdatable.hh)
+  of the [diagonal](examples/diagonal) example program.
   This class also shows that custom lazy matrices can be created
-  by simply inheriting from [src/linalgwrap/LazyMatrix_i.hh](LazyMatrix_i).
+  by simply inheriting from [LazyMatrix_i](src/linalgwrap/LazyMatrix_i.hh).
 
 ### TestingUtils
 This class contains utilities for performing numerics-aware
 property-based testing. This includes:
-- An extension of ``[https://linalgwrap.org/krims/#performing-floating-point-comparisons](krims::NumComp)`` for comparing Matrices
-  within error bounds (in file [src/linalgwrap/TestingUtils/krims_NumComp.hh](TestingUtils/krims_NumComp.hh))
+- An extension of [``krims::NumComp``](https://linalgwrap.org/krims/#performing-floating-point-comparisons)
+  for comparing Matrices within error bounds (in file [TestingUtils/krims_NumComp.hh](src/linalgwrap/TestingUtils/krims_NumComp.hh))
 - Generators for scalar values, vectors and matrices which are
   not too difficult to deal with,
   such that tests do not fail due to accumulation of numeric errors
-  (in folder [src/linalgwrap/TestingUtils/gen](TestingUtils/gen))
+  (in folder [TestingUtils/gen](src/linalgwrap/TestingUtils/gen))
