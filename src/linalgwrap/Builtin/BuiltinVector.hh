@@ -21,7 +21,7 @@
 
 #include "BuiltinTypes.hh"
 #include "linalgwrap/BaseInterfaces.hh"
-#include "linalgwrap/VectorMemoryWrapper.hh"
+#include "linalgwrap/PtrVector.hh"
 #include <iterator>
 #include <memory>
 
@@ -32,9 +32,9 @@ namespace linalgwrap {
  * \note This class is not intended to be fast. It just is a fallback.
  * */
 template <typename Scalar>
-class BuiltinVector : public VectorMemoryWrapper<Scalar*>, public Stored_i {
+class BuiltinVector : public PtrVector<Scalar>, public Stored_i {
   public:
-    typedef VectorMemoryWrapper<Scalar*> base_type;
+    typedef PtrVector<Scalar> base_type;
     typedef typename base_type::scalar_type scalar_type;
     typedef typename base_type::size_type size_type;
     typedef typename base_type::real_type real_type;
