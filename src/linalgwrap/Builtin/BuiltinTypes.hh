@@ -18,10 +18,18 @@
 //
 
 #pragma once
-/** \file which includes the armadillo interface */
+namespace linalgwrap {
+// Forward-declare
+template <typename Scalar>
+class BuiltinVector;
 
-// Forward-declares all Armadillo types
-#include "Armadillo/ArmadilloTypes.hh"
+struct BuiltinTypes {
+    template <typename Scalar>
+    using vector = BuiltinVector<Scalar>;
 
-#include "Armadillo/ArmadilloMatrix.hh"
-#include "Armadillo/ArmadilloVector.hh"
+    // TODO there is no builtin matrix yet.
+    template <typename Scalar>
+    using matrix = void;
+};
+
+}  // namespace linalgwrap

@@ -18,10 +18,4 @@
 //
 
 #pragma once
-/** \file which includes the armadillo interface */
-
-// Forward-declares all Armadillo types
-#include "Armadillo/ArmadilloTypes.hh"
-
-#include "Armadillo/ArmadilloMatrix.hh"
-#include "Armadillo/ArmadilloVector.hh"
+#include "TypeUtils/StoredTypeOf.hh"

@@ -18,8 +18,8 @@
 //
 
 #pragma once
-/** \file Includes the most basic inferfaces along with the
- * default implementation for all important operations */
+/** \file Includes the most basic inferfaces for vectors and matrices
+ * along with the default implementation for all important operations */
 
 /** Signal the calling of fallback functions by printing to cerr
  *  (useful for debugging whether the specialisations have worked) */

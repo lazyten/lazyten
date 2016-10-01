@@ -51,8 +51,11 @@ struct MakeConstIterator<const T*> {
 };
 }  // namespace detail
 
+// TODO IteratorVector is maybe not the best name for this guy
+// Think about renaming it to something else some day.
+
 /** \brief Simple class to offer a vector-like view into an arbitrary stride
- * of memory.
+ * of memory, which we walk over using an iterator range.
  *
  * The memory is either specified by an iterator range or
  * by an initial position and a size.
@@ -60,13 +63,12 @@ struct MakeConstIterator<const T*> {
  * \tparam Iterator   the iterator which represents the range of memory
  * \tparam ConstIterator   the type of the equivalent const iterator.
  *                         If missing it will either be deduced or if not
- * possible
- *                         a constant access view will be employed.
+ *                         possible a constant access view will be employed.
  */
 template <typename Iterator,
           typename ConstIterator =
                 typename detail::MakeConstIterator<Iterator>::type>
-class VectorMemoryWrapper
+class IteratorVector
       : public MutableVector_i<typename std::decay<
               typename std::iterator_traits<Iterator>::value_type>::type> {
   public:
@@ -82,20 +84,23 @@ class VectorMemoryWrapper
     typedef typename base_type::size_type size_type;
     typedef typename base_type::real_type real_type;
 
+    /** Does this IteratorVector operate directly on memory? */
+    static bool constexpr on_memory = std::is_pointer<iterator>::value;
+
     /** \name Constructors */
     ///@{
-    /** \brief Construct a VectorMemoryWrapper over an iterator range.  */
-    VectorMemoryWrapper(iterator begin, iterator end) {
+    /** \brief Construct a IteratorVector over an iterator range.  */
+    IteratorVector(iterator begin, iterator end) {
         initialise(std::forward<iterator>(begin), std::forward<iterator>(end));
     }
 
-    /** \brief Construct a VectorMemoryWrapper by providing a start of the range
+    /** \brief Construct a IteratorVector by providing a start of the range
      * and a size
      *
      * \param size Number of elements this container holds, including the one
      * pointed to by begin
      * */
-    VectorMemoryWrapper(iterator begin, size_type size) {
+    IteratorVector(iterator begin, size_type size) {
         initialise(std::forward<iterator>(begin), size);
     }
 
@@ -157,7 +162,7 @@ class VectorMemoryWrapper
     /** \name Vector operations */
     ///@{
     /** Scale vector by a scalar value */
-    VectorMemoryWrapper& operator*=(scalar_type s) {
+    IteratorVector& operator*=(scalar_type s) {
         assert_finite(s);
         std::transform(begin(), end(), begin(),
                        [&](scalar_type& v) { return v * s; });
@@ -165,7 +170,7 @@ class VectorMemoryWrapper
     }
 
     /** Divide all vector entries by a scalar value */
-    VectorMemoryWrapper& operator/=(scalar_type s) {
+    IteratorVector& operator/=(scalar_type s) {
         assert_nonzero(s);
         assert_finite(s);
         std::transform(begin(), end(), begin(),
@@ -174,7 +179,7 @@ class VectorMemoryWrapper
     }
 
     /* Add a vector to this one */
-    VectorMemoryWrapper& operator+=(const VectorMemoryWrapper& other) {
+    IteratorVector& operator+=(const IteratorVector& other) {
         assert_size(n_elem(), other.n_elem());
         std::transform(
               begin(), end(), std::begin(other), begin(),
@@ -183,7 +188,7 @@ class VectorMemoryWrapper
     }
 
     /* Add a vector to this one */
-    VectorMemoryWrapper& operator-=(const VectorMemoryWrapper& other) {
+    IteratorVector& operator-=(const IteratorVector& other) {
         assert_size(n_elem(), other.n_elem());
         std::transform(
               begin(), end(), std::begin(other), begin(),
@@ -191,7 +196,7 @@ class VectorMemoryWrapper
         return *this;
     }
 
-    bool operator==(const VectorMemoryWrapper& other) const {
+    bool operator==(const IteratorVector& other) const {
         if (m_size != other.m_size) return false;
         return std::equal(begin(), end(), std::begin(other));
     }
@@ -201,7 +206,7 @@ class VectorMemoryWrapper
      *
      * Before this class is used you *must* call initialise.
      **/
-    VectorMemoryWrapper() {}
+    IteratorVector() {}
 
     /** Initialise from range */
     void initialise(iterator begin, iterator end);
@@ -214,49 +219,36 @@ class VectorMemoryWrapper
     size_type m_size;
 };
 
-/** Convenience function to construct a vector memory wrapper class */
-template <typename Iterator>
-VectorMemoryWrapper<Iterator> make_vector_mem_wrap(Iterator begin,
-                                                   Iterator end) {
-    return VectorMemoryWrapper<Iterator>(begin, end);
-}
-
-/** Convenience function to construct a vector memory wrapper class */
-template <typename Iterator, typename Size>
-VectorMemoryWrapper<Iterator> make_vector_mem_wrap(Iterator begin, Size size) {
-    return VectorMemoryWrapper<Iterator>(begin, size);
-}
-
 //
 // Standard operations
 //
 template <typename Iterator, typename ConstIterator>
-VectorMemoryWrapper<Iterator, ConstIterator> operator*(
-      typename VectorMemoryWrapper<Iterator, ConstIterator>::scalar_type s,
-      VectorMemoryWrapper<Iterator, ConstIterator> m) {
+IteratorVector<Iterator, ConstIterator> operator*(
+      typename IteratorVector<Iterator, ConstIterator>::scalar_type s,
+      IteratorVector<Iterator, ConstIterator> m) {
     m *= s;
     return m;
 }
 
 template <typename Iterator, typename ConstIterator>
-VectorMemoryWrapper<Iterator, ConstIterator> operator*(
-      VectorMemoryWrapper<Iterator, ConstIterator> m,
-      typename VectorMemoryWrapper<Iterator, ConstIterator>::scalar_type s) {
+IteratorVector<Iterator, ConstIterator> operator*(
+      IteratorVector<Iterator, ConstIterator> m,
+      typename IteratorVector<Iterator, ConstIterator>::scalar_type s) {
     return s * m;
 }
 
 template <typename Iterator, typename ConstIterator>
-VectorMemoryWrapper<Iterator, ConstIterator> operator/(
-      VectorMemoryWrapper<Iterator, ConstIterator> m,
-      typename VectorMemoryWrapper<Iterator, ConstIterator>::scalar_type s) {
+IteratorVector<Iterator, ConstIterator> operator/(
+      IteratorVector<Iterator, ConstIterator> m,
+      typename IteratorVector<Iterator, ConstIterator>::scalar_type s) {
     m /= s;
     return m;
 }
 
 template <typename Iterator, typename ConstIterator>
-VectorMemoryWrapper<Iterator, ConstIterator> operator-(
-      VectorMemoryWrapper<Iterator, ConstIterator> mat) {
-    typedef typename VectorMemoryWrapper<Iterator, ConstIterator>::scalar_type
+IteratorVector<Iterator, ConstIterator> operator-(
+      IteratorVector<Iterator, ConstIterator> mat) {
+    typedef typename IteratorVector<Iterator, ConstIterator>::scalar_type
           scalar_type;
     return -Constants<scalar_type>::one * mat;
 }
@@ -265,17 +257,17 @@ VectorMemoryWrapper<Iterator, ConstIterator> operator-(
 // Add and subtract
 //
 template <typename Iterator, typename ConstIterator>
-VectorMemoryWrapper<Iterator, ConstIterator> operator-(
-      VectorMemoryWrapper<Iterator, ConstIterator> lhs,
-      const VectorMemoryWrapper<Iterator, ConstIterator>& rhs) {
+IteratorVector<Iterator, ConstIterator> operator-(
+      IteratorVector<Iterator, ConstIterator> lhs,
+      const IteratorVector<Iterator, ConstIterator>& rhs) {
     lhs -= rhs;
     return lhs;
 }
 
 template <typename Iterator, typename ConstIterator>
-VectorMemoryWrapper<Iterator, ConstIterator> operator+(
-      VectorMemoryWrapper<Iterator, ConstIterator> lhs,
-      const VectorMemoryWrapper<Iterator, ConstIterator>& rhs) {
+IteratorVector<Iterator, ConstIterator> operator+(
+      IteratorVector<Iterator, ConstIterator> lhs,
+      const IteratorVector<Iterator, ConstIterator>& rhs) {
     lhs += rhs;
     return lhs;
 }
@@ -285,9 +277,8 @@ VectorMemoryWrapper<Iterator, ConstIterator> operator+(
 //
 
 template <typename Iterator, typename ConstIterator>
-typename VectorMemoryWrapper<Iterator, ConstIterator>::scalar_type
-      VectorMemoryWrapper<Iterator, ConstIterator>::operator[](
-            size_type i) const {
+typename IteratorVector<Iterator, ConstIterator>::scalar_type
+      IteratorVector<Iterator, ConstIterator>::operator[](size_type i) const {
     assert_range(0, i, n_elem());
     iterator cpy(m_begin);
     std::advance(cpy, i);
@@ -295,8 +286,8 @@ typename VectorMemoryWrapper<Iterator, ConstIterator>::scalar_type
 }
 
 template <typename Iterator, typename ConstIterator>
-typename VectorMemoryWrapper<Iterator, ConstIterator>::scalar_type&
-      VectorMemoryWrapper<Iterator, ConstIterator>::operator[](size_type i) {
+typename IteratorVector<Iterator, ConstIterator>::scalar_type&
+      IteratorVector<Iterator, ConstIterator>::operator[](size_type i) {
     assert_range(0, i, n_elem());
     iterator cpy(m_begin);
     std::advance(cpy, i);
@@ -304,16 +295,16 @@ typename VectorMemoryWrapper<Iterator, ConstIterator>::scalar_type&
 }
 
 template <typename Iterator, typename ConstIterator>
-void VectorMemoryWrapper<Iterator, ConstIterator>::initialise(iterator begin,
-                                                              iterator end) {
+void IteratorVector<Iterator, ConstIterator>::initialise(iterator begin,
+                                                         iterator end) {
     m_begin = std::move(begin);
     m_end = std::move(end);
     m_size = std::distance(m_begin, m_end);
 }
 
 template <typename Iterator, typename ConstIterator>
-void VectorMemoryWrapper<Iterator, ConstIterator>::initialise(iterator begin,
-                                                              size_type size) {
+void IteratorVector<Iterator, ConstIterator>::initialise(iterator begin,
+                                                         size_type size) {
     m_begin = std::move(begin);
     m_end = m_begin;
     m_size = size;

@@ -18,10 +18,24 @@
 //
 
 #pragma once
-/** \file which includes the armadillo interface */
+#ifdef LINALGWRAP_HAVE_ARMADILLO
+namespace linalgwrap {
 
-// Forward-declares all Armadillo types
-#include "Armadillo/ArmadilloTypes.hh"
+// Forward-declare
+template <typename Scalar>
+class ArmadilloMatrix;
 
-#include "Armadillo/ArmadilloMatrix.hh"
-#include "Armadillo/ArmadilloVector.hh"
+// Forward-declare
+template <typename Scalar>
+class ArmadilloVector;
+
+struct ArmadilloTypes {
+    template <typename Scalar>
+    using vector = ArmadilloVector<Scalar>;
+
+    template <typename Scalar>
+    using matrix = ArmadilloMatrix<Scalar>;
+};
+
+}  // end namespace linalgwrap
+#endif

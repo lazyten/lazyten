@@ -18,10 +18,15 @@
 //
 
 #pragma once
-/** \file which includes the armadillo interface */
+#include "IteratorVector.hh"
 
-// Forward-declares all Armadillo types
-#include "Armadillo/ArmadilloTypes.hh"
+namespace linalgwrap {
 
-#include "Armadillo/ArmadilloMatrix.hh"
-#include "Armadillo/ArmadilloVector.hh"
+/** Using statement for a vector that operates directly on raw memory
+ *
+ * This is is a small wrapper interface to give a vector-like interface
+ * to any stride of memory represented by pointers.
+ * */
+template <typename T>
+using PtrVector = IteratorVector<T*>;
+}  // namespace linalgwrap

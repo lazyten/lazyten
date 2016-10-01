@@ -17,6 +17,7 @@
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
 
+#ifdef LINALGWRAP_HAVE_ARMADILLO
 #include "stored_matrix_tests.hh"
 #include <catch.hpp>
 #include <linalgwrap/Armadillo/ArmadilloMatrix.hh>
@@ -29,7 +30,6 @@ namespace linalgwrap {
 namespace tests {
 using namespace rc;
 
-#ifdef LINALGWRAP_HAVE_ARMADILLO
 TEST_CASE("ArmadilloMatrix class", "[ArmadilloMatrix]") {
     // The type of matrix we wish to test.
     typedef ArmadilloMatrix<double> matrix_type;
@@ -71,7 +71,7 @@ TEST_CASE("ArmadilloMatrix class", "[ArmadilloMatrix]") {
         testinglib("ArmadilloMatrix: ").run_checks();
     }
 }
-#endif
 
 }  // tests
 }  // linalgwrap
+#endif
