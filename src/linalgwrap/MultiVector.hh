@@ -32,6 +32,9 @@ namespace linalgwrap {
 template <typename InnerVector>
 class MultiVector : public krims::Subscribable,
                     private std::vector<InnerVector> {
+    static_assert(IsVector<InnerVector>::value,
+                  "The type InnerVector needs to be a vector type");
+
   public:
     typedef InnerVector vector_type;
     typedef typename vector_type::size_type size_type;
@@ -79,7 +82,10 @@ class MultiVector : public krims::Subscribable,
     size_type n_vectors() { return base_type::size(); }
 
     /** Number of elements in each vector */
-    size_type n_elem() { return n_vectors() > 0 ? (*this)[0].size() : 0; }
+    size_type n_elem() {
+        assert_valid_state();
+        return n_vectors() > 0 ? (*this)[0].size() : 0;
+    }
 
     // Forwarded things from std::vector
     // TODO assert state in these as well!
