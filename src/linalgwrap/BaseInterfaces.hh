@@ -18,6 +18,8 @@
 //
 
 #pragma once
+// TODO move into Base subfolder as "Interfaces.hh"
+
 /** \file Includes the most basic inferfaces for vectors and matrices
  * along with the default implementation for all important operations */
 
@@ -27,6 +29,7 @@
 
 // Basic interfaces
 #include "BaseInterfaces/Indexable_i.hh"
+#include "BaseInterfaces/RawMemoryAccess_i.hh"
 #include "BaseInterfaces/Stored_i.hh"
 
 // Vectors
