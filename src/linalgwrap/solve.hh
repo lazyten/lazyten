@@ -1,6 +1,8 @@
 #pragma once
 #include "Armadillo.hh"
+#include "Base/Solvers/SolverExceptions.hh"
 #include "MultiVector.hh"
+#include "TypeUtils.hh"
 #include <krims/ParameterMap.hh>
 
 namespace linalgwrap {
@@ -114,6 +116,10 @@ void solve(const Matrix& A, Vector& x, const Vector& b,
                  krims::ParameterMap()) {
 
     assert_dbg(false, krims::ExcNotImplemented());
+    (void)A;
+    (void)x;
+    (void)b;
+    (void)map;
 }
 //@}
 
