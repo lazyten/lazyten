@@ -1,7 +1,8 @@
-# linalgwrap
+#
+linalgwrap
 [![Build Status](https://travis-ci.org/linalgwrap/linalgwrap.svg?branch=master)](https://travis-ci.org/linalgwrap/linalgwrap) [![Licence](https://img.shields.io/github/license/linalgwrap/linalgwrap.svg)](LICENCE)
 
-A lightweight linear algebra wrapper library adding support for [#lazy-matrices](lazy matrices)
+A lightweight linear algebra wrapper library adding support for [lazy-matrices](#lazy matrices)
 and lazy matrix evaluation to existing linear algebra libraries.
 
 Note that this library is at a *very early stage* at the moment.
@@ -19,7 +20,7 @@ Testing ``linalgwrap`` further requires
 - [Catch](https://github.com/philsquared/Catch/) for the testing environment
 - [rapidcheck](https://github.com/emil-e/rapidcheck) for property-based testing
 
-Note, that for building ``linalgwrap`` (see [#building](below)) you really only need to have
+Note, that for building ``linalgwrap`` (see [below](#building)) you really only need to have
 [armadillo](http://arma.sourceforge.net/) installed on your system.
 All other dependencies can be automatically downloaded during the build process
 if you choose to so (set ``AUTOCHECKOUT_MISSING_REPOS`` to ``ON``,
@@ -102,6 +103,12 @@ most notably the [MWM 2016 Poster](http://docs.mfhs.eu/conferences/2016_mwm/lina
   of the [diagonal](examples/diagonal) example program.
   This class also shows that custom lazy matrices can be created
   by simply inheriting from [LazyMatrix_i](src/linalgwrap/LazyMatrix_i.hh).
+
+### Solvers
+- The folder [Solvers](src/linalgwrap/Solvers) contains the interface
+  for solving Eigenproblems using ``linalgwrap``.
+- Currently only [ArpackEigensolver](src/linalgwrap/ArpackEigensolver.hh)
+  is available as a solver backend.
 
 ### TestingUtils
 This class contains utilities for performing numerics-aware

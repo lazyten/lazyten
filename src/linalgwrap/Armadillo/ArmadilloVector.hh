@@ -200,6 +200,12 @@ class ArmadilloVector : public MutableVector_i<Scalar>, public Stored_i {
 
     ///@}
 
+    /** Read-only access to the raw memory */
+    const scalar_type* memptr() const { return m_arma.memptr(); }
+
+    /** Access to the raw memory */
+    scalar_type* memptr() { return m_arma.memptr(); }
+
     /** Read-only access to the inner storage */
     const_storage_type& data() const { return m_arma; }
 

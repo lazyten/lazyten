@@ -18,19 +18,20 @@
 //
 
 #pragma once
-#include "RawMemoryAccess_i.hh"
+#include <type_traits>
 
 namespace linalgwrap {
 /** Marker interface to assert that the objects derived off this class are
- * stored, i.e. that they manage their own storage allocation and deallocation
- * internally.
+ *  stored in a continuous stride of memory which can be accessed and modified.
  *
- * Most notably (due to RawMemoryAccess_i) all classes being derived off this
- * interface need to implement the method memptr().
- *
- * This has certain implications on the type of constructors which are to be
- * present.
- * See IsStoredVector.hh for details.
+ * This implies that all objects implementing this interfaces have the operation
+ * memptr() which either returns a const or non-const pointer to the memory
+ * (in whichever layout it may be).
  */
-struct Stored_i : public RawMemoryAccess_i {};
+struct RawMemoryAccess_i {};
+
+/** Struct representing a true_type if the class' storage is available
+ *  via memptr, else false_type */
+template <typename T>
+struct IsRawMemoryAccessible : public std::is_base_of<RawMemoryAccess_i, T> {};
 }

@@ -130,9 +130,21 @@ class StoredMatrix_i : public Matrix_i<Scalar> {
      * TODO generalise with a lambda and an arbitrary scalar
      * */
     virtual void set_zero() {
+        std::fill(begin(), end(), Constants<scalar_type>::zero);
+    }
+
+    /** \brief Symmetrise the matrix, that is form (A + A^T)/2.
+     *
+     * Only sensible for square matrices.
+     * */
+    virtual void symmetrise() {
+        assert_dbg(this->n_rows() == this->n_cols(), ExcMatrixNotSquare());
+
         for (size_type i = 0; i < this->n_rows(); ++i) {
-            for (size_type j = 0; j < this->n_cols(); ++j) {
-                (*this)(i, j) = 0;
+            for (size_type j = i + 1; j < this->n_rows(); ++j) {
+                const scalar_type res =
+                      ((*this)(i, j) + (*this)(j, i)) / scalar_type(2.);
+                (*this)(i, j) = (*this)(j, i) = res;
             }
         }
     }
@@ -175,6 +187,35 @@ template <typename Matrix>
 struct IsStoredMatrix<Matrix, krims::VoidType<typename Matrix::scalar_type>>
       : public std::is_base_of<StoredMatrix_i<typename Matrix::scalar_type>,
                                Matrix> {};
+//@}
+
+//@{
+/** \brief Convert a matrix to a stored matrix (in case it is none)
+ *  else return a reference to the original object
+ *
+ *  \note Can be used in order to make sure that one is dealing
+ *  with a stored matrix in any case without making an unnecessary
+ *  copy in case it already is a stored matrix
+ */
+template <typename Matrix,
+          typename StoredMatrix = typename Matrix::stored_matrix_type>
+StoredMatrix as_stored(const Matrix& m) {
+    return static_cast<StoredMatrix>(m);
+}
+
+template <typename StoredMatrix,
+          typename = typename std::enable_if<
+                IsStoredMatrix<StoredMatrix>::value>::type>
+StoredMatrix& as_stored(StoredMatrix& m) {
+    return m;
+}
+
+template <typename StoredMatrix,
+          typename = typename std::enable_if<
+                IsStoredMatrix<StoredMatrix>::value>::type>
+const StoredMatrix& as_stored(const StoredMatrix& m) {
+    return m;
+}
 //@}
 
 //

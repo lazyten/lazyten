@@ -21,8 +21,10 @@
 #ifdef LINALGWRAP_HAVE_ARMADILLO
 
 #include "ArmadilloTypes.hh"
+#include "ArmadilloVector.hh"
 #include "linalgwrap/Constants.hh"
 #include "linalgwrap/Exceptions.hh"
+#include "linalgwrap/PtrVector.hh"
 #include "linalgwrap/Range.hh"
 #include "linalgwrap/StoredMatrix_i.hh"
 #include <armadillo>
@@ -151,16 +153,57 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
     }
 
     //    // TODO neu
-    //    /** Multiply with a vector => maybe put this in StoredMatrix_i*/
-    //    template <typename Vector>
-    //    Vector operator*(const Vector& v) const;
+    //    /** Multiply with a stored vector => maybe put this in
+    //    StoredMatrix_i*/
+    template <typename Vector, typename = typename std::enable_if<
+                                     IsStoredVector<Vector>::value>::type>
+    Vector operator*(const Vector& v) const {
+        assert_size(v.size(), n_cols());
+        Vector out(n_rows());
+        apply(v, out);
+        return out;
+    }
     //
     //    ArmadilloVector<Scalar> operator*(const ArmadilloVector<Scalar>& v)
     //    const;
+
+    template <typename Vector,
+              typename = typename std::enable_if<
+                    // Guarantees that we have a mutable vector
+                    IsMutableVector<Vector>::value &&
+                    // Guarantees that we have access to a pointer
+                    IsRawMemoryAccessible<Vector>::value &&
+                    // We have the same scalar type
+                    std::is_same<typename Vector::scalar_type,
+                                 scalar_type>::value>::type>
+    void apply(const Vector& in, Vector& out) const {
+        assert_size(in.size(), n_cols());
+        assert_size(out.size(), n_rows());
+
+        const bool copy_into_arma = false;    // Do not copy the memory
+        const bool fixed_vector_size = true;  // No memory reallocation
+
+        const arma::Row<Scalar> in_arma(const_cast<Scalar*>(in.memptr()),
+                                        in.size(), copy_into_arma,
+                                        fixed_vector_size);
+        arma::Row<Scalar> out_arma(out.memptr(), out.size(), copy_into_arma,
+                                   fixed_vector_size);
+
+        // Note: We do not do m_arma * in here, since m_arma is actually the
+        // transpose of the matrix we represent!
+        out_arma = in_arma * m_arma;
+    }
+
+    //    see
+    //    https://trilinos.org/docs/r12.8/packages/tpetra/doc/html/classTpetra_1_1Operator.html
     //
     //    /** Multiply with a vector => maybe put this in StoredMatrix_i*/
     //    template <typename Vector>
     //    Vector apply(const Vector& v) const;
+    //
+    // static_assert(std::is_same<typename Vector::scalar_type,
+    // scalar_type>::value, "The vector and the matrix need to have the same
+    // scalar type");
     //
     //    /** Multiply with a vector => maybe put this in StoredMatrix_i*/
     //    template <typename Vector>
