@@ -46,6 +46,9 @@ set(LINALGWRAP_TESTS_SOURCES
 	BlockDiagonalMatrixTests.cc
 	DiagonalMatrixTests.cc
 
+	# linear solver
+	solveTests.cc
+
 	# main of the test suite
 	main.cc
 )
