@@ -21,6 +21,7 @@
 #include "stored_matrix_tests.hh"
 #include <catch.hpp>
 #include <linalgwrap/Armadillo/ArmadilloMatrix.hh>
+#include <linalgwrap/Armadillo/ArmadilloVector.hh>
 #include <rapidcheck.h>
 
 // Generators for necessary matrices
@@ -62,6 +63,48 @@ TEST_CASE("ArmadilloMatrix class", "[ArmadilloMatrix]") {
         CHECK(norm_l1(k) == 2.);
         CHECK(norm_linf(k) == 3.);
     }
+
+    SECTION("Test apply with PtrVectors") {
+        typedef double scalar_type;
+        typedef ArmadilloMatrix<scalar_type> matrix_type;
+
+        matrix_type m{4, 4};
+        m(0, 0) = 3;
+        m(1, 1) = 2;
+        m(2, 2) = -2;
+        m(3, 3) = 100;
+
+        std::vector<scalar_type> test = {1., 3., 2., 4.};
+        std::vector<scalar_type> testout(4);
+
+        const PtrVector<scalar_type> testv(test.data(), test.size());
+        PtrVector<scalar_type> testoutv(testout.data(), test.size());
+        m.apply(testv, testoutv);
+
+        CHECK(testout[0] == 3.);
+        CHECK(testout[1] == 6.);
+        CHECK(testout[2] == -4.);
+        CHECK(testout[3] == 400.);
+    }  // Test apply with PtrVectors
+
+    SECTION("Test multiplication with ArmadilloVector") {
+        typedef double scalar_type;
+        typedef ArmadilloMatrix<scalar_type> matrix_type;
+
+        matrix_type m{4, 4};
+        m(0, 0) = 3;
+        m(1, 1) = 2;
+        m(2, 2) = -2;
+        m(3, 3) = 100;
+
+        const ArmadilloVector<scalar_type> vec{1., 3., 2., 4.};
+        auto testout = m * vec;
+
+        CHECK(testout[0] == 3.);
+        CHECK(testout[1] == 6.);
+        CHECK(testout[2] == -4.);
+        CHECK(testout[3] == 400.);
+    }  // Test apply with ArmadilloVector
 
     SECTION("Default stored matrix tests") {
         typedef typename stored_matrix_tests::TestingLibrary<matrix_type>
