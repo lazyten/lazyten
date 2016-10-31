@@ -18,7 +18,7 @@
 //
 
 #pragma once
-#include "linalgwrap/Armadillo.hh"
+#include "linalgwrap/Armadillo/ArmadilloMatrix.hh"
 
 namespace linalgwrap {
 #if defined LINALGWRAP_HAVE_ARMADILLO
