@@ -17,12 +17,10 @@
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#pragma once
-/** \file which includes the armadillo interface */
+#include "EigensolverBaseKeys.hh"
+namespace linalgwrap {
 
-// Forward-declares all Armadillo types
-#include "Armadillo/ArmadilloTypes.hh"
+const std::string EigensolverBaseKeys::tolerance = "tolerance";
+const std::string EigensolverBaseKeys::which = "which";
 
-#include "Armadillo/ArmadilloEigensolver.hh"
-#include "Armadillo/ArmadilloMatrix.hh"
-#include "Armadillo/ArmadilloVector.hh"
+}  // namespace linalgwrap

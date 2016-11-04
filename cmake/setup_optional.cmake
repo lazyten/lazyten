@@ -21,10 +21,10 @@
 
 # adds entries to these things
 #
-# 	LINALGWRAP_DEPENDENCIES			everyone needs these libraries
-# 	LINALGWRAP_DEPENDENCIES_DEBUG		debug mode needs these extras
-# 	LINALGWRAP_DEPENDENCIES_RELEASE		release mode needs these extras
-# 	LINALGWRAP_DEPENDENCIES_TEST		tests need these extra libraries
+#       LINALGWRAP_DEPENDENCIES			everyone needs these libraries
+#       LINALGWRAP_DEPENDENCIES_DEBUG		debug mode needs these extras
+#       LINALGWRAP_DEPENDENCIES_RELEASE		release mode needs these extras
+#       LINALGWRAP_DEPENDENCIES_TEST		tests need these extra libraries
 #
 #       LINALGWRAP_DEFINITIONS			definitions for all compilation
 #       LINALGWRAP_DEFINITIONS_DEBUG		definitions for debug mode
@@ -41,5 +41,21 @@ endif()
 if (NOT CMAKE_CXX_STANDARD VERSION_LESS 17)
 	message(STATUS "Detected C++17 support: Setting LINALGWRAP_HAVE_CXX17")
 	LIST(APPEND LINALGWRAP_DEFINITIONS "LINALGWRAP_HAVE_CXX17")
+endif()
+
+################
+#--  ARPACK  --#
+################
+SET(ARPACK_DIR "" CACHE PATH "An optional hint to an ARPACK installation")
+find_library(
+	ARPACK_LIBRARY
+	NAMES arpack
+	HINTS ${ARPACK_DIR}
+	PATH_SUFFIXES lib64 lib
+)
+if(NOT ${ARPACK_LIBRARY} MATCHES "-NOTFOUND")
+	message(STATUS "Found ARPACK at ${ARPACK_LIBRARY}")
+	LIST(APPEND LINALGWRAP_DEFINITIONS "LINALGWRAP_HAVE_ARPACK")
+	set(LINALGWRAP_DEPENDENCIES ${LINALGWRAP_DEPENDENCIES} ${ARPACK_LIBRARY})
 endif()
 

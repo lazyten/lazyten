@@ -17,12 +17,10 @@
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#pragma once
-/** \file which includes the armadillo interface */
+#include "IterativeSolverKeys.hh"
 
-// Forward-declares all Armadillo types
-#include "Armadillo/ArmadilloTypes.hh"
+namespace linalgwrap {
 
-#include "Armadillo/ArmadilloEigensolver.hh"
-#include "Armadillo/ArmadilloMatrix.hh"
-#include "Armadillo/ArmadilloVector.hh"
+const std::string IterativeSolverKeys::max_iter = "max_iter";
+
+}  // namespace linalgwrap

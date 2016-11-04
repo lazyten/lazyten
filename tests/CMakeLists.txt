@@ -24,6 +24,7 @@
 #
 set(LINALGWRAP_TESTS_SOURCES
 	# Vector and Matrix LA interfaces
+# TODO	IteratorVectorTests.cc
 	BuiltinVectorTests.cc
 	ArmadilloMatrixTests.cc
 	ArmadilloVectorTests.cc
@@ -45,6 +46,11 @@ set(LINALGWRAP_TESTS_SOURCES
 	# Lazy matrix implementations
 	BlockDiagonalMatrixTests.cc
 	DiagonalMatrixTests.cc
+
+	# Eigensolver
+	ArpackEigensolverTests.cc
+	ArmadilloEigensolverTests.cc
+	eigensystemTests.cc
 
 	# linear solver
 	solveTests.cc

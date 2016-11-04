@@ -18,11 +18,23 @@
 //
 
 #pragma once
-/** \file which includes the armadillo interface */
+/** \file Includes the core interfaces and datastructures used
+ *  by the iterative and direct solvers provided by the
+ *  external libraries */
 
-// Forward-declares all Armadillo types
-#include "Armadillo/ArmadilloTypes.hh"
+// Base solver
+#include "Solvers/SolverBase.hh"
+#include "Solvers/SolverExceptions.hh"
+#include "Solvers/SolverStateBase.hh"
 
-#include "Armadillo/ArmadilloEigensolver.hh"
-#include "Armadillo/ArmadilloMatrix.hh"
-#include "Armadillo/ArmadilloVector.hh"
+// Iterative methods base types and structs
+#include "Solvers/IterativeSolver.hh"
+#include "Solvers/IterativeSolverKeys.hh"
+#include "Solvers/IterativeSolverState.hh"
+
+// Eigensolvers base types and structs
+#include "Solvers/Eigenproblem.hh"
+#include "Solvers/Eigensolution.hh"
+#include "Solvers/EigensolverBase.hh"
+#include "Solvers/EigensolverBaseKeys.hh"
+#include "Solvers/EigensolverStateBase.hh"

@@ -17,12 +17,17 @@
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#pragma once
-/** \file which includes the armadillo interface */
+#include "SolverStateBase.hh"
+namespace linalgwrap {
 
-// Forward-declares all Armadillo types
-#include "Armadillo/ArmadilloTypes.hh"
+void SolverStateBase::fail(std::string reason) {
+    m_failed = true;
+    m_fail_reason = reason;
+}
 
-#include "Armadillo/ArmadilloEigensolver.hh"
-#include "Armadillo/ArmadilloMatrix.hh"
-#include "Armadillo/ArmadilloVector.hh"
+void SolverStateBase::clear_failed() {
+    m_failed = false;
+    m_fail_reason = "";
+}
+
+}  // namespace linalgwrap

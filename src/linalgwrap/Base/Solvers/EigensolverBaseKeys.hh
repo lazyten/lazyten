@@ -18,11 +18,17 @@
 //
 
 #pragma once
-/** \file which includes the armadillo interface */
+#include "IterativeSolverKeys.hh"
+namespace linalgwrap {
 
-// Forward-declares all Armadillo types
-#include "Armadillo/ArmadilloTypes.hh"
+/** Struct which contains the keys used for setting the
+ *  EigensolverControlBase parameters */
+struct EigensolverBaseKeys {
+    /** The convergence tolerance use. Type: real_type */
+    static const std::string tolerance;
 
-#include "Armadillo/ArmadilloEigensolver.hh"
-#include "Armadillo/ArmadilloMatrix.hh"
-#include "Armadillo/ArmadilloVector.hh"
+    /** Which eigenpairs to compute. Type: std::string */
+    static const std::string which;
+};
+
+}  // namespace linalgwrap

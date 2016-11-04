@@ -18,11 +18,14 @@
 //
 
 #pragma once
-/** \file which includes the armadillo interface */
+#include <string>
+namespace linalgwrap {
 
-// Forward-declares all Armadillo types
-#include "Armadillo/ArmadilloTypes.hh"
+/** Struct which contains the keys used for setting the
+ *  IterativeSolver control parameters */
+struct IterativeSolverKeys {
+    /** Maximum number of iterations. Type: size_t */
+    static const std::string max_iter;
+};
 
-#include "Armadillo/ArmadilloEigensolver.hh"
-#include "Armadillo/ArmadilloMatrix.hh"
-#include "Armadillo/ArmadilloVector.hh"
+}  // namespace linalgwrap

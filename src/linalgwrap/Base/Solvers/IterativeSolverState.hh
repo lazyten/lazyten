@@ -18,11 +18,31 @@
 //
 
 #pragma once
-/** \file which includes the armadillo interface */
+#include <string>
 
-// Forward-declares all Armadillo types
-#include "Armadillo/ArmadilloTypes.hh"
+namespace linalgwrap {
 
-#include "Armadillo/ArmadilloEigensolver.hh"
-#include "Armadillo/ArmadilloMatrix.hh"
-#include "Armadillo/ArmadilloVector.hh"
+/** Extra structure the state of a truely iterative solver
+ *  needs to satisfy on top of SolverStateBase. */
+class IterativeSolverState {
+  public:
+    //! Type for counting iteration numbers.
+    typedef size_t count_type;
+
+    /** \brief Default constructor
+     *
+     * The failbit is unset and the iteration count is 0.
+     * */
+    IterativeSolverState() : m_count{0} {}
+
+    /** Increase the iteration count and return the new count */
+    count_type increase_iteration_count() { return ++m_count; }
+
+    /** Return the current iteration count */
+    count_type n_iter_count() const { return m_count; }
+
+  protected:
+    count_type m_count;
+};
+
+}  // namespace linalgwrap

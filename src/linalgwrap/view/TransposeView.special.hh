@@ -18,7 +18,7 @@
 //
 
 #pragma once
-#include "linalgwrap/Armadillo.hh"
+#include "linalgwrap/Armadillo/ArmadilloMatrix.hh"
 
 /** \file TransposeView.special.hh
  *  \brief Partial template specialisations for TransposeView.

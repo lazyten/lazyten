@@ -79,10 +79,10 @@ class MultiVector : public krims::Subscribable,
     }
 
     /** Number of vectors */
-    size_type n_vectors() { return base_type::size(); }
+    size_type n_vectors() const { return base_type::size(); }
 
     /** Number of elements in each vector */
-    size_type n_elem() {
+    size_type n_elem() const {
         assert_valid_state();
         return n_vectors() > 0 ? (*this)[0].size() : 0;
     }

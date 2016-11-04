@@ -25,6 +25,10 @@
 set(LINALGWRAP_SOURCES
 	version.cc
 	io/Mathematica.cc
+	Base/Solvers/SolverStateBase.cc
+	Base/Solvers/IterativeSolverKeys.cc
+	Base/Solvers/EigensolverBaseKeys.cc
+	Arpack/ArpackEigensolver.cc
 )
 
 # Dump the current version as an include file.
