@@ -17,12 +17,15 @@
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#pragma once
-/** \file which includes the armadillo interface */
+#include "ArpackEigensolver.hh"
 
-// Forward-declares all Armadillo types
-#include "Armadillo/ArmadilloTypes.hh"
+#ifdef LINALGWRAP_HAVE_ARPACK
+namespace linalgwrap {
 
-#include "Armadillo/ArmadilloEigensolver.hh"
-#include "Armadillo/ArmadilloMatrix.hh"
-#include "Armadillo/ArmadilloVector.hh"
+const std::string ArpackEigensolverKeys::max_iter = "max_iter";
+const std::string ArpackEigensolverKeys::n_arnoldi_vectors =
+      "n_arnoldi_vectors";
+const std::string ArpackEigensolverKeys::mode = "mode";
+
+}  // namespace linalgwrap
+#endif  // LINALGWRAP_HAVE_ARPACK

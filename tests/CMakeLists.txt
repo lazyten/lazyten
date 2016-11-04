@@ -46,6 +46,10 @@ set(LINALGWRAP_TESTS_SOURCES
 	BlockDiagonalMatrixTests.cc
 	DiagonalMatrixTests.cc
 
+	# Eigensolver
+	ArpackEigensolverTests.cc
+	ArmadilloEigensolverTests.cc
+
 	# linear solver
 	solveTests.cc
 

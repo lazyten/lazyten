@@ -18,11 +18,6 @@
 //
 
 #pragma once
-/** \file which includes the armadillo interface */
+/** \file which includes the ARPACK interface */
 
-// Forward-declares all Armadillo types
-#include "Armadillo/ArmadilloTypes.hh"
-
-#include "Armadillo/ArmadilloEigensolver.hh"
-#include "Armadillo/ArmadilloMatrix.hh"
-#include "Armadillo/ArmadilloVector.hh"
+#include "Arpack/ArpackEigensolver.hh"
