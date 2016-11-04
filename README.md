@@ -15,6 +15,8 @@ and only a fraction of the planned features are currently implemented.
   (ParameterMap, Exception handling, Subscription pointers)
 - [armadillo](http://arma.sourceforge.net/) as the only supported
   linear-algebra backend (so far)
+- *(optional)* [ARPACK](http://www.caam.rice.edu/software/ARPACK/) in order to use ``linalgwrap`` with the
+  ARPACK eigensolver.
 
 Testing ``linalgwrap`` further requires
 - [Catch](https://github.com/philsquared/Catch/) for the testing environment
@@ -105,10 +107,20 @@ most notably the [MWM 2016 Poster](http://docs.mfhs.eu/conferences/2016_mwm/lina
   by simply inheriting from [LazyMatrix_i](src/linalgwrap/LazyMatrix_i.hh).
 
 ### Solvers
-- The folder [Solvers](src/linalgwrap/Solvers) contains the interface
-  for solving Eigenproblems using ``linalgwrap``.
+- In order to solve an eigenproblem the methods ``eigensystem`` and ``eigensystem_hermitian``
+  in the file [eigensystem.hh](src/linalgwrap/eigensystem.hh) are available as
+  high-level routines. These are the recommended routines to solve eigenproblems.
+  Their interface is most likely to stay stable and an easy way to ask for
+  a particular method will be implemented soon.
+- For linear problems the file [solve.hh](src/linalgwrap/solve.hh) similarly
+  contains the methods  ``solve`` and ``solve_hermitian``.
+- The folder [Base/Solvers](src/linalgwrap/Base/Solvers) holds all the lower
+  interfaces the solvers use.
 - Currently only [ArpackEigensolver](src/linalgwrap/ArpackEigensolver.hh)
-  is available as a solver backend.
+  and [ArmadilloEigensolver](src/linalgwrap/ArmadilloEigensolver.hh) are implemented
+  as eigensolver backends.
+- ARPACK is enabled if it is found on the system.
+- Right now linear problems are always solved with ``armadillo``.
 
 ### TestingUtils
 This class contains utilities for performing numerics-aware
