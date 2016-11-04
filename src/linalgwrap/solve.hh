@@ -1,5 +1,5 @@
 #pragma once
-#include "Armadillo.hh"
+#include "Armadillo/ArmadilloMatrix.hh"
 #include "Base/Solvers/SolverExceptions.hh"
 #include "MultiVector.hh"
 #include "TypeUtils.hh"
