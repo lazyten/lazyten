@@ -208,14 +208,14 @@ EigensolutionTypeFor<true, Matrix> eigensystem_hermitian(
     problem_type problem{A, n_ep};
 
     // Select method (auto or user-defined)
-    const std::string method = map.at<std::string>("method", "auto");
+    const std::string method = map.at("method", std::string("auto"));
     if (method != "auto") {
         return detail::eigensystem_with_method(method, problem, map);
     }
 
 #ifdef LINALGWRAP_HAVE_ARPACK
     if (problem.n_ep() <= problem.dim() / 2 &&
-        map.at<std::string>(EigensolverBaseKeys::which, "SR") !=
+        map.at(EigensolverBaseKeys::which, std::string("SR")) !=
               std::string("SM")) {
         // Use Arpack since we want "few" eigenpairs
         // TODO This is just a shot, no clue whether half the dimension
@@ -240,7 +240,7 @@ EigensolutionTypeFor<true, MatrixA> eigensystem_hermitian(
     problem_type problem{A, B, n_ep};
 
     // Select method (auto or user-defined)
-    const std::string method = map.at<std::string>("method", "auto");
+    const std::string method = map.at("method", std::string("auto"));
     if (method != "auto") {
         return detail::eigensystem_with_method(method, problem, map);
     }
@@ -265,7 +265,7 @@ EigensolutionTypeFor<false, Matrix> eigensystem(
     problem_type problem{A, n_ep};
 
     // Select method (auto or user-defined)
-    const std::string method = map.at<std::string>("method", "auto");
+    const std::string method = map.at("method", std::string("auto"));
     if (method != "auto") {
         return detail::eigensystem_with_method(method, problem, map);
     }
@@ -291,7 +291,7 @@ EigensolutionTypeFor<false, MatrixA> eigensystem(
     problem_type problem{A, B, n_ep};
 
     // Select method (auto or user-defined)
-    const std::string method = map.at<std::string>("method", "auto");
+    const std::string method = map.at("method", std::string("auto"));
     if (method != "auto") {
         return detail::eigensystem_with_method(method, problem, map);
     }
