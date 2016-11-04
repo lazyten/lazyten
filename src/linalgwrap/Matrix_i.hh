@@ -55,6 +55,7 @@ class Matrix_i : public krims::Subscribable {
   public:
     typedef size_t size_type;
     typedef Scalar scalar_type;
+    typedef typename krims::RealTypeOf<Scalar>::type real_type;
 
     //! The iterator type (a const iterator)
     typedef DefaultMatrixConstIterator<Matrix_i<Scalar>> iterator;
@@ -128,13 +129,19 @@ class Matrix_i : public krims::Subscribable {
     ///@{
     /** \brief Check whether the matrix is symmetric
      *
-     * Loops over all elements and check wheather the difference
+     * Loops over all elements and check whether the difference
      * between m(i,j) and m(j,i) is less than the tolerance given
      * */
-    bool is_symmetric(scalar_type tolerance =
-                            Constants<scalar_type>::default_tolerance) const;
+    bool is_symmetric(
+          real_type tolerance = Constants<real_type>::default_tolerance) const;
 
-    // TODO ideas: is_real, is_hermetian, is_real_symmetric
+    /** \brief Check whether the matrix is Hermitian
+     *
+     * Loops over all elements and check whether the difference
+     * between conj(m(i,j)) and m(j,i) is less than the tolerance given
+     * */
+    bool is_hermitian(
+          real_type tolerance = Constants<real_type>::default_tolerance) const;
     ///@}
 };
 
@@ -250,7 +257,7 @@ typename Matrix_i<Scalar>::const_iterator Matrix_i<Scalar>::cend() const {
 }
 
 template <typename Scalar>
-bool Matrix_i<Scalar>::is_symmetric(scalar_type tolerance) const {
+bool Matrix_i<Scalar>::is_symmetric(real_type tolerance) const {
     // Check that the matrix is quadratic:
     if (n_rows() != n_cols()) return false;
 
@@ -258,6 +265,21 @@ bool Matrix_i<Scalar>::is_symmetric(scalar_type tolerance) const {
     for (size_type i = 0; i < n_rows(); ++i) {
         for (size_type j = 0; j < n_cols(); ++j) {
             if (std::abs((*this)(i, j) - (*this)(j, i)) > tolerance)
+                return false;
+        }
+    }
+    return true;
+}
+
+template <typename Scalar>
+bool Matrix_i<Scalar>::is_hermitian(real_type tolerance) const {
+    // Check that the matrix is quadratic:
+    if (n_rows() != n_cols()) return false;
+
+    // Check if lower and upper triangle agree:
+    for (size_type i = 0; i < n_rows(); ++i) {
+        for (size_type j = 0; j < n_cols(); ++j) {
+            if (std::abs(std::conj((*this)(i, j)) - (*this)(j, i)) > tolerance)
                 return false;
         }
     }
