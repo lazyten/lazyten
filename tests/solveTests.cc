@@ -32,7 +32,7 @@ using namespace krims;
 using namespace rc;
 
 template <typename Matrix>
-struct SolveProblem {
+struct SolveTestProblem {
     typedef Matrix matrix_type;
     typedef SmallVector<typename Matrix::scalar_type> vector_type;
 
@@ -41,22 +41,18 @@ struct SolveProblem {
     vector_type rhs;                 //< The rhs vector
     vector_type ref_soln;            //< The expected solution
     NumCompAccuracyLevel tolerance;  //< The accuracy level
+    ParameterMap params;             //< Parameters to run the solver with
 
-    SolveProblem(std::string description_, matrix_type M_, vector_type rhs_,
-                 vector_type ref_soln_, NumCompAccuracyLevel tolerance_ =
-                                              NumCompAccuracyLevel::Default)
-          : description(description_),
-            M(M_),
-            rhs(rhs_),
-            ref_soln(ref_soln_),
-            tolerance(tolerance_) {}
+    SolveTestProblem(std::string description_, matrix_type M_, vector_type rhs_,
+                     vector_type ref_soln_)
+          : description(description_), M(M_), rhs(rhs_), ref_soln(ref_soln_) {}
 };
 
 /** Get the list of all stored real hermitian problems */
 template <typename Matrix>
-static std::vector<SolveProblem<Matrix>> real_hermitian_problems() {
+static std::vector<SolveTestProblem<Matrix>> real_hermitian_problems() {
     typedef Matrix matrix_type;
-    typedef SolveProblem<Matrix> prob_type;
+    typedef SolveTestProblem<Matrix> prob_type;
     typedef typename prob_type::vector_type vector_type;
 
     std::vector<prob_type> res;
@@ -149,11 +145,11 @@ TEST_CASE("solve", "[solve]") {
     typedef SmallMatrix<double> matrix_type;
 
     // Real hermitian problems
-    std::vector<SolveProblem<matrix_type>> real_hermitian =
+    std::vector<SolveTestProblem<matrix_type>> real_hermitian =
           real_hermitian_problems<matrix_type>();
 
     SECTION("solve_hermitian with reference problems") {
-        typedef typename SolveProblem<matrix_type>::vector_type vector_type;
+        typedef typename SolveTestProblem<matrix_type>::vector_type vector_type;
         for (const auto& prb : real_hermitian) {
             vector_type res(prb.ref_soln.size());
             solve_hermitian(prb.M, res, prb.rhs);
@@ -166,15 +162,19 @@ TEST_CASE("solve", "[solve]") {
 
         auto test = [&] {
             // Generate the matrix
-            size_t s = *gen::numeric_size<2>().as("Matrix size");
-            auto M =
-                  *gen::numeric_tensor<matrix_type>(s, s).as("Problem matrix");
-            M.symmetrise();
+            auto symm = [](matrix_type m) {
+                m.symmetrise();
 
-            // Add one to make it less singular:
-            for (size_t i = 0; i < M.n_rows(); ++i) {
-                M(i, i) += 1.;
-            }
+                // Add one on the diagonal to make matrix less singular:
+                for (size_t i = 0; i < m.n_rows(); ++i) {
+                    m(i, i) += 1.;
+                }
+                return m;
+            };
+
+            auto n = *gen::scale(0.8, gen::numeric_size<2>()).as("Matrix size");
+            auto M = *gen::map(gen::numeric_tensor<matrix_type>(n, n), symm)
+                            .as("Problem matrix");
 
             // Generate the vectors and solve
             auto rhs = *gen::numeric_tensor<vector_type>(M.n_rows());
