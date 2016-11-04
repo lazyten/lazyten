@@ -82,7 +82,7 @@ class EigensolverBase : public SolverBase<State> {
      *   - "LI"   Largest imaginary
      *            (only for complex scalar types)
      */
-    std::string which = "SR";
+    std::string which{"SR"};
 
     /** The convergence tolerance to use within the eigensolver */
     real_type tolerance = Constants<real_type>::default_tolerance;

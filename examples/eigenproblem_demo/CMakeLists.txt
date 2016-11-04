@@ -19,8 +19,5 @@
 ##
 ## ---------------------------------------------------------------------
 
-#
-# The sources for this example executable
-#
-add_executable(diagonal diagonal.cc)
-setup_example_target(diagonal)
+add_executable(eigenproblem_demo main.cc)
+setup_example_target(eigenproblem_demo)

@@ -109,9 +109,9 @@ most notably the [MWM 2016 Poster](http://docs.mfhs.eu/conferences/2016_mwm/lina
 ### Solvers
 - In order to solve an eigenproblem the methods ``eigensystem`` and ``eigensystem_hermitian``
   in the file [eigensystem.hh](src/linalgwrap/eigensystem.hh) are available as
-  high-level routines. These are the recommended routines to solve eigenproblems.
-  Their interface is most likely to stay stable and an easy way to ask for
-  a particular method will be implemented soon.
+  high-level routines. These are the recommended routines to solve eigenproblems,
+  since their interface is designed to be easy to use and it easy to enforce
+  a particular eigensolver explicitly (using the parameter key ``method``).
 - For linear problems the file [solve.hh](src/linalgwrap/solve.hh) similarly
   contains the methods  ``solve`` and ``solve_hermitian``.
 - The folder [Base/Solvers](src/linalgwrap/Base/Solvers) holds all the lower
