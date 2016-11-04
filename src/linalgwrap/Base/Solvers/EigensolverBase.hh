@@ -93,7 +93,7 @@ class EigensolverBase : public SolverBase<State> {
      */
     void update_control_params(const krims::ParameterMap& map) {
         base_type::update_control_params(map);
-        which = map.at(EigensolverBaseKeys::which, which);
+        which = map.at<std::string>(EigensolverBaseKeys::which, which);
         tolerance = map.at(EigensolverBaseKeys::tolerance, tolerance);
     }
     ///@}
