@@ -43,6 +43,7 @@ flags = [
     '-DDEBUG',
     # Compile extra code blocks:
     '-DLINALGWRAP_HAVE_ARMADILLO',
+    '-DLINALGWRAP_HAVE_ARPACK',
     # C++14 code blocks:
     '-DLINALGWRAP_HAVE_CXX14',
     '-DKRIMS_HAVE_CXX14',
