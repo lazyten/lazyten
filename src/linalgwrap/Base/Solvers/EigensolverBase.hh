@@ -82,7 +82,7 @@ class EigensolverBase : public SolverBase<State> {
      *   - "LI"   Largest imaginary
      *            (only for complex scalar types)
      */
-    std::string which = "SR";
+    std::string which{"SR"};
 
     /** The convergence tolerance to use within the eigensolver */
     real_type tolerance = Constants<real_type>::default_tolerance;
@@ -93,7 +93,7 @@ class EigensolverBase : public SolverBase<State> {
      */
     void update_control_params(const krims::ParameterMap& map) {
         base_type::update_control_params(map);
-        which = map.at<std::string>(EigensolverBaseKeys::which, which);
+        which = map.at(EigensolverBaseKeys::which, which);
         tolerance = map.at(EigensolverBaseKeys::tolerance, tolerance);
     }
     ///@}
