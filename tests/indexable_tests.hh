@@ -58,10 +58,11 @@ namespace indexable_tests {
 using namespace rc;
 using namespace krims;
 
-/** Model implementation of a MutableVector for use in the comparative tests */
+/** Model implementation of a MutableMemoryVector for use in the comparative
+ * tests */
 template <typename Scalar>
 struct VectorModel : private std::vector<Scalar>,
-                     public MutableVector_i<Scalar>,
+                     public MutableMemoryVector_i<Scalar>,
                      public Stored_i {
     typedef Vector_i<Scalar> base_type;
     typedef typename base_type::size_type size_type;
@@ -76,7 +77,7 @@ struct VectorModel : private std::vector<Scalar>,
     using container_type::end;
     using container_type::cend;
 
-    // Implement what is needed to be a ModifyableVector_i
+    // Implement what is needed to be a MutableMemoryVector_i
     size_type size() const override { return container_type::size(); }
     size_type n_elem() const override { return size(); }
     Scalar operator()(size_type i) const override { return (*this)[i]; }
@@ -90,6 +91,9 @@ struct VectorModel : private std::vector<Scalar>,
     void set_zero() override {
         for (auto& elem : *this) elem = 0;
     }
+
+    Scalar* memptr() override { return this->data(); }
+    const Scalar* memptr() const override { return this->data(); }
 
     VectorModel(std::vector<Scalar> v) : container_type(v) {}
 

@@ -18,20 +18,17 @@
 //
 
 #pragma once
-#include <type_traits>
-
 namespace linalgwrap {
-/** Marker interface to assert that the objects derived off this class are
- *  stored in a continuous stride of memory which can be accessed and modified.
- *
- * This implies that all objects implementing this interfaces have the operation
- * memptr() which either returns a const or non-const pointer to the memory
- * (in whichever layout it may be).
- */
-struct RawMemoryAccess_i {};
 
-/** Struct representing a true_type if the class' storage is available
- *  via memptr, else false_type */
-template <typename T>
-struct IsRawMemoryAccessible : public std::is_base_of<RawMemoryAccess_i, T> {};
-}
+/** Should the matrix be applied in a transposed sense? */
+enum class Transposed {
+    /** The matrix is applied directly */
+    None,
+    /** The transpose of the matrix is applied */
+    Trans,
+    /** The conjugate transpose (Hermitian conjugate) of the matrix
+     * is applied */
+    ConjTrans,
+};
+
+}  // namespace linalgwrap

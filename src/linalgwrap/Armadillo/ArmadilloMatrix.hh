@@ -137,7 +137,7 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
         return *this;
     }
 
-    /** Multiply two small matrices */
+    /** Multiply two Armadillo matrices */
     ArmadilloMatrix operator*(const ArmadilloMatrix& other) const {
         assert_size(n_cols(), other.n_rows());
 
@@ -167,15 +167,13 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
     //    ArmadilloVector<Scalar> operator*(const ArmadilloVector<Scalar>& v)
     //    const;
 
-    template <typename Vector,
-              typename = typename std::enable_if<
-                    // Guarantees that we have a mutable vector
-                    IsMutableVector<Vector>::value &&
-                    // Guarantees that we have access to a pointer
-                    IsRawMemoryAccessible<Vector>::value &&
-                    // We have the same scalar type
-                    std::is_same<typename Vector::scalar_type,
-                                 scalar_type>::value>::type>
+    template <typename Vector, typename = typename std::enable_if<
+                                     // Guarantees that we have a mutable vector
+                                     // with access to the underlying memory
+                                     IsMutableMemoryVector<Vector>::value &&
+                                     // We have the same scalar type
+                                     std::is_same<typename Vector::scalar_type,
+                                                  scalar_type>::value>::type>
     void apply(const Vector& in, Vector& out) const {
         assert_size(in.size(), n_cols());
         assert_size(out.size(), n_rows());

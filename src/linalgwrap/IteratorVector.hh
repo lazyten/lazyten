@@ -314,7 +314,7 @@ class IteratorVector
  */
 template <typename T>
 class IteratorVector<T*> : public detail::IteratorVectorBase<T*>,
-                           public RawMemoryAccess_i {
+                           public MemoryAccess_i {
   public:
     typedef detail::IteratorVectorBase<T*> base_type;
     typedef typename base_type::size_type size_type;

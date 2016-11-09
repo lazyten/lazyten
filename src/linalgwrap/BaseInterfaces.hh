@@ -29,13 +29,16 @@
 
 // Basic interfaces
 #include "BaseInterfaces/Indexable_i.hh"
-#include "BaseInterfaces/RawMemoryAccess_i.hh"
 #include "BaseInterfaces/Stored_i.hh"
 
 // Vectors
 #include "BaseInterfaces/IsStoredVector.hh"
+#include "BaseInterfaces/MutableMemoryVector_i.hh"
 #include "BaseInterfaces/MutableVector_i.hh"
 #include "BaseInterfaces/Vector_i.hh"
 
-// Default implementations for important Vector operations.
+// Matrices
+#include "BaseInterfaces/Transposed.hh"
+
+// Default implementations for important Vector/Matrix/Indexable operations.
 #include "BaseInterfaces/FallbackOperations.hh"
