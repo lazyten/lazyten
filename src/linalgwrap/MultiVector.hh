@@ -18,103 +18,181 @@
 //
 
 #pragma once
-#include "BaseInterfaces.hh"
+#include "detail/MultiVectorBase.hh"
+#include "linalgwrap/Range.hh"
 
 namespace linalgwrap {
+
 /** \brief Class to represent a collection of multiple vectors
  *
- * The idea is to be able to pass such a logical collection around
- * (in for example ParameterMaps) without doing this for the individual
- * objects by themselves.
+ * The idea is to be able to pass a logical collection of vectors around
+ * and to apply the same operations to them in turn.
  *
- * All inner objects are assumed to have the same length
+ * All inner objects are assumed to have the same length.
+ *
+ *  \note The class will not perform implicit copies. If it gets a reference and
+ *  it cannot take ownership it will only store a subscription.
+ *
+ *  \note The copy-constructor and copy-assignment automatically make only
+ *  *shallow* copies, i.e. they still reference the same underlying objects.
+ *  If you want to make a deep copy, use ``copy_deep`` instead.
  */
 template <typename InnerVector>
-class MultiVector : public krims::Subscribable,
-                    private std::vector<InnerVector> {
-    static_assert(IsVector<InnerVector>::value,
-                  "The type InnerVector needs to be a vector type");
-
+class MultiVector : public detail::MultiVectorBase<InnerVector> {
   public:
-    typedef InnerVector vector_type;
-    typedef typename vector_type::size_type size_type;
-    typedef std::vector<vector_type> base_type;
+    typedef detail::MultiVectorBase<InnerVector> base_type;
+    typedef typename base_type::vector_type vector_type;
+    typedef typename base_type::size_type size_type;
+    typedef typename base_type::scalar_type scalar_type;
+    typedef typename base_type::real_type real_type;
 
-    /** Construct an empty MultiVector */
-    MultiVector() {}
+    /** \name Constructors, destructors and assignment */
+    ///@{
+    /** Construct an empty Multivector */
+    MultiVector() : base_type() {}
 
-    /** Construct from one inner vector */
-    explicit MultiVector(InnerVector i) { base_type::push_back(std::move(i)); }
+    /** Construct from one inner vector, taking no ownership of the vector */
+    explicit MultiVector(vector_type& v);
 
-    /** Construct from a vector of inner vectors */
-    explicit MultiVector(std::vector<InnerVector> v)
-          : base_type(std::forward<std::vector<InnerVector>>(v)) {
-        assert_valid_state();
-    }
+    /** Construct from one inner vector  taking ownership of the vector */
+    explicit MultiVector(vector_type&& v);
 
-    /** Construct from an iterator range of vectors */
-    template <typename Iterator>
-    MultiVector(Iterator begin, Iterator end) : base_type(begin, end) {
-        assert_valid_state();
-    }
+    /** Construct a MultiVector with n_vectors vectors, which each have n_elem
+     * elements */
+    template <typename Boolean,
+              krims::enable_if_cond_same_t<IsStoredVector<InnerVector>::value,
+                                           Boolean, bool>...>
+    MultiVector(size_type n_elem, size_type n_vectors,
+                Boolean fill_zero = true);
 
-    /** Construct by allocating n_vectors inner vectors **/
-    explicit MultiVector(size_type n_vectors, const InnerVector& i)
-          : base_type(n_vectors, i) {
-        assert_valid_state();
-    }
+    /** Default destructor */
+    ~MultiVector() = default;
 
-    /** Construct by allocating n_vectors inner vectors
-     * with each n_elem elements. Optionally fill the inner vectors
-     * with zeros.
+    /** Default move constructor */
+    MultiVector(MultiVector&&) = default;
+
+    /** Default move assignment */
+    MultiVector& operator=(MultiVector&&) = default;
+
+    /** Copy assignment making a shallow copy */
+    MultiVector& operator=(const MultiVector&) = default;
+
+    /** Copy constructor making a shallow copy */
+    MultiVector(const MultiVector&) = default;
+
+    /** Implicit conversion to different vector type
      *
-     * \param fill_zero  If true the inner vectors are zeroed.
-     *
-     * \note This constructor is only enabled for stored vectors */
-    MultiVector(size_type n_vectors, size_type n_elem,
-                typename std::enable_if<IsStoredVector<InnerVector>::value,
-                                        bool>::type fill_zero = true)
-          : MultiVector(n_vectors, InnerVector(n_elem, fill_zero)) {
-        assert_valid_state();
+     * All objects are converted via a shallow copy.
+     * */
+    template <typename OtherVector,
+              typename = krims::enable_if_ptr_convertible_t<OtherVector,
+                                                            InnerVector>>
+    MultiVector(MultiVector<OtherVector>& omv);
+    ///@}
+
+    /** \name Copies and views */
+    ///@{
+    /** Make a deep copy */
+    MultiVector copy_deep() const;
+
+    /** Obtain a view (shallow copy) of a part of the columns */
+    MultiVector subview(const Range<size_type>& colrange);
+
+    /** Obtain a constant view of a part of the columns */
+    MultiVector<const InnerVector> subview(
+          const Range<size_type>& colrange) const {
+        return csubview(colrange);
     }
 
-    /** Number of vectors */
-    size_type n_vectors() const { return base_type::size(); }
-
-    /** Number of elements in each vector */
-    size_type n_elem() const {
-        assert_valid_state();
-        return n_vectors() > 0 ? (*this)[0].size() : 0;
-    }
-
-    // Forwarded things from std::vector
-    // TODO assert state in these as well!
-    using base_type::front;
-    using base_type::back;
-    using base_type::operator[];
-
-    using base_type::begin;
-    using base_type::cbegin;
-    using base_type::end;
-    using base_type::cend;
-    using base_type::rbegin;
-    using base_type::crbegin;
-    using base_type::rend;
-    using base_type::crend;
-
-    using base_type::empty;
-    using base_type::emplace_back;
-    using base_type::push_back;
-    using base_type::pop_back;
-    using base_type::clear;
-
-    using base_type::reserve;
-
-  private:
-#ifdef DEBUG
-    void assert_valid_state() { assert_element_sizes(*this, n_elem()); }
-#else
-    void assert_valid_state() {}
-#endif
+    /** Obtain a constant view of a part of the columns */
+    MultiVector<const InnerVector> csubview(
+          const Range<size_type>& colrange) const;
+    ///@}
 };
+
+//
+// -------------------------------------------------
+//
+
+template <typename InnerVector>
+MultiVector<InnerVector>::MultiVector(vector_type& v) : MultiVector() {
+    base_type::reserve(1);
+    base_type::push_back(v);
+}
+
+template <typename InnerVector>
+MultiVector<InnerVector>::MultiVector(vector_type&& v) : MultiVector() {
+    base_type::reserve(1);
+    base_type::push_back(std::move(v));
+}
+
+template <typename InnerVector>
+template <typename Boolean,
+          krims::enable_if_cond_same_t<IsStoredVector<InnerVector>::value,
+                                       Boolean, bool>...>
+MultiVector<InnerVector>::MultiVector(size_type n_elem, size_type n_vectors,
+                                      Boolean fill_zero)
+      : MultiVector() {
+    base_type::m_n_elem = n_elem;
+    base_type::resize(n_vectors, fill_zero);
+    base_type::assert_valid_state();
+}
+
+template <typename InnerVector>
+template <typename OtherVector, typename>
+MultiVector<InnerVector>::MultiVector(MultiVector<OtherVector>& omv) {
+    typedef typename base_type::vector_rcptr_type vector_rcptr_type;
+    base_type::reserve(omv.n_vectors());
+    for (size_type i = 0; i < omv.n_vectors(); ++i) {
+        // Convert pointer
+        vector_rcptr_type converted{omv.at_ptr(i)};
+        base_type::m_vs.push_back(converted);
+    }
+    base_type::m_n_elem = omv.n_elem();
+}
+
+template <typename InnerVector>
+MultiVector<InnerVector> MultiVector<InnerVector>::copy_deep() const {
+    base_type::assert_valid_state();
+
+    MultiVector res;
+    res.reserve(base_type::m_vs.size());
+    for (const auto& vptr : base_type::m_vs) {
+        res.push_back(std::move(vector_type{*vptr}));
+    }
+    return res;
+}
+
+template <typename InnerVector>
+MultiVector<InnerVector> MultiVector<InnerVector>::subview(
+      const Range<size_type>& col_range) {
+    base_type::assert_valid_state();
+    if (!col_range.empty()) {
+        assert_greater_equal(col_range.last(), base_type::n_vectors());
+    }
+
+    MultiVector res;
+    res.reserve(col_range.length());
+    for (const auto& i : col_range) {
+        res.push_back(base_type::m_vs[i]);
+    }
+    return res;
+}
+
+template <typename InnerVector>
+MultiVector<const InnerVector> MultiVector<InnerVector>::csubview(
+      const Range<size_type>& col_range) const {
+    base_type::assert_valid_state();
+    if (!col_range.empty()) {
+        assert_greater_equal(col_range.last(), base_type::n_vectors());
+    }
+
+    MultiVector<const InnerVector> res;
+    res.reserve(col_range.length());
+    for (const auto& i : col_range) {
+        res.push_back(base_type::m_vs[i]);
+    }
+    return res;
+}
+
 }  // namespace linalgwrap
