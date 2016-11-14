@@ -19,3 +19,4 @@
 
 #pragma once
 #include "TypeUtils/StoredTypeOf.hh"
+#include "TypeUtils/mat_vec_apply_enabled_t.hh"

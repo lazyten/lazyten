@@ -21,6 +21,7 @@
 #include <krims/NumComp.hh>
 #include <linalgwrap/BaseInterfaces.hh>
 #include <linalgwrap/Matrix_i.hh>
+#include <linalgwrap/MultiVector.hh>
 
 // This file provides specialisations for the NumComp system to work with
 // linalgwrap matrices out of the box.
@@ -109,6 +110,37 @@ struct NumEqual<Vec1, Vec2,
     bool operator()(const Vec1& lhs, const Vec2& rhs) const;
 };
 
+/** \brief Functor to check that two multivectors
+ * (with vectors of possibly different type)
+ * are numerically equal
+ */
+template <typename Vec1, typename Vec2>
+struct NumEqual<linalgwrap::MultiVector<Vec1>, linalgwrap::MultiVector<Vec2>,
+                typename std::enable_if<
+                      linalgwrap::IsVector<Vec1>::value &&
+                      linalgwrap::IsVector<Vec2>::value &&
+                      std::is_same<typename Vec1::scalar_type,
+                                   typename Vec2::scalar_type>::value>::type>
+      : private detail::NumCompIndexableBase<linalgwrap::MultiVector<Vec1>,
+                                             linalgwrap::MultiVector<Vec2>> {
+    typedef const linalgwrap::MultiVector<Vec1>& first_argument_type;
+    typedef const linalgwrap::MultiVector<Vec2>& second_argument_type;
+    typedef bool result_type;
+
+    typedef detail::NumCompIndexableBase<linalgwrap::MultiVector<Vec1>,
+                                         linalgwrap::MultiVector<Vec2>>
+          base_type;
+    typedef typename base_type::real_type real_type;
+    typedef typename base_type::size_type size_type;
+    typedef typename base_type::scalar_type scalar_type;
+
+    NumEqual(const real_type tolerance, const NumCompActionType failure_action)
+          : base_type(tolerance, failure_action) {}
+
+    bool operator()(const linalgwrap::MultiVector<Vec1>& lhs,
+                    const linalgwrap::MultiVector<Vec2>& rhs) const;
+};
+
 //
 // -----------------------------------------------------------------------
 //
@@ -154,10 +186,10 @@ operator()(const Mat1& lhs, const Mat2& rhs) const {
     } catch (NumCompExceptionBase& e) {
         if (base_type::failure_action == NumCompActionType::ThrowVerbose) {
             std::stringstream ss;
-            ss << "when comparing matrices " << std::endl
+            ss << " when comparing matrices " << std::endl
                << lhs << std::endl
                << "and" << std::endl
-               << rhs << std::endl;
+               << rhs << "." << std::endl;
             e.append(ss.str());
             throw;
         }
@@ -179,10 +211,10 @@ operator()(const Mat1& lhs, const Mat2& rhs) const {
                 ss << "Matrix entry (" << i << "," << j << ") not equal";
                 if (base_type::failure_action ==
                     NumCompActionType::ThrowVerbose) {
-                    ss << "when comparing matrices " << std::endl
+                    ss << " when comparing matrices " << std::endl
                        << lhs << std::endl
                        << "and" << std::endl
-                       << rhs << std::endl;
+                       << rhs << "." << std::endl;
                 } else {
                     ss << ".";
                 }
@@ -215,10 +247,10 @@ operator()(const Vec1& lhs, const Vec2& rhs) const {
     } catch (NumCompExceptionBase& e) {
         if (base_type::failure_action == NumCompActionType::ThrowVerbose) {
             std::stringstream ss;
-            ss << "when comparing vectors " << std::endl
+            ss << " when comparing vectors " << std::endl
                << lhs << std::endl
                << "and" << std::endl
-               << rhs << std::endl;
+               << rhs << "." << std::endl;
             e.append(ss.str());
             throw;
         }
@@ -238,10 +270,68 @@ operator()(const Vec1& lhs, const Vec2& rhs) const {
             std::stringstream ss;
             ss << "Vector entry (" << i << ") not equal";
             if (base_type::failure_action == NumCompActionType::ThrowVerbose) {
-                ss << "when comparing vectors " << std::endl
+                ss << " when comparing vectors " << std::endl
                    << lhs << std::endl
                    << "and" << std::endl
-                   << rhs << std::endl;
+                   << rhs << "." << std::endl;
+            } else {
+                ss << ".";
+            }
+
+            e.append(ss.str());
+            throw;
+        }
+    }
+    return true;
+}
+
+template <typename Vec1, typename Vec2>
+bool NumEqual<linalgwrap::MultiVector<Vec1>, linalgwrap::MultiVector<Vec2>,
+              typename std::enable_if<
+                    linalgwrap::IsVector<Vec1>::value &&
+                    linalgwrap::IsVector<Vec2>::value &&
+                    std::is_same<typename Vec1::scalar_type,
+                                 typename Vec2::scalar_type>::value>::type>::
+operator()(const linalgwrap::MultiVector<Vec1>& lhs,
+           const linalgwrap::MultiVector<Vec2>& rhs) const {
+    // First compare the sizes. If we get an exception just pass it upwards
+    // appending the matrix values in case the user wants detailed throw
+    // information.
+    try {
+        if (!base_type::sizes_match(lhs.n_vectors(), rhs.n_vectors(),
+                                    "vectors")) {
+            return false;
+        }
+    } catch (NumCompExceptionBase& e) {
+        if (base_type::failure_action == NumCompActionType::ThrowVerbose) {
+            std::stringstream ss;
+            ss << "when comparing MultiVectors " << std::endl
+               << lhs << std::endl
+               << "and" << std::endl
+               << rhs << "." << std::endl;
+            e.append(ss.str());
+            throw;
+        }
+    }
+
+    // Now compare vectors
+    // If one is not equal return false or catch the exception and amend
+    // the data we are interested in before rethrowing.
+    NumEqual<Vec1, Vec2> is_equal{base_type::tolerance,
+                                  base_type::failure_action};
+    for (size_type i = 0; i < lhs.n_vectors(); ++i) {
+        try {
+            if (!is_equal(lhs[i], rhs[i])) {
+                return false;
+            }
+        } catch (NumCompExceptionBase& e) {
+            std::stringstream ss;
+            ss << "Vector (" << i << ") not equal";
+            if (base_type::failure_action == NumCompActionType::ThrowVerbose) {
+                ss << "when comparing MultiVectors " << std::endl
+                   << lhs << std::endl
+                   << "and" << std::endl
+                   << rhs << "." << std::endl;
             } else {
                 ss << ".";
             }

@@ -17,14 +17,14 @@
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef LINALG_MATRIX_I_HPP_
-#define LINALG_MATRIX_I_HPP_
-
-#include "linalgwrap/Constants.hh"
-#include "linalgwrap/DefaultMatrixIterator.hh"
-#include "linalgwrap/Exceptions.hh"
-#include "linalgwrap/SmallMatrix.hh"
-#include "linalgwrap/io/MatrixPrinter.hh"
+#pragma once
+#include "Constants.hh"
+#include "DefaultMatrixIterator.hh"
+#include "Exceptions.hh"
+#include "MultiVector.hh"
+#include "PtrVector.hh"
+#include "SmallMatrix.hh"
+#include "io/MatrixPrinter.hh"
 #include <complex>
 #include <cstddef>
 #include <iomanip>
@@ -37,6 +37,8 @@
 #include <utility>
 
 namespace linalgwrap {
+
+// TODO subview for Matrices
 
 template <typename IteratorCore>
 class MatrixIterator;
@@ -106,22 +108,22 @@ class Matrix_i : public krims::Subscribable {
      */
     ///@{
     /** Return an iterator to the beginning */
-    iterator begin();
+    iterator begin() { return iterator(*this, {0, 0}); }
 
     /** Return a const_iterator to the beginning */
-    const_iterator begin() const;
+    const_iterator begin() const { return cbegin(); }
 
     /** Return a const_iterator to the beginning */
-    const_iterator cbegin() const;
+    const_iterator cbegin() const { return const_iterator(*this, {0, 0}); }
 
     /** Return an iterator to the end */
-    iterator end();
+    iterator end() { return iterator(*this); }
 
     /** Return a const_iterator to the end */
-    const_iterator end() const;
+    const_iterator end() const { return cend(); }
 
     /** Return a const_iterator to the end */
-    const_iterator cend() const;
+    const_iterator cend() const { return const_iterator(*this); }
     ///@}
 
     /** \name Check for matrix properties
@@ -227,36 +229,6 @@ typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::operator[](
 }
 
 template <typename Scalar>
-typename Matrix_i<Scalar>::iterator Matrix_i<Scalar>::begin() {
-    return iterator(*this, {0, 0});
-}
-
-template <typename Scalar>
-typename Matrix_i<Scalar>::const_iterator Matrix_i<Scalar>::begin() const {
-    return cbegin();
-}
-
-template <typename Scalar>
-typename Matrix_i<Scalar>::const_iterator Matrix_i<Scalar>::cbegin() const {
-    return const_iterator(*this, {0, 0});
-}
-
-template <typename Scalar>
-typename Matrix_i<Scalar>::iterator Matrix_i<Scalar>::end() {
-    return iterator(*this);
-}
-
-template <typename Scalar>
-typename Matrix_i<Scalar>::const_iterator Matrix_i<Scalar>::end() const {
-    return cend();
-}
-
-template <typename Scalar>
-typename Matrix_i<Scalar>::const_iterator Matrix_i<Scalar>::cend() const {
-    return const_iterator(*this);
-}
-
-template <typename Scalar>
 bool Matrix_i<Scalar>::is_symmetric(real_type tolerance) const {
     // Check that the matrix is quadratic:
     if (n_rows() != n_cols()) return false;
@@ -355,4 +327,3 @@ std::ostream& operator<<(std::ostream& o, const Matrix_i<Scalar>& m) {
 }
 
 }  // namespace linalg
-#endif  // LINALG_MATRIX_I_HPP_

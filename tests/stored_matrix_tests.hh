@@ -97,11 +97,11 @@ void TestingLibrary<Matrix>::once_test_initialiser_list_constructor() const {
 template <typename Matrix>
 void TestingLibrary<Matrix>::run_checks() const {
     // Shorter aliases:
+    const NumCompAccuracyLevel eps = NumCompAccuracyLevel::MachinePrecision;
     const NumCompAccuracyLevel high = NumCompAccuracyLevel::Higher;
     const NumCompAccuracyLevel low = NumCompAccuracyLevel::Lower;
-    const NumCompAccuracyLevel supersloppy = NumCompAccuracyLevel::SuperSloppy;
     const NumCompAccuracyLevel sloppy = NumCompAccuracyLevel::Sloppy;
-    const NumCompAccuracyLevel eps = NumCompAccuracyLevel::MachinePrecision;
+    const NumCompAccuracyLevel supersloppy = NumCompAccuracyLevel::SuperSloppy;
 
     // Test construction from initialiser list
     once_test_initialiser_list_constructor();
@@ -116,8 +116,9 @@ void TestingLibrary<Matrix>::run_checks() const {
                     m_gen.generate(comptests::test_element_access, eps)));
     CHECK(rc::check(m_prefix + "Element access via extract_block",
                     m_gen.generate(comptests::test_extract_block, eps)));
-    CHECK(rc::check(m_prefix + "Data access via add_block_to",
-                    m_gen.generate(comptests::test_add_block_to, eps)));
+    CHECK(m_gen.run_test(
+          m_prefix + "Element access via transposed extract_block",
+          comptests::test_extract_transpose_block, eps));
     CHECK(rc::check(m_prefix + "Read-only iterator of small matrices",
                     m_gen.generate(comptests::test_readonly_iterator, eps)));
 
@@ -147,18 +148,29 @@ void TestingLibrary<Matrix>::run_checks() const {
     CHECK(rc::check(m_prefix + "trace calculation",
                     m_gen.generate(comptests::test_trace, low)));
 
-    // Operations
+    // Basic operations
     CHECK(rc::check(m_prefix + "Multiplication by scalar",
                     m_gen.generate(comptests::test_multiply_scalar)));
     CHECK(rc::check(m_prefix + "Divide by scalar",
                     m_gen.generate(comptests::test_divide_scalar)));
     CHECK(rc::check(m_prefix + "Add a matrix",
                     m_gen.generate(comptests::template test_add<Matrix>)));
-    CHECK(rc::check(m_prefix + "Subtract a matrix",
-                    m_gen.generate(comptests::template test_subtract<Matrix>)));
-    CHECK(rc::check(m_prefix + "Matrix multiplication",
-                    m_gen.generate(comptests::template test_multiply_by<Matrix>,
-                                   supersloppy)));
+
+    // Apply and matrix multiplication
+    CHECK(m_gen.run_test(
+          m_prefix + "Apply to MultiVector",
+          comptests::template test_apply_to<typename Matrix::vector_type>,
+          low));
+    CHECK(m_gen.run_test(m_prefix + "Transpose apply to MultiVector",
+                         comptests::template test_transpose_apply_to<
+                               typename Matrix::vector_type>,
+                         low));
+    CHECK(m_gen.run_test(m_prefix + "Test mmult", comptests::test_mmult, low));
+    CHECK(m_gen.run_test(m_prefix + "Test transposed mmult",
+                         comptests::test_transposed_mmult, low));
+    CHECK(m_gen.run_test(m_prefix + "Matrix multiplication",
+                         comptests::template test_multiply_by<Matrix>,
+                         supersloppy));
 }
 
 }  // namespace stored_matrix_tests
