@@ -262,6 +262,10 @@ class IteratorVector<T*, CT> : public MutableMemoryVector_i<T> {
         if (m_size != other.m_size) return false;
         return std::equal(m_begin, m_begin + m_size, other.m_begin);
     }
+
+    bool operator!=(const IteratorVector& other) const {
+        return !(*this == other);
+    }
     ///@}
 
     /** Read-only access to the raw memory */
