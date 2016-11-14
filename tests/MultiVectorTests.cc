@@ -103,6 +103,25 @@ TEST_CASE("MultiVector class", "[MultiVector]") {
         REQUIRE(mvconst[0] == v);
     }  // Basic constructors
 
+    SECTION("as_multivector() function") {
+        vector_type v{1, 2, 3, 4};
+        vector_type u{42, 43, 44};
+        vector_type ucopy(u);
+
+        auto mv1 = as_multivector(v);
+        REQUIRE(mv1.n_vectors() == 1u);
+        REQUIRE(mv1.n_elem() == 4u);
+        REQUIRE(mv1.at_ptr(0).is_shared_ptr() == false);
+        REQUIRE(mv1.at_ptr(0).get() == &v);
+        REQUIRE(mv1[0] == v);
+
+        auto mv2 = as_multivector(std::move(ucopy));
+        REQUIRE(mv2.n_vectors() == 1u);
+        REQUIRE(mv2.n_elem() == 3u);
+        REQUIRE(mv2.at_ptr(0).is_shared_ptr() == true);
+        REQUIRE(mv2[0] == u);
+    }  // As multivec
+
     SECTION("Checking Multivector push_back") {
         vector_type v{4, 8, 7, 3, 0, 2};
         MultiVector<vector_type> mv{vector_type(v)};
@@ -244,7 +263,7 @@ TEST_CASE("MultiVector class", "[MultiVector]") {
         CHECK(rc::check("Subview, deep and shallow copy", test));
     }  // Subview, deep and shallow copy
 
-    SECTION("Implicit conversion") {
+    SECTION("Vector type conversion") {
         auto test = []() {
             auto vecs = gen_vectors<vector_type>();
             auto mv = gen_multivector(vecs);
@@ -258,8 +277,8 @@ TEST_CASE("MultiVector class", "[MultiVector]") {
             }
         };
 
-        CHECK(rc::check("Implicit conversion", test));
-    }  // Implicit conversion
+        CHECK(rc::check("Vector type conversion", test));
+    }  // Vector type conversion
 
     SECTION("Obtaining memptrs") {
         auto test = []() {
