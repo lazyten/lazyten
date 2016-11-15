@@ -41,11 +41,6 @@ set(LINALGWRAP_TESTS_SOURCES
 	LazyMatrixProductTests.cc
 	LazyMatrixSumTests.cc
 
-	# Views
-	BlockViewTests.cc
-	ScaleViewTests.cc
-	TransposeViewTests.cc
-
 	# Lazy matrix implementations
 	BlockDiagonalMatrixTests.cc
 	DiagonalMatrixTests.cc
