@@ -25,14 +25,15 @@ namespace gen {
 
 /** \brief Generator for a numeric value, which is not zero.
  *
- * Honours the bounds max_n_elem, max_value and min_value. This means all
- * 1D-objects contain no more than 100 elements and all 2D objects have a
- * smaller dimensionality than 10x10. All entries are in the range
- * [min_value,max_value].
- */
+ * All entries are in the range [min_value,max_value] and
+ * centered around zero, i.e. the shrink towards *small values**
+ * which are not zero. If this is not desired, consider
+ * numeric_around(value), which shrinks towards the given value.
+ **/
 template <typename Value>
 rc::Gen<Value> numeric_nonZero() {
     return rc::gen::distinctFrom(gen::numeric<Value>(), 0.0);
 }
+
 }  // gen
 }  // linalgwrap

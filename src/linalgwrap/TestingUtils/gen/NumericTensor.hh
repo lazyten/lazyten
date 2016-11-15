@@ -90,8 +90,8 @@ struct NumericTensor<
             MultiVector<Vector> res;
             res.reserve(n_vecs);
             for (size_t i = 0; i < n_vecs; ++i) {
-                res.push_back(std::move(
-                      *NumericTensor<Vector>::numeric_tensor(n_elem)));
+                res.push_back(std::move(*rc::gen::scale(
+                      1.2, NumericTensor<Vector>::numeric_tensor(n_elem))));
             }
             return res;
         });
