@@ -32,8 +32,7 @@ TEST_CASE("LazyMatrixWrapper class", "[LazyMatrixWrapper]") {
 
     typedef double scalar_type;
     typedef SmallMatrix<scalar_type> stored_matrix_type;
-    typedef LazyMatrixWrapper<stored_matrix_type, stored_matrix_type>
-          lazy_matrix_type;
+    typedef LazyMatrixWrapper<stored_matrix_type> lazy_matrix_type;
     typedef typename stored_matrix_type::size_type size_type;
 
     // Generator for the args
@@ -50,7 +49,7 @@ TEST_CASE("LazyMatrixWrapper class", "[LazyMatrixWrapper]") {
 
     // Generator for the sut
     auto lazy_generator = [](stored_matrix_type m) {
-        lazy_matrix_type wrap{m};
+        lazy_matrix_type wrap{std::move(m)};
         return wrap;
     };
 

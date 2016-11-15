@@ -1,4 +1,4 @@
-
+//
 // Copyright (C) 2016 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
@@ -221,23 +221,85 @@ struct ComparativeTests {
     template <typename Vector>
     linalgwrap_declare_comptest(test_transpose_apply_to);
 
+    /** Are easy problems allowed (by default yes) */
+    static bool allow_easy_problems;
+
+    /** Switch to hard problems */
+    static void skip_easy_cases() { allow_easy_problems = false; }
+
   private:
+    /** Generator for the extractor ranges in extract_block
+     *
+     * If numelements==1 we can only return 0
+     * Else:
+     *   - For easy problems: Try to return more values which are larger than 0
+     *   - For hard problems: Always return values larger than 0
+     * */
+    static Gen<size_type> gen_range_length(size_type numelements) {
+        if (numelements == 1) {
+            return gen::just<size_type>(0);
+        } else {
+            if (allow_easy_problems) {
+                return gen::weightedOneOf<size_type>(
+                      {{1, gen::just<size_type>(0)},
+                       {4, gen::inRange<size_type>(1, numelements)}});
+            } else {
+                return gen::inRange<size_type>(1, numelements);
+            }
+        }
+    }
+
     /** Generator for the c_this coefficients for extract_block, mmult and apply
+     *
+     * Try to return far more more non-zeros than zeros.
      */
     static Gen<scalar_type> gen_c_this() {
-        return gen::weightedOneOf<scalar_type>(
-              {{3, gen::scale(0.9, gen::numeric_nonZero<scalar_type>())},
-               {1, gen::scale(0.9, gen::numeric<scalar_type>())}});
+        if (allow_easy_problems) {
+            return gen::weightedOneOf<scalar_type>(
+                  {{2, gen::scale(0.9, gen::numeric_around<scalar_type>(1.0))},
+                   {3, gen::scale(0.9, gen::numeric<scalar_type>())},
+                   {1, gen::just<scalar_type>(0.0)}});
+        } else {
+            return gen::scale(0.9, gen::numeric<scalar_type>());
+        }
     }
 
     /** Generator for the c_out coefficients for extract_block, mmult and
-     * apply*/
-    static Gen<scalar_type> gen_c_out() {
-        return gen::weightedOneOf<scalar_type>(
-              {{1, gen::scale(0.9, gen::numeric_nonZero<scalar_type>())},
-               {2, gen::scale(0.9, gen::numeric<scalar_type>())}});
+     * apply
+     *
+     * Try to return mostly evenly distributed zeros and non-zeros
+     * with focus on some more zeros unless allow_zero is false or we
+     * deal with only tough problems, then always return non-zero.
+     * */
+    static Gen<scalar_type> gen_c_out(const bool allow_zero = true) {
+        if (allow_zero && allow_easy_problems) {
+            return gen::weightedOneOf<scalar_type>(
+                  {{2, gen::scale(0.9, gen::numeric_around(1.0))},
+                   {3, gen::just(0.0)}});
+        } else {
+            return gen::scale(0.9, gen::numeric_around(1.0));
+        }
+    }
+
+    /** Generator to generate the problem matrices or vectors for
+     * apply and mmult
+     *
+     * If allow_easy_problems is false, we mostly return tensors with more
+     * non-zero elements.
+     * */
+    template <typename Object>
+    static Gen<Object> gen_problem_matrix(size_type n_rows, size_type n_cols) {
+        if (allow_easy_problems) {
+            return gen::numeric_tensor<Object>(n_rows, n_cols);
+        } else {
+            return gen::scale(4.0, gen::numeric_tensor<Object>(n_rows, n_cols));
+        }
     }
 };
+
+// Define default value to true
+template <typename Model, typename Sut>
+bool ComparativeTests<Model, Sut>::allow_easy_problems = true;
 
 //
 // -------------------------------------------------------
@@ -418,26 +480,35 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_setting_elements_vectorised(
 linalgwrap_define_comptest(test_extract_block) {
     typedef typename StoredTypeOf<Sut>::type stored_matrix_type;
 
-    size_type nrows =
-          *gen::scale(2.0, gen::inRange<size_type>(0, model.n_rows()))
-                 .as("Number of rows of the extracted matrix");
-    size_type ncols =
-          *gen::scale(2.0, gen::inRange<size_type>(0, model.n_cols()))
-                 .as("Number of cols of the extracted matrix");
+    size_type nrows = *gen_range_length(model.n_rows())
+                             .as("Number of rows of the extracted matrix");
+    size_type ncols = *gen_range_length(model.n_cols())
+                             .as("Number of cols of the extracted matrix");
     size_type start_row =
           *gen::inRange<size_type>(0, model.n_rows() - nrows).as("Start row");
     size_type start_col =
           *gen::inRange<size_type>(0, model.n_cols() - ncols).as("Start col");
-    auto out = *gen::scale(0.8, gen::numeric_tensor<stored_matrix_type>(nrows,
+    auto out = *gen::scale(0.9, gen::numeric_tensor<stored_matrix_type>(nrows,
                                                                         ncols))
                       .as("Matrix to extract values into");
     auto c_this = *gen_c_this().as("Coefficient for sut matrix");
-    auto c_M = *gen_c_out().as("Coefficient for out matrix");
+
+    // allow c_M only to be zero if out does not have a small norm.
+    auto c_M = *gen_c_out(norm_frobenius(out) >= 1e-12)
+                      .as("Coefficient for out matrix");
 #ifdef LINALGWRAP_TESTS_VERBOSE
-    RC_CLASSIFY(c_this == 0.0, "Zero matrix coefficient (c_this==0)");
-    RC_CLASSIFY(c_M == 0.0, "Zero output coefficient (c_M == 0)");
-    RC_CLASSIFY(nrows == 0 || ncols == 0, "Empty extractor range");
-    RC_CLASSIFY(norm_frobenius(out) < 1e-12, "Small norm of outmatrix");
+    RC_CLASSIFY(c_this == 0.0,
+                "extract_block: Matrix coefficient is zero (c_this==0)");
+    RC_CLASSIFY(c_M == 0.0,
+                "extract_block: Output coefficient is zero(c_M == 0)");
+    RC_CLASSIFY(nrows == 0 || ncols == 0,
+                "extract_block: Empty extractor range");
+    if (norm_frobenius(out) == 0) {
+        RC_CLASSIFY(true, "extract_block: Outmatrix is zero");
+    } else {
+        RC_CLASSIFY(norm_frobenius(out) < 1e-12,
+                    "extract_block: Outmatrix has small norm");
+    }
 #endif
 
     // Copy the out, that we have an unmodified version
@@ -462,28 +533,38 @@ linalgwrap_define_comptest(test_extract_block) {
 linalgwrap_define_comptest(test_extract_transpose_block) {
     typedef typename StoredTypeOf<Sut>::type stored_matrix_type;
 
-    size_type nrows =
-          *gen::scale(2.0, gen::inRange<size_type>(0, model.n_cols()))
-                 .as("Number of rows of the extracted matrix");
-    size_type ncols =
-          *gen::scale(2.0, gen::inRange<size_type>(0, model.n_rows()))
-                 .as("Number of cols of the extracted matrix");
+    size_type nrows = *gen_range_length(model.n_cols())
+                             .as("Number of rows of the extracted matrix");
+    size_type ncols = *gen_range_length(model.n_rows())
+                             .as("Number of cols of the extracted matrix");
     size_type start_row = *gen::inRange<size_type>(0, model.n_cols() - nrows)
                                  .as("Start row in transp. sut");
     size_type start_col = *gen::inRange<size_type>(0, model.n_rows() - ncols)
                                  .as("Start col in transp. sut");
-    auto out = *gen::scale(0.8, gen::numeric_tensor<stored_matrix_type>(nrows,
+    auto out = *gen::scale(0.9, gen::numeric_tensor<stored_matrix_type>(nrows,
                                                                         ncols))
                       .as("Matrix to extract values into");
     auto c_this = *gen_c_this().as("Coefficient for sut matrix");
-    auto c_M = *gen_c_out().as("Coefficient for out matrix");
+
+    // allow c_M only to be zero if out does not have a small norm.
+    auto c_M = *gen_c_out(norm_frobenius(out) >= 1e-12)
+                      .as("Coefficient for out matrix");
+
 // TODO bool conjtransp = *gen::arbitrary<bool>().as("Apply complex
 // conjugation");
 #ifdef LINALGWRAP_TESTS_VERBOSE
-    RC_CLASSIFY(c_this == 0.0, "Zero matrix coefficient (c_this==0)");
-    RC_CLASSIFY(c_M == 0.0, "Zero output coefficient (c_M == 0)");
-    RC_CLASSIFY(nrows == 0 || ncols == 0, "Empty extractor range");
-    RC_CLASSIFY(norm_frobenius(out) < 1e-12, "Small norm of outmatrix");
+    RC_CLASSIFY(c_this == 0.0,
+                "extract_tr_block: Matrix coefficient is zero (c_this==0)");
+    RC_CLASSIFY(c_M == 0.0,
+                "extract_tr_block: Output coefficient is zero (c_M == 0)");
+    RC_CLASSIFY(nrows == 0 || ncols == 0,
+                "extract_tr_block: Empty extractor range");
+    if (norm_frobenius(out) == 0) {
+        RC_CLASSIFY(true, "extract_tr_block: Outmatrix is zero");
+    } else {
+        RC_CLASSIFY(norm_frobenius(out) < 1e-12,
+                    "extract_tr_block: Outmatrix has small norm");
+    }
 #endif
 
     // Copy the out, that we have an unmodified version
@@ -657,7 +738,7 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_divide_scalar(
       const compmat_type& model, const sutmat_type& sut,
       const NumCompAccuracyLevel tolerance) {
     // Generate an arbitrary factor, but not too large
-    auto c = *gen::numeric_nonZero<scalar_type>().as("Coefficient");
+    auto c = *gen::numeric_around<scalar_type>(1.0).as("Coefficient");
 
     // Do the multiplication:
     auto res = sut / c;
@@ -677,13 +758,18 @@ linalgwrap_define_comptest_tmpl(test_multiply_by, OtherMatrix) {
     auto othersize =
           *gen::numeric_size<2>().as("Number of columns of the rhs matrix");
 #ifdef LINALGWRAP_TESTS_VERBOSE
-    RC_CLASSIFY(othersize == 0, "Empty rhs matrix");
+    RC_CLASSIFY(othersize == 0, "test_mult_by: Empty rhs matrix");
 #endif
 
     // Generate another matrix:
     OtherMatrix mrhs = *gen::scale(
-          0.9, gen::fixed_size<OtherMatrix>(model.n_cols(), othersize)
-                     .as("Multiplication rhs"));
+          0.95, gen::fixed_size<OtherMatrix>(model.n_cols(), othersize)
+                      .as("Multiplication rhs"));
+
+#ifdef LINALGWRAP_TESTS_VERBOSE
+    RC_CLASSIFY(norm_frobenius(mrhs) == 0,
+                "test_mult_by: Zero matrix multiplied");
+#endif
 
     // Do the low-level multiplication:
     Model result_model(model.n_rows(), othersize, false);
@@ -701,20 +787,34 @@ linalgwrap_define_comptest(test_mmult) {
 
     auto col =
           *gen::numeric_size<2>().as("Number of columns of the rhs matrix");
-    auto mrhs = *gen::scale(0.9, gen::numeric_tensor<stored_matrix_type>(
-                                       model.n_cols(), col))
+    auto mrhs = *gen::scale(0.95, gen_problem_matrix<stored_matrix_type>(
+                                        model.n_cols(), col))
                        .as("Multiplication matrix");
-    auto res = *gen::scale(0.8, gen::numeric_tensor<stored_matrix_type>(
-                                      model.n_rows(), col))
+    auto res = *gen::scale(0.85, gen_problem_matrix<stored_matrix_type>(
+                                       model.n_rows(), col))
                       .as("Result matrix");
     auto c_this = *gen_c_this().as("Coefficient for sut matrix");
-    auto coeff = *gen_c_out().as("Coefficient for out matrix");
+
+    // allow c_M only to be zero if out does not have a small norm.
+    auto coeff = *gen_c_out(norm_frobenius(res) >= 1e-12)
+                        .as("Coefficient for out matrix");
 #ifdef LINALGWRAP_TESTS_VERBOSE
-    RC_CLASSIFY(c_this == 0.0, "Zero matrix coefficient (c_this==0)");
-    RC_CLASSIFY(coeff == 0.0, "Zero output coefficient (c_M == 0)");
-    RC_CLASSIFY(col == 0, "Empty output matrix");
-    RC_CLASSIFY(norm_frobenius(mrhs) < 1e-12, "Small norm of inmatrix");
-    RC_CLASSIFY(norm_frobenius(res) < 1e-12, "Small norm of outmatrix");
+    RC_CLASSIFY(c_this == 0.0, "mmult: Matrix coefficient is zero (c_this==0)");
+    RC_CLASSIFY(coeff == 0.0, "mmult: Output coefficient is zero (c_M == 0)");
+    RC_CLASSIFY(col == 0, "mmult: Empty output matrix");
+
+    if (norm_frobenius(mrhs) == 0) {
+        RC_CLASSIFY(true, "mmult: Inmatrix is zero");
+    } else {
+        RC_CLASSIFY(norm_frobenius(mrhs) < 1e-12,
+                    "mmult: Inmatrix has small norm");
+    }
+    if (norm_frobenius(res) == 0) {
+        RC_CLASSIFY(true, "mmult: Outmatrix is zero");
+    } else {
+        RC_CLASSIFY(norm_frobenius(res) < 1e-12,
+                    "mmult: Outmatrix has small norm");
+    }
 #endif
 
     // Perform operations on model:
@@ -736,20 +836,35 @@ linalgwrap_define_comptest(test_transposed_mmult) {
 
     auto col =
           *gen::numeric_size<2>().as("Number of columns of the rhs matrix");
-    auto mrhs = *gen::scale(0.9, gen::numeric_tensor<stored_matrix_type>(
-                                       model.n_rows(), col))
+    auto mrhs = *gen::scale(0.95, gen_problem_matrix<stored_matrix_type>(
+                                        model.n_rows(), col))
                        .as("Multiplication matrix");
-    auto res = *gen::scale(0.8, gen::numeric_tensor<stored_matrix_type>(
-                                      model.n_cols(), col))
+    auto res = *gen::scale(0.85, gen_problem_matrix<stored_matrix_type>(
+                                       model.n_cols(), col))
                       .as("Result matrix");
     auto c_this = *gen_c_this().as("Coefficient for sut matrix");
-    auto coeff = *gen_c_out().as("Coefficient for out matrix");
+
+    // allow c_M only to be zero if out does not have a small norm.
+    auto coeff = *gen_c_out(norm_frobenius(res) >= 1e-12)
+                        .as("Coefficient for out matrix");
 #ifdef LINALGWRAP_TESTS_VERBOSE
-    RC_CLASSIFY(c_this == 0.0, "Zero matrix coefficient (c_this==0)");
-    RC_CLASSIFY(coeff == 0.0, "Zero output coefficient (c_M == 0)");
-    RC_CLASSIFY(col == 0, "Empty output matrix");
-    RC_CLASSIFY(norm_frobenius(mrhs) < 1e-12, "Small norm of inmatrix");
-    RC_CLASSIFY(norm_frobenius(res) < 1e-12, "Small norm of outmatrix");
+    RC_CLASSIFY(c_this == 0.0,
+                "mmult_trans: Matrix coefficient is zero (c_this==0)");
+    RC_CLASSIFY(coeff == 0.0,
+                "mmult_trans: Output coefficient is zero (c_M == 0)");
+    RC_CLASSIFY(col == 0, "mmult_trans: Empty output matrix");
+    if (norm_frobenius(mrhs) == 0) {
+        RC_CLASSIFY(true, "mmult_trans: Inmatrix is zero");
+    } else {
+        RC_CLASSIFY(norm_frobenius(mrhs) < 1e-12,
+                    "mmult_trans: Inmatrix has small norm");
+    }
+    if (norm_frobenius(res) == 0) {
+        RC_CLASSIFY(true, "mmult_trans: Outmatrix is zero");
+    } else {
+        RC_CLASSIFY(norm_frobenius(res) < 1e-12,
+                    "mmult_trans: Outmatrix is zero");
+    }
 #endif
 
     // Perform operations on model:
@@ -772,17 +887,38 @@ linalgwrap_define_comptest_tmpl(test_apply_to, Vector) {
     auto n_vectors =
           *gen::inRange<size_type>(1, 6).as("Number of vectors to apply to");
     auto mvin =
-          *gen::numeric_tensor<MultiVector<Vector>>(model.n_cols(), n_vectors)
+          *gen_problem_matrix<MultiVector<Vector>>(model.n_cols(), n_vectors)
                  .as("Vectors to apply to");
-    auto mvout = *gen::scale(0.8, gen::numeric_tensor<MultiVector<Vector>>(
+    auto mvout = *gen::scale(0.9, gen_problem_matrix<MultiVector<Vector>>(
                                         model.n_rows(), n_vectors))
                         .as("Result vectors");
     auto c_this = *gen_c_this().as("Coefficient for sut matrix");
-    auto coeff = *gen_c_out().as("Coefficient for out vectors");
+
+    // Norm of outvectors:
+    const auto l2norms_out = norm_l2_squared(mvout);
+    const scalar_type norm_out = std::sqrt(
+          std::accumulate(std::begin(l2norms_out), std::end(l2norms_out), 0));
+
+    // Norm of invectors:
+    const auto l2norms_in = norm_l2_squared(mvin);
+    const scalar_type norm_in = std::sqrt(
+          std::accumulate(std::begin(l2norms_in), std::end(l2norms_in), 0));
+
+    auto coeff =
+          *gen_c_out(norm_out >= 1e-12).as("Coefficient for out vectors");
 #ifdef LINALGWRAP_TESTS_VERBOSE
-    RC_CLASSIFY(c_this == 0.0, "Zero matrix coefficient (c_this==0)");
-    RC_CLASSIFY(coeff == 0.0, "Zero output coefficient (c_y == 0)");
-// TODO classification of multivector norms
+    RC_CLASSIFY(c_this == 0.0, "apply: Matrix coefficient is zero (c_this==0)");
+    RC_CLASSIFY(coeff == 0.0, "apply: Output coefficient is zero (c_y == 0)");
+    if (norm_in == 0) {
+        RC_CLASSIFY(true, "apply: Invectors are zero ");
+    } else {
+        RC_CLASSIFY(norm_in < 1e-12, "apply: Invectors have small norm");
+    }
+    if (norm_out == 0) {
+        RC_CLASSIFY(true, "apply: Outvectors are zero");
+    } else {
+        RC_CLASSIFY(norm_out < 1e-12, "apply: Outvectors have small norm");
+    }
 #endif
 
     // Perform operation on model:
@@ -806,17 +942,41 @@ linalgwrap_define_comptest_tmpl(test_transpose_apply_to, Vector) {
     auto n_vectors =
           *gen::inRange<size_type>(1, 6).as("Number of vectors to apply to");
     auto mvin =
-          *gen::numeric_tensor<MultiVector<Vector>>(model.n_rows(), n_vectors)
+          *gen_problem_matrix<MultiVector<Vector>>(model.n_rows(), n_vectors)
                  .as("Vectors to apply to");
-    auto mvout = *gen::scale(0.8, gen::numeric_tensor<MultiVector<Vector>>(
+    auto mvout = *gen::scale(0.9, gen_problem_matrix<MultiVector<Vector>>(
                                         model.n_cols(), n_vectors))
                         .as("Result vectors");
     auto c_this = *gen_c_this().as("Coefficient for sut matrix");
-    auto coeff = *gen_c_out().as("Coefficient for out vectors");
+
+    // Norm of outvectors:
+    const auto l2norms_out = norm_l2_squared(mvout);
+    const scalar_type norm_out = std::sqrt(
+          std::accumulate(std::begin(l2norms_out), std::end(l2norms_out), 0));
+
+    // Norm of invectors:
+    const auto l2norms_in = norm_l2_squared(mvin);
+    const scalar_type norm_in = std::sqrt(
+          std::accumulate(std::begin(l2norms_in), std::end(l2norms_in), 0));
+
+    auto coeff =
+          *gen_c_out(norm_out >= 1e-12).as("Coefficient for out vectors");
 #ifdef LINALGWRAP_TESTS_VERBOSE
-    RC_CLASSIFY(c_this == 0.0, "Zero matrix coefficient (c_this==0)");
-    RC_CLASSIFY(coeff == 0.0, "Zero output coefficient (c_y == 0)");
-// TODO classification of multivector norms
+    RC_CLASSIFY(c_this == 0.0,
+                "apply_trans: Matrix coefficient is zero (c_this==0)");
+    RC_CLASSIFY(coeff == 0.0,
+                "apply_trans: Output coefficient is zero (c_y == 0)");
+    if (norm_in == 0) {
+        RC_CLASSIFY(true, "apply_trans: Invectors are zero");
+    } else {
+        RC_CLASSIFY(norm_in < 1e-12, "apply_trans: Invectors have small norm");
+    }
+    if (norm_out == 0) {
+        RC_CLASSIFY(true, "apply_trans: Outvectors are zero");
+    } else {
+        RC_CLASSIFY(norm_out < 1e-12,
+                    "apply_trans: Outvectors have small norm");
+    }
 #endif
 
     // Perform operation on model:
@@ -850,6 +1010,10 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_add(
     auto madd = *gen::fixed_size<OtherMatrix>(model.n_rows(), model.n_cols())
                        .as("Matrix to add");
 
+#ifdef LINALGWRAP_TESTS_VERBOSE
+    RC_CLASSIFY(norm_frobenius(madd) == 0, "add: Zero matrix added");
+#endif
+
     // Perform the operation
     auto res = sut + madd;
 
@@ -877,6 +1041,10 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_subtract(
     // generate another matrix of the same size:
     auto msub = *gen::fixed_size<OtherMatrix>(model.n_rows(), model.n_cols())
                        .as("Matrix to subtract");
+
+#ifdef LINALGWRAP_TESTS_VERBOSE
+    RC_CLASSIFY(norm_frobenius(msub) == 0, "sub: Zero matrix subtracted");
+#endif
 
     // Perform the operation
     auto res = sut - msub;

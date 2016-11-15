@@ -148,7 +148,7 @@ void TestingLibrary<Matrix>::run_checks() const {
     CHECK(rc::check(m_prefix + "trace calculation",
                     m_gen.generate(comptests::test_trace, low)));
 
-    // Basic operations
+    // Basic operations (+,-,scaling)
     CHECK(rc::check(m_prefix + "Multiplication by scalar",
                     m_gen.generate(comptests::test_multiply_scalar)));
     CHECK(rc::check(m_prefix + "Divide by scalar",

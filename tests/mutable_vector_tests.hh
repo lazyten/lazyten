@@ -200,7 +200,7 @@ linalgwrap_define_comptest(test_multiply_scalar) {
 
 linalgwrap_define_comptest(test_divide_scalar) {
     // Generate an arbitrary factor, but not too large
-    auto c = *gen::numeric_nonZero<scalar_type>().as("Coefficient");
+    auto c = *gen::numeric_around<scalar_type>(1.0).as("Coefficient");
 
     // Do the multiplication:
     auto res = sut / c;

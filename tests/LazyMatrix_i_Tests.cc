@@ -41,6 +41,9 @@ class SimpleLazyMatrix : public LazyMatrix_i<StoredMatrix> {
 
     SimpleLazyMatrix(stored_matrix_type m) : m_stored{m} {}
 
+    // Also test the transpose stuff
+    bool has_transpose_operation_mode() const override { return true; }
+
     size_type n_rows() const override { return m_stored.n_rows(); }
     size_type n_cols() const override { return m_stored.n_cols(); }
     scalar_type operator()(size_type i, size_type j) const override {

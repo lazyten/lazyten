@@ -326,4 +326,4 @@ std::ostream& operator<<(std::ostream& o, const Matrix_i<Scalar>& m) {
     return o;
 }
 
-}  // namespace linalg
+}  // namespace linalgwrap

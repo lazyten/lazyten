@@ -46,7 +46,7 @@ void scale_or_set(MutableMemoryVector_i<Scalar>& o, Scalar s) {
         o.set_zero();
     } else {
         std::transform(std::begin(o), std::end(o), std::begin(o),
-                       [s](Scalar& elem) { elem *= s });
+                       [s](Scalar& elem) { return s * elem; });
     }
 }
 

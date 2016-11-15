@@ -25,6 +25,7 @@
 set(LINALGWRAP_SOURCES
 	version.cc
 	io/Mathematica.cc
+	BaseInterfaces/Transposed.cc
 	Base/Solvers/SolverStateBase.cc
 	Base/Solvers/IterativeSolverKeys.cc
 	Base/Solvers/EigensolverBaseKeys.cc

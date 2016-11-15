@@ -17,32 +17,19 @@
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef LINALG_ABSTRACT_MATRIX_HPP_
-#define LINALG_ABSTRACT_MATRIX_HPP_
-
+#pragma once
 #include "linalgwrap/LazyMatrixExpression.hh"
-#include <memory>
+#include <krims/RCPWrapper.hh>
 
 namespace linalgwrap {
 
 /** \brief Class for enabeling lazy evaluation of matrix operations
  *  onto another matrix class, which is not already lazy.
  *
- * \tparam InnerMatrix:   The type of the inner matrix that is made lazy
- * \tparam StoredMatrix:  The type of the stored matrix to use
+ * \tparam StoredMatrix:  The type of the stored matrix to make lazy.
  */
-template <typename StoredMatrix, typename InnerMatrix>
+template <typename StoredMatrix>
 class LazyMatrixWrapper : public LazyMatrixExpression<StoredMatrix> {
-    static_assert(
-          std::is_same<typename InnerMatrix::scalar_type,
-                       typename StoredMatrix::scalar_type>::value,
-          "InnerMatrix and StoredMatrix need to have the same scalar type");
-
-    static_assert(
-          std::is_base_of<StoredMatrix_i<typename InnerMatrix::scalar_type>,
-                          InnerMatrix>::value,
-          "InnerMatrix must be a child class of StoredMatrix_i");
-
   public:
     typedef LazyMatrixExpression<StoredMatrix> base_type;
     typedef typename base_type::stored_matrix_type stored_matrix_type;
@@ -51,40 +38,40 @@ class LazyMatrixWrapper : public LazyMatrixExpression<StoredMatrix> {
     typedef typename base_type::lazy_matrix_expression_ptr_type
           lazy_matrix_expression_ptr_type;
 
-    typedef InnerMatrix inner_matrix_type;
-
     //
     // Construction and destruction
     //
     /** \brief Constructor from shared pointer
      *
-     * Make a copy of the shared pointer and use that as the inner matrix
+     * Make a copy of the RCP pointer and use that as the inner matrix
      * object. All modifications done via this interface of cause are also
      * noticed from the Pointer provided here.
      */
-    explicit LazyMatrixWrapper(std::shared_ptr<inner_matrix_type> inner)
+    explicit LazyMatrixWrapper(
+          krims::RCPWrapper<const stored_matrix_type> inner)
           : m_inner{std::move(inner)} {}
 
-    /** \brief Constructor from inner_matrix_type (for implicit conversion) */
-    explicit LazyMatrixWrapper(inner_matrix_type&& inner)
-          : m_inner{std::make_shared<inner_matrix_type>(
-                  std::forward<inner_matrix_type>(inner))} {}
+    /** \brief Constructor from stored_matrix_type, taking ownership of
+     * the passed object. */
+    explicit LazyMatrixWrapper(stored_matrix_type&& inner)
+          : m_inner{std::make_shared<const stored_matrix_type>(
+                  std::move(inner))} {}
 
-    /** \brief Constructor from inner_matrix_type (for explicit conversion)
+    /** \brief Constructor from stored_matrix_type not taking
+     *         ownership
      *
-     * Warning: This copies the full content of inner.
+     *  \note This will not store a copy, but just a reference
+     *  to the passed object inside, hence the passed object
+     *  has to live longer than this class.
      */
-    explicit LazyMatrixWrapper(const inner_matrix_type& inner)
-          : m_inner{std::make_shared<inner_matrix_type>(inner)} {}
+    explicit LazyMatrixWrapper(const stored_matrix_type& inner)
+          : m_inner{krims::make_subscription(inner, "LazyMatrixWrapper")} {}
 
     //
     // Access to inner matrix
     //
     /** Const access to the inner matrix object */
-    const inner_matrix_type& inner_matrix() const { return *m_inner; }
-
-    /** Non-const access to the inner data object */
-    inner_matrix_type& inner_matrix() { return *m_inner; }
+    const stored_matrix_type& inner_matrix() const { return *m_inner; }
 
     //
     // Matrix_i interface
@@ -103,45 +90,84 @@ class LazyMatrixWrapper : public LazyMatrixExpression<StoredMatrix> {
     //
     // LazyMatrixExpression interface
     //
-    /** \brief Extract a block of values out of the matrix and
-     *         return it as a stored matrix of the appropriate size
-     *
-     * For more details of the interface see the function of the same
-     * name in ``LazyMatrixExpression``.
-     *
-     * \param row_range   The Range object representing the range of rows
-     *                    to extract. Note that it is a half-open interval
-     *                    i.e. the LHS is inclusive, but the RHS not.
-     *                    The Range may not be empty.
-     * \param col_range   The Range object representing the range of
-     *                    columns to extract.
-     *                    The Range may not be empty.
-     */
-    stored_matrix_type extract_block(
-          Range<size_type> row_range,
-          Range<size_type> col_range) const override {
-        return m_inner->extract_block(row_range, col_range);
+    /** Are operation modes Transposed::Trans and Transposed::ConjTrans
+     *  supported for this matrix type.
+     **/
+    bool has_transpose_operation_mode() const override {
+        return m_inner->has_transpose_operation_mode();
     }
 
-    /** \brief Add a block of values of the matrix to the stored matrix
-     *         provided by reference.
+    /** Extract a block of a matrix and (optionally) add it to
+     * a different matrix.
      *
-     * For more details of the interface see the function of the same name
-     * in ``LazyMatrixExpression``.
+     *  Loosely speaking we perform
+     *  \[ M = c_M \cdot M + (A^{mode})_{rowrange,colrange} \]
+     *  where
+     *    - rowrange = [start_row, start_row+in.n_rows() ) and
+     *    - colrange = [start_col, start_col+in.n_cols() )
      *
-     *  \param in   Matrix to add the values to. It is assumed that it
-     *              already has the correct sparsity structure to take
-     *              all the values. Its size defines the size of the
-     *              block. May not be an empty matrix.
-     *  \param start_row  The row index of the first element to extract
-     *  \param start_col  The column index of the first element to extract
-     *  \param c_this     The coefficient to multiply this matrix with
-     *                    before extracting.
+     * More details can be found in the same function in
+     * LazyMatrixExpression
      */
-    void add_block_to(
-          stored_matrix_type& in, size_type start_row, size_type start_col,
-          scalar_type c_this = Constants<scalar_type>::one) const override {
-        m_inner->add_block_to(in, start_row, start_col, c_this);
+    void extract_block(
+          stored_matrix_type& M, const size_type start_row,
+          const size_type start_col, const Transposed mode = Transposed::None,
+          const scalar_type c_this = Constants<scalar_type>::one,
+          const scalar_type c_M = Constants<scalar_type>::zero) const override {
+        m_inner->extract_block(M, start_row, start_col, mode, c_this, c_M);
+    }
+
+    /** \brief Compute the Matrix-Multivector application -- generic version
+     *
+     * Loosely speaking we perform
+     * \[ y = c_this \cdot A^\text{mode} \cdot x + c_y \cdot y. \]
+     *
+     * See LazyMatrixExpression for more details
+     *
+     * \note Whenever the virtual apply method is overwritten, this method
+     * should be implemented as well as it assures that conversion to
+     * MultiVector<MutableMemoryVector_i<scalar_type>> can actually occur
+     * automatically.
+     */
+    template <
+          typename VectorIn, typename VectorOut,
+          mat_vec_apply_enabled_t<LazyMatrixWrapper, VectorIn, VectorOut>...>
+    void apply(const MultiVector<VectorIn>& x, MultiVector<VectorOut>& y,
+               const Transposed mode = Transposed::None,
+               const scalar_type c_this = Constants<scalar_type>::one,
+               const scalar_type c_y = Constants<scalar_type>::zero) const {
+        m_inner->apply(x, y, mode, c_this, c_y);
+    }
+
+    /** \brief Compute the Matrix-Multivector application
+     *
+     * Loosely speaking we perform
+     * \[ y = c_this \cdot A^\text{mode} \cdot x + c_y \cdot y. \]
+     *
+     * See LazyMatrixExpression for more details
+     */
+    void apply(
+          const MultiVector<const MutableMemoryVector_i<scalar_type>>& x,
+          MultiVector<MutableMemoryVector_i<scalar_type>>& y,
+          const Transposed mode = Transposed::None,
+          const scalar_type c_this = Constants<scalar_type>::one,
+          const scalar_type c_y = Constants<scalar_type>::zero) const override {
+        m_inner->apply(x, y, mode, c_this, c_y);
+    }
+
+    /** Perform a matrix-matrix product.
+     *
+     * Loosely performs the operation
+     * \[ out = c_this \cdot A^\text{mode} \cdot in + c_out \cdot out. \]
+     *
+     * See LazyMatrixExpression for more details
+     */
+    void mmult(const stored_matrix_type& in, stored_matrix_type& out,
+               const Transposed mode = Transposed::None,
+               const scalar_type c_this = Constants<scalar_type>::one,
+               const scalar_type c_out =
+                     Constants<scalar_type>::zero) const override {
+        m_inner->mmult(in, out, mode, c_this, c_out);
     }
 
     /** \brief Update the internal data
@@ -152,13 +178,6 @@ class LazyMatrixWrapper : public LazyMatrixExpression<StoredMatrix> {
         // Do nothing.
     }
 
-    /** \brief Multiplication with a stored matrix */
-    stored_matrix_type operator*(const stored_matrix_type& m) const override {
-        // TODO assume that stored_matrix_type and inner_matrix_type
-        //      can be multiplied together.
-        return (*m_inner) * m;
-    }
-
     /** \brief Clone the expression */
     lazy_matrix_expression_ptr_type clone() const override {
         // return a copy enwrapped in the pointer type
@@ -166,16 +185,7 @@ class LazyMatrixWrapper : public LazyMatrixExpression<StoredMatrix> {
     }
 
   private:
-    std::shared_ptr<inner_matrix_type> m_inner;
+    krims::RCPWrapper<const stored_matrix_type> m_inner;
 };
 
-/** \brief Convenience function to construct a LazyMatrixWrapper */
-template <typename StoredMatrix, typename InnerMatrix, typename... Args>
-LazyMatrixWrapper<StoredMatrix, InnerMatrix> make_lazy_matrix(Args&&... args) {
-    return LazyMatrixWrapper<StoredMatrix, InnerMatrix>(std::move(
-          std::make_shared<InnerMatrix>(std::forward<Args>(args)...)));
-}
-
-}  // namespace linalg
-
-#endif
+}  // namespace linalgwrap

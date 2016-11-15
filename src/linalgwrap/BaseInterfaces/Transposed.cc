@@ -16,10 +16,22 @@
 // You should have received a copy of the GNU General Public License
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
-#pragma once
 
-// Comment out to enable more verbose testing output
-// #define LINALGWRAP_TESTS_VERBOSE
+#include "Transposed.hh"
 
-// Comment out to have debug output for matrix and vector generation
-// #define DEBUG_GENERATORS
+namespace linalgwrap {
+std::ostream& operator<<(std::ostream& o, Transposed mode) {
+    switch (mode) {
+        case Transposed::None:
+            o << "None";
+            break;
+        case Transposed::Trans:
+            o << "Trans";
+            break;
+        case Transposed::ConjTrans:
+            o << "ConjTrans";
+            break;
+    }
+    return o;
+}
+}  // namespace linalgwrap

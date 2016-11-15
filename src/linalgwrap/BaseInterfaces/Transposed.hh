@@ -18,17 +18,26 @@
 //
 
 #pragma once
+#include <krims/ExceptionSystem.hh>
+
 namespace linalgwrap {
 
 /** Should the matrix be applied in a transposed sense? */
 enum class Transposed {
-    /** The matrix is applied directly */
+    /** The matrix is applied/extracted/multiplied directly */
     None,
-    /** The transpose of the matrix is applied */
+    /** The transpose of the matrix is applied/extracted/multiplied */
     Trans,
     /** The conjugate transpose (Hermitian conjugate) of the matrix
-     * is applied */
+     * is applied/extracted/multiplied */
     ConjTrans,
 };
+
+// Print a transposed object
+std::ostream& operator<<(std::ostream& o, Transposed mode);
+
+/** A matrix that was expected to be Hermetian is not */
+DefException1(ExcUnsupportedOperationMode, Transposed,
+              << "Operation mode " << arg1 << " not valid for this matrix.");
 
 }  // namespace linalgwrap
