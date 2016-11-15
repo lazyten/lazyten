@@ -31,9 +31,7 @@ namespace linalgwrap {
  *  */
 template <typename Matrix, typename = void>
 struct StoredTypeOf {
-    // neither a lazy matrix nor a stored matrix
-    // => no clue what to do.
-    typedef void type;
+    // Neither lazy nor stored -> don't have any type
 };
 
 template <typename Matrix>
