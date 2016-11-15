@@ -80,23 +80,38 @@ class MultiVector : public detail::MultiVectorBase<InnerVector> {
     /** Copy constructor making a shallow copy */
     MultiVector(const MultiVector&) = default;
 
+    // TODO
+    // TODO make some of the constructors below explicit
+    // TODO
+
     /** conversion from different vector type
      *
      * All objects are converted via a shallow copy, so it is
      * linear in the number of vectors.
      * */
     template <typename OtherVector,
-              typename = krims::enable_if_ptr_convertible_t<OtherVector,
-                                                            InnerVector>>
+              typename = krims::enable_if_t<
+                    std::is_convertible<OtherVector*, InnerVector*>::value>>
     MultiVector(MultiVector<OtherVector>& omv);
+
+    /** conversion from different vector type -- const version
+     *
+     * All objects are converted via a shallow copy, so it is
+     * linear in the number of vectors.
+     * */
+    template <typename OtherVector,
+              typename = krims::enable_if_t<
+                    std::is_convertible<OtherVector*, InnerVector*>::value &&
+                    std::is_const<InnerVector>::value>>
+    MultiVector(const MultiVector<OtherVector>& omv);
 
     /** Implicit conversion from constant vector */
     // operator MultiVector<const InnerVector>();
 
     /** Implicit conversion from vector via move */
     template <typename OtherVector,
-              typename = krims::enable_if_ptr_convertible_t<OtherVector,
-                                                            InnerVector>>
+              typename = krims::enable_if_t<
+                    std::is_convertible<OtherVector*, InnerVector*>::value>>
     MultiVector(MultiVector<OtherVector>&& omv);
     ///@}
 
@@ -158,18 +173,11 @@ std::ostream& operator<<(std::ostream& o, const MultiVector<Vector>& mv) {
  * the multivector ownership of the vector (by moving it inside) or
  * not (by just passing a reference) is possible.
  **/
-template <typename Vector>
+template <typename Vector, krims::enable_if_t<IsVector<Vector>::value>...>
 MultiVector<typename std::remove_reference<Vector>::type> as_multivector(
       Vector&& v) {
-    // If we gen an rvalue
-    typedef typename std::remove_reference<Vector>::type type;
-    return MultiVector<type>(std::forward<type>(v));
-}
-
-template <typename Vector>
-MultiVector<Vector> as_multivector(Vector& v) {
-    // If we get an lvalue
-    return MultiVector<Vector>(v);
+    typedef typename std::remove_reference<Vector>::type vtype;
+    return MultiVector<vtype>(std::forward<Vector>(v));
 }
 //@}
 
@@ -179,6 +187,49 @@ template <typename Vector, typename... Args>
 MultiVector<Vector> make_as_multivector(Args&&... args) {
     return as_multivector(Vector(std::forward<Args>(args)...));
 }
+
+/** Compute multivector norms */
+///@{
+/** Calculate the l1 norm of each vector of the multivector
+ *  (sum of abs values of elements) */
+template <typename Vector>
+std::vector<typename Vector::real_type> norm_l1(const MultiVector<Vector>& mv) {
+    std::vector<typename Vector::real_type> res(mv.n_vectors());
+    std::transform(std::begin(mv), std::end(mv), std::begin(res),
+                   [](const Vector& v) { return norm_l1(v); });
+    return res;
+}
+
+/** Calculate the linf norm of the vectors of the multivector (abs. largest
+ * element) */
+template <typename Vector>
+std::vector<typename Vector::real_type> norm_linf(
+      const MultiVector<Vector>& mv) {
+    std::vector<typename Vector::real_type> res(mv.n_vectors());
+    std::transform(std::begin(mv), std::end(mv), std::begin(res),
+                   [](const Vector& v) { return norm_linf(v); });
+    return res;
+}
+
+/** Calculate the l2 norm squared of the vectors of the multivector. */
+template <typename Vector>
+std::vector<typename Vector::real_type> norm_l2_squared(
+      const MultiVector<Vector>& mv) {
+    std::vector<typename Vector::real_type> res(mv.n_vectors());
+    std::transform(std::begin(mv), std::end(mv), std::begin(res),
+                   [](const Vector& v) { return norm_l2_squared(v); });
+    return res;
+}
+
+/** Calculate the l2 norm of the vectors of the multivector. */
+template <typename Vector>
+std::vector<typename Vector::real_type> norm_l2(const MultiVector<Vector>& mv) {
+    std::vector<typename Vector::real_type> res(mv.n_vectors());
+    std::transform(std::begin(mv), std::end(mv), std::begin(res),
+                   [](const Vector& v) { return norm_l2(v); });
+    return res;
+}
+///@}
 
 //
 // -------------------------------------------------
@@ -206,6 +257,15 @@ MultiVector<InnerVector>::MultiVector(size_type n_elem, size_type n_vectors,
     base_type::m_n_elem = n_elem;
     base_type::resize(n_vectors, fill_zero);
     base_type::assert_valid_state();
+}
+
+template <typename InnerVector>
+template <typename OtherVector, typename>
+MultiVector<InnerVector>::MultiVector(const MultiVector<OtherVector>& omv) {
+    base_type::reserve(omv.n_vectors());
+    for (size_type i = 0; i < omv.n_vectors(); ++i) {
+        base_type::push_back(omv.at_ptr(i));
+    }
 }
 
 template <typename InnerVector>
