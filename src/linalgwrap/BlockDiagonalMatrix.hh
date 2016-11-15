@@ -93,7 +93,7 @@ class BlockDiagonalMatrix : public BlockDiagonalMatrixBase<Matrices...> {
 
     // TODO implement interface of StoredMatrix_i
 
-    // TODO implement extract_block and add_block_to sensibly
+    // TODO implement extract_block, mmult and apply
 
   private:
     /** The Matrix blocks along the diagonal */

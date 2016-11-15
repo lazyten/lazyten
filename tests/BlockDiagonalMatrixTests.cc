@@ -30,13 +30,12 @@ using namespace rc;
 TEST_CASE("BlockDiagonalMatrix class", "[BlockDiagonalMatrix]") {
     typedef double scalar_type;
     typedef SmallMatrix<scalar_type> stored_matrix_type;
-    typedef LazyMatrixWrapper<stored_matrix_type, stored_matrix_type>
-          lazy_matrix_type;
+    typedef LazyMatrixWrapper<stored_matrix_type> lazy_matrix_type;
 
     SECTION("Simple function test") {
         stored_matrix_type stored{{1.0, 2.0},   // first row
                                   {3.0, 4.0}};  // second row
-        lazy_matrix_type lazy{stored};
+        lazy_matrix_type lazy{stored_matrix_type(stored)};
 
         auto diag1 = make_block_diagonal(stored, stored);
         auto diag2 = make_block_diagonal(std::move(lazy), std::move(stored));
