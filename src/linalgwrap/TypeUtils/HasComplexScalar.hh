@@ -18,6 +18,22 @@
 //
 
 #pragma once
-#include "TypeUtils/HasComplexScalar.hh"
-#include "TypeUtils/StoredTypeOf.hh"
-#include "TypeUtils/mat_vec_apply_enabled_t.hh"
+#include <krims/TypeUtils.hh>
+
+namespace linalgwrap {
+
+//@{
+/** \brief helper struct to detect whether the scalar type
+ *         underlying the matrix or matrix reference is complex.
+ **/
+template <typename Object, typename = void>
+struct HasComplexScalar : public std::false_type {};
+
+template <typename Object>
+struct HasComplexScalar<
+      Object, krims::enable_if_t<krims::IsComplexNumber<
+                    typename std::decay<Object>::type::scalar_type>::value>>
+      : public std::true_type {};
+//@}
+
+}  // namespace linalgwrap

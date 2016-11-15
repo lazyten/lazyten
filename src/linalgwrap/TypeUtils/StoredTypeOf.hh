@@ -27,6 +27,8 @@ namespace linalgwrap {
 /** \brief helper struct to extract the underlying stored matrix
  *         type from a potentially lazy matrix.
  *
+ * References or array extents are stripped off via std::decay
+ *
  * The stored matrix type is accessible via the member type "type".
  *  */
 template <typename Matrix, typename = void>
@@ -35,15 +37,17 @@ struct StoredTypeOf {
 };
 
 template <typename Matrix>
-struct StoredTypeOf<
-      Matrix, typename std::enable_if<IsStoredMatrix<Matrix>::value>::type> {
-    typedef Matrix type;
+struct StoredTypeOf<Matrix,
+                    typename std::enable_if<IsStoredMatrix<
+                          typename std::decay<Matrix>::type>::value>::type> {
+    typedef typename std::decay<Matrix>::type type;
 };
 
 template <typename Matrix>
-struct StoredTypeOf<
-      Matrix, typename std::enable_if<IsLazyMatrix<Matrix>::value>::type> {
-    typedef typename Matrix::stored_matrix_type type;
+struct StoredTypeOf<Matrix,
+                    typename std::enable_if<IsLazyMatrix<
+                          typename std::decay<Matrix>::type>::value>::type> {
+    typedef typename std::decay<Matrix>::type::stored_matrix_type type;
 };
 //@}
 

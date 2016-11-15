@@ -33,6 +33,7 @@ set(LINALGWRAP_TESTS_SOURCES
 	ArmadilloVectorTests.cc
 
 	# Helper classes
+	TypeUtilsTests.cc
 	RangeTests.cc
 
 	# Lazy matrices
@@ -40,6 +41,10 @@ set(LINALGWRAP_TESTS_SOURCES
 	LazyMatrixWrapperTests.cc
 	LazyMatrixProductTests.cc
 	LazyMatrixSumTests.cc
+
+	# Proxies and other matrix functionality
+	TransposeProxyTests.cc
+	transTests.cc
 
 	# Lazy matrix implementations
 	BlockDiagonalMatrixTests.cc
