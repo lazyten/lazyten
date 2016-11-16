@@ -21,6 +21,7 @@
 #include "linalgwrap/BaseInterfaces.hh"
 #include <krims/IteratorUtils.hh>
 #include <krims/RCPWrapper.hh>
+#include <krims/TypeUtils.hh>
 
 namespace linalgwrap {
 // Forward-declare
@@ -191,8 +192,8 @@ class MultiVectorReadonly : public krims::Subscribable {
      * \param fill_zero  Whether to zero added vectors
      */
     template <typename SizeT,
-              krims::enable_if_cond_convertible_t<
-                    IsStoredVector<InnerVector>::value, SizeT, size_type>...>
+              typename = krims::enable_if_cond_convertible_t<
+                    IsStoredVector<InnerVector>::value, SizeT, size_type>>
     void resize(SizeT n, bool fill_zero = true);
 
     /** Request a change in capacity in the underlying storage array */
@@ -369,10 +370,7 @@ void MultiVectorReadonly<InnerVector>::push_back(vector_rcptr_type ptr) {
 }
 
 template <typename InnerVector>
-template <typename SizeT,
-          krims::enable_if_cond_convertible_t<
-                IsStoredVector<InnerVector>::value, SizeT,
-                typename MultiVectorReadonly<InnerVector>::size_type>...>
+template <typename SizeT, typename>
 void MultiVectorReadonly<InnerVector>::resize(SizeT nin, bool fill_zero) {
     assert_valid_state();
 
