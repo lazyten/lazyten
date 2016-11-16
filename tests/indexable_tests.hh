@@ -23,7 +23,7 @@
 #include "rapidcheck_utils.hh"
 #include <catch.hpp>
 #include <functional>
-#include <linalgwrap/BaseInterfaces.hh>
+#include <linalgwrap/Base/Interfaces.hh>
 #include <linalgwrap/TestingUtils.hh>
 
 namespace linalgwrap {

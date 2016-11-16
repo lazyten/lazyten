@@ -19,8 +19,8 @@
 
 #pragma once
 #include "detail/ApplyElementwise.hh"
-#include "linalgwrap/BaseInterfaces/Indexable_i.hh"
-#include "linalgwrap/BaseInterfaces/Vector_i.hh"
+#include "linalgwrap/Base/Interfaces/Indexable_i.hh"
+#include "linalgwrap/Base/Interfaces/Vector_i.hh"
 #include "linalgwrap/detail/GenericFunctionals.hh"
 #include "macro_defs.hh"
 

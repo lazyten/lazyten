@@ -20,7 +20,7 @@
 #pragma once
 
 #include "BuiltinTypes.hh"
-#include "linalgwrap/BaseInterfaces.hh"
+#include "linalgwrap/Base/Interfaces.hh"
 #include "linalgwrap/PtrVector.hh"
 #include <iterator>
 #include <memory>

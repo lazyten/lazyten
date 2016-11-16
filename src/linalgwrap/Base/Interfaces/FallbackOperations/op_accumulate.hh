@@ -18,23 +18,18 @@
 //
 
 #pragma once
-#include "linalgwrap/BaseInterfaces/Indexable_i.hh"
+#include "linalgwrap/Base/Interfaces/Indexable_i.hh"
 #include "macro_defs.hh"
+#include <numeric>
 
 namespace linalgwrap {
 
-/** Compute the minimum of all values of an indexable object */
+/** Compute the sum of all values of the indexable object */
 template <typename Indexable>
-ValidIndexableScalarT<Indexable> min(const Indexable& i) {
+ValidIndexableScalarT<Indexable> accumulate(const Indexable& i) {
     linalgwrap_called_fallback();
-    return *std::min_element(i.begin(), i.end());
-}
-
-/** Compute the maximum of all values of an indexable object */
-template <typename Indexable>
-ValidIndexableScalarT<Indexable> max(const Indexable& i) {
-    linalgwrap_called_fallback();
-    return *std::max_element(i.begin(), i.end());
+    typedef ValidIndexableScalarT<Indexable> scalar_type;
+    return std::accumulate(i.begin(), i.end(), Constants<scalar_type>::zero);
 }
 
 }  // namespace linalgwrap

@@ -21,7 +21,7 @@
 #ifdef LINALGWRAP_HAVE_ARMADILLO
 
 #include "ArmadilloTypes.hh"
-#include "linalgwrap/BaseInterfaces.hh"
+#include "linalgwrap/Base/Interfaces.hh"
 #include <armadillo>
 #include <iterator>
 

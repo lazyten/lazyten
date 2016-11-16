@@ -18,8 +18,8 @@
 //
 
 #pragma once
-#include "linalgwrap/BaseInterfaces/Indexable_i.hh"
-#include "linalgwrap/BaseInterfaces/Vector_i.hh"
+#include "linalgwrap/Base/Interfaces/Indexable_i.hh"
+#include "linalgwrap/Base/Interfaces/Vector_i.hh"
 #include <cmath>
 #include <complex>
 #include <cstdlib>

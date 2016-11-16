@@ -18,8 +18,8 @@
 //
 
 #pragma once
-#include "BaseInterfaces/MutableMemoryVector_i.hh"
-#include "BaseInterfaces/Transposed.hh"
+#include "Base/Interfaces/MutableMemoryVector_i.hh"
+#include "Base/Interfaces/Transposed.hh"
 #include "TypeUtils/mat_vec_apply_enabled_t.hh"
 #include "linalgwrap/LazyMatrixProduct.hh"
 #include "linalgwrap/LazyMatrixSum.hh"
