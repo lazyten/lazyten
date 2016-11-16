@@ -106,6 +106,27 @@ most notably the [MWM 2016 Poster](http://docs.mfhs.eu/conferences/2016_mwm/lina
   This class also shows that custom lazy matrices can be created
   by simply inheriting from [LazyMatrix_i](src/linalgwrap/LazyMatrix_i.hh).
 
+### Matrix operations
+#### As Matrix member functions
+All matrices support the following member functions:
+- ``apply``: Generalised matrix-vector product (like the ``gemv`` BLAS call).
+  Allows to multiply a matrix with a number of vectors and add (or set) the result
+  to a different set of vectors.
+- ``mmult``: Generalised matrix-matrix product (similar to BLAS' ``gemm``).
+  Allows to multiply two matrices and add or set the result to a third.
+- ``extract_block``: Extract a block of matrix values and add or set them
+  to some pre-allocated storage
+
+#### Matrix operators and global scope
+On global scope we have:
+- ``as_stored(mat)``: Either return a reference to the current object (in case it already is a stored matrix)
+  or return a stored representation (i.e. a copy) of the matrix ``mat``.
+- ``trans(mat)``: Return an object which represents the transpose of a matrix.
+- ``conjtrans(mat)``: Return an object which represents the conjugate transpose of a matrix.
+- ``operator*``: Multiplication between matrices and matrix and vector.
+  Internally calls the ``apply`` and ``mmult`` methods above.
+- All kinds of matrix norms: ``norm_linf``, ``norm_l1``, ``norm_frobenius``, ``norm_frobenius_squared``.
+
 ### Solvers
 - In order to solve an eigenproblem the methods ``eigensystem`` and ``eigensystem_hermitian``
   in the file [eigensystem.hh](src/linalgwrap/eigensystem.hh) are available as
