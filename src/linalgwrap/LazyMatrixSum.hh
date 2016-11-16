@@ -17,12 +17,12 @@
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef LINALG_MATRIX_SUM_HPP_
-#define LINALG_MATRIX_SUM_HPP_
-
+#pragma once
+#include "detail/scale_or_set.hh"
 #include "linalgwrap/Constants.hh"
 #include "linalgwrap/LazyMatrixExpression.hh"
 #include "linalgwrap/LazyMatrixProduct.hh"
+#include "linalgwrap/MultiVector.hh"
 #include <algorithm>
 #include <iterator>
 #include <krims/ParameterMap.hh>
@@ -40,6 +40,10 @@ class LazyMatrixExpression;
 
 // TODO: If sparsity should be incorporated, build up the sparsity pattern
 //       as more and more terms are added to the sum object.
+//
+// TODO: Maybe have a scaling coefficient for the whole object as well
+// this should improve numerical accuracy and maybe allows to easily
+// handle sums of lazy objects without wrapping each of them inside a product
 
 /** Macro to aid defining both in-place matrix-matrix addition and in-place
  * matrix-matrix subtraction */
@@ -100,6 +104,8 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
       private:
         scalar_type m_coefficient;
         krims::SubscriptionPointer<const stored_matrix_type> m_matrix_ptr;
+        // TODO maybe use RCPWrapper here and allow to move matrix inside object
+        //      as well?
     };
 
     /** Have an alias for the StoredTerm class */
@@ -272,41 +278,78 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
     //
     // LazyMatrixExpression interface
     //
-    /** \brief Extract a block of values out of the matrix and
-     *         return it as a stored matrix of the appropriate size
-     *
-     * For more details of the interface see the function of the same
-     * name in ``LazyMatrixExpression``.
-     *
-     * \param row_range   The Range object representing the range of rows
-     *                    to extract. Note that it is a half-open interval
-     *                    i.e. the LHS is inclusive, but the RHS not.
-     *                    The Range may not be empty.
-     * \param col_range   The Range object representing the range of
-     *                    columns to extract.
-     *                    The Range may not be empty.
-     */
-    stored_matrix_type extract_block(Range<size_type> row_range,
-                                     Range<size_type> col_range) const override;
+    /** Are operation modes Transposed::Trans and Transposed::ConjTrans
+     *  supported for this matrix type.
+     **/
+    bool has_transpose_operation_mode() const override;
 
-    /** \brief Add a block of values of the matrix to the stored matrix
-     *         provided by reference.
+    /** Extract a block of a matrix and (optionally) add it to
+     * a different matrix.
      *
-     * For more details of the interface see the function of the same name
-     * in ``LazyMatrixExpression``.
+     *  Loosely speaking we perform
+     *  \[ M = c_M \cdot M + (A^{mode})_{rowrange,colrange} \]
+     *  where
+     *    - rowrange = [start_row, start_row+in.n_rows() ) and
+     *    - colrange = [start_col, start_col+in.n_cols() )
      *
-     *  \param in   Matrix to add the values to. It is assumed that it
-     *              already has the correct sparsity structure to take
-     *              all the values. Its size defines the size of the
-     *              block. May not be an empty matrix
-     *  \param start_row  The row index of the first element to extract
-     *  \param start_col  The column index of the first element to extract
-     *  \param c_this     The coefficient to multiply this matrix with
-     *                    before extracting.
+     * More details can be found in the same function in
+     * LazyMatrixExpression
      */
-    void add_block_to(
-          stored_matrix_type& in, size_type start_row, size_type start_col,
-          scalar_type c_this = Constants<scalar_type>::one) const override;
+    void extract_block(
+          stored_matrix_type& M, const size_type start_row,
+          const size_type start_col, const Transposed mode = Transposed::None,
+          const scalar_type c_this = Constants<scalar_type>::one,
+          const scalar_type c_M = Constants<scalar_type>::zero) const override;
+
+    /** \brief Compute the Matrix-Multivector application -- generic version
+     *
+     * Loosely speaking we perform
+     * \[ y = c_this \cdot A^\text{mode} \cdot x + c_y \cdot y. \]
+     *
+     * See LazyMatrixExpression for more details
+     *
+     * \note Whenever the virtual apply method is overwritten, this method
+     * should be implemented as well as it assures that conversion to
+     * MultiVector<MutableMemoryVector_i<scalar_type>> can actually occur
+     * automatically.
+     */
+    template <typename VectorIn, typename VectorOut,
+              mat_vec_apply_enabled_t<LazyMatrixSum, VectorIn, VectorOut>...>
+    void apply(const MultiVector<VectorIn>& x, MultiVector<VectorOut>& y,
+               const Transposed mode = Transposed::None,
+               const scalar_type c_this = Constants<scalar_type>::one,
+               const scalar_type c_y = Constants<scalar_type>::zero) const {
+        MultiVector<const MutableMemoryVector_i<scalar_type>> x_wrapped(x);
+        MultiVector<MutableMemoryVector_i<scalar_type>> y_wrapped(y);
+        apply(x_wrapped, y_wrapped, mode, c_this, c_y);
+    }
+
+    /** \brief Compute the Matrix-Multivector application
+     *
+     * Loosely speaking we perform
+     * \[ y = c_this \cdot A^\text{mode} \cdot x + c_y \cdot y. \]
+     *
+     * See LazyMatrixExpression for more details
+     */
+    void apply(
+          const MultiVector<const MutableMemoryVector_i<scalar_type>>& x,
+          MultiVector<MutableMemoryVector_i<scalar_type>>& y,
+          const Transposed mode = Transposed::None,
+          const scalar_type c_this = Constants<scalar_type>::one,
+          const scalar_type c_y = Constants<scalar_type>::zero) const override;
+
+    /** Perform a matrix-matrix product.
+     *
+     * Loosely performs the operation
+     * \[ out = c_this \cdot A^\text{mode} \cdot in + c_out \cdot out. \]
+     *
+     * See LazyMatrixExpression for more details
+     */
+    void mmult(const stored_matrix_type& in, stored_matrix_type& out,
+               const Transposed mode = Transposed::None,
+               const scalar_type c_this = Constants<scalar_type>::one,
+               const scalar_type c_out =
+                     Constants<scalar_type>::zero) const override;
 
     /** \brief Update the internal data of all objects in this expression
      *         given the ParameterMap
@@ -316,37 +359,6 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
         for (auto& expression : m_lazy_terms) {
             expression.update(map);
         }
-    }
-
-    /** \brief Multiplication with a stored matrix */
-    virtual stored_matrix_type operator*(
-          const stored_matrix_type& m) const override {
-        assert_dbg(!empty(), krims::ExcInvalidState("LazyMatrixSum is empty."));
-        assert_size(n_cols(), m.n_rows());
-
-        // TODO
-        // The most common cases with zero or one
-        // stored matrix term could perhaps be optimised.
-
-        // Allocate storage for the return and fill with zero
-        stored_matrix_type res(n_rows(), m.n_cols(), true);
-
-        for (const auto& stored_term : m_stored_terms) {
-            const scalar_type coeff = stored_term.coefficient();
-            const stored_matrix_type& mat = stored_term.matrix();
-
-            // do the multiplication:
-            const stored_matrix_type matm = mat * m;
-
-            // res += coeff*matm
-            matm.add_block_to(res, 0, 0, coeff);
-        }
-
-        for (const auto& term : m_lazy_terms) {
-            // evaluate term times m and add to result:
-            res += term * m;
-        }
-        return res;
     }
 
     /** \brief Clone the expression */
@@ -545,64 +557,172 @@ typename LazyMatrixSum<StoredMatrix>::scalar_type LazyMatrixSum<StoredMatrix>::
 operator()(size_type row, size_type col) const {
     if (empty()) return Constants<scalar_type>::zero;
 
-    assert_dbg(!empty(), krims::ExcInvalidState("LazyMatrixSum is empty."));
     assert_range(0u, row, n_rows());
     assert_range(0u, col, n_cols());
-    auto block = extract_block({row, row + 1}, {col, col + 1});
+    stored_matrix_type block(1, 1, false);
+    extract_block(block, row, col);
     return block(0, 0);
 }
 
 template <typename StoredMatrix>
-typename LazyMatrixSum<StoredMatrix>::stored_matrix_type
-LazyMatrixSum<StoredMatrix>::extract_block(Range<size_type> row_range,
-                                           Range<size_type> col_range) const {
-    // Allocate storage and set elements to zero
-    stored_matrix_type res(row_range.length(), col_range.length(), true);
-
-    // if we are empty, this is all we need to do
-    if (empty()) return res;
-
-    // Assertive checks:
-    assert_dbg(!empty(), krims::ExcInvalidState("LazyMatrixSum is empty."));
-    assert_greater(0u, row_range.length());
-    assert_greater(0u, col_range.length());
-    assert_greater_equal(row_range.last(), this->n_rows());
-    assert_greater_equal(col_range.last(), this->n_cols());
-
-    add_block_to(res, row_range.first(), col_range.first());
-    return res;
+bool LazyMatrixSum<StoredMatrix>::has_transpose_operation_mode() const {
+    // If all have it, than we have it.
+    const bool lazy =
+          std::all_of(std::begin(m_lazy_terms), std::end(m_lazy_terms),
+                      [](const lazy_term_type& t) {
+                          return t.has_transpose_operation_mode();
+                      });
+    const bool stored =
+          std::all_of(std::begin(m_stored_terms), std::end(m_stored_terms),
+                      [](const stored_term_type& t) {
+                          return t.matrix().has_transpose_operation_mode();
+                      });
+    return lazy && stored;
 }
 
 template <typename StoredMatrix>
-void LazyMatrixSum<StoredMatrix>::add_block_to(stored_matrix_type& in,
-                                               size_type start_row,
-                                               size_type start_col,
-                                               scalar_type c_this) const {
-    // noop if we are empty.
-    if (empty()) return;
+void LazyMatrixSum<StoredMatrix>::extract_block(stored_matrix_type& M,
+                                                const size_type start_row,
+                                                const size_type start_col,
+                                                const Transposed mode,
+                                                const scalar_type c_this,
+                                                const scalar_type c_M) const {
+    assert_dbg(mode == Transposed::None || has_transpose_operation_mode(),
+               ExcUnsupportedOperationMode(mode));
+    assert_finite(c_this);
+    assert_finite(c_M);
+    // check that we do not overshoot the indices
+    if (mode == Transposed::Trans || mode == Transposed::ConjTrans) {
+        assert_greater_equal(start_row + M.n_rows(), n_cols());
+        assert_greater_equal(start_col + M.n_cols(), n_rows());
+    } else {
+        assert_greater_equal(start_row + M.n_rows(), n_rows());
+        assert_greater_equal(start_col + M.n_cols(), n_cols());
+    }
+    assert_sufficiently_tested(mode != Transposed::ConjTrans);
 
-    assert_greater(0u, in.n_rows());
-    assert_greater(0u, in.n_cols());
+    // For empty matrices there is nothing to do
+    if (M.n_rows() == 0 || M.n_cols() == 0) return;
 
-    // check that we do not overshoot the row index
-    assert_greater_equal(start_row + in.n_rows(), this->n_rows());
+    if (c_this == Constants<scalar_type>::zero || empty()) {
+        detail::scale_or_set(M, c_M);
+        return;
+    }  // c_this == 0
 
-    // check that we do not overshoot the column index
-    assert_greater_equal(start_col + in.n_cols(), this->n_cols());
+    // We need to use the c_M of the input only once,
+    // so store a local copy and set this to 1 after first run
+    scalar_type our_cM = c_M;
 
+    // Extract all the terms in turn and
+    // accumulate results in M matrix
     for (const auto& stored_term : m_stored_terms) {
         const scalar_type coeff = stored_term.coefficient();
         const stored_matrix_type& mat = stored_term.matrix();
+        mat.extract_block(M, start_row, start_col, mode, c_this * coeff,
+                          our_cM);
 
-        // Add the elements from the scaled matrix to the present
-        // block
-        mat.add_block_to(in, start_row, start_col, c_this * coeff);
+        // All future multiplication results will just be
+        // accumulated in out
+        our_cM = Constants<scalar_type>::one;
     }
 
-    for (const auto& term : m_lazy_terms) {
-        // add results to the present block:
-        term.add_block_to(in, start_row, start_col, c_this);
+    for (const auto& lazy_term : m_lazy_terms) {
+        lazy_term.extract_block(M, start_row, start_col, mode, c_this, our_cM);
+        our_cM = Constants<scalar_type>::one;
     }
 }
+
+template <typename StoredMatrix>
+void LazyMatrixSum<StoredMatrix>::apply(
+      const MultiVector<const MutableMemoryVector_i<scalar_type>>& x,
+      MultiVector<MutableMemoryVector_i<scalar_type>>& y, const Transposed mode,
+      const scalar_type c_this, const scalar_type c_y) const {
+    assert_dbg(mode == Transposed::None || has_transpose_operation_mode(),
+               ExcUnsupportedOperationMode(mode));
+    assert_finite(c_this);
+    assert_finite(c_y);
+    assert_dbg(!empty(), krims::ExcInvalidState("LazyMatrixSum is empty."));
+    assert_size(x.n_vectors(), y.n_vectors());
+    if (mode == Transposed::Trans || mode == Transposed::ConjTrans) {
+        assert_size(x.n_elem(), n_rows());
+        assert_size(y.n_elem(), n_cols());
+    } else {
+        assert_size(x.n_elem(), n_cols());
+        assert_size(y.n_elem(), n_rows());
+    }
+    assert_sufficiently_tested(mode != Transposed::ConjTrans);
+
+    if (c_this == Constants<scalar_type>::zero) {
+        for (auto& vec : y) detail::scale_or_set(vec, c_y);
+        return;
+    }  // c_this == 0
+
+    // Local, modifiable copy of c_y
+    scalar_type our_cy = c_y;
+
+    // Apply the terms to the input and
+    // accumulate results in y multivector
+    for (const auto& stored_term : m_stored_terms) {
+        const scalar_type coeff = stored_term.coefficient();
+        const stored_matrix_type& mat = stored_term.matrix();
+        mat.apply(x, y, mode, c_this * coeff, our_cy);
+
+        // All future multiplication results will just be
+        // accumulated in y
+        our_cy = Constants<scalar_type>::one;
+    }
+
+    for (const auto& lazy_term : m_lazy_terms) {
+        lazy_term.apply(x, y, mode, c_this, our_cy);
+        our_cy = Constants<scalar_type>::one;
+    }
+}
+
+template <typename StoredMatrix>
+void LazyMatrixSum<StoredMatrix>::mmult(const stored_matrix_type& in,
+                                        stored_matrix_type& out,
+                                        const Transposed mode,
+                                        const scalar_type c_this,
+                                        const scalar_type c_out) const {
+    assert_dbg(mode == Transposed::None || has_transpose_operation_mode(),
+               ExcUnsupportedOperationMode(mode));
+    assert_finite(c_this);
+    assert_finite(c_out);
+    assert_dbg(!empty(), krims::ExcInvalidState("LazyMatrixSum is empty."));
+    assert_size(in.n_cols(), out.n_cols());
+    if (mode == Transposed::Trans || mode == Transposed::ConjTrans) {
+        assert_size(n_rows(), in.n_rows());
+        assert_size(n_cols(), out.n_rows());
+    } else {
+        assert_size(n_cols(), in.n_rows());
+        assert_size(n_rows(), out.n_rows());
+    }
+    assert_sufficiently_tested(mode != Transposed::ConjTrans);
+
+    if (c_this == Constants<scalar_type>::zero) {
+        detail::scale_or_set(out, c_out);
+        return;
+    }
+
+    // Local, modifiable copy of c_out
+    scalar_type our_cout = c_out;
+
+    // Multiply the terms with the input and
+    // accumulate results in out matrix
+    for (const auto& stored_term : m_stored_terms) {
+        const scalar_type coeff = stored_term.coefficient();
+        const stored_matrix_type& mat = stored_term.matrix();
+        mat.mmult(in, out, mode, c_this * coeff, our_cout);
+
+        // All future multiplication results will just be
+        // accumulated in out
+        our_cout = Constants<scalar_type>::one;
+    }
+
+    for (const auto& lazy_term : m_lazy_terms) {
+        lazy_term.mmult(in, out, mode, c_this, our_cout);
+        our_cout = Constants<scalar_type>::one;
+    }
+}
+
 }  // namespace linalgwrap
-#endif

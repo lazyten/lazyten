@@ -18,4 +18,6 @@
 //
 
 #pragma once
+#include "TypeUtils/HasComplexScalar.hh"
 #include "TypeUtils/StoredTypeOf.hh"
+#include "TypeUtils/mat_vec_apply_enabled_t.hh"

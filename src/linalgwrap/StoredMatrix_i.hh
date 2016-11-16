@@ -17,9 +17,7 @@
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef LINALG_STORED_MATRIX_I_HPP_
-#define LINALG_STORED_MATRIX_I_HPP_
-
+#pragma once
 #include "linalgwrap/Constants.hh"
 #include "linalgwrap/DefaultMatrixIterator.hh"
 #include "linalgwrap/Matrix_i.hh"
@@ -29,7 +27,6 @@ namespace linalgwrap {
 
 // TODO define a set of optional functions which make performance better
 //      e.g. - an in-memory transpose() function
-//           - transpose-add ...
 //           - transpose-multiply
 //           - whatever else seems sensible
 
@@ -55,28 +52,60 @@ class Matrix_i;
  *   StoredMatrix_i(const SmallMatrix&, scalar_type tolerance)
  *   ```
  *
- * All implementing classes should further provide the function
- * ```
- * stored_matrix_type extract_block(Range<size_type> row_range,
- *                                  Range<size_type> col_range) const;
- * ```
- * which should copy a block of the matrix and return it
- * (similar to the ``extract_block`` in the ``LazyMatrixExpression`` class,
- * as well as
- * ```
- * void add_block_to(stored_matrix_type& in, size_type start_row,
- *                   size_type start_col,
- *                   scalar_type c_this = Constants<scalar_type>::one) const;
- * ```
- * which --- again similar to ``add_block_to`` of ``LazyMatrixExpression`` ---
- * should add a copy of a block of the matrix to the matrix provided on in.
+ * All implementing classes should further provide the following types
+ *   - vector_type  The type of the corresponding vector;
+ *   - type_family  The type of the type family of corresponding
+ *                  vector types (complex and real vectors)
+ *
+ * The following methods should be implemented:
+ *
+ * The following methods should be implemented between matrices of the
+ * implementing type:
+ * - Addition(+), Subtraction(-), Scalar multiplication and scalar division
+ * - In-place addition(+=) and subtraction(-=)
+ * - In-place scalar multiplication (*=)
+ *
+ * The following methods should be implemented:
+ * - ```void extract_block(stored_matrix_type& M,
+ *                         size_type start_row, size_type start_col,
+ *                         Transposed mode = Transposed::None,
+ *                         scalar_type c_this = Constants<scalar_type>::one,
+ *                         scalar_type c_M = Constants<scalar_type>::zero);
+ *   ```
+ *   This method should extract a block of size M.n_rows() times M.n_cols() of
+ *   values into the matrix M. Loosely speaking it should perform
+ *   \[ M = c_\text{this} * A^\text{mode} + c_M * M \]
+ *   where A is the matrix represented by this object. If the function
+ *   has_transpose_operation_mode() returns false only normal operation mode
+ *   (no transpose) needs to be supported, else all methods (normal,
+ *   transpose, conjugate transpose). For more information
+ *   see the documentation of this method in LazyMatrixExpression.
+ *
+ * - ```void mmult(const stored_matix_type& in, stored_matrix_type& out,
+ *             const Transposed mode = Transposed::None,
+ *             const scalar_type c_this = Constants<scalar_type>::one,
+ *             const scalar_type c_out = Constants<scalar_type>::zero) const;
+ *   ```
+ *   This method should multiply two matrices and add the result to a third.
+ *   (generalised matrix-matrix product, gemm), i.e. loosely needs to perform
+ *   \[ out = c_out * out + c_this * A^\text{mode} * in \]
+ *    See LazyMatrixExpression for more details.
+ *
+ * - ```template <typename VectorIn, typename VectorOut,
+ *            mat_vec_apply_enabled_t<stored_matrix_type, VectorIn,
+ * VectorOut>...>
+ *  void apply(const MultiVector<VectorIn>& x, MultiVector<VectorOut>& y,
+ *             const Transposed mode = Transposed::None,
+ *             const scalar_type c_this = Constants<scalar_type>::one,
+ *             const scalar_type c_y = Constants<scalar_type>::zero) const;
+ *   ```
+ *   Generalised matrix-vector application, performs
+ *   \[ y = c_y * y + c_this * A^\text{mode} * x
+ *   See LazyMatrixExpression for more details.
  *
  * Note that the operator() functions in derived classes are expected to return
  * zero even if an element is known to be zero by some sparsity pattern or
  * similar. Modification of a non-existing element should fail, however.
- *
- * The following types should also be defined:
- *  - vector_type  The type of the corresponding vector;
  *
  */
 template <typename Scalar>
@@ -92,9 +121,23 @@ class StoredMatrix_i : public Matrix_i<Scalar> {
     //! The const_iterator type
     typedef typename base_type::const_iterator const_iterator;
 
-    //
-    // Modifying functions
-    //
+    /** \name Matrix properties
+     */
+    ///@{
+    /** Are operation modes Transposed::Trans and Transposed::ConjTrans
+     *  supported for this matrix type
+     *
+     * These operation modes are important for the functions apply,
+     * mmult and extract_block
+     *
+     * \note It is highly recommended that stored matrices support
+     * all operation modes!
+     **/
+    virtual bool has_transpose_operation_mode() const { return false; }
+    ///@}
+
+    /** \name Data access */
+    ///@{
     /** Read-write access to elements */
     virtual scalar_type& operator()(size_type row, size_type col) = 0;
 
@@ -103,14 +146,7 @@ class StoredMatrix_i : public Matrix_i<Scalar> {
      * Access the element in row-major ordering (i.e. the matrix is
      * traversed row by row)
      */
-    virtual scalar_type& operator[](size_type i) {
-        // Check that we do not overshoot.
-        assert_range(0u, i, this->n_cols() * this->n_rows());
-
-        const size_type i_row = i / this->n_cols();
-        const size_type i_col = i % this->n_cols();
-        return (*this)(i_row, i_col);
-    }
+    virtual scalar_type& operator[](size_type i);
 
     /** \brief Read-only access to vectorised matrix object
      *
@@ -120,6 +156,7 @@ class StoredMatrix_i : public Matrix_i<Scalar> {
     scalar_type operator[](size_type i) const override {
         return base_type::operator[](i);
     }
+    ///@}
 
     /** \name Standard operations */
     ///@{
@@ -137,34 +174,23 @@ class StoredMatrix_i : public Matrix_i<Scalar> {
      *
      * Only sensible for square matrices.
      * */
-    virtual void symmetrise() {
-        assert_dbg(this->n_rows() == this->n_cols(), ExcMatrixNotSquare());
-
-        for (size_type i = 0; i < this->n_rows(); ++i) {
-            for (size_type j = i + 1; j < this->n_rows(); ++j) {
-                const scalar_type res =
-                      ((*this)(i, j) + (*this)(j, i)) / scalar_type(2.);
-                (*this)(i, j) = (*this)(j, i) = res;
-            }
-        }
-    }
-
+    virtual void symmetrise();
     ///@}
 
     //
     // Iterators
     //
     /** Return an iterator to the beginning */
-    iterator begin();
+    iterator begin() { return iterator(*this, {0, 0}); }
 
     /** Return a const iterator to the beginning */
-    const_iterator begin() const;
+    const_iterator begin() const { return base_type::cbegin(); }
 
     /** Return an iterator to the end */
-    iterator end();
+    iterator end() { return iterator(*this); }
 
     /** Return a const iterator to the end */
-    const_iterator end() const;
+    const_iterator end() const { return base_type::cend(); }
 
     // TODO
     //   function to get actual number of non-zero entries
@@ -223,26 +249,27 @@ const StoredMatrix& as_stored(const StoredMatrix& m) {
 //
 
 template <typename Scalar>
-typename StoredMatrix_i<Scalar>::iterator StoredMatrix_i<Scalar>::begin() {
-    return iterator(*this, {0, 0});
+typename StoredMatrix_i<Scalar>::scalar_type& StoredMatrix_i<Scalar>::
+operator[](size_type i) {
+    // Check that we do not overshoot.
+    assert_range(0u, i, this->n_cols() * this->n_rows());
+
+    const size_type i_row = i / this->n_cols();
+    const size_type i_col = i % this->n_cols();
+    return (*this)(i_row, i_col);
 }
 
 template <typename Scalar>
-typename StoredMatrix_i<Scalar>::const_iterator StoredMatrix_i<Scalar>::begin()
-      const {
-    return base_type::cbegin();
-}
+void StoredMatrix_i<Scalar>::symmetrise() {
+    assert_dbg(this->n_rows() == this->n_cols(), ExcMatrixNotSquare());
 
-template <typename Scalar>
-typename StoredMatrix_i<Scalar>::iterator StoredMatrix_i<Scalar>::end() {
-    return iterator(*this);
-}
-
-template <typename Scalar>
-typename StoredMatrix_i<Scalar>::const_iterator StoredMatrix_i<Scalar>::end()
-      const {
-    return base_type::cend();
+    for (size_type i = 0; i < this->n_rows(); ++i) {
+        for (size_type j = i + 1; j < this->n_rows(); ++j) {
+            const scalar_type res =
+                  ((*this)(i, j) + (*this)(j, i)) / scalar_type(2.);
+            (*this)(i, j) = (*this)(j, i) = res;
+        }
+    }
 }
 
 }  // namespace liblinalg
-#endif

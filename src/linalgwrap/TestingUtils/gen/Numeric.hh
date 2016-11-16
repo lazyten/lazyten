@@ -28,15 +28,16 @@ namespace linalgwrap {
 namespace gen {
 
 namespace detail {
+// TODO Have implementations for Matrices and Vectors here as well?
+
 /** Default implementation: Not allowed */
 template <typename Value, typename Enable = void>
 struct Numeric {
     static_assert(!std::is_same<Enable, void>::value,
-                  "Numeric is only available for floating point types and some "
-                  "containers thereof.");
+                  "Numeric is only available for floating point types.");
 };
 
-/** Construct a numeric floating point value */
+/** Construct a numeric stored vector */
 template <typename Scalar>
 struct Numeric<Scalar, typename std::enable_if<
                              std::is_floating_point<Scalar>::value>::type> {

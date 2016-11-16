@@ -1,4 +1,4 @@
-
+//
 // Copyright (C) 2016 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
@@ -73,12 +73,17 @@ struct FunctionalityTests
         base_type::test_element_access(model, sut);
         base_type::test_equivalence(model, sut);
         base_type::test_extract_block(model, sut);
-        base_type::test_add_block_to(model, sut);
+        base_type::test_extract_transpose_block(model, sut);
         base_type::test_readonly_iterator(model, sut);
 
+        base_type::template test_apply_to<
+              typename stored_matrix_type::vector_type>(model, sut, low);
+        base_type::template test_transpose_apply_to<
+              typename stored_matrix_type::vector_type>(model, sut, low);
+        base_type::test_mmult(model, sut, low);
+        base_type::test_transposed_mmult(model, sut, low);
         base_type::template test_multiply_by<stored_matrix_type>(model, sut,
                                                                  low);
-
         base_type::test_norm_l1(model, sut);
         base_type::test_norm_linf(model, sut);
         base_type::test_norm_frobenius(model, sut);
@@ -92,7 +97,7 @@ struct FunctionalityTests
 #ifdef LINALGWRAP_TESTS_VERBOSE
             RC_TAG("Small norm: Some tests not run.");
 #endif
-            // Problematic tests, which are left out once norm is too large
+            // Problematic tests, which are left out once norm is too small
             base_type::test_accumulate(model, sut, low);
         } else {
 #ifdef LINALGWRAP_TESTS_VERBOSE
@@ -101,7 +106,7 @@ struct FunctionalityTests
         }
     }
 
-    /** Test conversion of the sut metrix to its stored_matrix_type */
+    /** Test conversion of the sut matrix to its stored_matrix_type */
     static void test_convert_to_stored(const compmat_type& model,
                                        const sutmat_type& sut,
                                        const NumCompAccuracyLevel tolerance =
@@ -190,8 +195,9 @@ void TestingLibrary<LazyMatrix, LazyGenArg>::run_checks() const {
                     m_gen.generate(comptests::test_element_access)));
     CHECK(rc::check(m_prefix + "Element access via extract_block",
                     m_gen.generate(comptests::test_extract_block)));
-    CHECK(rc::check(m_prefix + "Data access via add_block_to",
-                    m_gen.generate(comptests::test_add_block_to)));
+    CHECK(m_gen.run_test(
+          m_prefix + "Element access via transposed extract_block",
+          comptests::test_extract_transpose_block));
     CHECK(rc::check(m_prefix + "Read-only iterator of small matrices",
                     m_gen.generate(comptests::test_readonly_iterator)));
 
@@ -211,9 +217,8 @@ void TestingLibrary<LazyMatrix, LazyGenArg>::run_checks() const {
     CHECK(rc::check(m_prefix + "trace calculation",
                     m_gen.generate(comptests::test_trace, low)));
 
-    // Operations
-    typedef LazyMatrixWrapper<stored_matrix_type, stored_matrix_type>
-          lazy_matrix_type;
+    // Basic Operations (+, -, scaling)
+    typedef LazyMatrixWrapper<stored_matrix_type> lazy_matrix_type;
 
     CHECK(rc::check(m_prefix + "Multiplication by scalar",
                     m_gen.generate(comptests::test_multiply_scalar, low)));
@@ -229,6 +234,20 @@ void TestingLibrary<LazyMatrix, LazyGenArg>::run_checks() const {
           m_prefix + "Subtract a stored matrix",
           m_gen.generate(
                 comptests::template test_subtract<stored_matrix_type>)));
+
+    // Apply and matrix multiplication
+    CHECK(m_gen.run_test(m_prefix + "Apply to MultiVector",
+                         comptests::template test_apply_to<
+                               typename stored_matrix_type::vector_type>,
+                         low));
+    CHECK(m_gen.run_test(m_prefix + "Transpose apply to MultiVector",
+                         comptests::template test_transpose_apply_to<
+                               typename stored_matrix_type::vector_type>,
+                         low));
+    CHECK(m_gen.run_test(m_prefix + "Test mmult", comptests::test_mmult,
+                         sloppy));
+    CHECK(m_gen.run_test(m_prefix + "Test transposed mmult",
+                         comptests::test_transposed_mmult, sloppy));
     if (m_run_matrix_times_stored) {
         CHECK(rc::check(
               m_prefix + "Multiply a stored matrix",

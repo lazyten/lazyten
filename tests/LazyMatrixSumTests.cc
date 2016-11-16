@@ -67,6 +67,9 @@ TEST_CASE("LazyMatrixSum", "[LazyMatrixSum]") {
             testing_lib::run_all_tests(tosub, subed);
         };
 
+        // Enable hard tests in the testing library
+        testing_lib::skip_easy_cases();
+
         // Increase numeric tolerance for this scope,
         // ie results need to be less exact for passing
         auto highertol = NumCompConstants::change_temporary(
@@ -79,8 +82,7 @@ TEST_CASE("LazyMatrixSum", "[LazyMatrixSum]") {
         typedef double scalar_type;
         typedef SmallMatrix<scalar_type> stored_matrix_type;
         typedef typename stored_matrix_type::size_type size_type;
-        typedef LazyMatrixWrapper<stored_matrix_type, stored_matrix_type>
-              lazy_matrix_type;
+        typedef LazyMatrixWrapper<stored_matrix_type> lazy_matrix_type;
         typedef LazyMatrixSum<stored_matrix_type> sum_type;
 
         // Generator for the args

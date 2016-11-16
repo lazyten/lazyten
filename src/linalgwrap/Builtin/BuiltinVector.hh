@@ -136,10 +136,10 @@ class BuiltinVector : public PtrVector<Scalar>, public Stored_i {
     ///@}
 
     /** Read-only access to the raw memory */
-    const scalar_type* memptr() const { return m_data.get(); }
+    const scalar_type* memptr() const override { return m_data.get(); }
 
     /** Access to the raw memory */
-    scalar_type* memptr() { return m_data.get(); }
+    scalar_type* memptr() override { return m_data.get(); }
 
     /** Read-only access to the inner storage */
     const_storage_type& data() const { return m_data; }

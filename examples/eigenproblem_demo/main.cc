@@ -1,7 +1,18 @@
+#include <linalgwrap/DiagonalMatrix.hh>
 #include <linalgwrap/SmallMatrix.hh>
+#include <linalgwrap/SmallVector.hh>
 #include <linalgwrap/eigensystem.hh>
 
 using namespace linalgwrap;
+
+template <typename Solution>
+void print_solution(const Solution& solution) {
+    for (size_t i = 0; i < solution.evalues().size(); ++i) {
+        std::cout << "  (value: " << solution.evalues()[i]
+                  << "  ; vector: " << solution.evectors()[i] << ")"
+                  << std::endl;
+    }
+}
 
 int main() {
     typedef double scalar_type;
@@ -31,13 +42,8 @@ int main() {
     map.update("method", "arpack");
     const auto solution_arpack =
           linalgwrap::eigensystem_hermitian(A, n_ep, map);
-
     std::cout << "Arpack eigenpairs: " << std::endl;
-    for (size_t i = 0; i < n_ep; ++i) {
-        std::cout << "  (value: " << solution_arpack.evalues()[i]
-                  << "  ; vector: " << solution_arpack.evectors()[i] << ")"
-                  << std::endl;
-    }
+    print_solution(solution_arpack);
     std::cout << std::endl;
 
     //
@@ -48,11 +54,23 @@ int main() {
           linalgwrap::eigensystem_hermitian(A, n_ep, map);
 
     std::cout << "Arpack eigenpairs: " << std::endl;
-    for (size_t i = 0; i < n_ep; ++i) {
-        std::cout << "  (value: " << solution_arpack.evalues()[i]
-                  << "  ; vector: " << solution_arpack.evectors()[i] << ")"
-                  << std::endl;
-    }
+    print_solution(solution_armadillo);
     std::cout << std::endl;
+
+    //
+    // Compute solution for eigensystem given by
+    // lazy matrix expression
+    //
+    map.update("method", "auto");
+    SmallVector<scalar_type> diagonal{1, 2, -200, -1, 0, 0};
+    auto diagmatrix = make_diagmat(std::move(diagonal));
+
+    const auto sum = diagmatrix + A;
+    const auto solution_lazy =
+          linalgwrap::eigensystem_hermitian(sum, n_ep, map);
+    std::cout << "Lazy matrix eigenpairs: " << std::endl;
+    print_solution(solution_lazy);
+    std::cout << std::endl;
+
     return 0;
 }

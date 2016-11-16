@@ -18,7 +18,7 @@
 //
 
 #pragma once
-#include "MutableVector_i.hh"
+#include "MutableMemoryVector_i.hh"
 #include "Stored_i.hh"
 
 namespace linalgwrap {
@@ -78,16 +78,11 @@ namespace linalgwrap {
  *    to the beginning of the stride of memory.
  *  - ``end()``, ``cend()``   Return an iterator/constant iterator to the
  *    position past-the-end of the stride of memory.
- *  - ``memptr()`` return a const or non-const pointer to the memory
- *    this object iterates over.
- *
- *  TODO make this a virtual function in Stored_i and enforce it to be
- *       implemented?
  */
 
 template <typename T>
 struct IsStoredVector : public std::integral_constant<
-                              bool, IsMutableVector<T>::value &&
+                              bool, IsMutableMemoryVector<T>::value &&
                                           std::is_base_of<Stored_i, T>::value> {
 };
 

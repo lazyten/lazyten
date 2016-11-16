@@ -39,7 +39,7 @@ TEST_CASE("DiagonalMatrix class", "[DiagonalMatrix]") {
     // Generator for the args
     auto args_generator = [] {
         auto val_size =
-              *gen::scale(0.7, gen::numeric_size<1>().as("Diagonal size"));
+              *gen::scale(0.6, gen::numeric_size<1>().as("Diagonal size"));
         // TODO allow zero-sized matrices
         RC_PRE(val_size > 0u);
         auto vals =

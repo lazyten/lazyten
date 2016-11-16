@@ -171,6 +171,9 @@ struct CommandBase : rc::state::Command<typename TestingTraits::model_type,
         model_type model_copy{model};
         this->apply(model_copy);
 
+        // Skip easy test problem cases, since they should be checked before
+        // running these random tests
+        statetest_type::skip_easy_cases();
         statetest_type::run_all_tests(model_copy, sut.matrix());
     }
 };
@@ -376,8 +379,8 @@ struct MultiplyScalar : CommandBase<TestingTraits> {
     scalar_type scalar;
 
     MultiplyScalar(const model_type&)
-          : scalar{*gen::numeric_nonZero<scalar_type>().as(
-                  "Scalar to multiply with")} {}
+          : scalar{*gen::scale(0.9, gen::numeric_around<scalar_type>(1.0))
+                          .as("Scalar to multiply with")} {}
 
     void apply(model_type& model) const override {
         // Multiply all entries
@@ -418,8 +421,8 @@ struct DivideScalar : CommandBase<TestingTraits> {
     scalar_type scalar;
 
     DivideScalar(const model_type&)
-          : scalar{*gen::numeric_nonZero<scalar_type>().as(
-                  "Scalar to divide by")} {}
+          : scalar{*gen::scale(0.9, gen::numeric_around<scalar_type>(1.0))
+                          .as("Scalar to divide by")} {}
 
     void apply(model_type& model) const override {
         // Multiply all entries
@@ -466,8 +469,7 @@ struct StatefulTestingLibrary {
     typedef typename matrix_type::stored_matrix_type stored_matrix_type;
 
     //! The default lazy matrix type to use:
-    typedef LazyMatrixWrapper<stored_matrix_type, stored_matrix_type>
-          lazy_matrix_type;
+    typedef LazyMatrixWrapper<stored_matrix_type> lazy_matrix_type;
 
     //@{
     /** The default commands defined */
@@ -493,12 +495,13 @@ struct StatefulTestingLibrary {
     void run_check(const model_type& initial_state, GenFunc&& generation_func,
                    double scale = 1.0) const {
 
-        //! The global space used for strong matrices the lazy matrix
+        //! The global space used for storing the matrices the lazy matrix
         //  expressions point to indirectly
         std::list<stored_matrix_type> stored_matrices;
 
         // Setup the initial system and the initial_sut:
-        LazyMatrixWrapper<stored_matrix_type, model_type> wrap{initial_state};
+        LazyMatrixWrapper<stored_matrix_type> wrap{
+              std::move(model_type{initial_state})};
         matrix_type model{wrap};
         sut_type initial_sut{model, stored_matrices};
 

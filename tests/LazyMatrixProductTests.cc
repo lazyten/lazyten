@@ -39,14 +39,13 @@ TEST_CASE("LazyMatrixProduct", "[LazyMatrixProduct]") {
     SECTION("Default lazy matrix tests") {
         typedef double scalar_type;
         typedef SmallMatrix<scalar_type> stored_matrix_type;
-        typedef LazyMatrixWrapper<stored_matrix_type, stored_matrix_type>
-              lazy_matrix_type;
+        typedef LazyMatrixWrapper<stored_matrix_type> lazy_matrix_type;
         typedef LazyMatrixProduct<stored_matrix_type> product_type;
 
         // Generator for the args
         auto args_generator = []() {
             stored_matrix_type mat1 =
-                  *gen::scale(0.8, gen::numeric_tensor<stored_matrix_type>())
+                  *gen::scale(0.9, gen::numeric_tensor<stored_matrix_type>())
                          .as("Matrix factor 1");
 
             // The size of the other matrix to multiply mat1 with:
@@ -55,9 +54,14 @@ TEST_CASE("LazyMatrixProduct", "[LazyMatrixProduct]") {
                   "Number of columns of the 2nd matrix");
 
             stored_matrix_type mat2 =
-                  *gen::scale(0.8, gen::numeric_tensor<stored_matrix_type>(
+                  *gen::scale(0.9, gen::numeric_tensor<stored_matrix_type>(
                                          mat1.n_cols(), othersize))
                          .as("Matrix factor 2");
+
+#ifdef LINALGWRAP_TESTS_VERBOSE
+            RC_CLASSIFY(norm_frobenius(mat1) == 0, "Factor 1 is zero");
+            RC_CLASSIFY(norm_frobenius(mat2) == 0, "Factor 2 is zero");
+#endif
 
             return std::make_pair(mat1, mat2);
         };
@@ -71,14 +75,31 @@ TEST_CASE("LazyMatrixProduct", "[LazyMatrixProduct]") {
         };
 
         // Generator for the sut:
-        auto sut_generator =
-              [](std::pair<stored_matrix_type, stored_matrix_type> p) {
-                  lazy_matrix_type lm1 = lazy_matrix_type{std::move(p.first)};
-                  lazy_matrix_type lm2 = lazy_matrix_type{std::move(p.second)};
-                  product_type prod{lm1};
-                  prod.push_factor(lm2);
-                  return prod;
-              };
+        auto sut_generator = [](
+              std::pair<stored_matrix_type, stored_matrix_type> p) {
+            // Make two unit rectangles as extra factors
+            RC_ASSERT(p.first.n_cols() == p.second.n_rows());
+            stored_matrix_type unitrect1{p.first.n_cols(),
+                                         p.first.n_cols() + 3};
+            stored_matrix_type unitrect2{p.first.n_cols() + 3,
+                                         p.first.n_cols()};
+            for (typename stored_matrix_type::size_type i = 0;
+                 i < p.first.n_cols(); ++i) {
+                unitrect1(i, i) = Constants<scalar_type>::one;
+                unitrect2(i, i) = Constants<scalar_type>::one;
+            }
+
+            lazy_matrix_type lm1 = lazy_matrix_type{std::move(p.first)};
+            lazy_matrix_type lm_unit1 = lazy_matrix_type{std::move(unitrect1)};
+            lazy_matrix_type lm_unit2 = lazy_matrix_type{std::move(unitrect2)};
+            lazy_matrix_type lm2 = lazy_matrix_type{std::move(p.second)};
+
+            product_type prod{lm1};
+            prod.push_factor(lm_unit1);
+            prod.push_factor(lm_unit2);
+            prod.push_factor(lm2);
+            return prod;
+        };
 
         typedef lazy_matrix_tests::TestingLibrary<product_type,
                                                   decltype(args_generator())>

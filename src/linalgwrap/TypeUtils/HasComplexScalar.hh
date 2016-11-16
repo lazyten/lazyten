@@ -18,9 +18,22 @@
 //
 
 #pragma once
+#include <krims/TypeUtils.hh>
 
-#include "linalgwrap/IsView.hh"
-#include "linalgwrap/view/BlockView.hh"
-#include "linalgwrap/view/ScaleView.hh"
-#include "linalgwrap/view/TransposeView.hh"
-#include "linalgwrap/view/make_view.hh"
+namespace linalgwrap {
+
+//@{
+/** \brief helper struct to detect whether the scalar type
+ *         underlying the matrix or matrix reference is complex.
+ **/
+template <typename Object, typename = void>
+struct HasComplexScalar : public std::false_type {};
+
+template <typename Object>
+struct HasComplexScalar<
+      Object, krims::enable_if_t<krims::IsComplexNumber<
+                    typename std::decay<Object>::type::scalar_type>::value>>
+      : public std::true_type {};
+//@}
+
+}  // namespace linalgwrap

@@ -23,6 +23,7 @@
 #include <rapidcheck.h>
 
 namespace rc {
+// TODO deprecate in favour for gen::numeric_tensor and gen::construct
 
 template <typename Matrix>
 struct FixedSizeMatrix {
@@ -32,16 +33,16 @@ struct FixedSizeMatrix {
     }
 };
 
-template <typename StoredMatrix, typename InnerMatrix>
-struct FixedSizeMatrix<
-      ::linalgwrap::LazyMatrixWrapper<StoredMatrix, InnerMatrix>> {
-    typedef typename ::linalgwrap::LazyMatrixWrapper<StoredMatrix, InnerMatrix>
+template <typename StoredMatrix>
+struct FixedSizeMatrix<::linalgwrap::LazyMatrixWrapper<StoredMatrix>> {
+    typedef typename ::linalgwrap::LazyMatrixWrapper<StoredMatrix>
           generated_type;
     typedef typename generated_type::size_type size_type;
 
     static Gen<generated_type> fixed_size(size_type n_rows, size_type n_cols) {
-        return gen::construct<generated_type>(
-              linalgwrap::gen::numeric_tensor<InnerMatrix>(n_rows, n_cols));
+        return gen::map(
+              linalgwrap::gen::numeric_tensor<StoredMatrix>(n_rows, n_cols),
+              [](StoredMatrix m) { return generated_type(std::move(m)); });
     }
 };
 

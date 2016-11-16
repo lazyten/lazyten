@@ -22,6 +22,7 @@
 #include "NumericContainer.hh"
 #include "NumericSize.hh"
 #include "linalgwrap/BaseInterfaces.hh"
+#include "linalgwrap/MultiVector.hh"
 #include "linalgwrap/StoredMatrix_i.hh"
 
 namespace linalgwrap {
@@ -70,6 +71,33 @@ struct NumericTensor<
     }
 
     static rc::Gen<Matrix> numeric_tensor() {
+        return rc::gen::exec([] {
+            return *numeric_tensor(*gen::numeric_size<2>(),
+                                   *gen::numeric_size<2>());
+        });
+    }
+};
+
+/** Implementation for MultiVectors */
+template <typename Vector>
+struct NumericTensor<
+      MultiVector<Vector>,
+      typename std::enable_if<IsStoredVector<Vector>::value>::type> {
+    static rc::Gen<MultiVector<Vector>> numeric_tensor(
+          typename Vector::size_type n_elem,
+          typename Vector::size_type n_vecs) {
+        return rc::gen::exec([=] {
+            MultiVector<Vector> res;
+            res.reserve(n_vecs);
+            for (size_t i = 0; i < n_vecs; ++i) {
+                res.push_back(std::move(*rc::gen::scale(
+                      1.2, NumericTensor<Vector>::numeric_tensor(n_elem))));
+            }
+            return res;
+        });
+    }
+
+    static rc::Gen<MultiVector<Vector>> numeric_tensor() {
         return rc::gen::exec([] {
             return *numeric_tensor(*gen::numeric_size<2>(),
                                    *gen::numeric_size<2>());

@@ -378,13 +378,17 @@ void ArpackEigensolver<Eigenproblem, State>::arpack_ido_step(
     // Nothing to do if we are converged.
     if (state.ido == 99) return;
 
-    // Build PtrVectors for the important vectors.
+    typedef PtrVector<scalar_type> ptrvec_t;
+    // Build MultiVector<PtrVector>s for the important vectors, such
+    // that we can use apply with them.
     // Note: Since Arpack uses 1-based indices (Fortran) we need to
     // take one away before we use them.
     scalar_type* workd = &(*state.workd_ptr)[0];
-    const PtrVector<scalar_type> x(workd + ipntr[0] - 1, problem.dim());
-    PtrVector<scalar_type> y(workd + ipntr[1] - 1, problem.dim());
-    const PtrVector<scalar_type> Bx(workd + ipntr[2] - 1, problem.dim());
+    auto x = make_as_multivector<const ptrvec_t>(workd + ipntr[0] - 1,
+                                                 problem.dim());
+    auto y = make_as_multivector<ptrvec_t>(workd + ipntr[1] - 1, problem.dim());
+    auto Bx = make_as_multivector<const ptrvec_t>(workd + ipntr[2] - 1,
+                                                  problem.dim());
 
     switch (state.ido) {
         case -1:
@@ -395,7 +399,8 @@ void ArpackEigensolver<Eigenproblem, State>::arpack_ido_step(
                 // the one Arpack uses.
                 std::unique_ptr<scalar_type[]> tmp_ptr(
                       new scalar_type[problem.dim()]);
-                PtrVector<scalar_type> tmp(tmp_ptr.get(), problem.dim());
+                auto tmp = make_as_multivector<ptrvec_t>(tmp_ptr.get(),
+                                                         problem.dim());
                 problem.B().apply(x, tmp);  // tmp = B x
                 // y = (A - \sigma B)^{-1} tmp
                 problem.Diag().apply(tmp, y);

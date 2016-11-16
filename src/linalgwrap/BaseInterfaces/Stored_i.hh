@@ -18,19 +18,14 @@
 //
 
 #pragma once
-#include "RawMemoryAccess_i.hh"
 
 namespace linalgwrap {
 /** Marker interface to assert that the objects derived off this class are
  * stored, i.e. that they manage their own storage allocation and deallocation
- * internally.
+ * internally and sit fully in memory.
  *
- * Most notably (due to RawMemoryAccess_i) all classes being derived off this
- * interface need to implement the method memptr().
- *
- * This has certain implications on the type of constructors which are to be
- * present.
- * See IsStoredVector.hh for details.
+ * This has certain implications on the type of constructors which are expected
+ * by the library. See for example IsStoredVector.hh for details.
  */
-struct Stored_i : public RawMemoryAccess_i {};
+struct Stored_i {};
 }

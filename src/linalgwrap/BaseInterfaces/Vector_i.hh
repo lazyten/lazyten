@@ -46,7 +46,7 @@ class Vector_i : public Indexable_i<Scalar> {
     typedef scalar_type value_type;
 
     /** Size of the vector */
-    virtual size_type size() const = 0;
+    virtual size_type size() const { return this->n_elem(); }
 
     /** \name Data access
      *        Access to vector data
@@ -59,7 +59,7 @@ class Vector_i : public Indexable_i<Scalar> {
 
 //@{
 /** \brief struct representing a type (std::true_type, std::false_type) which
- *  indicates whether T is a stored vector
+ *  indicates whether T is a vector
  *
  * The definition is done using SFINAE, such that even for types not having a
  * typedef scalar_type this expression is valid.

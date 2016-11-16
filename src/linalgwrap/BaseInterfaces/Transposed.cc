@@ -17,21 +17,21 @@
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#pragma once
-#include <type_traits>
+#include "Transposed.hh"
 
 namespace linalgwrap {
-/** Marker interface to assert that the objects derived off this class are
- *  stored in a continuous stride of memory which can be accessed and modified.
- *
- * This implies that all objects implementing this interfaces have the operation
- * memptr() which either returns a const or non-const pointer to the memory
- * (in whichever layout it may be).
- */
-struct RawMemoryAccess_i {};
-
-/** Struct representing a true_type if the class' storage is available
- *  via memptr, else false_type */
-template <typename T>
-struct IsRawMemoryAccessible : public std::is_base_of<RawMemoryAccess_i, T> {};
+std::ostream& operator<<(std::ostream& o, Transposed mode) {
+    switch (mode) {
+        case Transposed::None:
+            o << "None";
+            break;
+        case Transposed::Trans:
+            o << "Trans";
+            break;
+        case Transposed::ConjTrans:
+            o << "ConjTrans";
+            break;
+    }
+    return o;
 }
+}  // namespace linalgwrap

@@ -18,19 +18,22 @@
 //
 
 #pragma once
-#include "gen/Numeric.hh"
-#include "gen/NumericAround.hh"
-#include "gen/NumericConstants.hh"
-#include "gen/NumericContainer.hh"
-#include "gen/NumericNonZero.hh"
-#include "gen/NumericSize.hh"
-#include "gen/NumericTensor.hh"
+#include "linalgwrap/BaseInterfaces.hh"
 
 namespace linalgwrap {
-namespace gen {
-// Import rapidcheck gen into this namespace
-// such that all generators are available via
-// linalgwrap::gen::
-using namespace rc::gen;
-}  // namespace gen
+
+/** Using statement which selectively enables/disables the generic form of
+ *  Matrix-Vector applies.
+ *
+ *  The apply is only enabled if the Vector has the same scalar type and is
+ *  a mutable memory vector
+ */
+template <typename Matrix, typename VectorIn, typename VectorOut>
+using mat_vec_apply_enabled_t = typename std::enable_if<
+      IsMutableMemoryVector<VectorIn>::value &&
+      IsMutableMemoryVector<VectorOut>::value &&
+      std::is_same<typename VectorIn::scalar_type,
+                   typename VectorOut::scalar_type>::value &&
+      std::is_same<typename VectorIn::scalar_type,
+                   typename Matrix::scalar_type>::value>::type;
 }  // namespace linalgwrap

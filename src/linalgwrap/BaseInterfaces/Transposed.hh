@@ -18,19 +18,26 @@
 //
 
 #pragma once
-#include "gen/Numeric.hh"
-#include "gen/NumericAround.hh"
-#include "gen/NumericConstants.hh"
-#include "gen/NumericContainer.hh"
-#include "gen/NumericNonZero.hh"
-#include "gen/NumericSize.hh"
-#include "gen/NumericTensor.hh"
+#include <krims/ExceptionSystem.hh>
 
 namespace linalgwrap {
-namespace gen {
-// Import rapidcheck gen into this namespace
-// such that all generators are available via
-// linalgwrap::gen::
-using namespace rc::gen;
-}  // namespace gen
+
+/** Should the matrix be applied in a transposed sense? */
+enum class Transposed {
+    /** The matrix is applied/extracted/multiplied directly */
+    None,
+    /** The transpose of the matrix is applied/extracted/multiplied */
+    Trans,
+    /** The conjugate transpose (Hermitian conjugate) of the matrix
+     * is applied/extracted/multiplied */
+    ConjTrans,
+};
+
+// Print a transposed object
+std::ostream& operator<<(std::ostream& o, Transposed mode);
+
+/** A matrix that was expected to be Hermetian is not */
+DefException1(ExcUnsupportedOperationMode, Transposed,
+              << "Operation mode " << arg1 << " not valid for this matrix.");
+
 }  // namespace linalgwrap

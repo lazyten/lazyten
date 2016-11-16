@@ -29,7 +29,7 @@
 namespace linalgwrap {
 
 template <typename Scalar>
-class ArmadilloVector : public MutableVector_i<Scalar>, public Stored_i {
+class ArmadilloVector : public MutableMemoryVector_i<Scalar>, public Stored_i {
     static_assert(
           std::is_same<double, Scalar>::value ||
                 std::is_same<float, Scalar>::value ||
@@ -47,7 +47,7 @@ class ArmadilloVector : public MutableVector_i<Scalar>, public Stored_i {
           "int, unsigned long");
 
   public:
-    typedef MutableVector_i<Scalar> base_type;
+    typedef MutableMemoryVector_i<Scalar> base_type;
     typedef typename base_type::scalar_type scalar_type;
     typedef typename base_type::size_type size_type;
     typedef typename base_type::real_type real_type;
@@ -201,10 +201,10 @@ class ArmadilloVector : public MutableVector_i<Scalar>, public Stored_i {
     ///@}
 
     /** Read-only access to the raw memory */
-    const scalar_type* memptr() const { return m_arma.memptr(); }
+    const scalar_type* memptr() const override { return m_arma.memptr(); }
 
     /** Access to the raw memory */
-    scalar_type* memptr() { return m_arma.memptr(); }
+    scalar_type* memptr() override { return m_arma.memptr(); }
 
     /** Read-only access to the inner storage */
     const_storage_type& data() const { return m_arma; }

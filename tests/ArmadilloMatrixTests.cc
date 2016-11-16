@@ -77,9 +77,12 @@ TEST_CASE("ArmadilloMatrix class", "[ArmadilloMatrix]") {
         std::vector<scalar_type> test = {1., 3., 2., 4.};
         std::vector<scalar_type> testout(4);
 
-        const PtrVector<scalar_type> testv(test.data(), test.size());
-        PtrVector<scalar_type> testoutv(testout.data(), test.size());
-        m.apply(testv, testoutv);
+        typedef PtrVector<scalar_type> vectype;
+        auto mvin =
+              make_as_multivector<const vectype>(test.data(), test.size());
+        auto mvout =
+              make_as_multivector<vectype>(testout.data(), testout.size());
+        m.apply(mvin, mvout);
 
         CHECK(testout[0] == 3.);
         CHECK(testout[1] == 6.);

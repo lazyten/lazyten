@@ -58,55 +58,48 @@ namespace indexable_tests {
 using namespace rc;
 using namespace krims;
 
-/** Model implementation of a MutableVector for use in the comparative tests */
+/** Model implementation of a MutableMemoryVector for use in the comparative
+ * tests */
 template <typename Scalar>
-struct VectorModel : private std::vector<Scalar>,
-                     public MutableVector_i<Scalar>,
-                     public Stored_i {
+struct VectorModel : public MutableMemoryVector_i<Scalar>, public Stored_i {
     typedef Vector_i<Scalar> base_type;
     typedef typename base_type::size_type size_type;
     typedef typename base_type::scalar_type scalar_type;
-    typedef typename std::vector<Scalar> container_type;
 
-    // Bring in important stuff from std::vector
-    using typename container_type::iterator;
-    using typename container_type::const_iterator;
-    using container_type::begin;
-    using container_type::cbegin;
-    using container_type::end;
-    using container_type::cend;
-
-    // Implement what is needed to be a ModifyableVector_i
-    size_type size() const override { return container_type::size(); }
+    // Implement what is needed to be a MutableMemoryVector_i
+    size_type size() const override { return m_cont.size(); }
     size_type n_elem() const override { return size(); }
     Scalar operator()(size_type i) const override { return (*this)[i]; }
-    Scalar operator[](size_type i) const override {
-        return container_type::operator[](i);
-    }
+    Scalar operator[](size_type i) const override { return m_cont[i]; }
     Scalar& operator()(size_type i) override { return (*this)[i]; }
-    Scalar& operator[](size_type i) override {
-        return container_type::operator[](i);
-    }
+    Scalar& operator[](size_type i) override { return m_cont[i]; }
     void set_zero() override {
-        for (auto& elem : *this) elem = 0;
+        for (auto& elem : m_cont) elem = 0;
     }
 
-    VectorModel(std::vector<Scalar> v) : container_type(v) {}
+    Scalar* memptr() override { return m_cont.data(); }
+    const Scalar* memptr() const override { return m_cont.data(); }
 
-    VectorModel(size_type c, bool initialise) : container_type(c) {
+    VectorModel(std::vector<Scalar> v) : m_cont(v) {}
+
+    VectorModel(size_type c, bool initialise) : m_cont(c) {
         if (initialise) {
             for (auto& elem : *this) elem = 0;
         }
     }
 
-    VectorModel(std::initializer_list<Scalar> il) : container_type(il) {}
+    VectorModel(std::initializer_list<Scalar> il) : m_cont(il) {}
 
     template <typename Iterator>
-    VectorModel(Iterator begin, Iterator end) : container_type(begin, end) {}
+    VectorModel(Iterator begin, Iterator end) : m_cont(begin, end) {}
 
     template <typename Indexable, typename = typename std::enable_if<
                                         IsIndexable<Indexable>::value>::type>
-    VectorModel(Indexable i) : container_type(i.begin(), i.end()) {}
+    VectorModel(Indexable i) : m_cont(i.begin(), i.end()) {}
+
+  private:
+    typedef typename std::vector<Scalar> container_type;
+    container_type m_cont;
 };
 
 /** \brief Standard test functions which test a certain

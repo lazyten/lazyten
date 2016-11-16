@@ -19,19 +19,44 @@
 
 #pragma once
 #ifdef LINALGWRAP_HAVE_ARMADILLO
-#include "ArmadilloMatrix.hh"
 #include <armadillo>
+#include <krims/TypeUtils.hh>
 
-// TODO: Performance analysis: Maybe it is better to first use a transpose view
+// TODO: Performance analysis: Maybe it is better to first use transpose()
 // to get the transpose and then use as_stored to get the stored matrix
 // representation
 
 namespace linalgwrap {
 
+namespace detail {
+
+/** In armadillo t() is the normal transpose for real matrices and the conjugate
+ * transpose for complex ones.
+ * Here we make sure that we actually get exactly what we want. */
+template <typename Scalar, bool real = !krims::IsComplexNumber<Scalar>::value>
+struct ArmaTranspose {
+    static auto trans(const arma::Mat<Scalar>& m) -> decltype(m.t()) {
+        return m.t();
+    }
+    static auto conjtrans(const arma::Mat<Scalar>& m) -> decltype(m.t()) {
+        return m.t();
+    }
+};
+
+/** Specialisation of above for complex numbers */
+template <typename Scalar>
+struct ArmaTranspose<Scalar, false> {
+    static auto trans(const arma::Mat<Scalar>& m) -> decltype(m.st()) {
+        return m.st();
+    }
+    static auto conjtrans(const arma::Mat<Scalar>& m) -> decltype(m.t()) {
+        return m.t();
+    }
+};
+
 /** Wrapper around the armadillo eig_sym, eig_gen and eig_pair
  *  functions calling whatever is appropriate
  **/
-namespace detail {
 template <typename Eigenproblem, bool isHermitian = Eigenproblem::hermitian,
           bool isGeneralised = Eigenproblem::generalised,
           bool isReal = Eigenproblem::real>

@@ -144,13 +144,17 @@ class RangeIterator : public std::iterator<std::input_iterator_tag, T> {
     typedef typename base_type::pointer pointer;
 
     /** Constructs an iterator-past-the-end */
-    RangeIterator();
+    RangeIterator()
+          : m_current{Constants<T>::invalid}, m_last{Constants<T>::invalid} {}
 
     /** Construct an iterator which currently points at
      * current and runs until last-1 (i.e. last is *not*
      * included any more.
      * */
-    RangeIterator(value_type current, value_type last);
+    RangeIterator(value_type current, value_type last)
+          : m_current{current}, m_last{last} {
+        assert_dbg(!is_past_the_end(), krims::ExcIteratorPastEnd());
+    }
 
     /** Prefix increment to the next value */
     RangeIterator& operator++();
@@ -173,10 +177,7 @@ class RangeIterator : public std::iterator<std::input_iterator_tag, T> {
   private:
     /** Does this data structure represent an
      *  iterator-past-the-end */
-    bool is_past_the_end() const;
-
-    /** Assert that the internal state is valid */
-    void assert_valid_state() const;
+    bool is_past_the_end() const { return m_current >= m_last; }
 
     value_type m_current;
     value_type m_last;
@@ -187,12 +188,16 @@ class RangeIterator : public std::iterator<std::input_iterator_tag, T> {
 //
 /** Return a range interval from 0 to \p t, i.e. 0 is included, but \p t not. */
 template <typename T>
-Range<T> range(const T& t);
+Range<T> range(const T& t) {
+    return Range<T>{0, t};
+}
 
 /** Return a range interval from \p t1 to \p t2, where \p t1 is included,
  * but \p t2 not. */
 template <typename T>
-Range<T> range(const T& t1, const T& t2);
+Range<T> range(const T& t1, const T& t2) {
+    return Range<T>{t1, t2};
+}
 
 //
 // ---------------------------------------------------
@@ -313,35 +318,15 @@ Range<T>& operator-(T /*i*/, Range<T> /*r*/) {
 //
 
 template <typename T>
-void RangeIterator<T>::assert_valid_state() const {
-    assert_dbg(!is_past_the_end(), krims::ExcIteratorPastEnd());
-}
-
-template <typename T>
-bool RangeIterator<T>::is_past_the_end() const {
-    return m_current >= m_last;
-}
-
-template <typename T>
-RangeIterator<T>::RangeIterator()
-      : m_current{Constants<T>::invalid}, m_last{Constants<T>::invalid} {}
-
-template <typename T>
-RangeIterator<T>::RangeIterator(value_type current, value_type last)
-      : m_current{current}, m_last{last} {
-    assert_valid_state();
-}
-
-template <typename T>
 RangeIterator<T>& RangeIterator<T>::operator++() {
-    assert_valid_state();
+    assert_dbg(!is_past_the_end(), krims::ExcIteratorPastEnd());
     m_current++;
     return (*this);
 }
 
 template <typename T>
 RangeIterator<T> RangeIterator<T>::operator++(int) {
-    assert_valid_state();
+    assert_dbg(!is_past_the_end(), krims::ExcIteratorPastEnd());
     RangeIterator<T> copy{*this};
     ++(*this);
     return copy;
@@ -349,13 +334,13 @@ RangeIterator<T> RangeIterator<T>::operator++(int) {
 
 template <typename T>
 typename RangeIterator<T>::value_type RangeIterator<T>::operator*() const {
-    assert_valid_state();
+    assert_dbg(!is_past_the_end(), krims::ExcIteratorPastEnd());
     return m_current;
 }
 
 template <typename T>
 const typename RangeIterator<T>::pointer RangeIterator<T>::operator->() const {
-    assert_valid_state();
+    assert_dbg(!is_past_the_end(), krims::ExcIteratorPastEnd());
     return &m_current;
 }
 
@@ -373,23 +358,6 @@ bool RangeIterator<T>::operator==(const RangeIterator& other) const {
 template <typename T>
 bool RangeIterator<T>::operator!=(const RangeIterator& other) const {
     return !(*this == other);
-}
-
-//
-// Range helper functions.
-//
-
-/** Return a range interval from 0 to \p t, i.e. 0 is included, but \p t not. */
-template <typename T>
-Range<T> range(const T& t) {
-    return Range<T>{0, t};
-}
-
-/** Return a range interval from \p t1 to \p t2, where \p t1 is included,
- * but \p t2 not. */
-template <typename T>
-Range<T> range(const T& t1, const T& t2) {
-    return Range<T>{t1, t2};
 }
 
 }  // namespace linalgwrap

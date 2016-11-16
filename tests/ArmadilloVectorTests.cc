@@ -24,7 +24,6 @@
 
 namespace linalgwrap {
 namespace tests {
-namespace armadillo_vector_tests {
 using namespace rc;
 
 #ifdef LINALGWRAP_HAVE_ARMADILLO
@@ -75,6 +74,5 @@ TEST_CASE("ArmadilloVector class", "[ArmadilloVector]") {
 }
 #endif
 
-}  // armadillo_vector_tests
 }  // tests
 }  // linalgwrap

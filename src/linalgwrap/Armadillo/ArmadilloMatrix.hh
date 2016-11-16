@@ -22,12 +22,14 @@
 
 #include "ArmadilloTypes.hh"
 #include "ArmadilloVector.hh"
+#include "detail.hh"
+#include "linalgwrap/BaseInterfaces/MutableMemoryVector_i.hh"
+#include "linalgwrap/BaseInterfaces/Transposed.hh"
 #include "linalgwrap/Constants.hh"
 #include "linalgwrap/Exceptions.hh"
-#include "linalgwrap/PtrVector.hh"
-#include "linalgwrap/Range.hh"
 #include "linalgwrap/StoredMatrix_i.hh"
-#include <armadillo>
+#include "linalgwrap/TypeUtils/mat_vec_apply_enabled_t.hh"
+#include "linalgwrap/detail/scale_or_set.hh"
 #include <initializer_list>
 #include <memory>
 #include <type_traits>
@@ -137,79 +139,6 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
         return *this;
     }
 
-    /** Multiply two small matrices */
-    ArmadilloMatrix operator*(const ArmadilloMatrix& other) const {
-        assert_size(n_cols(), other.n_rows());
-
-        // m_arma is the transpose of what we represent
-        //   (see comment above class definition)
-        // other.m_arme is the transpose of what other
-        // represents
-        // hence
-        storage_type tres = other.m_arma * m_arma;
-        // is the transpose of the result this * other
-        // and this is what we need to envelope into the new ArmadilloMatrix.
-        return ArmadilloMatrix(tres);
-    }
-
-    //    // TODO neu
-    //    /** Multiply with a stored vector => maybe put this in
-    //    StoredMatrix_i*/
-    template <typename Vector, typename = typename std::enable_if<
-                                     IsStoredVector<Vector>::value>::type>
-    Vector operator*(const Vector& v) const {
-        assert_size(v.size(), n_cols());
-        Vector out(n_rows());
-        apply(v, out);
-        return out;
-    }
-    //
-    //    ArmadilloVector<Scalar> operator*(const ArmadilloVector<Scalar>& v)
-    //    const;
-
-    template <typename Vector,
-              typename = typename std::enable_if<
-                    // Guarantees that we have a mutable vector
-                    IsMutableVector<Vector>::value &&
-                    // Guarantees that we have access to a pointer
-                    IsRawMemoryAccessible<Vector>::value &&
-                    // We have the same scalar type
-                    std::is_same<typename Vector::scalar_type,
-                                 scalar_type>::value>::type>
-    void apply(const Vector& in, Vector& out) const {
-        assert_size(in.size(), n_cols());
-        assert_size(out.size(), n_rows());
-
-        const bool copy_into_arma = false;    // Do not copy the memory
-        const bool fixed_vector_size = true;  // No memory reallocation
-
-        const arma::Row<Scalar> in_arma(const_cast<Scalar*>(in.memptr()),
-                                        in.size(), copy_into_arma,
-                                        fixed_vector_size);
-        arma::Row<Scalar> out_arma(out.memptr(), out.size(), copy_into_arma,
-                                   fixed_vector_size);
-
-        // Note: We do not do m_arma * in here, since m_arma is actually the
-        // transpose of the matrix we represent!
-        out_arma = in_arma * m_arma;
-    }
-
-    //    see
-    //    https://trilinos.org/docs/r12.8/packages/tpetra/doc/html/classTpetra_1_1Operator.html
-    //
-    //    /** Multiply with a vector => maybe put this in StoredMatrix_i*/
-    //    template <typename Vector>
-    //    Vector apply(const Vector& v) const;
-    //
-    // static_assert(std::is_same<typename Vector::scalar_type,
-    // scalar_type>::value, "The vector and the matrix need to have the same
-    // scalar type");
-    //
-    //    /** Multiply with a vector => maybe put this in StoredMatrix_i*/
-    //    template <typename Vector>
-    //    std::vector<Vector> apply(const std::vector<Vector>& vs) const;
-    //    // END TODO
-
     /* Add a small matrix to this one */
     ArmadilloMatrix& operator+=(const ArmadilloMatrix& other) {
         assert_size(n_cols(), other.n_cols());
@@ -279,6 +208,49 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
         return m_arma[i];
     }
 
+    // We have a transpose operation mode available
+    bool has_transpose_operation_mode() const override { return true; }
+
+    /** \name Matrix application and matrix products
+     */
+    ///@{
+    /** \brief Compute the Matrix-MultiVector application
+     * For details see LazyMatrixExpression
+     */
+    template <typename VectorIn, typename VectorOut,
+              mat_vec_apply_enabled_t<ArmadilloMatrix, VectorIn, VectorOut>...>
+    void apply(const MultiVector<VectorIn>& x, MultiVector<VectorOut>& y,
+               const Transposed mode = Transposed::None,
+               const scalar_type c_this = Constants<scalar_type>::one,
+               const scalar_type c_y = Constants<scalar_type>::zero) const;
+
+    /** Perform the Matrix-Vector product */
+    template <typename Vector, typename = typename std::enable_if<
+                                     IsStoredVector<Vector>::value>::type>
+    MultiVector<Vector> operator*(const MultiVector<Vector>& v) const;
+
+    /** Perform the Matrix-MultiVector product */
+    template <typename Vector, typename = typename std::enable_if<
+                                     IsStoredVector<Vector>::value>::type>
+    Vector operator*(const Vector& v) const;
+
+    /** \brief Compute the Matrix-Matrix product
+     *
+     * For more details see the docstring of the corresponding method
+     * in LazyMatrixExpression */
+    void mmult(const ArmadilloMatrix& in, ArmadilloMatrix& out,
+               const Transposed mode = Transposed::None,
+               const scalar_type c_this = Constants<scalar_type>::one,
+               const scalar_type c_out = Constants<scalar_type>::zero) const;
+
+    /** \brief Multiplication with a stored matrix */
+    ArmadilloMatrix operator*(const ArmadilloMatrix& in) const {
+        ArmadilloMatrix out(n_rows(), in.n_cols(), false);
+        mmult(in, out);
+        return out;
+    }
+    ///@}
+
     //
     // StoredMatrix_i interface
     //
@@ -291,72 +263,16 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
         return m_arma.at(col, row);
     }
 
-    /** \brief Return a copy of a block of values out of the matrix and
-     *         return it as a ArmadilloMatrix of the appropriate size
+    /* Extract a block of the present matrix and copy it into a scaled
+     * version of M.
      *
-     * For more details of the interface see the function of the same
-     * name in ``LazyMatrixExpression``.
-     *
-     * \param row_range   The Range object representing the range of rows
-     *                    to extract. Note that it is a half-open interval
-     *                    i.e. the LHS is inclusive, but the RHS not.
-     *                    The Range may not be empty.
-     * \param col_range   The Range object representing the range of
-     *                    columns to extract.
-     *                    The Range may not be empty.
-     */
-    virtual ArmadilloMatrix<scalar_type> extract_block(
-          Range<size_type> row_range, Range<size_type> col_range) const {
-        // Assertive checks:
-        assert_greater(0u, row_range.length());
-        assert_greater(0u, col_range.length());
-
-        assert_greater_equal(row_range.last(), this->n_rows());
-        assert_greater_equal(col_range.last(), this->n_cols());
-
-        // Translate ranges to armadillo spans (which are closed intervals)
-        arma::span rows(row_range.first(), row_range.last() - 1);
-        arma::span cols(col_range.first(), col_range.last() - 1);
-
-        // Create a copy of the elements to extract
-        // Note comment above the class definition why it
-        // has to be this way round
-        storage_type m = m_arma(cols, rows);
-
-        // Move into a now ArmadilloMatrix:
-        return ArmadilloMatrix<scalar_type>{std::move(m)};
-    }
-
-    /** \brief Add a copy of a block of values of the matrix to
-     *         the ArmadilloMatrix provided by reference.
-     *
-     * For more details of the interface see the function of the same
-     * name in ``LazyMatrixExpression``.
-     *
-     *  \param in   Matrix to add the values to. It is assumed that it
-     *              already has the correct sparsity structure to take
-     *              all the values. Its size defines the size of the
-     *              block. May not be an empty matrix
-     *  \param start_row  The row index of the first element to extract
-     *  \param start_col  The column index of the first element to extract
-     *  \param c_this     The coefficient to multiply this matrix with
-     *                    before extracting.
-     */
-    void add_block_to(ArmadilloMatrix<scalar_type>& in, size_type start_row,
-                      size_type start_col,
-                      scalar_type c_this = Constants<scalar_type>::one) const {
-        assert_greater(0u, in.n_rows());
-        assert_greater(0u, in.n_cols());
-
-        // check that we do not overshoot the indices
-        assert_greater_equal(start_row + in.n_rows(), this->n_rows());
-        assert_greater_equal(start_col + in.n_cols(), this->n_cols());
-
-        // Do the operation:
-        // Note comment above the class definition why it
-        // has to be this way round
-        in.m_arma += c_this * m_arma(start_col, start_row, size(in.m_arma));
-    }
+     * For more details see the docstring of the corresponding method
+     * in LazyMatrixExpression */
+    void extract_block(
+          ArmadilloMatrix& M, const size_type start_row,
+          const size_type start_col, const Transposed mode = Transposed::None,
+          const scalar_type c_this = Constants<scalar_type>::one,
+          const scalar_type c_M = Constants<scalar_type>::zero) const;
 
     scalar_type& operator[](size_type i) override {
         assert_greater(i, n_cols() * n_rows());
@@ -376,6 +292,31 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
 
   private:
     storage_type m_arma;
+
+    /** Performs
+     *    y = c_y * y + c_this * A * x
+     * If c_y is zero, then the values of y are never used
+     */
+    template <typename VectorIn, typename VectorOut>
+    void apply_normal(const VectorIn& x, VectorOut& y, const scalar_type c_this,
+                      const scalar_type c_y) const;
+
+    /** Performs
+     *    y = c_y * y + c_this * A^T * x
+     * If c_y is zero, then the values of y are never used
+     */
+    template <typename VectorIn, typename VectorOut>
+    void apply_transpose(const VectorIn& x, VectorOut& y,
+                         const scalar_type c_this, const scalar_type c_y) const;
+
+    /** Performs
+     *    y = c_y * y + c_this * {A^{T})^* * x
+     * If c_y is zero, then the values of y are never used
+     */
+    template <typename VectorIn, typename VectorOut>
+    void apply_conjtranspose(const VectorIn& x, VectorOut& y,
+                             const scalar_type c_this,
+                             const scalar_type c_y) const;
 };
 
 //
@@ -534,6 +475,271 @@ ArmadilloMatrix<Scalar>::ArmadilloMatrix(
     assert_dbg(i == n_rows, krims::ExcInternalError());
 }
 
+// Matrix-Vector multiplication
+
+template <typename Scalar>
+template <typename VectorIn, typename VectorOut>
+void ArmadilloMatrix<Scalar>::apply_normal(const VectorIn& x, VectorOut& y,
+                                           const scalar_type c_this,
+                                           const scalar_type c_y) const {
+    const bool copy_into_arma = false;    // Do not copy the memory
+    const bool fixed_vector_size = true;  // No memory reallocation
+
+    const arma::Row<Scalar> x_arma(const_cast<Scalar*>(x.memptr()), x.size(),
+                                   copy_into_arma, fixed_vector_size);
+    arma::Row<Scalar> y_arma(y.memptr(), y.size(), copy_into_arma,
+                             fixed_vector_size);
+
+    // Since m_arma is the transpose of what we represent, we
+    // multiply from the left with a row-vector
+    if (c_y == Constants<scalar_type>::zero) {
+        y_arma = c_this * x_arma * m_arma;
+    } else {
+        y_arma = c_y * y_arma + c_this * x_arma * m_arma;
+    }
+}
+
+template <typename Scalar>
+template <typename VectorIn, typename VectorOut>
+void ArmadilloMatrix<Scalar>::apply_transpose(const VectorIn& x, VectorOut& y,
+                                              const scalar_type c_this,
+                                              const scalar_type c_y) const {
+    const bool copy_into_arma = false;    // Do not copy the memory
+    const bool fixed_vector_size = true;  // No memory reallocation
+
+    const arma::Col<Scalar> x_arma(const_cast<Scalar*>(x.memptr()), x.size(),
+                                   copy_into_arma, fixed_vector_size);
+    arma::Col<Scalar> y_arma(y.memptr(), y.size(), copy_into_arma,
+                             fixed_vector_size);
+
+    // Since m_arma is the transpose of what we represent, we
+    // multiply from the right with a column-vector
+    // (no need to take transpose)
+    if (c_y == Constants<scalar_type>::zero) {
+        y_arma = c_this * m_arma * x_arma;
+    } else {
+        y_arma = c_y * y_arma + c_this * m_arma * x_arma;
+    }
+}
+
+template <typename Scalar>
+template <typename VectorIn, typename VectorOut>
+void ArmadilloMatrix<Scalar>::apply_conjtranspose(const VectorIn& x,
+                                                  VectorOut& y,
+                                                  const scalar_type c_this,
+                                                  const scalar_type c_y) const {
+    const bool copy_into_arma = false;    // Do not copy the memory
+    const bool fixed_vector_size = true;  // No memory reallocation
+
+    const arma::Col<Scalar> x_arma(const_cast<Scalar*>(x.memptr()), x.size(),
+                                   copy_into_arma, fixed_vector_size);
+    arma::Col<Scalar> y_arma(y.memptr(), y.size(), copy_into_arma,
+                             fixed_vector_size);
+
+    // Since m_arma is the transpose of what we represent, we
+    // multiply from the right with a column-vector
+    // (no need to take transpose)
+    if (c_y == Constants<scalar_type>::zero) {
+        y_arma = c_this * arma::conj(m_arma) * x_arma;
+    } else {
+        y_arma = c_y * y_arma + c_this * arma::conj(m_arma) * x_arma;
+    }
+}
+
+template <typename Scalar>
+template <
+      typename VectorIn, typename VectorOut,
+      mat_vec_apply_enabled_t<ArmadilloMatrix<Scalar>, VectorIn, VectorOut>...>
+void ArmadilloMatrix<Scalar>::apply(const MultiVector<VectorIn>& x,
+                                    MultiVector<VectorOut>& y,
+                                    const Transposed mode,
+                                    const scalar_type c_this,
+                                    const scalar_type c_y) const {
+    assert_finite(c_this);
+    assert_finite(c_y);
+    assert_size(x.n_vectors(), y.n_vectors());
+    if (mode == Transposed::Trans || mode == Transposed::ConjTrans) {
+        assert_size(x.n_elem(), n_rows());
+        assert_size(y.n_elem(), n_cols());
+    } else {
+        assert_size(x.n_elem(), n_cols());
+        assert_size(y.n_elem(), n_rows());
+    }
+    assert_sufficiently_tested(mode != Transposed::ConjTrans);
+
+    if (c_this == Constants<scalar_type>::zero) {
+        for (auto& vec : y) detail::scale_or_set(vec, c_y);
+        return;
+    }  // c_this == 0
+
+    for (size_type i = 0; i < x.n_vectors(); ++i) {
+        switch (mode) {
+            case Transposed::None:
+                apply_normal(x[i], y[i], c_this, c_y);
+                break;
+            case Transposed::Trans:
+                apply_transpose(x[i], y[i], c_this, c_y);
+                break;
+            case Transposed::ConjTrans:
+                apply_conjtranspose(x[i], y[i], c_this, c_y);
+                break;
+        }  // mode
+    }      // for
+}
+
+template <typename Scalar>
+template <typename Vector, typename>
+Vector ArmadilloMatrix<Scalar>::operator*(const Vector& v) const {
+    assert_size(v.size(), n_cols());
+    Vector out(n_rows(), false);
+    apply_normal(v, out, Constants<scalar_type>::one,
+                 Constants<scalar_type>::zero);
+    return out;
+}
+
+template <typename Scalar>
+template <typename Vector, typename>
+MultiVector<Vector> ArmadilloMatrix<Scalar>::operator*(
+      const MultiVector<Vector>& mv) const {
+    assert_size(mv.n_elem(), n_cols());
+    MultiVector<Vector> out(n_rows(), mv.n_vectors(), false);
+    apply_inner(mv, out, Transposed::None, Constants<scalar_type>::one,
+                Constants<scalar_type>::zero);
+    return out;
+}
+
+// mmult
+
+template <typename Scalar>
+void ArmadilloMatrix<Scalar>::mmult(const ArmadilloMatrix& in,
+                                    ArmadilloMatrix& out, const Transposed mode,
+                                    const scalar_type c_this,
+                                    const scalar_type c_out) const {
+    assert_finite(c_this);
+    assert_finite(c_out);
+    assert_size(in.n_cols(), out.n_cols());
+    if (mode == Transposed::Trans || mode == Transposed::ConjTrans) {
+        assert_size(n_rows(), in.n_rows());
+        assert_size(n_cols(), out.n_rows());
+    } else {
+        assert_size(n_cols(), in.n_rows());
+        assert_size(n_rows(), out.n_rows());
+    }
+    assert_sufficiently_tested(mode != Transposed::ConjTrans);
+
+    if (c_this == Constants<scalar_type>::zero) {
+        detail::scale_or_set(out, c_out);
+        return;
+    }  // c_this == 0
+
+    // If c_out is zero we are not allowed to read the memory from out
+    // since it could be uninitialised or nan
+    const bool assign_out = c_out == Constants<scalar_type>::zero;
+
+    // Transposing wrapper class
+    typedef detail::ArmaTranspose<Scalar> AT;
+    switch (mode) {
+        case Transposed::None:
+            // Since matrices are stored in a transposed sense
+            // and B^T A^T = (AB)^T, i.e. what we need to store
+            // in the product class
+            if (assign_out) {
+                out.m_arma = c_this * in.m_arma * m_arma;
+            } else {
+                out.m_arma = c_out * out.m_arma + c_this * in.m_arma * m_arma;
+            }
+            break;
+        //
+        case Transposed::Trans:
+            if (assign_out) {
+                out.m_arma = c_this * in.m_arma * AT::trans(m_arma);
+            } else {
+                out.m_arma = c_out * out.m_arma +
+                             c_this * in.m_arma * AT::trans(m_arma);
+            }
+            break;
+        //
+        case Transposed::ConjTrans:
+            if (assign_out) {
+                out.m_arma = c_this * in.m_arma * AT::conjtrans(m_arma);
+            } else {
+                out.m_arma = c_out * out.m_arma +
+                             c_this * in.m_arma * AT::conjtrans(m_arma);
+            }
+            break;
+    }  // mode
+}
+template <typename Scalar>
+void ArmadilloMatrix<Scalar>::extract_block(ArmadilloMatrix<Scalar>& M,
+                                            const size_type start_row,
+                                            const size_type start_col,
+                                            const Transposed mode,
+                                            const scalar_type c_this,
+                                            const scalar_type c_M) const {
+    assert_finite(c_this);
+    assert_finite(c_M);
+    // check that we do not overshoot the indices
+    if (mode == Transposed::Trans || mode == Transposed::ConjTrans) {
+        assert_greater_equal(start_row + M.n_rows(), n_cols());
+        assert_greater_equal(start_col + M.n_cols(), n_rows());
+    } else {
+        assert_greater_equal(start_row + M.n_rows(), n_rows());
+        assert_greater_equal(start_col + M.n_cols(), n_cols());
+    }
+    assert_sufficiently_tested(mode != Transposed::ConjTrans);
+
+    // For empty matrices there is nothing to do
+    if (M.n_rows() == 0 || M.n_cols() == 0) return;
+
+    if (c_this == Constants<scalar_type>::zero) {
+        detail::scale_or_set(M, c_M);
+        return;
+    }  // c_this == 0
+
+    // If c_M is zero we are not allowed to read the memory from M
+    // since it could be uninitialised or nan
+    const bool assign_M = c_M == Constants<scalar_type>::zero;
+
+    // Translate ranges of interesting rows and columns
+    // to armadillo spans (which are closed intervals)
+    arma::span rows(start_row, start_row + M.n_rows() - 1);
+    arma::span cols(start_col, start_col + M.n_cols() - 1);
+
+    typedef detail::ArmaTranspose<Scalar> AT;
+    switch (mode) {
+        case Transposed::None:
+            // Note that the order of rows and cols has to be
+            // interchanged, see class documentation for details
+            if (assign_M) {
+                M.m_arma = c_this * m_arma(cols, rows);
+            } else {
+                M.m_arma = c_M * M.m_arma + c_this * m_arma(cols, rows);
+            }
+            break;
+        //
+        case Transposed::Trans:
+            if (assign_M) {
+                M.m_arma = c_this * AT::trans(m_arma(rows, cols));
+            } else {
+                M.m_arma =
+                      c_M * M.m_arma + c_this * AT::trans(m_arma(rows, cols));
+            }
+            break;
+        //
+        case Transposed::ConjTrans:
+            if (assign_M) {
+                M.m_arma = c_this * AT::conjtrans(m_arma(rows, cols));
+            } else {
+                M.m_arma = c_M * M.m_arma +
+                           c_this * AT::conjtrans(m_arma(rows, cols));
+            }
+            break;
+    }  // mode
+}
+
+//
+// Out of class
+//
 template <typename Scalar>
 Scalar norm_l1(const ArmadilloMatrix<Scalar>& m) {
     // l1 is the maximum of the sums over columns

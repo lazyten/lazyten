@@ -23,8 +23,8 @@
 #include <krims/version.hh>
 #include <linalgwrap/LazyMatrixWrapper.hh>
 #include <linalgwrap/SmallMatrix.hh>
+#include <linalgwrap/trans.hh>
 #include <linalgwrap/version.hh>
-#include <linalgwrap/view.hh>
 
 using namespace linalgwrap;
 
@@ -35,8 +35,8 @@ using namespace linalgwrap;
  *  */
 template <typename Matrix, typename RMatrix>
 auto rotate(Matrix& m, RMatrix rotation_matrix)
-      -> decltype(view::transpose(rotation_matrix) * m * rotation_matrix) {
-    return view::transpose(rotation_matrix) * m * rotation_matrix;
+      -> decltype(conjtrans(rotation_matrix) * m * rotation_matrix) {
+    return conjtrans(rotation_matrix) * m * rotation_matrix;
 }
 
 int main() {

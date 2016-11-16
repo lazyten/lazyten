@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
+#pragma once
 
 // Comment out to enable more verbose testing output
 // #define LINALGWRAP_TESTS_VERBOSE
