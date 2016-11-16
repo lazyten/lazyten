@@ -73,7 +73,16 @@ if ("${rapidcheck_DIR}" STREQUAL "rapidcheck_DIR-NOTFOUND")
 		# Change compiler flags (CMAKE_CXX_FLAGS) to make fresh build config
 		set(CMAKE_CXX_FLAGS_STORED_TMP ${CMAKE_CXX_FLAGS})
 		set(CMAKE_CXX_FLAGS "")
-		#enable_if_compiles(CMAKE_CXX_FLAGS "-Wno-gnu-zero-variadic-macro-arguments")
+
+		if (CMAKE_CXX_COMPILER_ID MATCHES "GNU"
+				AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "6.0")
+			# TODO Problems in rapidcheck's code
+			#      Fix them some day
+			enable_if_compiles(CMAKE_CXX_FLAGS "-Wno-error=shift-negative-value")
+			enable_if_compiles(CMAKE_CXX_FLAGS_STORED_TMP "-Wno-error=shift-negative-value")
+			enable_if_compiles(CMAKE_CXX_FLAGS "-Wno-error=misleading-indentation")
+			enable_if_compiles(CMAKE_CXX_FLAGS_STORED_TMP "-Wno-error=misleading-indentation")
+		endif()
 
 		# Add the rapidcheck subdirectory and configure its built.
 		add_subdirectory(${PROJECT_SOURCE_DIR}/external/rapidcheck)
