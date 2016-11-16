@@ -18,7 +18,7 @@
 //
 
 #pragma once
-#include "linalgwrap/BaseInterfaces/MutableMemoryVector_i.hh"
+#include "linalgwrap/Base/Interfaces/MutableMemoryVector_i.hh"
 #include "linalgwrap/Constants.hh"
 #include <iterator>
 namespace linalgwrap {

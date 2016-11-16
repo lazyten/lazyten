@@ -18,7 +18,7 @@
 //
 
 #pragma once
-#include "linalgwrap/BaseInterfaces.hh"
+#include "linalgwrap/Base/Interfaces.hh"
 #include <krims/IteratorUtils.hh>
 #include <krims/RCPWrapper.hh>
 #include <krims/TypeUtils.hh>

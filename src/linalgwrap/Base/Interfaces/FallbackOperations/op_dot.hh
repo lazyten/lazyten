@@ -18,7 +18,7 @@
 //
 
 #pragma once
-#include "linalgwrap/BaseInterfaces/Indexable_i.hh"
+#include "linalgwrap/Base/Interfaces/Indexable_i.hh"
 #include "macro_defs.hh"
 #include "op_elementwise.hh"
 #include <numeric>

@@ -18,8 +18,6 @@
 //
 
 #pragma once
-// TODO move into Base subfolder as "Interfaces.hh"
-
 /** \file Includes the most basic inferfaces for vectors and matrices
  * along with the default implementation for all important operations */
 
@@ -28,17 +26,17 @@
 //#define LINALGWRAP_SIGNAL_FALLBACK
 
 // Basic interfaces
-#include "BaseInterfaces/Indexable_i.hh"
-#include "BaseInterfaces/Stored_i.hh"
+#include "Interfaces/Indexable_i.hh"
+#include "Interfaces/Stored_i.hh"
 
 // Vectors
-#include "BaseInterfaces/IsStoredVector.hh"
-#include "BaseInterfaces/MutableMemoryVector_i.hh"
-#include "BaseInterfaces/MutableVector_i.hh"
-#include "BaseInterfaces/Vector_i.hh"
+#include "Interfaces/IsStoredVector.hh"
+#include "Interfaces/MutableMemoryVector_i.hh"
+#include "Interfaces/MutableVector_i.hh"
+#include "Interfaces/Vector_i.hh"
 
 // Matrices
-#include "BaseInterfaces/Transposed.hh"
+#include "Interfaces/Transposed.hh"
 
 // Default implementations for important Vector/Matrix/Indexable operations.
-#include "BaseInterfaces/FallbackOperations.hh"
+#include "Interfaces/FallbackOperations.hh"

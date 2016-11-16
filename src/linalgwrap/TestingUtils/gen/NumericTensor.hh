@@ -21,7 +21,7 @@
 #include "Numeric.hh"
 #include "NumericContainer.hh"
 #include "NumericSize.hh"
-#include "linalgwrap/BaseInterfaces.hh"
+#include "linalgwrap/Base/Interfaces.hh"
 #include "linalgwrap/MultiVector.hh"
 #include "linalgwrap/StoredMatrix_i.hh"
 

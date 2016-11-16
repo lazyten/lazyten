@@ -18,8 +18,8 @@
 //
 
 #pragma once
-#include "linalgwrap/BaseInterfaces/Indexable_i.hh"
-#include "linalgwrap/BaseInterfaces/Vector_i.hh"
+#include "linalgwrap/Base/Interfaces/Indexable_i.hh"
+#include "linalgwrap/Base/Interfaces/Vector_i.hh"
 #include "macro_defs.hh"
 #include "op_accumulate.hh"
 #include "op_dot.hh"

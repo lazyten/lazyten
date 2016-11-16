@@ -18,7 +18,7 @@
 //
 
 #pragma once
-#include "linalgwrap/BaseInterfaces.hh"
+#include "linalgwrap/Base/Interfaces.hh"
 
 // TODO IteratorVector is maybe not the best name for this guy
 // Think about renaming it to something else some day.

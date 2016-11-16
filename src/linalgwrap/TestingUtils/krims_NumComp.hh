@@ -19,7 +19,7 @@
 
 #pragma once
 #include <krims/NumComp.hh>
-#include <linalgwrap/BaseInterfaces.hh>
+#include <linalgwrap/Base/Interfaces.hh>
 #include <linalgwrap/Matrix_i.hh>
 #include <linalgwrap/MultiVector.hh>
 

@@ -18,7 +18,7 @@
 //
 
 #pragma once
-#include "linalgwrap/BaseInterfaces.hh"
+#include "linalgwrap/Base/Interfaces.hh"
 
 namespace linalgwrap {
 
