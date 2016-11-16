@@ -29,7 +29,7 @@ struct RangeWithin {
     typedef T value_type;
 
     //! Construct a range which at most runs over the interval [min:max)
-    static Gen<linalgwrap::Range<value_type>> range_within(
+    static Gen<krims::Range<value_type>> range_within(
           value_type min, value_type max, value_type min_length = 0) {
 
         auto gen_range = [=] {

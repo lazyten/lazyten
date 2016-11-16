@@ -302,7 +302,7 @@ MultiVector<InnerVector> MultiVector<InnerVector>::copy_deep() const {
 
 template <typename InnerVector>
 MultiVector<InnerVector> MultiVector<InnerVector>::subview(
-      const Range<size_type>& col_range) {
+      const krims::Range<size_type>& col_range) {
     base_type::assert_valid_state();
     if (!col_range.empty()) {
         assert_greater_equal(col_range.last(), base_type::n_vectors());
@@ -318,7 +318,7 @@ MultiVector<InnerVector> MultiVector<InnerVector>::subview(
 
 template <typename InnerVector>
 MultiVector<const InnerVector> MultiVector<InnerVector>::csubview(
-      const Range<size_type>& col_range) const {
+      const krims::Range<size_type>& col_range) const {
     base_type::assert_valid_state();
     if (!col_range.empty()) {
         assert_greater_equal(col_range.last(), base_type::n_vectors());
