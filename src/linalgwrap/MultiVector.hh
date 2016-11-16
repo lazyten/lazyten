@@ -19,7 +19,7 @@
 
 #pragma once
 #include "detail/MultiVectorBase.hh"
-#include "linalgwrap/Range.hh"
+#include <krims/Range.hh>
 
 namespace linalgwrap {
 
@@ -129,17 +129,17 @@ class MultiVector : public detail::MultiVectorBase<InnerVector> {
     MultiVector copy_deep() const;
 
     /** Obtain a view (shallow copy) of a part of the columns */
-    MultiVector subview(const Range<size_type>& colrange);
+    MultiVector subview(const krims::Range<size_type>& colrange);
 
     /** Obtain a constant view of a part of the columns */
     MultiVector<const InnerVector> subview(
-          const Range<size_type>& colrange) const {
+          const krims::Range<size_type>& colrange) const {
         return csubview(colrange);
     }
 
     /** Obtain a constant view of a part of the columns */
     MultiVector<const InnerVector> csubview(
-          const Range<size_type>& colrange) const;
+          const krims::Range<size_type>& colrange) const;
     ///@}
 };
 
@@ -302,7 +302,7 @@ MultiVector<InnerVector> MultiVector<InnerVector>::copy_deep() const {
 
 template <typename InnerVector>
 MultiVector<InnerVector> MultiVector<InnerVector>::subview(
-      const Range<size_type>& col_range) {
+      const krims::Range<size_type>& col_range) {
     base_type::assert_valid_state();
     if (!col_range.empty()) {
         assert_greater_equal(col_range.last(), base_type::n_vectors());
@@ -318,7 +318,7 @@ MultiVector<InnerVector> MultiVector<InnerVector>::subview(
 
 template <typename InnerVector>
 MultiVector<const InnerVector> MultiVector<InnerVector>::csubview(
-      const Range<size_type>& col_range) const {
+      const krims::Range<size_type>& col_range) const {
     base_type::assert_valid_state();
     if (!col_range.empty()) {
         assert_greater_equal(col_range.last(), base_type::n_vectors());

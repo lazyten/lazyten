@@ -25,7 +25,6 @@
 #include "rapidcheck_utils.hh"
 #include "vector_tests.hh"
 #include <functional>
-#include <linalgwrap/Range.hh>
 #include <linalgwrap/TestingUtils.hh>
 #include <linalgwrap/TypeUtils.hh>
 
