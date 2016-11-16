@@ -173,7 +173,9 @@ std::ostream& operator<<(std::ostream& o, const MultiVector<Vector>& mv) {
  * the multivector ownership of the vector (by moving it inside) or
  * not (by just passing a reference) is possible.
  **/
-template <typename Vector, krims::enable_if_t<IsVector<Vector>::value>...>
+template <typename Vector,
+          typename = krims::enable_if_t<
+                IsVector<typename std::remove_reference<Vector>::type>::value>>
 MultiVector<typename std::remove_reference<Vector>::type> as_multivector(
       Vector&& v) {
     typedef typename std::remove_reference<Vector>::type vtype;
