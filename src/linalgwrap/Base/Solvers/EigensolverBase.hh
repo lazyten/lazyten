@@ -105,8 +105,8 @@ class EigensolverBase : public SolverBase<State> {
     /** \brief Run the eigensolver with the provided eigenproblem and return
      * the final state.
      *
-     * If the solver does not manage to achieve convergence an
-     * IterativeSolverException
+     * If the solver does not manage to achieve convergence a
+     * SolverException
      * is thrown and the state's fail_bit will be set accompanied with
      * an appropriate fail message.
      */
