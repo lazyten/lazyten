@@ -69,7 +69,7 @@ class FileType_i {
      *  Use the provided label string to indicate the multivector
      */
     template <typename Scalar>
-    bool write(std::ostream&, const std::string&,
+    void write(std::ostream&, const std::string&,
                const MultiVector<Vector_i<Scalar>>&) const {
         assert_dbg(false, krims::ExcNotImplemented());
     }
@@ -77,7 +77,7 @@ class FileType_i {
     /** Write a non-labelled multivector to the stream represented by this class
      * under the format represented by this class */
     template <typename Scalar>
-    bool write(std::ostream&, const MultiVector<Vector_i<Scalar>>&) const {
+    void write(std::ostream&, const MultiVector<Vector_i<Scalar>>&) const {
         assert_dbg(false, krims::ExcNotImplemented());
     }
 
