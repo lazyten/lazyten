@@ -102,6 +102,7 @@ void TestingLibrary<Matrix>::run_checks() const {
     const NumCompAccuracyLevel low = NumCompAccuracyLevel::Lower;
     const NumCompAccuracyLevel sloppy = NumCompAccuracyLevel::Sloppy;
     const NumCompAccuracyLevel supersloppy = NumCompAccuracyLevel::SuperSloppy;
+    static constexpr bool cplx = krims::IsComplexNumber<scalar_type>::value;
 
     // Test construction from initialiser list
     once_test_initialiser_list_constructor();
@@ -141,6 +142,14 @@ void TestingLibrary<Matrix>::run_checks() const {
 
     CHECK(rc::check(m_prefix + "Frobenius norm",
                     m_gen.generate(comptests::test_norm_frobenius)));
+
+    CHECK(m_gen.run_test(m_prefix + "Elementwise functions",
+                         comptests::test_elementwise));
+
+    if (!cplx) {
+        CHECK(m_gen.run_test(m_prefix + "Min and max function",
+                             comptests::test_minmax, eps));
+    }
 
     CHECK(rc::check(m_prefix + "accumulate function",
                     m_gen.generate(comptests::test_accumulate, sloppy)));

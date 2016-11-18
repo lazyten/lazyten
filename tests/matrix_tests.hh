@@ -77,8 +77,6 @@ struct ComparativeTests {
     // TODO use stuff from indexable_tests.hh and vector_tests.hh
     // TODO missing from indexable_tests
     //  - test_dot
-    //  - test_minmax
-    //  - test_elementwise
 
     // TODO temporary
     typedef model_type compmat_type;
@@ -162,6 +160,12 @@ struct ComparativeTests {
 
     /** Test the trace function */
     linalgwrap_declare_comptest(test_trace);
+
+    /** Test the functions min and max*/
+    linalgwrap_declare_comptest(test_minmax);
+
+    /** Test the elementwise functions abs, conj, sqrt and square */
+    linalgwrap_declare_comptest(test_elementwise);
 
     /** Test the accumulate function */
     linalgwrap_declare_comptest(test_accumulate);
@@ -703,6 +707,16 @@ linalgwrap_define_comptest(test_trace) {
     }
 
     RC_ASSERT_NC(trace(sut) == numcomp(res).tolerance(tolerance));
+}
+
+linalgwrap_define_comptest(test_minmax) {
+    // TODO exists in indexable_tests.hh
+    idx_cmptests::test_minmax(model, sut, tolerance);
+}
+
+linalgwrap_define_comptest(test_elementwise) {
+    // TODO exists in indexable_tests.hh
+    idx_cmptests::test_elementwise(model, sut, tolerance);
 }
 
 linalgwrap_define_comptest(test_accumulate) {

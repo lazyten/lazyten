@@ -19,6 +19,7 @@
 
 #pragma once
 #include "linalgwrap/Constants.hh"
+#include <iostream>
 #include <krims/Subscribable.hh>
 #include <krims/TypeUtils.hh>
 #include <numeric>
@@ -116,6 +117,24 @@ using ValidIndexableScalarT =
 /** Type alias to assert that the index type is valid */
 template <typename T>
 using ValidIndexableT = typename std::enable_if<IsIndexable<T>::value, T>::type;
+
+/** \brief Simple output operator, that plainly shows all entries of
+ *  the Matrix one by one.
+ *
+ *  Rows are separated by a newline and entries by spaces.
+ *  The last row is not terminated by a newline character.
+ *  */
+template <typename Scalar>
+std::ostream& operator<<(std::ostream& o, const Indexable_i<Scalar>& ible) {
+    for (size_t i = 0; i < ible.n_elem(); ++i) {
+        o << ible[i] << " ";
+    }
+
+    // TODO extend
+    // assert_dbg(false, krims::ExcNotImplemented());
+    // io::MatrixPrinter().print(m, o);
+    return o;
+}
 
 /** Convert an indexable with only one element into this scalar element */
 template <typename Scalar>
