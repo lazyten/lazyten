@@ -183,7 +183,7 @@ TEST_CASE("solve", "[solve]") {
 
             // Check that we agree:
             RC_ASSERT_NC(M * sol ==
-                         numcomp(rhs).tolerance(NumCompAccuracyLevel::Lower));
+                         numcomp(rhs).tolerance(NumCompAccuracyLevel::Sloppy));
         };
 
         CHECK(rc::check("solve_hermitian with random problems", test));
