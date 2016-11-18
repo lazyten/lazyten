@@ -18,8 +18,10 @@
 //
 
 #pragma once
+#include "linalgwrap/Base/Interfaces.hh"
+#include "linalgwrap/Matrix_i.hh"
+#include "linalgwrap/MultiVector.hh"
 #include <krims/Subscribable.hh>
-#include <linalgwrap/Matrix_i.hh>
 
 namespace linalgwrap {
 namespace io {
@@ -58,6 +60,23 @@ class DataWriter_i : public krims::Subscribable {
      * \return Is the writer still in a good state?
      * */
     virtual bool write(const Matrix_i<Scalar>& mat) = 0;
+
+    /** Write a labelled multivector to the ostream under the format represented
+     * by
+     * this class.
+     *  Use the provided label string to indicate the multivector
+     *
+     * \return Is the writer still in a good state?
+     *  */
+    virtual bool write(const std::string& label,
+                       const MultiVector<Vector_i<Scalar>>& vecs) = 0;
+
+    /** Write a non-labelled multivector to the stream represented by this class
+     * under the format represented by this class
+     *
+     * \return Is the writer still in a good state?
+     * */
+    virtual bool write(const MultiVector<Vector_i<Scalar>>& vecs) = 0;
 
     /** Write a comment string
      *

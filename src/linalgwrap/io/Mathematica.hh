@@ -51,6 +51,14 @@ class Mathematica : public FileType_i {
     template <typename Scalar>
     void write(std::ostream& out, const Matrix_i<Scalar>& mat) const;
 
+    /** Write a labelled multivector to the ostream under the format represented
+     * by this class.
+     *  Use the provided label string to indicate the multivector
+     */
+    template <typename Scalar>
+    void write(std::ostream& out,
+               const MultiVector<Vector_i<Scalar>>& mv) const;
+
     /** Write a comment **/
     void write_comment(std::ostream& out,
                        const std::string& comment) const override {
@@ -106,15 +114,36 @@ void Mathematica::write(std::ostream& out, const std::string& label,
 }
 
 template <typename Scalar>
+void Mathematica::write(std::ostream& out,
+                        const MultiVector<Vector_i<Scalar>>& mv) const {
+    typedef typename Vector_i<Scalar>::size_type size_type;
+    assert_throw(out, krims::ExcIO());
+    if (mv.n_vectors() == 0 || mv.n_elem() == 0) return;
+
+    out << "{";
+    for (size_type row = 0; row < mv.n_elem(); ++row) {
+        if (row != 0) out << "," << std::endl;
+        out << "{";
+        for (size_type col = 0; col < mv.n_vectors(); ++col) {
+            if (col != 0) out << ",";
+            write_elem(out, (mv[col])[row]);
+        }
+        out << "}";
+    }
+    out << "};" << std::endl;
+}
+
+template <typename Scalar>
 void Mathematica::write(std::ostream& out, const Matrix_i<Scalar>& mat) const {
+    typedef typename Matrix_i<Scalar>::size_type size_type;
     assert_throw(out, krims::ExcIO());
     if (mat.n_rows() == 0 || mat.n_cols() == 0) return;
 
     out << "{";
-    for (auto row : range(mat.n_rows())) {
+    for (size_type row = 0; row < mat.n_rows(); ++row) {
         if (row != 0) out << "," << std::endl;
         out << "{";
-        for (auto col : range(mat.n_cols())) {
+        for (size_type col = 0; col < mat.n_cols(); ++col) {
             if (col != 0) out << ",";
             write_elem(out, mat(row, col));
         }
