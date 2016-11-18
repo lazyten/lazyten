@@ -87,6 +87,8 @@ struct FunctionalityTests
         base_type::test_norm_l1(model, sut);
         base_type::test_norm_linf(model, sut);
         base_type::test_norm_frobenius(model, sut);
+        base_type::test_elementwise(model, sut);
+        base_type::test_minmax(model, sut);
         if (model.n_rows() == model.n_cols()) {
             base_type::test_trace(model, sut);
         }
@@ -184,6 +186,7 @@ template <typename LazyMatrix, typename LazyGenArg>
 void TestingLibrary<LazyMatrix, LazyGenArg>::run_checks() const {
     const NumCompAccuracyLevel low = NumCompAccuracyLevel::Lower;
     const NumCompAccuracyLevel sloppy = NumCompAccuracyLevel::Sloppy;
+    static constexpr bool cplx = krims::IsComplexNumber<scalar_type>::value;
 
     // Test basic equivalence:
     // TODO change all calls to
@@ -213,6 +216,14 @@ void TestingLibrary<LazyMatrix, LazyGenArg>::run_checks() const {
 
     CHECK(rc::check(m_prefix + "accumulate function",
                     m_gen.generate(comptests::test_accumulate, low)));
+
+    CHECK(m_gen.run_test(m_prefix + "Elementwise functions",
+                         comptests::test_elementwise));
+
+    if (!cplx) {
+        CHECK(m_gen.run_test(m_prefix + "Min and max function",
+                             comptests::test_minmax));
+    }
 
     CHECK(rc::check(m_prefix + "trace calculation",
                     m_gen.generate(comptests::test_trace, low)));

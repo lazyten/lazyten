@@ -309,7 +309,7 @@ TEST_CASE("MultiVector class", "[MultiVector]") {
         CHECK(rc::check("MultiVector: Obtaining memptrs", test));
     }  // Obtaining memptrs
 
-    SECTION("outer_sum() on multivectors") {
+    SECTION("outer_prod_sum() on multivectors") {
         auto test = [] {
             auto vecs1 = gen_vectors<vector_type>();
             auto mv1 = gen_multivector(vecs1);
@@ -318,8 +318,8 @@ TEST_CASE("MultiVector class", "[MultiVector]") {
             auto mv2 = gen_multivector(vecs2);
 
             // compute some outer products
-            auto res = outer_sum(mv1, mv2);
-            auto res2 = outer_sum(mv1, mv1);
+            auto res = outer_prod_sum(mv1, mv2);
+            auto res2 = outer_prod_sum(mv1, mv1);
 
             RC_ASSERT(res.n_rows() == mv1.n_elem());
             RC_ASSERT(res.n_cols() == mv2.n_elem());
@@ -338,7 +338,7 @@ TEST_CASE("MultiVector class", "[MultiVector]") {
             }      // i
         };
 
-        CHECK(rc::check("MultiVector: outer_sum()", test));
+        CHECK(rc::check("MultiVector: outer_prod_sum()", test));
     }  // outer_sum() on multivectors
 
     // TODO full stateful test

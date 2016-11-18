@@ -245,8 +245,8 @@ template <typename Vector, typename Vector2,
                 std::is_same<typename std::remove_const<Vector>::type,
                              typename std::remove_const<Vector2>::type>::value>>
 typename Vector::type_family::template matrix<typename Vector::scalar_type>
-outer_sum(const MultiVector<Vector>& u,
-          const linalgwrap::MultiVector<Vector2>& v) {
+outer_prod_sum(const MultiVector<Vector>& u,
+               const linalgwrap::MultiVector<Vector2>& v) {
     // TODO this is a temporary routine
     assert_size(u.n_vectors(), v.n_vectors());
 
@@ -255,6 +255,9 @@ outer_sum(const MultiVector<Vector>& u,
           matrix_type;
     typedef typename Vector::size_type size_type;
     matrix_type ret(u.n_elem(), v.n_elem());
+
+    // Later use std::inner_product and as operator* the outer_prod
+    // function
 
     for (size_type vi = 0; vi < v.n_vectors(); ++vi) {
         const auto& uu = u[vi];

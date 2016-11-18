@@ -18,6 +18,7 @@
 //
 
 #pragma once
+#include "Base/Interfaces/Indexable_i.hh"
 #include "Constants.hh"
 #include "DefaultMatrixIterator.hh"
 #include "Exceptions.hh"
@@ -30,7 +31,6 @@
 #include <iomanip>
 #include <ios>
 #include <iostream>
-#include <krims/Subscribable.hh>
 #include <krims/TypeUtils.hh>
 #include <numeric>
 #include <string>
@@ -53,11 +53,12 @@ class MatrixIteratorDefaultCore;
  * only when other means (e.g. using shared pointers) is not possible.
  * */
 template <typename Scalar>
-class Matrix_i : public krims::Subscribable {
+class Matrix_i : public Indexable_i<Scalar> {
   public:
-    typedef size_t size_type;
-    typedef Scalar scalar_type;
-    typedef typename krims::RealTypeOf<Scalar>::type real_type;
+    typedef Indexable_i<Scalar> base_type;
+    typedef typename base_type::size_type size_type;
+    typedef typename base_type::scalar_type scalar_type;
+    typedef typename base_type::real_type real_type;
 
     //! The iterator type (a const iterator)
     typedef DefaultMatrixConstIterator<Matrix_i<Scalar>> iterator;
@@ -86,7 +87,7 @@ class Matrix_i : public krims::Subscribable {
     virtual size_type n_cols() const = 0;
 
     /** \brief Return the number of elements of the matrix */
-    virtual size_type n_elem() const { return n_rows() * n_cols(); }
+    virtual size_type n_elem() const override { return n_rows() * n_cols(); }
     ///@}
 
     /** \name Data access
@@ -101,7 +102,7 @@ class Matrix_i : public krims::Subscribable {
      * Access the element in row-major ordering (i.e. the matrix is
      * traversed row by row)
      */
-    virtual scalar_type operator[](size_type i) const;
+    virtual scalar_type operator[](size_type i) const override;
     ///@}
 
     /** \name Iterators
