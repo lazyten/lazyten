@@ -227,7 +227,8 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
     /** Perform the Matrix-Vector product */
     template <typename Vector, typename = typename std::enable_if<
                                      IsStoredVector<Vector>::value>::type>
-    MultiVector<Vector> operator*(const MultiVector<Vector>& v) const;
+    MultiVector<typename std::remove_const<Vector>::type> operator*(
+          const MultiVector<Vector>& v) const;
 
     /** Perform the Matrix-MultiVector product */
     template <typename Vector, typename = typename std::enable_if<
@@ -599,12 +600,13 @@ Vector ArmadilloMatrix<Scalar>::operator*(const Vector& v) const {
 
 template <typename Scalar>
 template <typename Vector, typename>
-MultiVector<Vector> ArmadilloMatrix<Scalar>::operator*(
-      const MultiVector<Vector>& mv) const {
+MultiVector<typename std::remove_const<Vector>::type> ArmadilloMatrix<Scalar>::
+operator*(const MultiVector<Vector>& mv) const {
     assert_size(mv.n_elem(), n_cols());
-    MultiVector<Vector> out(n_rows(), mv.n_vectors(), false);
-    apply_inner(mv, out, Transposed::None, Constants<scalar_type>::one,
-                Constants<scalar_type>::zero);
+    MultiVector<typename std::remove_const<Vector>::type> out(
+          n_rows(), mv.n_vectors(), false);
+    apply(mv, out, Transposed::None, Constants<scalar_type>::one,
+          Constants<scalar_type>::zero);
     return out;
 }
 
