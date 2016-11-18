@@ -59,11 +59,11 @@ class MultiVector : public detail::MultiVectorBase<InnerVector> {
 
     /** Construct a MultiVector with n_vectors vectors, which each have n_elem
      * elements */
-    template <typename Boolean,
-              krims::enable_if_cond_same_t<IsStoredVector<InnerVector>::value,
-                                           Boolean, bool>...>
-    MultiVector(size_type n_elem, size_type n_vectors,
-                Boolean fill_zero = true);
+    template <typename SizeType,
+              krims::enable_if_cond_convertible_t<
+                    IsStoredVector<InnerVector>::value, SizeType,
+                    typename InnerVector::size_type>...>
+    MultiVector(size_type n_elem, SizeType n_vectors, bool fill_zero = true);
 
     /** Default destructor */
     ~MultiVector() = default;
@@ -231,6 +231,45 @@ std::vector<typename Vector::real_type> norm_l2(const MultiVector<Vector>& mv) {
                    [](const Vector& v) { return norm_l2(v); });
     return res;
 }
+
+// TODO later return a lazy expression here
+/** Compute the sum of all outer products between the vectors,
+ *  i.e. computes
+ *  \f[ \sum_k  u^{(k)}_i v^{(k)}_j \f]
+ * where k runs over the number of vectors in the multivector
+ * and i and j runs over the respective number of elements
+ * in the multivectors u and v
+ */
+template <typename Vector, typename Vector2,
+          typename = krims::enable_if_t<
+                std::is_same<typename std::remove_const<Vector>::type,
+                             typename std::remove_const<Vector2>::type>::value>>
+typename Vector::type_family::template matrix<typename Vector::scalar_type>
+outer_sum(const MultiVector<Vector>& u,
+          const linalgwrap::MultiVector<Vector2>& v) {
+    // TODO this is a temporary routine
+    assert_size(u.n_vectors(), v.n_vectors());
+
+    typedef typename Vector::type_family::template matrix<
+          typename Vector::scalar_type>
+          matrix_type;
+    typedef typename Vector::size_type size_type;
+    matrix_type ret(u.n_elem(), v.n_elem());
+
+    for (size_type vi = 0; vi < v.n_vectors(); ++vi) {
+        const auto& uu = u[vi];
+        const auto& vv = v[vi];
+
+        for (size_type i = 0; i < u.n_elem(); ++i) {
+            for (size_type j = 0; j < v.n_elem(); ++j) {
+                ret(i, j) += uu(i) * vv(j);
+            }  // j
+        }      // i
+    }          // vi
+
+    return ret;
+}
+
 ///@}
 
 //
@@ -250,11 +289,11 @@ MultiVector<InnerVector>::MultiVector(vector_type&& v) : MultiVector() {
 }
 
 template <typename InnerVector>
-template <typename Boolean,
-          krims::enable_if_cond_same_t<IsStoredVector<InnerVector>::value,
-                                       Boolean, bool>...>
-MultiVector<InnerVector>::MultiVector(size_type n_elem, size_type n_vectors,
-                                      Boolean fill_zero)
+template <typename SizeType, krims::enable_if_cond_convertible_t<
+                                   IsStoredVector<InnerVector>::value, SizeType,
+                                   typename InnerVector::size_type>...>
+MultiVector<InnerVector>::MultiVector(size_type n_elem, SizeType n_vectors,
+                                      bool fill_zero)
       : MultiVector() {
     base_type::m_n_elem = n_elem;
     base_type::resize(n_vectors, fill_zero);

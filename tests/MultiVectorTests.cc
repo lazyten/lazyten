@@ -18,24 +18,29 @@
 //
 
 #include "generators.hh"
+#include "rapidcheck_utils.hh"
 #include <catch.hpp>
 #include <linalgwrap/MultiVector.hh>
 #include <linalgwrap/SmallVector.hh>
 #include <linalgwrap/TestingUtils.hh>
-#include <rapidcheck.h>
 
 namespace linalgwrap {
 namespace tests {
 using namespace rc;
 
 namespace multi_vector_tests {
-/** Generate a vector of shared pointers to the provided vector type */
+/** Generate a vector of the given size with vectors of the provided type */
 template <typename Vector>
-std::vector<Vector> gen_vectors() {
-    auto n_vecs = *gen::numeric_size<1>().as("Number of vectors");
-    auto n_elem = *gen::numeric_size<1>().as("Number of elements per vector");
+std::vector<Vector> gen_vectors(size_t n_vecs) {
+    auto n_elem = *gen::numeric_size<2>().as("Number of elements per vector");
     return *gen::container<std::vector<Vector>>(
           n_vecs, gen::numeric_tensor<Vector>(n_elem));
+}
+
+/** Generate a vector of vectors of the provided type */
+template <typename Vector>
+std::vector<Vector> gen_vectors() {
+    return gen_vectors<Vector>(*gen::numeric_size<2>().as("Number of vectors"));
 }
 
 /** Take the result of the gen_vectors function and make
@@ -303,6 +308,38 @@ TEST_CASE("MultiVector class", "[MultiVector]") {
         };
         CHECK(rc::check("MultiVector: Obtaining memptrs", test));
     }  // Obtaining memptrs
+
+    SECTION("outer_sum() on multivectors") {
+        auto test = [] {
+            auto vecs1 = gen_vectors<vector_type>();
+            auto mv1 = gen_multivector(vecs1);
+
+            auto vecs2 = gen_vectors<vector_type>(vecs1.size());
+            auto mv2 = gen_multivector(vecs2);
+
+            // compute some outer products
+            auto res = outer_sum(mv1, mv2);
+            auto res2 = outer_sum(mv1, mv1);
+
+            RC_ASSERT(res.n_rows() == mv1.n_elem());
+            RC_ASSERT(res.n_cols() == mv2.n_elem());
+            RC_ASSERT(res2.n_cols() == mv1.n_elem());
+            RC_ASSERT(res2.n_rows() == mv1.n_elem());
+            RC_ASSERT(res2.is_symmetric());
+
+            for (size_type i = 0; i < res.n_rows(); ++i) {
+                for (size_type j = 0; j < res.n_cols(); ++j) {
+                    scalar_type sum = 0;
+                    for (size_type k = 0; k < mv1.n_vectors(); ++k) {
+                        sum += mv1[k](i) * mv2[k](j);
+                    }  // k
+                    RC_ASSERT_NC(krims::numcomp(sum) == res(i, j));
+                }  // j
+            }      // i
+        };
+
+        CHECK(rc::check("MultiVector: outer_sum()", test));
+    }  // outer_sum() on multivectors
 
     // TODO full stateful test
 
