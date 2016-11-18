@@ -64,6 +64,23 @@ class FileType_i {
         assert_dbg(false, krims::ExcNotImplemented());
     }
 
+    /** Write a labelled multivector to the ostream under the format represented
+     * by this class.
+     *  Use the provided label string to indicate the multivector
+     */
+    template <typename Scalar>
+    void write(std::ostream&, const std::string&,
+               const MultiVector<Vector_i<Scalar>>&) const {
+        assert_dbg(false, krims::ExcNotImplemented());
+    }
+
+    /** Write a non-labelled multivector to the stream represented by this class
+     * under the format represented by this class */
+    template <typename Scalar>
+    void write(std::ostream&, const MultiVector<Vector_i<Scalar>>&) const {
+        assert_dbg(false, krims::ExcNotImplemented());
+    }
+
     /** Write a comment string **/
     virtual void write_comment(std::ostream&, const std::string&) const = 0;
 

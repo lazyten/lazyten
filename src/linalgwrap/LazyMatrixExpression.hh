@@ -315,8 +315,9 @@ template <typename StoredMatrix, typename Vector,
                 IsStoredVector<Vector>::value &&
                 std::is_same<typename StoredMatrix::scalar_type,
                              typename Vector::scalar_type>::value>::type>
-MultiVector<Vector> operator*(const LazyMatrixExpression<StoredMatrix>& m,
-                              const MultiVector<Vector>& mv);
+MultiVector<typename std::remove_const<Vector>::type> operator*(
+      const LazyMatrixExpression<StoredMatrix>& m,
+      const MultiVector<Vector>& mv);
 
 //
 // Division by scalar
@@ -438,10 +439,12 @@ LazyMatrixProduct<StoredMatrix> operator-(
 // Multiplication
 //
 template <typename StoredMatrix, typename Vector, typename>
-MultiVector<Vector> operator*(const LazyMatrixExpression<StoredMatrix>& m,
-                              const MultiVector<Vector>& mv) {
+MultiVector<typename std::remove_const<Vector>::type> operator*(
+      const LazyMatrixExpression<StoredMatrix>& m,
+      const MultiVector<Vector>& mv) {
     assert_size(mv.n_elem(), m.n_cols());
-    MultiVector<Vector> out(m.n_rows(), mv.n_vectors(), false);
+    MultiVector<typename std::remove_const<Vector>::type> out(
+          m.n_rows(), mv.n_vectors(), false);
     m.apply(mv, out);
     return out;
 }

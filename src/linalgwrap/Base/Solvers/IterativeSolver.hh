@@ -26,16 +26,18 @@
 namespace linalgwrap {
 
 /** Extra structure the state of a truely iterative solver
- *  needs to be able to do on top of SolverBase. */
-template <typename State>
-class IterativeSolver {
-    static_assert(
-          std::is_base_of<linalgwrap::IterativeSolverState, State>::value,
-          "State needs to be derived off linalgwrap::IterationState");
-
+ *  needs to be able to do on top of another Base class. */
+template <typename Base>
+class IterativeSolver : public Base {
   public:
-    typedef State state_type;
+    typedef Base base_type;
+    typedef typename base_type::state_type state_type;
     typedef typename state_type::count_type count_type;
+
+    static_assert(
+          std::is_base_of<linalgwrap::IterativeSolverState, state_type>::value,
+          "Base's state_type needs to be derived off "
+          "linalgwrap::IterationState");
 
     /** \name Iteration control */
     ///@{
@@ -57,6 +59,7 @@ class IterativeSolver {
      * For the list of available keys, see IterativeSolverKeys.hh
      */
     void update_control_params(const krims::ParameterMap& map) {
+        base_type::update_control_params(map);
         max_iter = map.at(IterativeSolverKeys::max_iter, max_iter);
     }
     ///@}
@@ -104,8 +107,8 @@ class IterativeSolver {
 
 template <typename State>
 void IterativeSolver<State>::start_iteration_step(state_type& s) const {
-    // Increase the iteration count:
     s.increase_iteration_count();
+    base_type::start_iteration_step(s);
 }
 
 template <typename State>
@@ -119,6 +122,7 @@ bool IterativeSolver<State>::convergence_reached(state_type& s) const {
 
 template <typename State>
 void IterativeSolver<State>::end_iteration_step(state_type& s) const {
+    base_type::end_iteration_step(s);
     // Assert that we are not beyond the iteration count
     solver_assert(s.n_iter_count() < max_iter, s,
                   ExcMaximumNumberOfIterationsReached(max_iter));
