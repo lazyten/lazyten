@@ -35,15 +35,14 @@ TransposeProxy<typename std::remove_reference<Matrix>::type> trans(Matrix&& m) {
 }
 
 template <typename Matrix, krims::enable_if_t<IsMatrix<Matrix>::value>...>
-Matrix&& trans(TransposeProxy<Matrix>&& mt) {
+Matrix trans(TransposeProxy<Matrix>&& mt) {
     if (mt.owns_inner_matrix()) {
-        return std::move(mt.inner_matrix());
+        return Matrix(std::move(mt.inner_matrix()));
     }
 
     // TODO This is not yet implemented ... we need matrix views for that
     assert_dbg(false, krims::ExcNotImplemented());
-    Matrix copy(mt.inner_matrix());
-    return std::move(copy);
+    return Matrix(mt.inner_matrix());
 }
 
 template <typename Matrix, krims::enable_if_t<IsMatrix<Matrix>::value>...>
