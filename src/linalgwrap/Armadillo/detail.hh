@@ -155,8 +155,9 @@ struct ArmadilloEigWrapper<Eigenproblem, /* hermitian= */ true,
         // we may have eigenvectors which have an imaginary part, but
         // which can (hopefully) be rotated such that they are
         // entirely real.
-        inner_evecs.each_col(
-              [](arma::cx_vec& col) { rotate_imaginary_part(col); });
+        for (size_t coli = 0; coli < inner_evecs.n_cols; ++coli) {
+            rotate_imaginary_part(inner_evecs.unsafe_col(coli));
+        }
 
 #ifdef DEBUG
         // Check imaginary parts are now really zero:
@@ -191,7 +192,7 @@ struct ArmadilloEigWrapper<Eigenproblem, /* hermitian= */ true,
      * such that of this vector such that hopefully the vector
      * is entirely real afterwards
      */
-    static void rotate_imaginary_part(arma::cx_vec& v) {
+    static void rotate_imaginary_part(arma::cx_vec v) {
         // Tolerance for comparisons against zero we use here
         const scalar_type tolerance = Constants<scalar_type>::default_tolerance;
 
