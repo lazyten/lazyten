@@ -21,6 +21,7 @@
 #ifdef LINALGWRAP_HAVE_ARMADILLO
 #include <armadillo>
 #include <krims/TypeUtils.hh>
+#include <linalgwrap/Constants.hh>
 
 // TODO: Performance analysis: Maybe it is better to first use transpose()
 // to get the transpose and then use as_stored to get the stored matrix
@@ -29,6 +30,11 @@
 namespace linalgwrap {
 
 namespace detail {
+
+DefException1(ExcImaginaryPartNonZero, double,
+              << "The imaginary part of an eigenvalue or eigenvector of an "
+                 "Hermitian eigenproblem was not zero, but "
+              << arg1 << "instead.");
 
 /** In armadillo t() is the normal transpose for real matrices and the conjugate
  * transpose for complex ones.
@@ -145,17 +151,24 @@ struct ArmadilloEigWrapper<Eigenproblem, /* hermitian= */ true,
                                         as_stored(prb.A()).data(), b_arma);
         if (!res) return false;
 
+        // Since eigenvectors are only unique up to a phase,
+        // we may have eigenvectors which have an imaginary part, but
+        // which can (hopefully) be rotated such that they are
+        // entirely real.
+        inner_evecs.each_col(
+              [](arma::cx_vec& col) { rotate_imaginary_part(col); });
+
 #ifdef DEBUG
-        // Check imaginary parts are zero:
+        // Check imaginary parts are now really zero:
         for (const auto& elem : inner_evals) {
             assert_dbg(std::abs(elem.imag()) <
                              Constants<scalar_type>::default_tolerance,
-                       krims::ExcInternalError());
+                       ExcImaginaryPartNonZero(elem.imag()));
         }
         for (const auto& elem : inner_evecs) {
             assert_dbg(std::abs(elem.imag()) <
                              Constants<scalar_type>::default_tolerance,
-                       krims::ExcInternalError());
+                       ExcImaginaryPartNonZero(elem.imag()));
         }
 #endif
         // Copy results:
@@ -171,6 +184,34 @@ struct ArmadilloEigWrapper<Eigenproblem, /* hermitian= */ true,
         }
 
         return true;
+    }
+
+  private:
+    /** Rotate the imaginary part of each element of this vectors
+     * such that of this vector such that hopefully the vector
+     * is entirely real afterwards
+     */
+    static void rotate_imaginary_part(arma::cx_vec& v) {
+        // Tolerance for comparisons against zero we use here
+        const scalar_type tolerance = Constants<scalar_type>::default_tolerance;
+
+        for (size_t i = 0; i < v.n_elem; ++i) {
+            if (std::abs(v[i].imag()) >= tolerance) {
+                // We have a non-zero imaginary part
+                // => determine phase factor to rotate away
+                const std::complex<double> fac =
+                      std::conj(v[i]) / std::sqrt(std::abs(v[i]));
+
+                // Scale vector with this factor:
+                v[i] *= fac;
+
+                // We can only do this scaling once
+                // so if this didn't do it, we have no
+                // chance to rotate the other imaginary
+                // parts away as well.
+                return;
+            }
+        }
     }
 };
 
