@@ -30,13 +30,9 @@ TEST_CASE("LazyMatrixWrapper class", "[LazyMatrixWrapper]") {
     // Test constructor
     // Test swapping
 
-    // Make sure that the program does not get aborted
-    AssertDbgEffect::set(ExceptionEffect::THROW);
-
     typedef double scalar_type;
     typedef SmallMatrix<scalar_type> stored_matrix_type;
-    typedef LazyMatrixWrapper<stored_matrix_type, stored_matrix_type>
-          lazy_matrix_type;
+    typedef LazyMatrixWrapper<stored_matrix_type> lazy_matrix_type;
     typedef typename stored_matrix_type::size_type size_type;
 
     // Generator for the args
@@ -53,7 +49,7 @@ TEST_CASE("LazyMatrixWrapper class", "[LazyMatrixWrapper]") {
 
     // Generator for the sut
     auto lazy_generator = [](stored_matrix_type m) {
-        lazy_matrix_type wrap{m};
+        lazy_matrix_type wrap{std::move(m)};
         return wrap;
     };
 
@@ -62,9 +58,9 @@ TEST_CASE("LazyMatrixWrapper class", "[LazyMatrixWrapper]") {
                                                   decltype(args_generator())>
               testlib;
 
-        testlib lib{args_generator, lazy_generator, model_generator,
-                    "LazyMatrixWrapper: ", TestConstants::default_num_tol};
-        lib.run_checks();
+        testlib{args_generator, model_generator, lazy_generator,
+                "LazyMatrixWrapper: "}
+              .run_checks();
     }
 }
 

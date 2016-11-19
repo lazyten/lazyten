@@ -42,9 +42,11 @@ flags = [
     # Compile debug code as well
     '-DDEBUG',
     # Compile extra code blocks:
-    '-DLINALGWRAP_HAVE_GLIBC_STACKTRACE',
-    '-DLINALGWRAP_HAVE_LIBSTDCXX_DEMANGLER',
     '-DLINALGWRAP_HAVE_ARMADILLO',
+    '-DLINALGWRAP_HAVE_ARPACK',
+    # C++14 code blocks:
+    '-DLINALGWRAP_HAVE_CXX14',
+    '-DKRIMS_HAVE_CXX14',
     # Compile as c++14
     '-std=c++14',
     # Treat .h header files as c++:
@@ -56,6 +58,11 @@ flags = [
     '-I', 'src',
     '-isystem', 'external/rapidcheck/include',
     '-isystem', 'external/rapidcheck/ext/catch/include',
+    '-isystem', 'external/krims/src',
+    '-isystem', '../krims/src',
+    '-isystem', '../rapidcheck/ext/catch/include',
+    '-isystem', '../rapidcheck/include',
+    '-isystem', '/usr/lib/ycmd/clang_includes',
 ]
 
 def DirectoryOfThisScript():

@@ -20,10 +20,11 @@
 #include "DiagonalUpdatable.hh"
 #include <algorithm>
 #include <iostream>
+#include <krims/version.hh>
 #include <linalgwrap/LazyMatrixWrapper.hh>
 #include <linalgwrap/SmallMatrix.hh>
+#include <linalgwrap/trans.hh>
 #include <linalgwrap/version.hh>
-#include <linalgwrap/view.hh>
 
 using namespace linalgwrap;
 
@@ -34,8 +35,8 @@ using namespace linalgwrap;
  *  */
 template <typename Matrix, typename RMatrix>
 auto rotate(Matrix& m, RMatrix rotation_matrix)
-      -> decltype(view::transpose(rotation_matrix) * m * rotation_matrix) {
-    return view::transpose(rotation_matrix) * m * rotation_matrix;
+      -> decltype(conjtrans(rotation_matrix) * m * rotation_matrix) {
+    return conjtrans(rotation_matrix) * m * rotation_matrix;
 }
 
 int main() {
@@ -48,8 +49,9 @@ int main() {
     //
 
     // Print the linalgwrap version we run on:
-    std::cout << "Running with linalgwrap " << version::version_string()
-              << std::endl
+    std::cout << "Running with linalgwrap "
+              << linalgwrap::version::version_string() << " and krims "
+              << krims::version::version_string() << std::endl
               << std::endl;
 
     //
@@ -99,10 +101,8 @@ int main() {
     // as SubscriptionPointers are allowed.
     // Here we use a SubscriptionPointer, which is implicitly constructed using
     // the make_subscription function from linalgwrap.
-    ParameterMap map;
     diagonal = SmallVector<scalar_type>{-1., 2., 3.};
-    map.update("diagonal", make_subscription(diagonal, "UpdateMap"));
-    diag.update(map);
+    diag.update(krims::ParameterMap{{"diagonal", diagonal}});
 
     // The output of the diag should change
     std::cout << "diag (updated diag) = " << std::endl
@@ -118,7 +118,7 @@ int main() {
 
     // Update the diag again, this time via matrix_diag
     diagonal = SmallVector<scalar_type>{4., 3., 2.};
-    map.update("diagonal", make_subscription(diagonal, "UpdateMap"));
+    krims::ParameterMap map{{"diagonal", diagonal}};
     matrix_diag.update(map);
 
     // This time this is unchanged
@@ -167,7 +167,7 @@ int main() {
 
     // Now do another update:
     diagonal = SmallVector<scalar_type>{-100., -100., -100.};
-    map.update("diagonal", make_subscription(diagonal, "UpdateMap"));
+    map.update("diagonal", diagonal);
     matrix_diag.update(map);
 
     // This of cause stays as it was, since it is now an evaluated

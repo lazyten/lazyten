@@ -19,12 +19,11 @@
 
 #pragma once
 #include "linalgwrap/Constants.hh"
-#include "linalgwrap/EnforceReference.hh"
 #include "linalgwrap/Exceptions.hh"
 #include "linalgwrap/Matrix_i.hh"
 #include "linalgwrap/StoredMatrix_i.hh"
-#include "linalgwrap/SubscriptionPointer.hh"
 #include <iterator>
+#include <krims/SubscriptionPointer.hh>
 #include <type_traits>
 
 namespace linalgwrap {
@@ -37,6 +36,49 @@ template <typename Scalar>
 class StoredMatrix_i;
 
 namespace detail {
+
+/** \brief Class to enforce a reference to be returned
+ *
+ * The class requires prior knowledge about the situation
+ * Only in the case that we get the data by-value it really
+ * does anything (it copies the data to internal storage
+ * and returns a reference to it)
+ *
+ * \tparam T The data type
+ * \tparam FromValue Do we get the data by-value(true) or by-reference(false)
+ * */
+template <typename T, bool FromValue>
+struct EnforceReference {};
+
+/** \brief Class to enforce a reference to be returned
+ *
+ * This version is an identity operation, just returning
+ * the reference it got.
+ */
+template <typename T>
+struct EnforceReference<T, false> {
+    typedef T& result_type;
+    typedef T& argument_type;
+    T& operator()(T& t) const { return t; }
+};
+
+/** \brief Class to enforce a reference to be returned
+ *
+ * This version copies the value to internal storage and
+ * returns a reference to this internal value.
+*/
+template <typename T>
+struct EnforceReference<T, true> {
+    typedef T& result_type;
+    typedef T argument_type;
+    T& operator()(T t) const {
+        dummy = t;
+        return dummy;
+    }
+
+  private:
+    mutable T dummy;
+};
 
 /** \brief Base class providing the required inner functionality of an iterator
  *
@@ -216,7 +258,7 @@ class MatrixIteratorDefaultCore
 
   private:
     index_type m_index;
-    SubscriptionPointer<matrix_type> m_matrix_ptr;
+    krims::SubscriptionPointer<matrix_type> m_matrix_ptr;
 
     /** The function to enforce the reference. If Constness
      *  then we can be sure, that Matrix::operator() returns a value
@@ -254,11 +296,12 @@ constexpr bool MatrixIteratorCoreBase<Matrix, Constness>::is_const_iterator;
 template <typename Matrix, bool Constness>
 void MatrixIteratorDefaultCore<Matrix, Constness>::assert_valid_state() const {
     assert_dbg(m_matrix_ptr,
-               ExcInvalidState("MatrixIterator does not point to any matrix"));
+               krims::ExcInvalidState(
+                     "MatrixIterator does not point to any matrix"));
 
     assert_dbg(m_index.first != base_type::invalid_pos.first &&
                      m_index.second != base_type::invalid_pos.second,
-               ExcIteratorPastEnd());
+               krims::ExcIteratorPastEnd());
 }
 
 template <typename Matrix, bool Constness>
@@ -306,6 +349,10 @@ typename std::conditional<
       const typename MatrixIteratorDefaultCore<Matrix, Constness>::pointer,
       typename MatrixIteratorDefaultCore<Matrix, Constness>::pointer>::type
 MatrixIteratorDefaultCore<Matrix, Constness>::ptr_to_value() const {
+    // TODO maybe this function should be explictly disabled (throw ExcDisabled)
+    // for matrices which do compute entries on the fly, since it is very
+    // expensive.
+
     // Get the current element --- by value or by reference ---
     // and make a reference out of it using the EnforceReference
     // functor

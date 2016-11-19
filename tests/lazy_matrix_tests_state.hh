@@ -19,12 +19,10 @@
 
 #pragma once
 #include "lazy_matrix_tests.hh"
+#include "macro_defs.hh"
 #include "matrix_tests.hh"
 #include <rapidcheck.h>
 #include <rapidcheck/state.h>
-
-// have an extra verbose output for rapidcheck function tests:
-//#define HAVE_MATRIX_RC_CLASSIFY
 
 namespace linalgwrap {
 namespace tests {
@@ -168,16 +166,14 @@ struct CommandBase : rc::state::Command<typename TestingTraits::model_type,
      *          to sut already.
      * */
     void run_common_tests(const model_type& model, const sut_type& sut) const {
-#ifdef HAVE_MATRIX_DEBUG_PRINT
-        std::cout << model << std::endl;
-        std::cout << "------------------------------------" << std::endl;
-#endif
-
         // Apply to a copy of the model, which has been advanced to the
         // same state
         model_type model_copy{model};
         this->apply(model_copy);
 
+        // Skip easy test problem cases, since they should be checked before
+        // running these random tests
+        statetest_type::skip_easy_cases();
         statetest_type::run_all_tests(model_copy, sut.matrix());
     }
 };
@@ -223,7 +219,7 @@ struct AddMatrix : CommandBase<TestingTraits> {
         const MatrixTermType& term_ref = sut.copy_to_internal_storage(term);
         sut.set_matrix(sut.matrix() + term_ref);
 
-#ifdef HAVE_MATRIX_RC_CLASSIFY
+#ifdef LINALGWRAP_TESTS_VERBOSE
         RC_CLASSIFY(true, "AddMatrix");
 #endif
 
@@ -275,7 +271,7 @@ struct SubtractMatrix : CommandBase<TestingTraits> {
         const MatrixTermType& term_ref = sut.copy_to_internal_storage(term);
         sut.set_matrix(sut.matrix() - term_ref);
 
-#ifdef HAVE_MATRIX_RC_CLASSIFY
+#ifdef LINALGWRAP_TESTS_VERBOSE
         RC_CLASSIFY(true, "SubtractMatrix");
 #endif
         base_type::run_common_tests(model, sut);
@@ -312,7 +308,7 @@ struct UnaryMinusMatrix : CommandBase<TestingTraits> {
         // Swap the signs:
         sut.set_matrix(-sut.matrix());
 
-#ifdef HAVE_MATRIX_RC_CLASSIFY
+#ifdef LINALGWRAP_TESTS_VERBOSE
         RC_CLASSIFY(true, "UnaryMinusMatrix");
 #endif
         base_type::run_common_tests(model, sut);
@@ -339,9 +335,8 @@ struct MultiplyMatrix : CommandBase<TestingTraits> {
     MultiplyMatrix(const model_type& model)
           : term{*FixedSizeMatrix<MatrixTermType>::fixed_size(
                         model.n_cols(),
-                        *gen::inRange<size_type>(
-                               1, TestConstants::max_matrix_size + 1)
-                               .as("No of columns of multiplied matrix"))
+                        *gen::numeric_size<2>().as(
+                              "No of columns of multiplied matrix"))
                         .as("Matrix to multiply the current state with.")} {}
 
     void apply(model_type& model) const override {
@@ -359,7 +354,7 @@ struct MultiplyMatrix : CommandBase<TestingTraits> {
         const MatrixTermType& term_ref = sut.copy_to_internal_storage(term);
         sut.set_matrix(sut.matrix() * term_ref);
 
-#ifdef HAVE_MATRIX_RC_CLASSIFY
+#ifdef LINALGWRAP_TESTS_VERBOSE
         RC_CLASSIFY(true, "MultiplyMatrix");
 #endif
         base_type::run_common_tests(model, sut);
@@ -384,8 +379,8 @@ struct MultiplyScalar : CommandBase<TestingTraits> {
     scalar_type scalar;
 
     MultiplyScalar(const model_type&)
-          : scalar{*rc::gen::nonZero<scalar_type>().as(
-                  "Scalar to multiply with")} {}
+          : scalar{*gen::scale(0.9, gen::numeric_around<scalar_type>(1.0))
+                          .as("Scalar to multiply with")} {}
 
     void apply(model_type& model) const override {
         // Multiply all entries
@@ -401,7 +396,7 @@ struct MultiplyScalar : CommandBase<TestingTraits> {
         // Apply to sut:
         sut.set_matrix(scalar * sut.matrix());
 
-#ifdef HAVE_MATRIX_RC_CLASSIFY
+#ifdef LINALGWRAP_TESTS_VERBOSE
         RC_CLASSIFY(true, "MultiplyScalar");
 #endif
         base_type::run_common_tests(model, sut);
@@ -426,8 +421,8 @@ struct DivideScalar : CommandBase<TestingTraits> {
     scalar_type scalar;
 
     DivideScalar(const model_type&)
-          : scalar{*rc::gen::nonZero<scalar_type>().as("Scalar to divide by")} {
-    }
+          : scalar{*gen::scale(0.9, gen::numeric_around<scalar_type>(1.0))
+                          .as("Scalar to divide by")} {}
 
     void apply(model_type& model) const override {
         // Multiply all entries
@@ -443,7 +438,7 @@ struct DivideScalar : CommandBase<TestingTraits> {
         // Apply to sut:
         sut.set_matrix(sut.matrix() / scalar);
 
-#ifdef HAVE_MATRIX_RC_CLASSIFY
+#ifdef LINALGWRAP_TESTS_VERBOSE
         RC_CLASSIFY(true, "MultiplyScalar");
 #endif
         base_type::run_common_tests(model, sut);
@@ -474,8 +469,7 @@ struct StatefulTestingLibrary {
     typedef typename matrix_type::stored_matrix_type stored_matrix_type;
 
     //! The default lazy matrix type to use:
-    typedef LazyMatrixWrapper<stored_matrix_type, stored_matrix_type>
-          lazy_matrix_type;
+    typedef LazyMatrixWrapper<stored_matrix_type> lazy_matrix_type;
 
     //@{
     /** The default commands defined */
@@ -493,18 +487,21 @@ struct StatefulTestingLibrary {
      *
      * \param initial_state The initial state to use
      * \param generation_func  The generation functor for the commands
-     * \param scale    The scaling to apply to the command length
+     * \param scale    The scaling to apply to the command length.
+     *                 Smaller scaling means smaller command chains and
+     *                 hence tests which are easier to pass.
      */
     template <typename GenFunc>
     void run_check(const model_type& initial_state, GenFunc&& generation_func,
                    double scale = 1.0) const {
 
-        //! The global space used for stroing matrices the lazy matrix
+        //! The global space used for storing the matrices the lazy matrix
         //  expressions point to indirectly
         std::list<stored_matrix_type> stored_matrices;
 
         // Setup the initial system and the initial_sut:
-        LazyMatrixWrapper<stored_matrix_type, model_type> wrap{initial_state};
+        LazyMatrixWrapper<stored_matrix_type> wrap{
+              std::move(model_type{initial_state})};
         matrix_type model{wrap};
         sut_type initial_sut{model, stored_matrices};
 

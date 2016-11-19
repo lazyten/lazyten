@@ -21,97 +21,41 @@
 
 # adds entries to these things
 #
-# 	LINALGWRAP_DEPENDENCIES			everyone needs these libraries
-# 	LINALGWRAP_DEPENDENCIES_DEBUG		debug mode needs these extras
-# 	LINALGWRAP_DEPENDENCIES_RELEASE		release mode needs these extras
-# 	LINALGWRAP_DEPENDENCIES_TEST		tests need these extra libraries
+#       LINALGWRAP_DEPENDENCIES			everyone needs these libraries
+#       LINALGWRAP_DEPENDENCIES_DEBUG		debug mode needs these extras
+#       LINALGWRAP_DEPENDENCIES_RELEASE		release mode needs these extras
+#       LINALGWRAP_DEPENDENCIES_TEST		tests need these extra libraries
 #
 #       LINALGWRAP_DEFINITIONS			definitions for all compilation
 #       LINALGWRAP_DEFINITIONS_DEBUG		definitions for debug mode
 #       LINALGWRAP_DEFINITIONS_RELEASE		definitions for release mode
-#       
-
-
-#################################
-#--     Modules and macros    --#
-#################################
-include(CheckCXXSourceCompiles)
-
-########################
-#-- Exception system --#
-########################
-
 #
-# Check whether stacktrace information is available for the exception
-# system. We expect the interface of glibc. 
-# If it is than we also add the -rdynamic flag since this is required
-# if one wants meaningful backtraces.
-#
-CHECK_CXX_SOURCE_COMPILES(
-	"
-	#include <execinfo.h>
-	#include <stdlib.h>
-	const int asize = 25;
-	void * array[asize];
-	int nBT = backtrace(array, asize);
-	char ** bt_raw = backtrace_symbols(array, nBT);
-	int main() { free(bt_raw); return 0; }
-	"
-	LINALGWRAP_HAVE_GLIBC_STACKTRACE)
 
-if(LINALGWRAP_HAVE_GLIBC_STACKTRACE)
-	# needed for meaningful stacktraces
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -rdynamic")
-	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -rdynamic")
-	LIST(APPEND LINALGWRAP_DEFINITIONS "LINALGWRAP_HAVE_GLIBC_STACKTRACE")
+####################
+#-- C++ standard --#
+####################
+if (NOT CMAKE_CXX_STANDARD VERSION_LESS 14)
+	message(STATUS "Detected C++14 support: Setting LINALGWRAP_HAVE_CXX14")
+	LIST(APPEND LINALGWRAP_DEFINITIONS "LINALGWRAP_HAVE_CXX14")
+endif()
+if (NOT CMAKE_CXX_STANDARD VERSION_LESS 17)
+	message(STATUS "Detected C++17 support: Setting LINALGWRAP_HAVE_CXX17")
+	LIST(APPEND LINALGWRAP_DEFINITIONS "LINALGWRAP_HAVE_CXX17")
 endif()
 
-#
-# Check for demangling symbols from within the program.
-# We expect the interface from the libstdc++
-#
-# The test example is taken from 
-#   http://gcc.gnu.org/onlinedocs/libstdc++/18_support/howto.html#6
-#
-if(LINALGWRAP_HAVE_GLIBC_STACKTRACE)
-	CHECK_CXX_SOURCE_COMPILES(
-		"
-		#include <exception>
-		#include <iostream>
-		#include <cxxabi.h>
-		#include <cstdlib>
-
-		struct empty { };
-
-		template <typename T, int N>
-		struct bar { };
-
-		int     status;
-		char   *realname;
-
-		int main()
-		{
-		// exception classes not in <stdexcept>, thrown by the implementation
-		// instead of the user
-		std::bad_exception  e;
-		realname = abi::__cxa_demangle(e.what(), 0, 0, &status);
-		free(realname);
-
-
-		// typeid
-		bar<empty,17>          u;
-		const std::type_info  &ti = typeid(u);
-
-		realname = abi::__cxa_demangle(ti.name(), 0, 0, &status);
-		free(realname);
-
-		return 0;
-		}
-		"
-		LINALGWRAP_HAVE_LIBSTDCXX_DEMANGLER)
-
-	if(LINALGWRAP_HAVE_LIBSTDCXX_DEMANGLER)
-		LIST(APPEND LINALGWRAP_DEFINITIONS "LINALGWRAP_HAVE_LIBSTDCXX_DEMANGLER")
-	endif()
+################
+#--  ARPACK  --#
+################
+SET(ARPACK_DIR "" CACHE PATH "An optional hint to an ARPACK installation")
+find_library(
+	ARPACK_LIBRARY
+	NAMES arpack
+	HINTS ${ARPACK_DIR}
+	PATH_SUFFIXES lib64 lib
+)
+if(NOT ${ARPACK_LIBRARY} MATCHES "-NOTFOUND")
+	message(STATUS "Found ARPACK at ${ARPACK_LIBRARY}")
+	LIST(APPEND LINALGWRAP_DEFINITIONS "LINALGWRAP_HAVE_ARPACK")
+	set(LINALGWRAP_DEPENDENCIES ${LINALGWRAP_DEPENDENCIES} ${ARPACK_LIBRARY})
 endif()
 

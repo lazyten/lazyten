@@ -19,8 +19,8 @@
 
 #pragma once
 #include <initializer_list>
+#include <krims/ParameterMap.hh>
 #include <linalgwrap/Constants.hh>
-#include <linalgwrap/Exceptions.hh>
 #include <linalgwrap/LazyMatrix_i.hh>
 #include <linalgwrap/SmallVector.hh>
 
@@ -71,60 +71,20 @@ class DiagonalUpdatable : public LazyMatrix_i<StoredMatrix> {
         return lazy_matrix_expression_ptr_type(new DiagonalUpdatable(*this));
     }
 
-    /** \brief Overriding default extract_block function
-     *
-     * Not strictly speaking required to get a lazy matrix, but
-     * improves preformance here.
-     */
-    stored_matrix_type extract_block(
-          Range<size_type> row_range,
-          Range<size_type> col_range) const override {
-        // At least one range is empty -> no work to be done:
-        if (row_range.empty() || col_range.empty()) {
-            return stored_matrix_type{row_range.length(), col_range.length()};
-        }
-
-        // Assertive checks:
-        assert_greater_equal(row_range.last(), n_rows());
-        assert_greater_equal(col_range.last(), n_cols());
-
-        stored_matrix_type res(row_range.length(), col_range.length());
-
-        size_type start = std::max(row_range.first(), col_range.first());
-        size_type end = std::min(row_range.last(), col_range.last());
-
-        for (size_t i = start; i < end; ++i) {
-            res(i - start, i - start) = m_diagonal[0];
-        }
-        return res;
-    }
-
-    /** \brief Overriding default multiplication function
-     *
-     * Not strictly speaking required to get a lazy matrix, but
-     * improves preformance.
-     */
-    stored_matrix_type operator*(const stored_matrix_type& m) const override {
-        assert_size(n_cols(), m.n_rows());
-
-        stored_matrix_type res(n_rows(), m.n_cols(), true);
-        for (auto it = std::begin(m); it != std::end(m); ++it) {
-            res(it.row(), it.col()) = *it * m_diagonal[it.row()];
-        }
-
-        return res;
-    }
-
     /** \brief Provide an update mechanism */
-    void update(const ParameterMap& m) override {
-        auto diagonal = m.at<SmallVector<scalar_type>>("diagonal");
+    void update(const krims::ParameterMap& m) override {
+        const auto& diagonal = m.at<SmallVector<scalar_type>>("diagonal");
 
         // check that we have no size changes
         assert_size(diagonal.size(), m_diagonal.size());
 
         // assign:
-        m_diagonal = std::move(diagonal);
+        m_diagonal = diagonal;
     }
+
+    // Note: One could override apply, mmult and extract_block for better
+    // performance in those matrix operations, but this is not required
+    // to get the basic functionality going.
 
   private:
     // A n_rows times 1 vector of diagonal shifts

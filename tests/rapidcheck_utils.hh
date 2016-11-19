@@ -21,6 +21,13 @@
 #include <rapidcheck.h>
 #include <rapidcheck/state.h>
 
+/** Make a rapidcheck assertion with captures disabled
+ *
+ * This is required for the krims::numcomp function to work
+ * properly --- which I personally value more)
+ * */
+#define RC_ASSERT_NC(expression) RC_ASSERT((expression));
+
 namespace rc {
 namespace state {
 namespace gen {
@@ -28,7 +35,8 @@ namespace gen {
 // TODO implement into rapidcheck in some sensible way
 template <typename Model, typename GenerationFunc>
 auto commandsScaledLength(const Model &initialState, double scale,
-                          GenerationFunc &&genFunc) {
+                          GenerationFunc &&genFunc)
+      -> decltype(commands<Model>(initialState, genFunc)) {
 
     /// Generate a sequence of commands where the commands themself
     /// get passed the size ``size``.

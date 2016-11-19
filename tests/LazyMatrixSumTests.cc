@@ -27,9 +27,6 @@ namespace tests {
 using namespace rc;
 
 TEST_CASE("LazyMatrixSum", "[LazyMatrixSum]") {
-    // Make sure that the program does not get aborted
-    AssertDbgEffect::set(ExceptionEffect::THROW);
-
     // TODO  Test swap function
     // TODO  Test constructors
 
@@ -70,10 +67,79 @@ TEST_CASE("LazyMatrixSum", "[LazyMatrixSum]") {
             testing_lib::run_all_tests(tosub, subed);
         };
 
+        // Enable hard tests in the testing library
+        testing_lib::skip_easy_cases();
+
+        // Increase numeric tolerance for this scope,
+        // ie results need to be less exact for passing
+        auto highertol = NumCompConstants::change_temporary(
+              10. * krims::NumCompConstants::default_tolerance_factor);
+
         REQUIRE(rc::check("Test adding terms to empty sum", test_add_to_empty));
     }
 
+    SECTION("Default lazy matrix tests") {
+        typedef double scalar_type;
+        typedef SmallMatrix<scalar_type> stored_matrix_type;
+        typedef typename stored_matrix_type::size_type size_type;
+        typedef LazyMatrixWrapper<stored_matrix_type> lazy_matrix_type;
+        typedef LazyMatrixSum<stored_matrix_type> sum_type;
+
+        // Generator for the args
+        auto args_generator = []() {
+            stored_matrix_type mat1 =
+                  *gen::arbitrary<stored_matrix_type>().as("Matrix summand 1");
+
+            stored_matrix_type mat2 =
+                  *gen::scale(0.9, gen::numeric_tensor<stored_matrix_type>(
+                                         mat1.n_rows(), mat1.n_cols()))
+                         .as("Matrix summand 2");
+
+            return std::make_pair(mat1, mat2);
+        };
+
+        // Generator for the model:
+        auto model_generator = [](
+              std::pair<stored_matrix_type, stored_matrix_type> p) {
+            stored_matrix_type res(p.first.n_rows(), p.first.n_cols(), false);
+            for (size_type i = 0; i < p.first.n_rows(); ++i) {
+                for (size_type j = 0; j < p.first.n_cols(); ++j) {
+                    res(i, j) = p.first(i, j) + p.second(i, j);
+                }
+            }
+            return res;
+        };
+
+        // Generator for the sut:
+        auto sut_generator =
+              [](std::pair<stored_matrix_type, stored_matrix_type> p) {
+                  lazy_matrix_type lm1 = lazy_matrix_type{std::move(p.first)};
+                  lazy_matrix_type lm2 = lazy_matrix_type{std::move(p.second)};
+                  sum_type sum{lm1};
+                  sum.push_term(lm2);
+                  return sum;
+              };
+
+        typedef lazy_matrix_tests::TestingLibrary<sum_type,
+                                                  decltype(args_generator())>
+              testinglib;
+
+        // Increase numeric tolerance for this scope,
+        // ie results need to be less exact for passing
+        auto highertol = NumCompConstants::change_temporary(
+              10. * krims::NumCompConstants::default_tolerance_factor);
+
+        testinglib{args_generator, model_generator, sut_generator,
+                   "LazyMatrixSum: "}
+              .run_checks();
+    }
+
     SECTION("Random function test") {
+        // Increase numeric tolerance for this scope,
+        // ie results need to be less exact for passing
+        auto highertol = NumCompConstants::change_temporary(
+              100. * krims::NumCompConstants::default_tolerance_factor);
+
         auto random_test = [] {
             // The initial value:
             model_matrix_type in(2, 3);
@@ -104,7 +170,7 @@ TEST_CASE("LazyMatrixSum", "[LazyMatrixSum]") {
                   typename test_library::op_DivideScalar>;
 
             // Run the check:
-            test_library().run_check(in, genCommands(), 0.7);
+            test_library().run_check(in, genCommands(), 0.6);
         };
 
         REQUIRE(

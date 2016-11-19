@@ -76,7 +76,7 @@ class OstreamState {
 //
 
 inline OstreamState::OstreamState(std::ostream& o)
-      : m_o{o},
+      : m_o(o),
         m_orig_flags{o.flags()},
         m_orig_width{o.width()},
         m_orig_precision{o.precision()},

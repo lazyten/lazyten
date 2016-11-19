@@ -23,15 +23,18 @@
 # set the source files.
 #
 set(LINALGWRAP_SOURCES
-	ParameterMap.cc
-	ExceptionBase.cc
-	ExceptionSystem.cc
 	version.cc
 	io/Mathematica.cc
-)	
+	Base/Interfaces/Transposed.cc
+	Base/Solvers/SolverStateBase.cc
+	Base/Solvers/IterativeSolverKeys.cc
+	Base/Solvers/EigensolverBaseKeys.cc
+	Arpack/ArpackEigensolver.cc
+	eigensystem.cc
+)
 
 # Dump the current version as an include file.
-include(WriteVersionHeader)
+include_krims_cmake_module(WriteVersionHeader)
 WRITE_VERSION_HEADER("${CMAKE_BINARY_DIR}/src/linalgwrap/version_defs.hh")
 
 # add the libraries for Debug and Release:

@@ -18,7 +18,7 @@
 //
 
 #pragma once
-#include <linalgwrap/Range.hh>
+#include <krims/Range.hh>
 #include <rapidcheck.h>
 #include <sstream>
 
@@ -29,7 +29,7 @@ struct RangeWithin {
     typedef T value_type;
 
     //! Construct a range which at most runs over the interval [min:max)
-    static Gen<linalgwrap::Range<value_type>> range_within(
+    static Gen<krims::Range<value_type>> range_within(
           value_type min, value_type max, value_type min_length = 0) {
 
         auto gen_range = [=] {
@@ -49,7 +49,7 @@ struct RangeWithin {
             }
 
             if (min_length == max - min) {
-                return linalgwrap::Range<value_type>{min, max};
+                return krims::Range<value_type>{min, max};
             }
 
             auto length = *gen::inRange<value_type>(min_length, max - min + 1);
@@ -61,7 +61,7 @@ struct RangeWithin {
                    << start + length << " where desired max was " << max;
                 throw rc::GenerationFailure(ss.str());
             }
-            return linalgwrap::Range<value_type>{start, start + length};
+            return krims::Range<value_type>{start, start + length};
         };
         return gen::exec(gen_range);
     }
@@ -73,7 +73,7 @@ struct RangeWithin {
  */
 namespace gen {
 template <typename T>
-Gen<linalgwrap::Range<T>> range_within(T min, T max, T min_length = 0) {
+Gen<krims::Range<T>> range_within(T min, T max, T min_length = 0) {
     return RangeWithin<T>::range_within(min, max, min_length);
 }
 }  // namespace gen

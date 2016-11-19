@@ -41,6 +41,9 @@ class SimpleLazyMatrix : public LazyMatrix_i<StoredMatrix> {
 
     SimpleLazyMatrix(stored_matrix_type m) : m_stored{m} {}
 
+    // Also test the transpose stuff
+    bool has_transpose_operation_mode() const override { return true; }
+
     size_type n_rows() const override { return m_stored.n_rows(); }
     size_type n_cols() const override { return m_stored.n_cols(); }
     scalar_type operator()(size_type i, size_type j) const override {
@@ -58,9 +61,6 @@ class SimpleLazyMatrix : public LazyMatrix_i<StoredMatrix> {
 
 TEST_CASE("LazyMatrix_i abstract class", "[LazyMatrix_i]") {
     using namespace lazymatrix_i_tests;
-    // Make sure that the program does not get aborted
-    AssertDbgEffect::set(ExceptionEffect::THROW);
-
     // Test constructor
     // Test swapping
 
@@ -92,9 +92,9 @@ TEST_CASE("LazyMatrix_i abstract class", "[LazyMatrix_i]") {
                                                   decltype(args_generator())>
               testlib;
 
-        testlib lib{args_generator, lazy_generator, model_generator,
-                    "LazyMatrix_i: ", TestConstants::default_num_tol};
-        lib.run_checks();
+        testlib{args_generator, model_generator, lazy_generator,
+                "LazyMatrix_i: "}
+              .run_checks();
     }
 }
 

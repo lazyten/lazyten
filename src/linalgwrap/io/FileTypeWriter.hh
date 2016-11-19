@@ -52,6 +52,17 @@ class FileTypeWriter : public DataWriter_i<Scalar> {
      * under the format represented by this class */
     bool write(const Matrix_i<Scalar>& mat) override;
 
+    /** Write a labelled multivector to the ostream under the format represented
+     * by this class.
+     *  Use the provided label string to indicate the multivector
+     */
+    bool write(const std::string& label,
+               const MultiVector<Vector_i<Scalar>>& vecs) override;
+
+    /** Write a non-labelled multivector to the stream represented by this class
+     * under the format represented by this class */
+    bool write(const MultiVector<Vector_i<Scalar>>& vecs) override;
+
     /** Write a comment string **/
     bool write_comment(const std::string&) override;
 
@@ -93,13 +104,13 @@ template <typename FileType, typename Scalar>
 inline FileTypeWriter<FileType, Scalar>::FileTypeWriter(std::ostream& out,
                                                         const file_type ft)
       : m_out{out}, m_ft{std::forward<const file_type>(ft)} {
-    assert_throw(m_out, ExcIO());
+    assert_throw(m_out, krims::ExcIO());
 }
 
 template <typename FileType, typename Scalar>
 inline bool FileTypeWriter<FileType, Scalar>::write(
       const std::string& label, const Matrix_i<Scalar>& mat) {
-    assert_throw(m_out, ExcIO());
+    assert_throw(m_out, krims::ExcIO());
     m_ft.write(m_out, label, mat);
     return m_out.good();
 }
@@ -107,22 +118,38 @@ inline bool FileTypeWriter<FileType, Scalar>::write(
 template <typename FileType, typename Scalar>
 inline bool FileTypeWriter<FileType, Scalar>::write(
       const Matrix_i<Scalar>& mat) {
-    assert_throw(m_out, ExcIO());
+    assert_throw(m_out, krims::ExcIO());
     m_ft.write(m_out, mat);
+    return m_out.good();
+}
+
+template <typename FileType, typename Scalar>
+bool FileTypeWriter<FileType, Scalar>::write(
+      const std::string& label, const MultiVector<Vector_i<Scalar>>& vecs) {
+    assert_throw(m_out, krims::ExcIO());
+    m_ft.write(m_out, label, vecs);
+    return m_out.good();
+}
+
+template <typename FileType, typename Scalar>
+bool FileTypeWriter<FileType, Scalar>::write(
+      const MultiVector<Vector_i<Scalar>>& vecs) {
+    assert_throw(m_out, krims::ExcIO());
+    m_ft.write(m_out, vecs);
     return m_out.good();
 }
 
 template <typename FileType, typename Scalar>
 inline bool FileTypeWriter<FileType, Scalar>::write_comment(
       const std::string& comment) {
-    assert_throw(m_out, ExcIO());
+    assert_throw(m_out, krims::ExcIO());
     m_ft.write_comment(m_out, comment);
     return m_out.good();
 }
 
 template <typename FileType, typename Scalar>
 inline bool FileTypeWriter<FileType, Scalar>::write_empty_line() {
-    assert_throw(m_out, ExcIO());
+    assert_throw(m_out, krims::ExcIO());
     m_out << std::endl;
     return m_out.good();
 }
@@ -130,7 +157,7 @@ inline bool FileTypeWriter<FileType, Scalar>::write_empty_line() {
 template <typename FileType, typename Scalar>
 inline bool FileTypeWriter<FileType, Scalar>::write_verbatim(
       const std::string& s) {
-    assert_throw(m_out, ExcIO());
+    assert_throw(m_out, krims::ExcIO());
     m_out << s;
     return m_out.good();
 }

@@ -17,26 +17,28 @@
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef LINALG_MATRIX_I_HPP_
-#define LINALG_MATRIX_I_HPP_
-
-#include "linalgwrap/Constants.hh"
-#include "linalgwrap/DefaultMatrixIterator.hh"
-#include "linalgwrap/Exceptions.hh"
-#include "linalgwrap/SmallMatrix.hh"
-#include "linalgwrap/Subscribable.hh"
-#include "linalgwrap/io/MatrixPrinter.hh"
-#include "linalgwrap/type_utils.hh"
+#pragma once
+#include "Base/Interfaces/Indexable_i.hh"
+#include "Constants.hh"
+#include "DefaultMatrixIterator.hh"
+#include "Exceptions.hh"
+#include "MultiVector.hh"
+#include "PtrVector.hh"
+#include "SmallMatrix.hh"
+#include "io/MatrixPrinter.hh"
 #include <complex>
 #include <cstddef>
 #include <iomanip>
 #include <ios>
 #include <iostream>
+#include <krims/TypeUtils.hh>
 #include <numeric>
 #include <string>
 #include <utility>
 
 namespace linalgwrap {
+
+// TODO subview for Matrices
 
 template <typename IteratorCore>
 class MatrixIterator;
@@ -47,14 +49,16 @@ class MatrixIteratorDefaultCore;
 /** \brief Abstract matrix interface class
  *
  * This interface and hence all classes derived from it are subscribable using
- * the SubscriptionPointer class. This should be used very little and only when
- * other means (e.g. using shared pointers) is not possible.
+ * the krims::SubscriptionPointer class. This should be used very little and
+ * only when other means (e.g. using shared pointers) is not possible.
  * */
 template <typename Scalar>
-class Matrix_i : public Subscribable {
+class Matrix_i : public Indexable_i<Scalar> {
   public:
-    typedef size_t size_type;
-    typedef Scalar scalar_type;
+    typedef Indexable_i<Scalar> base_type;
+    typedef typename base_type::size_type size_type;
+    typedef typename base_type::scalar_type scalar_type;
+    typedef typename base_type::real_type real_type;
 
     //! The iterator type (a const iterator)
     typedef DefaultMatrixConstIterator<Matrix_i<Scalar>> iterator;
@@ -81,6 +85,9 @@ class Matrix_i : public Subscribable {
 
     /** \brief Number of columns of the matrix */
     virtual size_type n_cols() const = 0;
+
+    /** \brief Return the number of elements of the matrix */
+    virtual size_type n_elem() const override { return n_rows() * n_cols(); }
     ///@}
 
     /** \name Data access
@@ -95,29 +102,29 @@ class Matrix_i : public Subscribable {
      * Access the element in row-major ordering (i.e. the matrix is
      * traversed row by row)
      */
-    virtual scalar_type operator[](size_type i) const;
+    virtual scalar_type operator[](size_type i) const override;
     ///@}
 
     /** \name Iterators
      */
     ///@{
     /** Return an iterator to the beginning */
-    iterator begin();
+    iterator begin() { return iterator(*this, {0, 0}); }
 
     /** Return a const_iterator to the beginning */
-    const_iterator begin() const;
+    const_iterator begin() const { return cbegin(); }
 
     /** Return a const_iterator to the beginning */
-    const_iterator cbegin() const;
+    const_iterator cbegin() const { return const_iterator(*this, {0, 0}); }
 
     /** Return an iterator to the end */
-    iterator end();
+    iterator end() { return iterator(*this); }
 
     /** Return a const_iterator to the end */
-    const_iterator end() const;
+    const_iterator end() const { return cend(); }
 
     /** Return a const_iterator to the end */
-    const_iterator cend() const;
+    const_iterator cend() const { return const_iterator(*this); }
     ///@}
 
     /** \name Check for matrix properties
@@ -125,40 +132,19 @@ class Matrix_i : public Subscribable {
     ///@{
     /** \brief Check whether the matrix is symmetric
      *
-     * Loops over all elements and check wheather the difference
+     * Loops over all elements and check whether the difference
      * between m(i,j) and m(j,i) is less than the tolerance given
      * */
-    bool is_symmetric(scalar_type tolerance =
-                            Constants<scalar_type>::default_tolerance) const;
+    bool is_symmetric(
+          real_type tolerance = Constants<real_type>::default_tolerance) const;
 
-    // TODO ideas: is_real, is_hermetian, is_real_symmetric
-    ///@}
-
-    /** \name Standard operations
-     */
-    ///@{
-    /** \brief Compute the trace of this matrix
-     * Only works for quadratic matrices */
-    scalar_type trace() const;
-
-    /** Calculate the (signed) sum of all matrix entries. */
-    scalar_type accumulate() const;
-
-    /** Calculate the l1 norm (maximum of the sums over columns) */
-    scalar_type norm_l1() const;
-
-    /** Calculate the linf norm (maximum of the sums over rows) */
-    scalar_type norm_linf() const;
-
-    /** Calculate the Frobenius norm (sqrt of all matrix elements
-     * squared
+    /** \brief Check whether the matrix is Hermitian
      *
-     * \note This norm is not the matrix norm compatible to the l2 norm!
-     */
-    scalar_type norm_frobenius() const;
-
-    /** Calculate the Frobenius norm squared */
-    scalar_type norm_frobenius_squared() const;
+     * Loops over all elements and check whether the difference
+     * between conj(m(i,j)) and m(j,i) is less than the tolerance given
+     * */
+    bool is_hermitian(
+          real_type tolerance = Constants<real_type>::default_tolerance) const;
     ///@}
 };
 
@@ -173,7 +159,7 @@ template <typename T, typename = void>
 struct IsMatrix : public std::false_type {};
 
 template <typename T>
-struct IsMatrix<T, void_t<typename T::scalar_type>>
+struct IsMatrix<T, krims::VoidType<typename T::scalar_type>>
       : public std::is_base_of<Matrix_i<typename T::scalar_type>, T> {};
 //@}
 
@@ -186,6 +172,45 @@ struct IsMatrix<T, void_t<typename T::scalar_type>>
 template <typename Scalar>
 std::ostream& operator<<(std::ostream& o, const Matrix_i<Scalar>& m);
 
+/** Compute the trace of the matrix
+ *
+ * \note only sensible for square matrices
+ */
+template <typename Scalar>
+Scalar trace(const Matrix_i<Scalar>& m);
+
+/** Accumulate all matrix values */
+template <typename Scalar>
+Scalar accumulate(const Matrix_i<Scalar>& m) {
+    return std::accumulate(m.begin(), m.end(), Constants<Scalar>::zero);
+}
+
+/** Compute the l1 norm (maximum of the sums over columns) */
+template <typename Scalar>
+Scalar norm_l1(const Matrix_i<Scalar>& m);
+
+/** Calculate the linf norm (maximum of the sums over rows) */
+template <typename Scalar>
+Scalar norm_linf(const Matrix_i<Scalar>& m);
+
+/** Calculate the Frobenius norm (sqrt of all matrix elements
+ * squared
+ *
+ * \note This norm is not the matrix norm compatible to the l2 norm!
+ */
+template <typename Scalar>
+Scalar norm_frobenius(const Matrix_i<Scalar>& m) {
+    // sqrt of square of all matrix elements
+    return std::sqrt(norm_frobenius_squared(m));
+}
+
+/** Calculate the Frobenius norm squared
+ *
+ * \note This norm is not the matrix norm compatible to the l2 norm!
+ */
+template <typename Scalar>
+Scalar norm_frobenius_squared(const Matrix_i<Scalar>& m);
+
 //
 // ---------------------------------------------------------------
 //
@@ -197,7 +222,7 @@ template <typename Scalar>
 typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::operator[](
       size_type i) const {
     // Check that we do not overshoot.
-    assert_range(0, i, n_cols() * n_rows());
+    assert_range(0u, i, n_cols() * n_rows());
 
     const size_type i_row = i / n_cols();
     const size_type i_col = i % n_cols();
@@ -205,37 +230,7 @@ typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::operator[](
 }
 
 template <typename Scalar>
-typename Matrix_i<Scalar>::iterator Matrix_i<Scalar>::begin() {
-    return iterator(*this, {0, 0});
-}
-
-template <typename Scalar>
-typename Matrix_i<Scalar>::const_iterator Matrix_i<Scalar>::begin() const {
-    return cbegin();
-}
-
-template <typename Scalar>
-typename Matrix_i<Scalar>::const_iterator Matrix_i<Scalar>::cbegin() const {
-    return const_iterator(*this, {0, 0});
-}
-
-template <typename Scalar>
-typename Matrix_i<Scalar>::iterator Matrix_i<Scalar>::end() {
-    return iterator(*this);
-}
-
-template <typename Scalar>
-typename Matrix_i<Scalar>::const_iterator Matrix_i<Scalar>::end() const {
-    return cend();
-}
-
-template <typename Scalar>
-typename Matrix_i<Scalar>::const_iterator Matrix_i<Scalar>::cend() const {
-    return const_iterator(*this);
-}
-
-template <typename Scalar>
-bool Matrix_i<Scalar>::is_symmetric(scalar_type tolerance) const {
+bool Matrix_i<Scalar>::is_symmetric(real_type tolerance) const {
     // Check that the matrix is quadratic:
     if (n_rows() != n_cols()) return false;
 
@@ -250,25 +245,38 @@ bool Matrix_i<Scalar>::is_symmetric(scalar_type tolerance) const {
 }
 
 template <typename Scalar>
-inline typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::accumulate()
-      const {
-    return std::accumulate(begin(), end(), Constants<scalar_type>::zero);
+bool Matrix_i<Scalar>::is_hermitian(real_type tolerance) const {
+    // Check that the matrix is quadratic:
+    if (n_rows() != n_cols()) return false;
+
+    // Check if lower and upper triangle agree:
+    for (size_type i = 0; i < n_rows(); ++i) {
+        for (size_type j = 0; j < n_cols(); ++j) {
+            if (std::abs(std::conj((*this)(i, j)) - (*this)(j, i)) > tolerance)
+                return false;
+        }
+    }
+    return true;
 }
 
+//
+// Out of scope
+//
+
 template <typename Scalar>
-inline typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::norm_l1()
-      const {
+Scalar norm_l1(const Matrix_i<Scalar>& m) {
+    typedef typename Matrix_i<Scalar>::size_type size_type;
     // This way is real bad for the cache and hence really slow.
     // One should do this in blocks of row indices, which fit the cache size.
 
     // maximum of the colsums
     //
-    scalar_type res(Constants<scalar_type>::zero);
-    for (size_type col = 0; col < n_cols(); ++col) {
+    Scalar res(Constants<Scalar>::zero);
+    for (size_type col = 0; col < m.n_cols(); ++col) {
         // sum of absolute entries of this column
-        scalar_type colsum = Constants<scalar_type>::zero;
-        for (size_type row = 0; row < n_rows(); ++row) {
-            colsum += std::abs((*this)(row, col));
+        Scalar colsum = Constants<Scalar>::zero;
+        for (size_type row = 0; row < m.n_rows(); ++row) {
+            colsum += std::abs(m(row, col));
         }
         res = std::max(res, colsum);
     }
@@ -276,16 +284,15 @@ inline typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::norm_l1()
 }
 
 template <typename Scalar>
-inline typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::norm_linf()
-      const {
-    // maximum of the rowsums
-    //
-    scalar_type res = Constants<scalar_type>::zero;
-    for (size_type row = 0; row < n_rows(); ++row) {
+Scalar norm_linf(const Matrix_i<Scalar>& m) {
+    typedef typename Matrix_i<Scalar>::size_type size_type;
+
+    Scalar res = Constants<Scalar>::zero;
+    for (size_type row = 0; row < m.n_rows(); ++row) {
         // sum of absolute entries of this row
-        scalar_type rowsum = Constants<scalar_type>::zero;
-        for (size_type col = 0; col < n_cols(); ++col) {
-            rowsum += std::abs((*this)(row, col));
+        Scalar rowsum = Constants<Scalar>::zero;
+        for (size_type col = 0; col < m.n_cols(); ++col) {
+            rowsum += std::abs(m(row, col));
         }
         res = std::max(res, rowsum);
     }
@@ -293,42 +300,31 @@ inline typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::norm_linf()
 }
 
 template <typename Scalar>
-inline typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::norm_frobenius()
-      const {
-    // sqrt of square of all matrix elements
-    return std::sqrt(norm_frobenius_squared());
-}
-
-template <typename Scalar>
-inline typename Matrix_i<Scalar>::scalar_type
-Matrix_i<Scalar>::norm_frobenius_squared() const {
+Scalar norm_frobenius_squared(const Matrix_i<Scalar>& m) {
     // sum of squares of all matrix elements
-    scalar_type sum = Constants<scalar_type>::zero;
-    for (auto it = begin(); it != end(); ++it) {
+    Scalar sum = Constants<Scalar>::zero;
+    for (auto it = m.begin(); it != m.end(); ++it) {
         sum += (*it) * (*it);
     }
     return sum;
 }
 
 template <typename Scalar>
-inline typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::trace() const {
-    assert_dbg(n_rows() == n_cols(), ExcMatrixNotSquare());
+Scalar trace(const Matrix_i<Scalar>& m) {
+    typedef typename Matrix_i<Scalar>::size_type size_type;
+    assert_dbg(m.n_rows() == m.n_cols(), ExcMatrixNotSquare());
 
-    scalar_type trace{Constants<scalar_type>::zero};
-    for (size_type i = 0; i < n_rows(); ++i) {
-        trace += (*this)(i, i);
+    Scalar trace{Constants<Scalar>::zero};
+    for (size_type i = 0; i < m.n_rows(); ++i) {
+        trace += m(i, i);
     }
     return trace;
 }
 
-//
-// Out of scope
-//
 template <typename Scalar>
 std::ostream& operator<<(std::ostream& o, const Matrix_i<Scalar>& m) {
     io::MatrixPrinter().print(m, o);
     return o;
 }
 
-}  // namespace linalg
-#endif  // LINALG_MATRIX_I_HPP_
+}  // namespace linalgwrap

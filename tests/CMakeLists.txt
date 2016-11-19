@@ -23,21 +23,41 @@
 # The sources for the test executable
 #
 set(LINALGWRAP_TESTS_SOURCES
-	NumComp.cc
-	ExceptionTests.cc
-	RangeTests.cc
-	SubscriptionTests.cc
+	# Vector and Matrix LA interfaces
+# TODO	IteratorVectorTests.cc
+	MultiVectorTests.cc
+	BuiltinVectorTests.cc
+
+	# Armadillo vector/matrix
 	ArmadilloMatrixTests.cc
 	ArmadilloVectorTests.cc
-	ParameterMapTests.cc
+
+	# Helper classes
+	TypeUtilsTests.cc
+
+	# Lazy matrices
+	LazyMatrix_i_Tests.cc
 	LazyMatrixWrapperTests.cc
 	LazyMatrixProductTests.cc
 	LazyMatrixSumTests.cc
-	LazyMatrix_i_Tests.cc
-	ScaleViewTests.cc
-	TransposeViewTests.cc
-	BlockViewTests.cc
+
+	# Proxies and other matrix functionality
+	TransposeProxyTests.cc
+	transTests.cc
+
+	# Lazy matrix implementations
 	BlockDiagonalMatrixTests.cc
+	DiagonalMatrixTests.cc
+
+	# Eigensolver
+	ArpackEigensolverTests.cc
+	ArmadilloEigensolverTests.cc
+	eigensystemTests.cc
+
+	# linear solver
+	solveTests.cc
+
+	# main of the test suite
 	main.cc
 )
 
