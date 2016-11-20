@@ -106,6 +106,13 @@ TEST_CASE("MultiVector class", "[MultiVector]") {
         REQUIRE(mvconst.n_elem() == 4u);
         REQUIRE(mvconst.at_ptr(0).is_shared_ptr() == false);
         REQUIRE(mvconst[0] == v);
+
+        MultiVector<vector_type> mv4{{1, 2},   // elem 0
+                                     {3, 4},   // elem 1
+                                     {5, 6}};  // elem 2
+        REQUIRE(mv4[0] == vector_type({1, 3, 5}));
+        REQUIRE(mv4[1] == vector_type({2, 4, 6}));
+
     }  // Basic constructors
 
     SECTION("as_multivector() function") {
