@@ -19,6 +19,7 @@
 
 #pragma once
 #include "detail/MultiVectorBase.hh"
+#include <initializer_list>
 #include <krims/Range.hh>
 
 namespace linalgwrap {
@@ -38,7 +39,10 @@ namespace linalgwrap {
  *  If you want to make a deep copy, use ``copy_deep`` instead.
  */
 template <typename InnerVector>
-class MultiVector : public detail::MultiVectorBase<InnerVector> {
+class MultiVector : public detail::MultiVectorBase<InnerVector>,
+                    // Multivectors are cheaply copyable since this just makes a
+                    // shallow copy
+                    public krims::CheaplyCopyable_i {
   public:
     typedef detail::MultiVectorBase<InnerVector> base_type;
     typedef typename base_type::vector_type vector_type;
@@ -64,6 +68,21 @@ class MultiVector : public detail::MultiVectorBase<InnerVector> {
                     IsStoredVector<InnerVector>::value, SizeType,
                     typename InnerVector::size_type>...>
     MultiVector(size_type n_elem, SizeType n_vectors, bool fill_zero = true);
+
+    /** \brief Construct from a nested initialiser list of scalars.
+     *
+     * The outermost layer gives the number of vectors, the innermost layer the
+     * number of elements in each vector. An example would be
+     * ```
+     * MultiVector<vector_type> mat{{1.0,2.0,0.5},{1.5,4.5,6.}})
+     * ```
+     * which produces a MultiVector with 3 Vectors a 2 elements.
+     */
+    template <typename Scalar, krims::enable_if_cond_convertible_t<
+                                     IsStoredVector<InnerVector>::value, Scalar,
+                                     typename InnerVector::scalar_type>...>
+    MultiVector(
+          std::initializer_list<std::initializer_list<Scalar>> list_of_lists);
 
     /** Default destructor */
     ~MultiVector() = default;
@@ -301,6 +320,37 @@ MultiVector<InnerVector>::MultiVector(size_type n_elem, SizeType n_vectors,
     base_type::m_n_elem = n_elem;
     base_type::resize(n_vectors, fill_zero);
     base_type::assert_valid_state();
+}
+
+template <typename InnerVector>
+template <typename Scalar, krims::enable_if_cond_convertible_t<
+                                 IsStoredVector<InnerVector>::value, Scalar,
+                                 typename InnerVector::scalar_type>...>
+MultiVector<InnerVector>::MultiVector(
+      std::initializer_list<std::initializer_list<Scalar>> list_of_lists)
+      : MultiVector(
+              list_of_lists.size(),
+              list_of_lists.size() > 0 ? list_of_lists.begin()->size() : 0,
+              false) {
+#ifdef DEBUG
+    size_type n_elem = list_of_lists.size();
+    size_type n_vectors = n_elem > 0 ? list_of_lists.begin()->size() : 0;
+#endif
+
+    // Assert all columns have equal length.
+    assert_element_sizes(list_of_lists, n_vectors);
+
+    size_type i = 0;
+    for (auto row : list_of_lists) {
+        size_type j = 0;
+        for (scalar_type elem : row) {
+            ((*this)[j])(i) = elem;
+            ++j;
+        }
+        assert_dbg(j == n_vectors, krims::ExcInternalError());
+        ++i;
+    }
+    assert_dbg(i == n_elem, krims::ExcInternalError());
 }
 
 template <typename InnerVector>
