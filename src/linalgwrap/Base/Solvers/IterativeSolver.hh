@@ -95,18 +95,15 @@ class IterativeSolver : public Base {
      * Also call on_convergence if convergence.
      **/
     bool convergence_reached(state_type& s) const;
-
-    /** End the current iteration step.
-     *
-     *  In principle it checks that we are not beyond
-     *   max_iter
-     */
-    void end_iteration_step(state_type& s) const;
     ///@}
 };
 
 template <typename State>
 void IterativeSolver<State>::start_iteration_step(state_type& s) const {
+    // Assert that we are not beyond the iteration count already
+    solver_assert(s.n_iter_count() < max_iter, s,
+                  ExcMaximumNumberOfIterationsReached(max_iter));
+
     s.increase_iteration_count();
     base_type::start_iteration_step(s);
 }
@@ -118,14 +115,6 @@ bool IterativeSolver<State>::convergence_reached(state_type& s) const {
         return true;
     }
     return false;
-}
-
-template <typename State>
-void IterativeSolver<State>::end_iteration_step(state_type& s) const {
-    base_type::end_iteration_step(s);
-    // Assert that we are not beyond the iteration count
-    solver_assert(s.n_iter_count() < max_iter, s,
-                  ExcMaximumNumberOfIterationsReached(max_iter));
 }
 
 }  // namespace linalgwrap
