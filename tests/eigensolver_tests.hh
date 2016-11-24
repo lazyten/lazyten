@@ -23,6 +23,7 @@
 #include <catch.hpp>
 #include <linalgwrap/Base/Solvers.hh>
 #include <linalgwrap/SmallVector.hh>
+#include <linalgwrap/TestingUtils.hh>
 
 namespace linalgwrap {
 namespace tests {
@@ -70,22 +71,6 @@ class TestProblemRunner {
   /** Function which takes the test problem and returns the solution*/
   std::function<typename testproblem_type::soln_type(const testproblem_type&)>
         m_solve_testproblem;
-
-  /** \brief Check that the signs of the entries of the vectors from and to
-   * agree
-   *  if not multiply to by -1.
-   *
-   *  The idea behind this function is that eigensolvers can only compute
-   *  the eigenvector up to the sign and this ambiguity has to be fixed before
-   *  comparing the solver results and a reference
-   *
-   *  \param tolerance   Entries smaller than the numeric tolerance
-   *                     (which compare to 0 under this tolerance)
-   *                     will not be considered.
-   *  \param from        Vector to read the sign from
-   *  \param to          Vector to apply the sign to.
-   */
-  void sign_normalise(const evector_type& from, evector_type& to) const;
 };
 
 /** A default functor for the solvefctn in TestProblemRunner, which is usually
@@ -104,34 +89,6 @@ struct DefaultSolveFunctor {
 //
 // ---------------------------------------------------------------------
 //
-
-template <typename Testproblem>
-void TestProblemRunner<Testproblem>::sign_normalise(const evector_type& from,
-                                                    evector_type& to) const {
-  auto itfrom = std::begin(from);
-  auto itto = std::begin(to);
-  for (; itfrom != std::end(from); ++itfrom, ++itto) {
-    // Skip if the element is numerically zero
-    if (numcomp(*itfrom).failure_action(NumCompActionType::Return) ==
-        Constants<typename evector_type::scalar_type>::zero) {
-      continue;
-    }
-
-    // TODO The case of complex eigenvalues has not been properly thought
-    // through when it comes to sign normalisation: It seems that one could
-    // perform any rotation of real and imaginary part on the unit circle,
-    // but I am not sure whether this is correct ... mfh
-    assert_dbg(!IsComplexNumber<typename evector_type::scalar_type>::value,
-               krims::ExcNotImplemented());
-
-    // The sign of the first important element is different:
-    if ((std::real(*itfrom) < 0. && std::real(*itto) > 0.) ||
-        (std::real(*itfrom) > 0. && std::real(*itto) < 0.)) {
-      to *= -1;
-      return;
-    }
-  }
-}
 
 template <typename Testproblem>
 void TestProblemRunner<Testproblem>::run_matching(
@@ -197,7 +154,7 @@ void TestProblemRunner<Testproblem>::run_matching(
         // Sign-normalise the reference
         // Note that this is necessary due to the ambiguity in the sign
         // in the eigenvectors.
-        sign_normalise(evec, evec_ref);
+        adjust_phase(evec, evec_ref);
 
         CHECK(evec == numcomp(evec_ref).tolerance(problem.tolerance));
       }
