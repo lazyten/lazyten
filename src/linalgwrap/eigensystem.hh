@@ -33,15 +33,14 @@ static_assert(false,
 
 namespace detail {
 template <typename Eigenproblem>
-EigensolutionTypeFor<Eigenproblem::hermitian,
-                     typename Eigenproblem::matrix_diag_type>
+EigensolutionTypeFor<Eigenproblem::hermitian, typename Eigenproblem::matrix_diag_type>
 eigensystem_with_method(const std::string& method, const Eigenproblem problem,
                         const krims::ParameterMap& map = krims::ParameterMap());
 }  // namespace detail
 
 struct EigensystemKeys : public EigensolverBaseKeys {
-    /** The solver method to use. Type: string */
-    static const std::string method;
+  /** The solver method to use. Type: string */
+  static const std::string method;
 };
 
 // TODO document default and supported keys (method, tolerance and which)
@@ -84,9 +83,8 @@ struct EigensystemKeys : public EigensolverBaseKeys {
 template <typename Matrix>
 EigensolutionTypeFor<true, Matrix> eigensystem_hermitian(
       const Matrix& A,
-      typename std::enable_if<IsMatrix<Matrix>::value,
-                              typename Matrix::size_type>::type n_ep =
-            Constants<typename Matrix::size_type>::all,
+      typename std::enable_if<IsMatrix<Matrix>::value, typename Matrix::size_type>::type
+            n_ep = Constants<typename Matrix::size_type>::all,
       const krims::ParameterMap& map = krims::ParameterMap());
 
 /** Solve a generalised hermitian eigensystem
@@ -107,8 +105,7 @@ EigensolutionTypeFor<true, Matrix> eigensystem_hermitian(
 template <typename MatrixA, typename MatrixB>
 EigensolutionTypeFor<true, MatrixA> eigensystem_hermitian(
       const MatrixA& A, const MatrixB& B,
-      typename std::enable_if<IsMatrix<MatrixA>::value &&
-                                    IsMatrix<MatrixB>::value,
+      typename std::enable_if<IsMatrix<MatrixA>::value && IsMatrix<MatrixB>::value,
                               typename MatrixA::size_type>::type n_ep =
             Constants<typename MatrixA::size_type>::all,
       const krims::ParameterMap& map = krims::ParameterMap());
@@ -130,9 +127,8 @@ EigensolutionTypeFor<true, MatrixA> eigensystem_hermitian(
 template <typename Matrix>
 EigensolutionTypeFor<false, Matrix> eigensystem(
       const Matrix& A,
-      typename std::enable_if<IsMatrix<Matrix>::value,
-                              typename Matrix::size_type>::type n_ep =
-            Constants<typename Matrix::size_type>::all,
+      typename std::enable_if<IsMatrix<Matrix>::value, typename Matrix::size_type>::type
+            n_ep = Constants<typename Matrix::size_type>::all,
       const krims::ParameterMap& map = krims::ParameterMap());
 
 /** Solve a generalised eigensystem
@@ -153,8 +149,7 @@ EigensolutionTypeFor<false, Matrix> eigensystem(
 template <typename MatrixA, typename MatrixB>
 EigensolutionTypeFor<false, MatrixA> eigensystem(
       const MatrixA& A, const MatrixB& B,
-      typename std::enable_if<IsMatrix<MatrixA>::value &&
-                                    IsMatrix<MatrixB>::value,
+      typename std::enable_if<IsMatrix<MatrixA>::value && IsMatrix<MatrixB>::value,
                               typename MatrixA::size_type>::type n_ep =
             Constants<typename MatrixA::size_type>::all,
       const krims::ParameterMap& map = krims::ParameterMap());
@@ -165,160 +160,150 @@ EigensolutionTypeFor<false, MatrixA> eigensystem(
 
 namespace detail {
 template <typename Eigenproblem>
-EigensolutionTypeFor<Eigenproblem::hermitian,
-                     typename Eigenproblem::matrix_diag_type>
+EigensolutionTypeFor<Eigenproblem::hermitian, typename Eigenproblem::matrix_diag_type>
 eigensystem_with_method(const std::string& method, const Eigenproblem problem,
                         const krims::ParameterMap& map) {
 
 #ifdef LINALGWRAP_HAVE_ARPACK
-    // We need a hack here, since Arpack is in fact only available for real
-    // Hermitian non-general Eigenproblems. So we define a constexpr, which
-    // tells us whether this is the case and a conditional type which is only
-    // evaluating to Arpack in case we actually have it availabe (to make
-    // the compiler happy)
+  // We need a hack here, since Arpack is in fact only available for real
+  // Hermitian non-general Eigenproblems. So we define a constexpr, which
+  // tells us whether this is the case and a conditional type which is only
+  // evaluating to Arpack in case we actually have it availabe (to make
+  // the compiler happy)
 
-    // Is Arpack available for this Eigenproblem?
-    constexpr bool isArpackAvailable = Eigenproblem::hermitian &&
-                                       !Eigenproblem::generalised &&
-                                       Eigenproblem::real;
+  // Is Arpack available for this Eigenproblem?
+  constexpr bool isArpackAvailable =
+        Eigenproblem::hermitian && !Eigenproblem::generalised && Eigenproblem::real;
 
-    typedef typename std::conditional<
-          isArpackAvailable, ArpackEigensolver<Eigenproblem>,
-          ArmadilloEigensolver<Eigenproblem>>::type conditional_arpack_type;
+  typedef typename std::conditional<isArpackAvailable, ArpackEigensolver<Eigenproblem>,
+                                    ArmadilloEigensolver<Eigenproblem>>::type
+        conditional_arpack_type;
 
-    if (method == "arpack") {
-        // No method is supported!
-        assert_throw(isArpackAvailable,
-                     ExcInvalidSolverParametersEncountered(
-                           "Arpack is currently only available for real "
-                           "symmetric non-general eigenproblems."));
+  if (method == "arpack") {
+    // No method is supported!
+    assert_throw(isArpackAvailable, ExcInvalidSolverParametersEncountered(
+                                          "Arpack is currently only available for real "
+                                          "symmetric non-general eigenproblems."));
 
-        return conditional_arpack_type{map}
-              .solve(std::move(problem))
-              .eigensolution();
-    }
+    return conditional_arpack_type{map}.solve(std::move(problem)).eigensolution();
+  }
 #endif
 #ifdef LINALGWRAP_HAVE_ARMADILLO
-    if (method == "armadillo") {
-        return ArmadilloEigensolver<Eigenproblem>{map}
-              .solve(std::move(problem))
-              .eigensolution();
-    }
+  if (method == "armadillo") {
+    return ArmadilloEigensolver<Eigenproblem>{map}
+          .solve(std::move(problem))
+          .eigensolution();
+  }
 #endif
 
-    // No method is supported!
-    assert_throw(false, ExcInvalidSolverParametersEncountered(
-                              "The eigensolver method " + method +
-                              "(set via the key " + EigensystemKeys::method +
-                              ") is not available. Either you spelled it wrong "
-                              "or this method has not ben compiled into this "
-                              "version of linalgwrapj"));
+  // No method is supported!
+  assert_throw(false, ExcInvalidSolverParametersEncountered(
+                            "The eigensolver method " + method + "(set via the key " +
+                            EigensystemKeys::method +
+                            ") is not available. Either you spelled it wrong "
+                            "or this method has not ben compiled into this "
+                            "version of linalgwrapj"));
 }
 }  // namespace detail
 
 template <typename Matrix>
 EigensolutionTypeFor<true, Matrix> eigensystem_hermitian(
-      const Matrix& A,
-      typename std::enable_if<IsMatrix<Matrix>::value,
-                              typename Matrix::size_type>::type n_ep,
+      const Matrix& A, typename std::enable_if<IsMatrix<Matrix>::value,
+                                               typename Matrix::size_type>::type n_ep,
       const krims::ParameterMap& map) {
-    // Setup problem
-    typedef Eigenproblem<true, Matrix> problem_type;
-    problem_type problem{A, n_ep};
+  // Setup problem
+  typedef Eigenproblem<true, Matrix> problem_type;
+  problem_type problem{A, n_ep};
 
-    // Select method (auto or user-defined)
-    const std::string method = map.at("method", std::string("auto"));
-    if (method != "auto") {
-        return detail::eigensystem_with_method(method, problem, map);
-    }
+  // Select method (auto or user-defined)
+  const std::string method = map.at("method", std::string("auto"));
+  if (method != "auto") {
+    return detail::eigensystem_with_method(method, problem, map);
+  }
 
 #ifdef LINALGWRAP_HAVE_ARPACK
-    if (problem.n_ep() <= problem.dim() / 2 &&
-        map.at(EigensolverBaseKeys::which, std::string("SR")) !=
-              std::string("SM")) {
-        // Use Arpack since we want "few" eigenpairs
-        // TODO This is just a shot, no clue whether half the dimension
-        // is a sensible value or not.
-        return detail::eigensystem_with_method("arpack", problem, map);
-    }
+  if (problem.n_ep() < problem.dim() / 2 &&
+      map.at(EigensolverBaseKeys::which, std::string("SR")) != std::string("SM")) {
+    // Use Arpack since we want "few" eigenpairs
+    // TODO This is just a shot, no clue whether half the dimension
+    // is a sensible value or not.
+    return detail::eigensystem_with_method("arpack", problem, map);
+  }
 #endif
 
-    // Fallback: Armadillo
-    return detail::eigensystem_with_method("armadillo", problem, map);
+  // Fallback: Armadillo
+  return detail::eigensystem_with_method("armadillo", problem, map);
 }
 
 template <typename MatrixA, typename MatrixB>
 EigensolutionTypeFor<true, MatrixA> eigensystem_hermitian(
       const MatrixA& A, const MatrixB& B,
-      typename std::enable_if<IsMatrix<MatrixA>::value &&
-                                    IsMatrix<MatrixB>::value,
+      typename std::enable_if<IsMatrix<MatrixA>::value && IsMatrix<MatrixB>::value,
                               typename MatrixA::size_type>::type n_ep,
       const krims::ParameterMap& map) {
-    // Setup problem
-    typedef Eigenproblem<true, MatrixA, MatrixB> problem_type;
-    problem_type problem{A, B, n_ep};
+  // Setup problem
+  typedef Eigenproblem<true, MatrixA, MatrixB> problem_type;
+  problem_type problem{A, B, n_ep};
 
-    // Select method (auto or user-defined)
-    const std::string method = map.at("method", std::string("auto"));
-    if (method != "auto") {
-        return detail::eigensystem_with_method(method, problem, map);
-    }
+  // Select method (auto or user-defined)
+  const std::string method = map.at("method", std::string("auto"));
+  if (method != "auto") {
+    return detail::eigensystem_with_method(method, problem, map);
+  }
 
-    // TODO Do something better here some day (e.g. use Arpack)
+  // TODO Do something better here some day (e.g. use Arpack)
 
-    // Fallback: Armadillo
-    return detail::eigensystem_with_method("armadillo", problem, map);
+  // Fallback: Armadillo
+  return detail::eigensystem_with_method("armadillo", problem, map);
 }
 
 template <typename Matrix>
 EigensolutionTypeFor<false, Matrix> eigensystem(
-      const Matrix& A,
-      typename std::enable_if<IsMatrix<Matrix>::value,
-                              typename Matrix::size_type>::type n_ep,
+      const Matrix& A, typename std::enable_if<IsMatrix<Matrix>::value,
+                                               typename Matrix::size_type>::type n_ep,
       const krims::ParameterMap& map) {
-    // TODO This code is untested!
-    assert_sufficiently_tested(false);
+  // TODO This code is untested!
+  assert_sufficiently_tested(false);
 
-    // Setup problem
-    typedef Eigenproblem<false, Matrix> problem_type;
-    problem_type problem{A, n_ep};
+  // Setup problem
+  typedef Eigenproblem<false, Matrix> problem_type;
+  problem_type problem{A, n_ep};
 
-    // Select method (auto or user-defined)
-    const std::string method = map.at("method", std::string("auto"));
-    if (method != "auto") {
-        return detail::eigensystem_with_method(method, problem, map);
-    }
+  // Select method (auto or user-defined)
+  const std::string method = map.at("method", std::string("auto"));
+  if (method != "auto") {
+    return detail::eigensystem_with_method(method, problem, map);
+  }
 
-    // TODO Do something better here some day (e.g. use Arpack)
+  // TODO Do something better here some day (e.g. use Arpack)
 
-    // Fallback: Armadillo
-    return detail::eigensystem_with_method("armadillo", problem, map);
+  // Fallback: Armadillo
+  return detail::eigensystem_with_method("armadillo", problem, map);
 }
 
 template <typename MatrixA, typename MatrixB>
 EigensolutionTypeFor<false, MatrixA> eigensystem(
       const MatrixA& A, const MatrixB& B,
-      typename std::enable_if<IsMatrix<MatrixA>::value &&
-                                    IsMatrix<MatrixB>::value,
+      typename std::enable_if<IsMatrix<MatrixA>::value && IsMatrix<MatrixB>::value,
                               typename MatrixA::size_type>::type n_ep,
       const krims::ParameterMap& map) {
-    // TODO This code is untested!
-    assert_sufficiently_tested(false);
+  // TODO This code is untested!
+  assert_sufficiently_tested(false);
 
-    // Setup problem
-    typedef Eigenproblem<false, MatrixA, MatrixB> problem_type;
-    problem_type problem{A, B, n_ep};
+  // Setup problem
+  typedef Eigenproblem<false, MatrixA, MatrixB> problem_type;
+  problem_type problem{A, B, n_ep};
 
-    // Select method (auto or user-defined)
-    const std::string method = map.at("method", std::string("auto"));
-    if (method != "auto") {
-        return detail::eigensystem_with_method(method, problem, map);
-    }
+  // Select method (auto or user-defined)
+  const std::string method = map.at("method", std::string("auto"));
+  if (method != "auto") {
+    return detail::eigensystem_with_method(method, problem, map);
+  }
 
-    // TODO Do something better here some day (e.g. use Arpack)
+  // TODO Do something better here some day (e.g. use Arpack)
 
-    // Fallback: Armadillo
-    return detail::eigensystem_with_method("armadillo", problem, map);
+  // Fallback: Armadillo
+  return detail::eigensystem_with_method("armadillo", problem, map);
 }
 
 }  // namespace linalgwrap
