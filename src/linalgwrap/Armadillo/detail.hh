@@ -20,6 +20,7 @@
 #pragma once
 #ifdef LINALGWRAP_HAVE_ARMADILLO
 #include <armadillo>
+#include <krims/ExceptionSystem.hh>
 #include <krims/TypeUtils.hh>
 #include <linalgwrap/Constants.hh>
 
@@ -30,11 +31,6 @@
 namespace linalgwrap {
 
 namespace detail {
-
-DefException1(ExcImaginaryPartNonZero, double,
-              << "The imaginary part of an eigenvalue or eigenvector of an "
-                 "Hermitian eigenproblem was not zero, but "
-              << arg1 << "instead.");
 
 /** In armadillo t() is the normal transpose for real matrices and the conjugate
  * transpose for complex ones.
@@ -129,6 +125,13 @@ struct ArmadilloEigWrapper<Eigenproblem, /* hermitian= */ false,
     }
 };
 
+DefException3(ExcImaginaryPartNonZero, size_t, size_t, arma::cx_mat&,
+              << "The imaginary part of the element (" << arg1 << "," << arg2
+              << ") of a generalised isHermitian "
+                 "eigenproblem was not zero."
+              << "The object is " << std::endl
+              << arg3);
+
 /** real symmetric generalised eigenproblems */
 template <typename Eigenproblem>
 struct ArmadilloEigWrapper<Eigenproblem, /* hermitian= */ true,
@@ -161,15 +164,18 @@ struct ArmadilloEigWrapper<Eigenproblem, /* hermitian= */ true,
 
 #ifdef DEBUG
         // Check imaginary parts are now really zero:
-        for (const auto& elem : inner_evals) {
-            assert_dbg(std::abs(elem.imag()) <
+        for (size_t i = 0; i < inner_evals.n_elem; ++i) {
+            assert_dbg(std::abs(inner_evals(i).imag()) <
                              Constants<scalar_type>::default_tolerance,
-                       ExcImaginaryPartNonZero(elem.imag()));
+                       ExcImaginaryPartNonZero(i, 0, inner_evals));
         }
-        for (const auto& elem : inner_evecs) {
-            assert_dbg(std::abs(elem.imag()) <
-                             Constants<scalar_type>::default_tolerance,
-                       ExcImaginaryPartNonZero(elem.imag()));
+
+        for (size_t i = 0; i < inner_evecs.n_rows; ++i) {
+            for (size_t j = 0; j < inner_evecs.n_cols; ++j) {
+                assert_dbg(std::abs(inner_evecs(i, j).imag()) <
+                                 Constants<scalar_type>::default_tolerance,
+                           ExcImaginaryPartNonZero(i, j, inner_evecs));
+            }
         }
 #endif
         // Copy results:
