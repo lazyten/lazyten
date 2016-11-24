@@ -19,6 +19,7 @@
 
 #pragma once
 #include "FileType_i.hh"
+#include <krims/TypeUtils.hh>
 #include <regex>
 #include <vector>
 
@@ -40,8 +41,9 @@ class Mathematica : public FileType_i {
    * used under the label provided. Note, that mathematica does not allow
    * certain characters in the label, so be careful.
    */
-  template <typename Matrix>
-  void write(std::ostream& out, const std::string& label, const Matrix& mat) const;
+  template <typename Scalar>
+  void write(std::ostream& out, const std::string& label,
+             const Matrix_i<Scalar>& mat) const;
 
   /** \brief Write a matrix to a stream in mathematica format.
    *
@@ -56,6 +58,12 @@ class Mathematica : public FileType_i {
    */
   template <typename Scalar>
   void write(std::ostream& out, const MultiVector<Vector_i<Scalar>>& mv) const;
+
+  template <typename Scalar>
+  void write(std::ostream& out, const std::string& label, Scalar s) const;
+
+  template <typename Scalar>
+  void write(std::ostream& out, Scalar s) const;
 
   /** Write a comment **/
   void write_comment(std::ostream& out, const std::string& comment) const override {
@@ -96,9 +104,9 @@ class Mathematica : public FileType_i {
 // ---------------------------------------
 //
 
-template <typename Matrix>
+template <typename Scalar>
 void Mathematica::write(std::ostream& out, const std::string& label,
-                        const Matrix& mat) const {
+                        const Matrix_i<Scalar>& mat) const {
   assert_dbg(is_valid_label(label),
              ExcInvalidDataForFileType(" Mathematica labels need to consist "
                                        "of only letters and numbers, so " +
@@ -114,7 +122,10 @@ void Mathematica::write(std::ostream& out,
                         const MultiVector<Vector_i<Scalar>>& mv) const {
   typedef typename Vector_i<Scalar>::size_type size_type;
   assert_throw(out, krims::ExcIO());
-  if (mv.n_vectors() == 0 || mv.n_elem() == 0) return;
+  if (mv.n_vectors() == 0 || mv.n_elem() == 0) {
+    out << std::endl;
+    return;
+  }
 
   out << "{";
   for (size_type row = 0; row < mv.n_elem(); ++row) {
@@ -133,7 +144,10 @@ template <typename Scalar>
 void Mathematica::write(std::ostream& out, const Matrix_i<Scalar>& mat) const {
   typedef typename Matrix_i<Scalar>::size_type size_type;
   assert_throw(out, krims::ExcIO());
-  if (mat.n_rows() == 0 || mat.n_cols() == 0) return;
+  if (mat.n_rows() == 0 || mat.n_cols() == 0) {
+    out << std::endl;
+    return;
+  }
 
   out << "{";
   for (size_type row = 0; row < mat.n_rows(); ++row) {
@@ -146,6 +160,24 @@ void Mathematica::write(std::ostream& out, const Matrix_i<Scalar>& mat) const {
     out << "}";
   }
   out << "};" << std::endl;
+}
+
+template <typename Scalar>
+void Mathematica::write(std::ostream& out, const std::string& label, Scalar s) const {
+  assert_dbg(is_valid_label(label),
+             ExcInvalidDataForFileType(" Mathematica labels need to consist "
+                                       "of only letters and numbers, so " +
+                                       label + " is not valid."));
+
+  assert_throw(out, krims::ExcIO());
+  out << label << " = ";
+  write(out, s);
+}
+
+template <typename Scalar>
+void Mathematica::write(std::ostream& out, Scalar s) const {
+  write_elem(out, s);
+  out << ";" << std::endl;
 }
 
 template <typename Scalar>

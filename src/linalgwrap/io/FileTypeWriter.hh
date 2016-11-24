@@ -63,6 +63,16 @@ class FileTypeWriter : public DataWriter_i<Scalar> {
    * under the format represented by this class */
   bool write(const MultiVector<Vector_i<Scalar>>& vecs) override;
 
+  /** Write a labelled scalar under the format represented by this class
+   * \return Is the writer still in a good state?
+   * */
+  virtual bool write(const std::string& label, Scalar s) override;
+
+  /** Write a non-labelled scalar under the format represented by this class
+   * \return Is the writer still in a good state?
+   * */
+  virtual bool write(Scalar s) override;
+
   /** Write a comment string **/
   bool write_comment(const std::string&) override;
 
@@ -133,6 +143,20 @@ template <typename FileType, typename Scalar>
 bool FileTypeWriter<FileType, Scalar>::write(const MultiVector<Vector_i<Scalar>>& vecs) {
   assert_throw(m_out, krims::ExcIO());
   m_ft.write(m_out, vecs);
+  return m_out.good();
+}
+
+template <typename FileType, typename Scalar>
+bool FileTypeWriter<FileType, Scalar>::write(const std::string& label, Scalar s) {
+  assert_throw(m_out, krims::ExcIO());
+  m_ft.write(m_out, label, s);
+  return m_out.good();
+}
+
+template <typename FileType, typename Scalar>
+bool FileTypeWriter<FileType, Scalar>::write(Scalar s) {
+  assert_throw(m_out, krims::ExcIO());
+  m_ft.write(m_out, s);
   return m_out.good();
 }
 
