@@ -112,7 +112,7 @@ class ds_upd_wrapper {
         // Setup required objects:
         char howmany = 'A';  // All
 
-        std::vector<int> select(nev, 0);
+        std::vector<int> select(ncv, 1);
         evalues.resize(nev);
 
         int ldz = n;

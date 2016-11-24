@@ -112,6 +112,14 @@ DefSolverException2(ExcArpackCannotFindMoreEigenpairs, size_t, desired,
                     << desired << " eigenpairs were desired, but " << found
                     << " eigenpairs were found.");
 
+DefSolverException1(
+      ExcArpackCouldNotApplyShifts, size_t, n_arnoldi_vectors,
+      << "Arpac has failed with info==3, which implies that it could "
+      << "not apply shifts during the implicit restart. One way to "
+      << "tackle this problem is to increase the number of arnoldi"
+      << "vectors beyond the current value ( " << n_arnoldi_vectors
+      << " ) using the key 'n_arnoldi_vectors' in a ParameterMap.");
+
 /** Class which contains all ParameterMap keys which are understood
  *  by the ArpackSolver update_control_params as static string
  *  members.
@@ -495,6 +503,11 @@ void ArpackEigensolver<Eigenproblem, State>::solve_state(
     // info == 0 implies that all is fine
     // info == 1 implies that we cannot find any more Ritz vectors
     //           (but we still can get some of them)
+    // info == 3 implies that no shifts could be applied during the
+    //           implicit restart, usutally this means that the
+    //           number of arnoldi vectors has been too small
+    solver_assert(info != 3, state,
+                  ExcArpackCouldNotApplyShifts(n_arnoldi_actual));
     solver_assert(info == 0 || info == 1, state, ExcArpackInfo("dsaupd", info));
 
     // TODO The case of info == 1 has never been tested.
