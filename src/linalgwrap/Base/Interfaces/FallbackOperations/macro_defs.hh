@@ -23,15 +23,12 @@ namespace linalgwrap {
 #ifdef LINALGWRAP_SIGNAL_FALLBACK
 
 #include <iostream>
-#define linalgwrap_called_fallback()                                      \
-    {                                                                     \
-        std::cerr << "Note:  Called fallback for " << __PRETTY_FUNCTION__ \
-                  << std::endl;                                           \
-    }
+#define linalgwrap_called_fallback() \
+  { std::cerr << "Note:  Called fallback for " << __PRETTY_FUNCTION__ << std::endl; }
 
 #else
 #define linalgwrap_called_fallback() \
-    {}
+  {}
 #endif
 
 }  // namespace linalgwrap

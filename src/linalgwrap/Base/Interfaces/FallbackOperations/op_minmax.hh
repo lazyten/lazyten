@@ -26,15 +26,15 @@ namespace linalgwrap {
 /** Compute the minimum of all values of an indexable object */
 template <typename Indexable>
 ValidIndexableScalarT<Indexable> min(const Indexable& i) {
-    linalgwrap_called_fallback();
-    return *std::min_element(i.begin(), i.end());
+  linalgwrap_called_fallback();
+  return *std::min_element(i.begin(), i.end());
 }
 
 /** Compute the maximum of all values of an indexable object */
 template <typename Indexable>
 ValidIndexableScalarT<Indexable> max(const Indexable& i) {
-    linalgwrap_called_fallback();
-    return *std::max_element(i.begin(), i.end());
+  linalgwrap_called_fallback();
+  return *std::max_element(i.begin(), i.end());
 }
 
 }  // namespace linalgwrap

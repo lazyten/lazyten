@@ -29,19 +29,18 @@ template <typename S>
 using genlib = vector_tests::GeneratorLibrary<BuiltinVector<S>>;
 
 TEST_CASE("BuiltinVector class", "[BuiltinVector]") {
-    SECTION("Default stored vector tests") {
-        // Decrease tolerance to require a more accurate numerical agreement
-        // for passing.
-        auto lowertol = NumCompConstants::change_temporary(
-              0.1 * krims::NumCompConstants::default_tolerance_factor);
+  SECTION("Default stored vector tests") {
+    // Decrease tolerance to require a more accurate numerical agreement
+    // for passing.
+    auto lowertol = NumCompConstants::change_temporary(
+          0.1 * krims::NumCompConstants::default_tolerance_factor);
 
-        stored_vector_tests::run_with_generator(genlib<double>::testgenerator(),
-                                                "BuiltinVector<double>: ");
+    stored_vector_tests::run_with_generator(genlib<double>::testgenerator(),
+                                            "BuiltinVector<double>: ");
 
-        stored_vector_tests::run_with_generator(
-              genlib<std::complex<double>>::testgenerator(),
-              "BuiltinVector<complex double>: ");
-    }
+    stored_vector_tests::run_with_generator(genlib<std::complex<double>>::testgenerator(),
+                                            "BuiltinVector<complex double>: ");
+  }
 }
 
 }  // builtin_vector_tests

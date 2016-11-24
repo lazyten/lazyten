@@ -29,92 +29,91 @@ namespace linalgwrap {
  *  needs to be able to do on top of another Base class. */
 template <typename Base>
 class IterativeSolver : public Base {
-  public:
-    typedef Base base_type;
-    typedef typename base_type::state_type state_type;
-    typedef typename state_type::count_type count_type;
+ public:
+  typedef Base base_type;
+  typedef typename base_type::state_type state_type;
+  typedef typename state_type::count_type count_type;
 
-    static_assert(
-          std::is_base_of<linalgwrap::IterativeSolverState, state_type>::value,
-          "Base's state_type needs to be derived off "
-          "linalgwrap::IterationState");
+  static_assert(std::is_base_of<linalgwrap::IterativeSolverState, state_type>::value,
+                "Base's state_type needs to be derived off "
+                "linalgwrap::IterationState");
 
-    /** \name Iteration control */
-    ///@{
-    /** \brief Function to check convergence before a new iteration begins.
-     *  This default implementation does no checking and just returns
-     *  false.
-     */
-    virtual bool is_converged(const state_type&) const { return false; }
+  /** \name Iteration control */
+  ///@{
+  /** \brief Function to check convergence before a new iteration begins.
+   *  This default implementation does no checking and just returns
+   *  false.
+   */
+  virtual bool is_converged(const state_type&) const { return false; }
 
-    /** Maximum number of iterations
-     *
-     * The iteration should be considered as failed
-     * once we go beyond this number of iterations.
-     **/
-    count_type max_iter = 100;
+  /** Maximum number of iterations
+   *
+   * The iteration should be considered as failed
+   * once we go beyond this number of iterations.
+   **/
+  count_type max_iter = 100;
 
-    /** Bulk-update control parameters from a parameter map.
-     *
-     * For the list of available keys, see IterativeSolverKeys.hh
-     */
-    void update_control_params(const krims::ParameterMap& map) {
-        base_type::update_control_params(map);
-        max_iter = map.at(IterativeSolverKeys::max_iter, max_iter);
-    }
-    ///@}
+  /** Bulk-update control parameters from a parameter map.
+   *
+   * For the list of available keys, see IterativeSolverKeys.hh
+   */
+  void update_control_params(const krims::ParameterMap& map) {
+    base_type::update_control_params(map);
+    max_iter = map.at(IterativeSolverKeys::max_iter, max_iter);
+  }
+  ///@}
 
-  protected:
-    /** \name Handler functions
-     * Various virtual handler functions, which are called when
-     * certain events happen.
-     */
-    ///@{
-    /** Handler which is called once the iteration has converged
-     *
-     * \note This may not mark the end of the iteration yet.
-     */
-    virtual void on_converged(state_type&) const {}
-    ///@}
+ protected:
+  /** \name Handler functions
+   * Various virtual handler functions, which are called when
+   * certain events happen.
+   */
+  ///@{
+  /** Handler which is called once the iteration has converged
+   *
+   * \note This may not mark the end of the iteration yet.
+   */
+  virtual void on_converged(state_type&) const {}
+  ///@}
 
-    /** \name Solver building blocks.
-     * Various handler functions, which should be called
-     * by child classes to perform these tasks.
-     */
-    ///@{
-    /** \brief Start the next iteration step
-     *
-     * Increase the iteration count.
-     **/
-    void start_iteration_step(state_type& s) const;
+  /** \name Solver building blocks.
+   * Various handler functions, which should be called
+   * by child classes to perform these tasks.
+   */
+  ///@{
+  /** \brief Start the next iteration step
+   *
+   * Increase the iteration count.
+   **/
+  void start_iteration_step(state_type& s) const;
 
-    /** \brief Use is_converged to check whether convergence
-     * has been achieved.
-     *
-     * Return true if yes, else false
-     * Also call on_convergence if convergence.
-     **/
-    bool convergence_reached(state_type& s) const;
-    ///@}
+  /** \brief Use is_converged to check whether convergence
+   * has been achieved.
+   *
+   * Return true if yes, else false
+   * Also call on_convergence if convergence.
+   **/
+  bool convergence_reached(state_type& s) const;
+  ///@}
 };
 
 template <typename State>
 void IterativeSolver<State>::start_iteration_step(state_type& s) const {
-    // Assert that we are not beyond the iteration count already
-    solver_assert(s.n_iter_count() < max_iter, s,
-                  ExcMaximumNumberOfIterationsReached(max_iter));
+  // Assert that we are not beyond the iteration count already
+  solver_assert(s.n_iter_count() < max_iter, s,
+                ExcMaximumNumberOfIterationsReached(max_iter));
 
-    s.increase_iteration_count();
-    base_type::start_iteration_step(s);
+  s.increase_iteration_count();
+  base_type::start_iteration_step(s);
 }
 
 template <typename State>
 bool IterativeSolver<State>::convergence_reached(state_type& s) const {
-    if (is_converged(s)) {
-        on_converged(s);
-        return true;
-    }
-    return false;
+  if (is_converged(s)) {
+    on_converged(s);
+    return true;
+  }
+  return false;
 }
 
 }  // namespace linalgwrap

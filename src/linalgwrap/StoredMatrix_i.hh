@@ -110,91 +110,87 @@ class Matrix_i;
  */
 template <typename Scalar>
 class StoredMatrix_i : public Matrix_i<Scalar> {
-  public:
-    typedef Matrix_i<Scalar> base_type;
-    typedef typename base_type::scalar_type scalar_type;
-    typedef typename base_type::size_type size_type;
+ public:
+  typedef Matrix_i<Scalar> base_type;
+  typedef typename base_type::scalar_type scalar_type;
+  typedef typename base_type::size_type size_type;
 
-    //! The iterator type
-    typedef DefaultMatrixIterator<StoredMatrix_i<Scalar>> iterator;
+  //! The iterator type
+  typedef DefaultMatrixIterator<StoredMatrix_i<Scalar>> iterator;
 
-    //! The const_iterator type
-    typedef typename base_type::const_iterator const_iterator;
+  //! The const_iterator type
+  typedef typename base_type::const_iterator const_iterator;
 
-    /** \name Matrix properties
-     */
-    ///@{
-    /** Are operation modes Transposed::Trans and Transposed::ConjTrans
-     *  supported for this matrix type
-     *
-     * These operation modes are important for the functions apply,
-     * mmult and extract_block
-     *
-     * \note It is highly recommended that stored matrices support
-     * all operation modes!
-     **/
-    virtual bool has_transpose_operation_mode() const { return false; }
-    ///@}
+  /** \name Matrix properties
+   */
+  ///@{
+  /** Are operation modes Transposed::Trans and Transposed::ConjTrans
+   *  supported for this matrix type
+   *
+   * These operation modes are important for the functions apply,
+   * mmult and extract_block
+   *
+   * \note It is highly recommended that stored matrices support
+   * all operation modes!
+   **/
+  virtual bool has_transpose_operation_mode() const { return false; }
+  ///@}
 
-    /** \name Data access */
-    ///@{
-    /** Read-write access to elements */
-    virtual scalar_type& operator()(size_type row, size_type col) = 0;
+  /** \name Data access */
+  ///@{
+  /** Read-write access to elements */
+  virtual scalar_type& operator()(size_type row, size_type col) = 0;
 
-    /** \brief Read-write access to vectorised matrix object
-     *
-     * Access the element in row-major ordering (i.e. the matrix is
-     * traversed row by row)
-     */
-    virtual scalar_type& operator[](size_type i);
+  /** \brief Read-write access to vectorised matrix object
+   *
+   * Access the element in row-major ordering (i.e. the matrix is
+   * traversed row by row)
+   */
+  virtual scalar_type& operator[](size_type i);
 
-    /** \brief Read-only access to vectorised matrix object
-     *
-     * Access the element in row-major ordering (i.e. the matrix is
-     * traversed row by row)
-     * */
-    scalar_type operator[](size_type i) const override {
-        return base_type::operator[](i);
-    }
-    ///@}
+  /** \brief Read-only access to vectorised matrix object
+   *
+   * Access the element in row-major ordering (i.e. the matrix is
+   * traversed row by row)
+   * */
+  scalar_type operator[](size_type i) const override { return base_type::operator[](i); }
+  ///@}
 
-    /** \name Standard operations */
-    ///@{
-    /** Set all elements to zero
-     *
-     * Overload this to get a more performant implementation.
-     *
-     * TODO generalise with a lambda and an arbitrary scalar
-     * */
-    virtual void set_zero() {
-        std::fill(begin(), end(), Constants<scalar_type>::zero);
-    }
+  /** \name Standard operations */
+  ///@{
+  /** Set all elements to zero
+   *
+   * Overload this to get a more performant implementation.
+   *
+   * TODO generalise with a lambda and an arbitrary scalar
+   * */
+  virtual void set_zero() { std::fill(begin(), end(), Constants<scalar_type>::zero); }
 
-    /** \brief Symmetrise the matrix, that is form (A + A^T)/2.
-     *
-     * Only sensible for square matrices.
-     * */
-    virtual void symmetrise();
-    ///@}
+  /** \brief Symmetrise the matrix, that is form (A + A^T)/2.
+   *
+   * Only sensible for square matrices.
+   * */
+  virtual void symmetrise();
+  ///@}
 
-    //
-    // Iterators
-    //
-    /** Return an iterator to the beginning */
-    iterator begin() { return iterator(*this, {0, 0}); }
+  //
+  // Iterators
+  //
+  /** Return an iterator to the beginning */
+  iterator begin() { return iterator(*this, {0, 0}); }
 
-    /** Return a const iterator to the beginning */
-    const_iterator begin() const { return base_type::cbegin(); }
+  /** Return a const iterator to the beginning */
+  const_iterator begin() const { return base_type::cbegin(); }
 
-    /** Return an iterator to the end */
-    iterator end() { return iterator(*this); }
+  /** Return an iterator to the end */
+  iterator end() { return iterator(*this); }
 
-    /** Return a const iterator to the end */
-    const_iterator end() const { return base_type::cend(); }
+  /** Return a const iterator to the end */
+  const_iterator end() const { return base_type::cend(); }
 
-    // TODO
-    //   function to get actual number of non-zero entries
-    //   function to get estimated/implicitly known number of non-zero entries
+  // TODO
+  //   function to get actual number of non-zero entries
+  //   function to get estimated/implicitly known number of non-zero entries
 };
 
 //@{
@@ -211,8 +207,7 @@ struct IsStoredMatrix : public std::false_type {};
 
 template <typename Matrix>
 struct IsStoredMatrix<Matrix, krims::VoidType<typename Matrix::scalar_type>>
-      : public std::is_base_of<StoredMatrix_i<typename Matrix::scalar_type>,
-                               Matrix> {};
+      : public std::is_base_of<StoredMatrix_i<typename Matrix::scalar_type>, Matrix> {};
 //@}
 
 //@{
@@ -223,24 +218,21 @@ struct IsStoredMatrix<Matrix, krims::VoidType<typename Matrix::scalar_type>>
  *  with a stored matrix in any case without making an unnecessary
  *  copy in case it already is a stored matrix
  */
-template <typename Matrix,
-          typename StoredMatrix = typename Matrix::stored_matrix_type>
+template <typename Matrix, typename StoredMatrix = typename Matrix::stored_matrix_type>
 StoredMatrix as_stored(const Matrix& m) {
-    return static_cast<StoredMatrix>(m);
+  return static_cast<StoredMatrix>(m);
 }
 
 template <typename StoredMatrix,
-          typename = typename std::enable_if<
-                IsStoredMatrix<StoredMatrix>::value>::type>
+          typename = typename std::enable_if<IsStoredMatrix<StoredMatrix>::value>::type>
 StoredMatrix& as_stored(StoredMatrix& m) {
-    return m;
+  return m;
 }
 
 template <typename StoredMatrix,
-          typename = typename std::enable_if<
-                IsStoredMatrix<StoredMatrix>::value>::type>
+          typename = typename std::enable_if<IsStoredMatrix<StoredMatrix>::value>::type>
 const StoredMatrix& as_stored(const StoredMatrix& m) {
-    return m;
+  return m;
 }
 //@}
 
@@ -249,27 +241,26 @@ const StoredMatrix& as_stored(const StoredMatrix& m) {
 //
 
 template <typename Scalar>
-typename StoredMatrix_i<Scalar>::scalar_type& StoredMatrix_i<Scalar>::
-operator[](size_type i) {
-    // Check that we do not overshoot.
-    assert_range(0u, i, this->n_cols() * this->n_rows());
+typename StoredMatrix_i<Scalar>::scalar_type& StoredMatrix_i<Scalar>::operator[](
+      size_type i) {
+  // Check that we do not overshoot.
+  assert_range(0u, i, this->n_cols() * this->n_rows());
 
-    const size_type i_row = i / this->n_cols();
-    const size_type i_col = i % this->n_cols();
-    return (*this)(i_row, i_col);
+  const size_type i_row = i / this->n_cols();
+  const size_type i_col = i % this->n_cols();
+  return (*this)(i_row, i_col);
 }
 
 template <typename Scalar>
 void StoredMatrix_i<Scalar>::symmetrise() {
-    assert_dbg(this->n_rows() == this->n_cols(), ExcMatrixNotSquare());
+  assert_dbg(this->n_rows() == this->n_cols(), ExcMatrixNotSquare());
 
-    for (size_type i = 0; i < this->n_rows(); ++i) {
-        for (size_type j = i + 1; j < this->n_rows(); ++j) {
-            const scalar_type res =
-                  ((*this)(i, j) + (*this)(j, i)) / scalar_type(2.);
-            (*this)(i, j) = (*this)(j, i) = res;
-        }
+  for (size_type i = 0; i < this->n_rows(); ++i) {
+    for (size_type j = i + 1; j < this->n_rows(); ++j) {
+      const scalar_type res = ((*this)(i, j) + (*this)(j, i)) / scalar_type(2.);
+      (*this)(i, j) = (*this)(j, i) = res;
     }
+  }
 }
 
 }  // namespace liblinalg

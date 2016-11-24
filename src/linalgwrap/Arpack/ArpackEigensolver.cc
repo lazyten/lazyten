@@ -23,8 +23,7 @@
 namespace linalgwrap {
 
 const std::string ArpackEigensolverKeys::max_iter = "max_iter";
-const std::string ArpackEigensolverKeys::n_arnoldi_vectors =
-      "n_arnoldi_vectors";
+const std::string ArpackEigensolverKeys::n_arnoldi_vectors = "n_arnoldi_vectors";
 const std::string ArpackEigensolverKeys::mode = "mode";
 
 }  // namespace linalgwrap

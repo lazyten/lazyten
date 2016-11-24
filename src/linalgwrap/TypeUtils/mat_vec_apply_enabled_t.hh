@@ -29,11 +29,11 @@ namespace linalgwrap {
  *  a mutable memory vector
  */
 template <typename Matrix, typename VectorIn, typename VectorOut>
-using mat_vec_apply_enabled_t = typename std::enable_if<
-      IsMutableMemoryVector<VectorIn>::value &&
-      IsMutableMemoryVector<VectorOut>::value &&
-      std::is_same<typename VectorIn::scalar_type,
-                   typename VectorOut::scalar_type>::value &&
-      std::is_same<typename VectorIn::scalar_type,
-                   typename Matrix::scalar_type>::value>::type;
+using mat_vec_apply_enabled_t =
+      typename std::enable_if<IsMutableMemoryVector<VectorIn>::value &&
+                              IsMutableMemoryVector<VectorOut>::value &&
+                              std::is_same<typename VectorIn::scalar_type,
+                                           typename VectorOut::scalar_type>::value &&
+                              std::is_same<typename VectorIn::scalar_type,
+                                           typename Matrix::scalar_type>::value>::type;
 }  // namespace linalgwrap

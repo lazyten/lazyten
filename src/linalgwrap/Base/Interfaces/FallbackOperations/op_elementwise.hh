@@ -31,9 +31,8 @@ namespace linalgwrap {
 template <typename Indexable>
 detail::ApplyElementwise<ValidIndexableT<Indexable>, detail::AbsFctr> abs(
       const Indexable& i) {
-    linalgwrap_called_fallback();
-    return detail::ApplyElementwise<Indexable, detail::AbsFctr>{
-          i, detail::AbsFctr{}};
+  linalgwrap_called_fallback();
+  return detail::ApplyElementwise<Indexable, detail::AbsFctr>{i, detail::AbsFctr{}};
 }
 
 /** Return an indexable object which represents the elementwise complex
@@ -41,27 +40,24 @@ detail::ApplyElementwise<ValidIndexableT<Indexable>, detail::AbsFctr> abs(
 template <typename Indexable>
 detail::ApplyElementwise<ValidIndexableT<Indexable>, detail::ConjFctr> conj(
       const Indexable& i) {
-    linalgwrap_called_fallback();
-    return detail::ApplyElementwise<Indexable, detail::ConjFctr>{
-          i, detail::ConjFctr{}};
+  linalgwrap_called_fallback();
+  return detail::ApplyElementwise<Indexable, detail::ConjFctr>{i, detail::ConjFctr{}};
 }
 
 /** Return an indexable object which represents the elementwise square root */
 template <typename Indexable>
 detail::ApplyElementwise<ValidIndexableT<Indexable>, detail::SqrtFctr> sqrt(
       const Indexable& i) {
-    linalgwrap_called_fallback();
-    return detail::ApplyElementwise<Indexable, detail::SqrtFctr>{
-          i, detail::SqrtFctr{}};
+  linalgwrap_called_fallback();
+  return detail::ApplyElementwise<Indexable, detail::SqrtFctr>{i, detail::SqrtFctr{}};
 }
 
 /** Return an indexable object which represents the elementwise square */
 template <typename Indexable>
 detail::ApplyElementwise<ValidIndexableT<Indexable>, detail::SquareFctr> square(
       const Indexable& i) {
-    linalgwrap_called_fallback();
-    return detail::ApplyElementwise<Indexable, detail::SquareFctr>{
-          i, detail::SquareFctr{}};
+  linalgwrap_called_fallback();
+  return detail::ApplyElementwise<Indexable, detail::SquareFctr>{i, detail::SquareFctr{}};
 }
 
 }  // namespace linalgwrap

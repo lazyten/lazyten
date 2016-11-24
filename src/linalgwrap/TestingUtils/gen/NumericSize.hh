@@ -35,21 +35,20 @@ namespace gen {
  */
 template <unsigned int dim>
 rc::Gen<size_t> numeric_size() {
-    static_assert(dim > 0, "dimension has to be larger than 0");
+  static_assert(dim > 0, "dimension has to be larger than 0");
 
-    constexpr size_t max =
-          (dim == 1)
-                ? 80                                           // dim==1 -> 80
-                : ((dim == 2) ? 10                             // dim==2 -> 10
-                              : ((dim == 3) ? 4                // dim==3 -> 4
-                                            : ((dim == 4) ? 3  // dim==4 -> 3
-                                                          : 2  // else -> 2
-                                               )));
+  constexpr size_t max =
+        (dim == 1) ? 80                                           // dim==1 -> 80
+                   : ((dim == 2) ? 10                             // dim==2 -> 10
+                                 : ((dim == 3) ? 4                // dim==3 -> 4
+                                               : ((dim == 4) ? 3  // dim==4 -> 3
+                                                             : 2  // else -> 2
+                                                  )));
 
-    // rhs of inRange is exclusive
-    return rc::gen::inRange<size_t>(1u, max + 1);
-    // TODO this really should be 0,max+1
-    // return rc::gen::inRange<size_t>(0u, max + 1);
+  // rhs of inRange is exclusive
+  return rc::gen::inRange<size_t>(1u, max + 1);
+  // TODO this really should be 0,max+1
+  // return rc::gen::inRange<size_t>(0u, max + 1);
 }
 }  // namespace gen
 }  // namespace linalgwrap

@@ -28,47 +28,47 @@ namespace io {
  * and restore it upon destruction of the class.
  */
 class OstreamState {
-  public:
-    //! Construct from an ostream, taking its current state
-    OstreamState(std::ostream& o);
+ public:
+  //! Construct from an ostream, taking its current state
+  OstreamState(std::ostream& o);
 
-    //! Destruct class, set state back to the ostream.
-    ~OstreamState() { restore_to(m_o); }
+  //! Destruct class, set state back to the ostream.
+  ~OstreamState() { restore_to(m_o); }
 
-    //! Default copy constructor
-    OstreamState(const OstreamState&) = default;
+  //! Default copy constructor
+  OstreamState(const OstreamState&) = default;
 
-    //! Default move constructor
-    OstreamState(OstreamState&&) = default;
+  //! Default move constructor
+  OstreamState(OstreamState&&) = default;
 
-    //! Default copy assignment
-    OstreamState& operator=(const OstreamState&) = default;
+  //! Default copy assignment
+  OstreamState& operator=(const OstreamState&) = default;
 
-    //! Default move assignment
-    OstreamState& operator=(OstreamState&&) = default;
+  //! Default move assignment
+  OstreamState& operator=(OstreamState&&) = default;
 
-    /** Set original state to this ostream as well
-     *
-     *  \note This class automatically resets the state of the ostream passed
-     *  upon construction as soon as it is destructed.
-     **/
-    void restore_to(std::ostream& o) const;
+  /** Set original state to this ostream as well
+   *
+   *  \note This class automatically resets the state of the ostream passed
+   *  upon construction as soon as it is destructed.
+   **/
+  void restore_to(std::ostream& o) const;
 
-  private:
-    //! The ostream we manage
-    std::ostream& m_o;
+ private:
+  //! The ostream we manage
+  std::ostream& m_o;
 
-    //! The original format flags it had:
-    std::ios::fmtflags m_orig_flags;
+  //! The original format flags it had:
+  std::ios::fmtflags m_orig_flags;
 
-    //! The original stream width it had:
-    std::streamsize m_orig_width;
+  //! The original stream width it had:
+  std::streamsize m_orig_width;
 
-    //! The original precision it had:
-    std::streamsize m_orig_precision;
+  //! The original precision it had:
+  std::streamsize m_orig_precision;
 
-    //! The original fill character it had:
-    char m_orig_fill;
+  //! The original fill character it had:
+  char m_orig_fill;
 };
 
 //
@@ -83,10 +83,10 @@ inline OstreamState::OstreamState(std::ostream& o)
         m_orig_fill{o.fill()} {}
 
 inline void OstreamState::restore_to(std::ostream& o) const {
-    o.flags(m_orig_flags);
-    o.width(m_orig_width);
-    o.precision(m_orig_precision);
-    o.fill(m_orig_fill);
+  o.flags(m_orig_flags);
+  o.width(m_orig_width);
+  o.precision(m_orig_precision);
+  o.fill(m_orig_fill);
 }
 
 }  // namespace io

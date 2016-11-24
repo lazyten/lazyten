@@ -26,96 +26,94 @@
 namespace linalgwrap {
 namespace detail {
 struct PlusFctr {
-    template <typename T1, typename T2>
-    auto operator()(const T1& t1, const T2& t2) -> decltype(t1 + t2) {
-        return t1 + t2;
-    }
+  template <typename T1, typename T2>
+  auto operator()(const T1& t1, const T2& t2) -> decltype(t1 + t2) {
+    return t1 + t2;
+  }
 };
 
 struct MinusFctr {
-    template <typename T1, typename T2>
-    auto operator()(const T1& t1, const T2& t2) -> decltype(t1 - t2) {
-        return t1 - t2;
-    }
+  template <typename T1, typename T2>
+  auto operator()(const T1& t1, const T2& t2) -> decltype(t1 - t2) {
+    return t1 - t2;
+  }
 };
 
 struct MultipliesFctr {
-    template <typename T1, typename T2>
-    auto operator()(const T1& t1, const T2& t2) -> decltype(t1 * t2) {
-        return t1 * t2;
-    }
+  template <typename T1, typename T2>
+  auto operator()(const T1& t1, const T2& t2) -> decltype(t1 * t2) {
+    return t1 * t2;
+  }
 };
 
 struct DividesFctr {
-    template <typename T1, typename T2>
-    auto operator()(const T1& t1, const T2& t2) -> decltype(t1 / t2) {
-        return t1 / t2;
-    }
+  template <typename T1, typename T2>
+  auto operator()(const T1& t1, const T2& t2) -> decltype(t1 / t2) {
+    return t1 / t2;
+  }
 };
 
 struct NegateFctr {
-    template <typename T>
-    auto operator()(const T& t) -> decltype(-t) {
-        return t;
-    }
+  template <typename T>
+  auto operator()(const T& t) -> decltype(-t) {
+    return t;
+  }
 };
 
 template <typename S>
 struct ScaleByFctr {
-    S sfac;
-    ScaleByFctr(S sfac_) : sfac(sfac_) {}
+  S sfac;
+  ScaleByFctr(S sfac_) : sfac(sfac_) {}
 
-    template <typename T>
-    auto operator()(const T& t) -> decltype(sfac * t) {
-        return sfac * t;
-    }
+  template <typename T>
+  auto operator()(const T& t) -> decltype(sfac * t) {
+    return sfac * t;
+  }
 };
 
 template <typename S>
 struct DivideByFctr {
-    S sfac;
-    DivideByFctr(S sfac_) : sfac(sfac_) {}
+  S sfac;
+  DivideByFctr(S sfac_) : sfac(sfac_) {}
 
-    template <typename T>
-    auto operator()(const T& t) -> decltype(t / sfac) {
-        return t / sfac;
-    }
+  template <typename T>
+  auto operator()(const T& t) -> decltype(t / sfac) {
+    return t / sfac;
+  }
 };
 
 struct AbsFctr {
-    template <typename Scalar>
-    auto operator()(const Scalar& s) const -> decltype(std::abs(s)) {
-        return std::abs(s);
-    }
+  template <typename Scalar>
+  auto operator()(const Scalar& s) const -> decltype(std::abs(s)) {
+    return std::abs(s);
+  }
 };
 
 struct SqrtFctr {
-    template <typename Scalar>
-    auto operator()(const Scalar& s) const -> decltype(std::sqrt(s)) {
-        return std::sqrt(s);
-    }
+  template <typename Scalar>
+  auto operator()(const Scalar& s) const -> decltype(std::sqrt(s)) {
+    return std::sqrt(s);
+  }
 };
 
 struct SquareFctr {
-    template <typename Scalar>
-    auto operator()(const Scalar& s) const -> decltype(s * s) {
-        return s * s;
-    }
+  template <typename Scalar>
+  auto operator()(const Scalar& s) const -> decltype(s * s) {
+    return s * s;
+  }
 };
 
 struct ConjFctr {
-    template <typename Scalar>
-    auto operator()(const std::complex<Scalar>& s) const
-          -> decltype(std::conj(s)) {
-        return std::conj(s);
-    }
+  template <typename Scalar>
+  auto operator()(const std::complex<Scalar>& s) const -> decltype(std::conj(s)) {
+    return std::conj(s);
+  }
 
-    template <typename Scalar>
-    typename std::enable_if<!krims::IsComplexNumber<Scalar>::value,
-                            Scalar>::type
-    operator()(const Scalar& s) const {
-        return s;
-    }
+  template <typename Scalar>
+  typename std::enable_if<!krims::IsComplexNumber<Scalar>::value, Scalar>::type
+  operator()(const Scalar& s) const {
+    return s;
+  }
 };
 
 }  // namespace detail

@@ -81,9 +81,8 @@ namespace linalgwrap {
  */
 
 template <typename T>
-struct IsStoredVector : public std::integral_constant<
-                              bool, IsMutableMemoryVector<T>::value &&
-                                          std::is_base_of<Stored_i, T>::value> {
-};
+struct IsStoredVector
+      : public std::integral_constant<bool, IsMutableMemoryVector<T>::value &&
+                                                  std::is_base_of<Stored_i, T>::value> {};
 
 }  // namespace linalgwrap

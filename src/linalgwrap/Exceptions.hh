@@ -36,12 +36,10 @@ DefExceptionMsg(ExcMatrixNotSymmetric,
                 "was expected");
 
 /** A matrix which was expected to be dense, contained sparsity */
-DefExceptionMsg(
-      ExcMatrixNotDense,
-      "Encountered a non-dense matrix where a dense matrix was expected");
+DefExceptionMsg(ExcMatrixNotDense,
+                "Encountered a non-dense matrix where a dense matrix was expected");
 
 /** A matrix which was expected to be quadratic, was not */
-DefExceptionMsg(
-      ExcMatrixNotSquare,
-      "Encountered a non-square matrix where a square matrix was expected");
+DefExceptionMsg(ExcMatrixNotSquare,
+                "Encountered a non-square matrix where a square matrix was expected");
 }  // linalgwrap

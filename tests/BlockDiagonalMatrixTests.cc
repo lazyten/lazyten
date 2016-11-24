@@ -28,45 +28,45 @@ namespace tests {
 using namespace rc;
 
 TEST_CASE("BlockDiagonalMatrix class", "[BlockDiagonalMatrix]") {
-    typedef double scalar_type;
-    typedef SmallMatrix<scalar_type> stored_matrix_type;
-    typedef LazyMatrixWrapper<stored_matrix_type> lazy_matrix_type;
+  typedef double scalar_type;
+  typedef SmallMatrix<scalar_type> stored_matrix_type;
+  typedef LazyMatrixWrapper<stored_matrix_type> lazy_matrix_type;
 
-    SECTION("Simple function test") {
-        stored_matrix_type stored{{1.0, 2.0},   // first row
-                                  {3.0, 4.0}};  // second row
-        lazy_matrix_type lazy{stored_matrix_type(stored)};
+  SECTION("Simple function test") {
+    stored_matrix_type stored{{1.0, 2.0},   // first row
+                              {3.0, 4.0}};  // second row
+    lazy_matrix_type lazy{stored_matrix_type(stored)};
 
-        auto diag1 = make_block_diagonal(stored, stored);
-        auto diag2 = make_block_diagonal(std::move(lazy), std::move(stored));
+    auto diag1 = make_block_diagonal(stored, stored);
+    auto diag2 = make_block_diagonal(std::move(lazy), std::move(stored));
 
-        CHECK(diag1.n_rows() == 4u);
-        CHECK(diag2.n_rows() == 4u);
+    CHECK(diag1.n_rows() == 4u);
+    CHECK(diag2.n_rows() == 4u);
 
-        auto res = diag1 + diag2;
-        auto res2 = diag2 * diag1;
+    auto res = diag1 + diag2;
+    auto res2 = diag2 * diag1;
 
-        CHECK(res.n_rows() == 4u);
+    CHECK(res.n_rows() == 4u);
 
-        CHECK(diag1(0, 0) == 1.);
-        CHECK(diag1(0, 1) == 2.);
-        CHECK(diag1(2, 2) == 1.);
-        CHECK(diag1(2, 3) == 2.);
-        CHECK(diag1(1, 3) == 0.);
+    CHECK(diag1(0, 0) == 1.);
+    CHECK(diag1(0, 1) == 2.);
+    CHECK(diag1(2, 2) == 1.);
+    CHECK(diag1(2, 3) == 2.);
+    CHECK(diag1(1, 3) == 0.);
 
-        CHECK(diag2(0, 0) == 1.);
-        CHECK(diag2(0, 1) == 2.);
-        CHECK(diag2(2, 2) == 1.);
-        CHECK(diag2(2, 3) == 2.);
-        CHECK(diag2(1, 3) == 0.);
+    CHECK(diag2(0, 0) == 1.);
+    CHECK(diag2(0, 1) == 2.);
+    CHECK(diag2(2, 2) == 1.);
+    CHECK(diag2(2, 3) == 2.);
+    CHECK(diag2(1, 3) == 0.);
 
-        CHECK(res(2, 2) == 2.);
-        CHECK(res(0, 0) == 2.);
-        CHECK(res(1, 3) == 0.);
+    CHECK(res(2, 2) == 2.);
+    CHECK(res(0, 0) == 2.);
+    CHECK(res(1, 3) == 0.);
 
-        CHECK(res2(2, 2) == 7.);
-        CHECK(res2(2, 3) == 10.);
-    }
+    CHECK(res2(2, 2) == 7.);
+    CHECK(res2(2, 3) == 10.);
+  }
 }
 
 }  // tests

@@ -24,8 +24,8 @@ namespace linalgwrap {
 /** Struct which contains the keys used for setting the
  *  IterativeSolver control parameters */
 struct IterativeSolverKeys {
-    /** Maximum number of iterations. Type: size_t */
-    static const std::string max_iter;
+  /** Maximum number of iterations. Type: size_t */
+  static const std::string max_iter;
 };
 
 }  // namespace linalgwrap

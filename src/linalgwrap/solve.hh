@@ -15,8 +15,7 @@ static_assert(false, "We need armadillo for this at the moment.");
 
 namespace detail {
 template <bool cond>
-using ParameterMap_if =
-      typename std::enable_if<cond, krims::ParameterMap>::type;
+using ParameterMap_if = typename std::enable_if<cond, krims::ParameterMap>::type;
 }
 
 // TODO transpose solve?
@@ -32,54 +31,53 @@ using ParameterMap_if =
  * \throws      Subclass of SolverException in case there is an error.
  **/
 template <typename Matrix, typename Vector>
-void solve_hermitian(
-      const Matrix& A, MultiVector<Vector>& x, const MultiVector<Vector>& b,
-      const detail::ParameterMap_if<IsMatrix<Matrix>::value &&
-                                    IsMutableVector<Vector>::value>& map =
-            krims::ParameterMap()) {
-    assert_size(x.n_vectors(), b.n_vectors());
-    for (size_t i = 0; i < x.n_vectors(); ++i) {
-        solve_hermitian(A, x[i], b[i], map);
-    }
+void solve_hermitian(const Matrix& A, MultiVector<Vector>& x,
+                     const MultiVector<Vector>& b,
+                     const detail::ParameterMap_if<IsMatrix<Matrix>::value &&
+                                                   IsMutableVector<Vector>::value>& map =
+                           krims::ParameterMap()) {
+  assert_size(x.n_vectors(), b.n_vectors());
+  for (size_t i = 0; i < x.n_vectors(); ++i) {
+    solve_hermitian(A, x[i], b[i], map);
+  }
 }
 
 template <typename Matrix, typename Vector>
-void solve_hermitian(
-      const Matrix& A, Vector& x, const Vector& b,
-      const detail::ParameterMap_if<IsMatrix<Matrix>::value &&
-                                    IsMutableVector<Vector>::value>& map =
-            krims::ParameterMap()) {
+void solve_hermitian(const Matrix& A, Vector& x, const Vector& b,
+                     const detail::ParameterMap_if<IsMatrix<Matrix>::value &&
+                                                   IsMutableVector<Vector>::value>& map =
+                           krims::ParameterMap()) {
 
-    static_assert(std::is_same<typename Matrix::scalar_type,
-                               typename Vector::scalar_type>::value,
-                  "The scalar types need to agree.");
-    static_assert(std::is_same<typename Matrix::scalar_type, double>::value,
-                  "This simple implementation only works for double");
+  static_assert(
+        std::is_same<typename Matrix::scalar_type, typename Vector::scalar_type>::value,
+        "The scalar types need to agree.");
+  static_assert(std::is_same<typename Matrix::scalar_type, double>::value,
+                "This simple implementation only works for double");
 
-    assert_dbg(A.is_symmetric(), ExcMatrixNotSymmetric());
-    assert_size(A.n_rows(), b.size());
-    assert_size(A.n_cols(), x.size());
+  assert_dbg(A.is_symmetric(), ExcMatrixNotSymmetric());
+  assert_size(A.n_rows(), b.size());
+  assert_size(A.n_cols(), x.size());
 
-    // Assert some types:
-    static_assert(std::is_same<typename StoredTypeOf<Matrix>::type,
-                               ArmadilloMatrix<double>>::value,
-                  "This hack only works for armadillo matrices");
+  // Assert some types:
+  static_assert(
+        std::is_same<typename StoredTypeOf<Matrix>::type, ArmadilloMatrix<double>>::value,
+        "This hack only works for armadillo matrices");
 
-    static_assert(IsStoredVector<Vector>::value,
-                  "Currently we assume that the Vector is a stored vector");
+  static_assert(IsStoredVector<Vector>::value,
+                "Currently we assume that the Vector is a stored vector");
 
-    // Make arma matrices
-    const arma::Mat<double>& m_arma =
-          as_stored(A).data();  //.t() is skipped since m is symmetric
-    arma::Col<double> b_arma(b.memptr(), b.size());
-    arma::Col<double> x_arma(x.memptr(), x.size(), false);
+  // Make arma matrices
+  const arma::Mat<double>& m_arma =
+        as_stored(A).data();  //.t() is skipped since m is symmetric
+  arma::Col<double> b_arma(b.memptr(), b.size());
+  arma::Col<double> x_arma(x.memptr(), x.size(), false);
 
-    // Solve the linear system:
-    bool result = arma::solve(x_arma, m_arma, b_arma);
-    assert_throw(result, SolverException());
+  // Solve the linear system:
+  bool result = arma::solve(x_arma, m_arma, b_arma);
+  assert_throw(result, SolverException());
 
-    // Fake-use the map.
-    (void)map;
+  // Fake-use the map.
+  (void)map;
 }
 //@}
 
@@ -98,15 +96,14 @@ void solve_hermitian(
  * \throws      Subclass of SolverException in case there is an error.
  **/
 template <typename Matrix, typename Vector>
-void solve(const Matrix& A, MultiVector<Vector>& x,
-           const MultiVector<Vector>& b,
+void solve(const Matrix& A, MultiVector<Vector>& x, const MultiVector<Vector>& b,
            const detail::ParameterMap_if<IsMatrix<Matrix>::value &&
                                          IsMutableVector<Vector>::value>& map =
                  krims::ParameterMap()) {
-    assert_size(x.n_vectors(), b.n_vectors());
-    for (size_t i = 0; i < x.n_vectors(); ++i) {
-        solve(A, x[i], b[i], map);
-    }
+  assert_size(x.n_vectors(), b.n_vectors());
+  for (size_t i = 0; i < x.n_vectors(); ++i) {
+    solve(A, x[i], b[i], map);
+  }
 }
 
 template <typename Matrix, typename Vector>
@@ -115,11 +112,11 @@ void solve(const Matrix& A, Vector& x, const Vector& b,
                                          IsMutableVector<Vector>::value>& map =
                  krims::ParameterMap()) {
 
-    assert_dbg(false, krims::ExcNotImplemented());
-    (void)A;
-    (void)x;
-    (void)b;
-    (void)map;
+  assert_dbg(false, krims::ExcNotImplemented());
+  (void)A;
+  (void)x;
+  (void)b;
+  (void)map;
 }
 //@}
 

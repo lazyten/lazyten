@@ -27,30 +27,28 @@ namespace rc {
 
 template <typename Matrix>
 struct FixedSizeMatrix {
-    typedef typename Matrix::size_type size_type;
-    static Gen<Matrix> fixed_size(size_type n_rows, size_type n_cols) {
-        return linalgwrap::gen::numeric_tensor<Matrix>(n_rows, n_cols);
-    }
+  typedef typename Matrix::size_type size_type;
+  static Gen<Matrix> fixed_size(size_type n_rows, size_type n_cols) {
+    return linalgwrap::gen::numeric_tensor<Matrix>(n_rows, n_cols);
+  }
 };
 
 template <typename StoredMatrix>
 struct FixedSizeMatrix<::linalgwrap::LazyMatrixWrapper<StoredMatrix>> {
-    typedef typename ::linalgwrap::LazyMatrixWrapper<StoredMatrix>
-          generated_type;
-    typedef typename generated_type::size_type size_type;
+  typedef typename ::linalgwrap::LazyMatrixWrapper<StoredMatrix> generated_type;
+  typedef typename generated_type::size_type size_type;
 
-    static Gen<generated_type> fixed_size(size_type n_rows, size_type n_cols) {
-        return gen::map(
-              linalgwrap::gen::numeric_tensor<StoredMatrix>(n_rows, n_cols),
-              [](StoredMatrix m) { return generated_type(std::move(m)); });
-    }
+  static Gen<generated_type> fixed_size(size_type n_rows, size_type n_cols) {
+    return gen::map(linalgwrap::gen::numeric_tensor<StoredMatrix>(n_rows, n_cols),
+                    [](StoredMatrix m) { return generated_type(std::move(m)); });
+  }
 };
 
 namespace gen {
 template <typename Matrix>
 Gen<Matrix> fixed_size(typename Matrix::size_type n_rows,
                        typename Matrix::size_type n_cols) {
-    return FixedSizeMatrix<Matrix>::fixed_size(n_rows, n_cols);
+  return FixedSizeMatrix<Matrix>::fixed_size(n_rows, n_cols);
 }
 
 }  // namespace gen

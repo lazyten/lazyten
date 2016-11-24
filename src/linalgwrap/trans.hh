@@ -26,37 +26,36 @@ namespace linalgwrap {
 //
 //@{
 /** Transpose a matrix: Return a TransposeProxy object, properly initialised */
-template <typename Matrix,
-          typename = krims::enable_if_t<
-                IsMatrix<typename std::remove_reference<Matrix>::type>::value>>
+template <typename Matrix, typename = krims::enable_if_t<IsMatrix<
+                                 typename std::remove_reference<Matrix>::type>::value>>
 TransposeProxy<typename std::remove_reference<Matrix>::type> trans(Matrix&& m) {
-    return TransposeProxy<typename std::remove_reference<Matrix>::type>(
-          std::forward<Matrix>(m));
+  return TransposeProxy<typename std::remove_reference<Matrix>::type>(
+        std::forward<Matrix>(m));
 }
 
 template <typename Matrix, krims::enable_if_t<IsMatrix<Matrix>::value>...>
 Matrix trans(TransposeProxy<Matrix>&& mt) {
-    if (mt.owns_inner_matrix()) {
-        return Matrix(std::move(mt.inner_matrix()));
-    }
+  if (mt.owns_inner_matrix()) {
+    return Matrix(std::move(mt.inner_matrix()));
+  }
 
-    // TODO This is not yet implemented ... we need matrix views for that
-    assert_dbg(false, krims::ExcNotImplemented());
-    return Matrix(mt.inner_matrix());
+  // TODO This is not yet implemented ... we need matrix views for that
+  assert_dbg(false, krims::ExcNotImplemented());
+  return Matrix(mt.inner_matrix());
 }
 
 template <typename Matrix, krims::enable_if_t<IsMatrix<Matrix>::value>...>
 Matrix& trans(TransposeProxy<Matrix>& mt) {
-    // TODO This is not yet implemented ... we need matrix views for that
-    assert_dbg(false, krims::ExcNotImplemented());
-    return mt.inner_matrix();
+  // TODO This is not yet implemented ... we need matrix views for that
+  assert_dbg(false, krims::ExcNotImplemented());
+  return mt.inner_matrix();
 }
 
 template <typename Matrix, krims::enable_if_t<IsMatrix<Matrix>::value>...>
 const Matrix& trans(const TransposeProxy<Matrix>& mt) {
-    // TODO This is not yet implemented ... we need matrix views for that
-    assert_dbg(false, krims::ExcNotImplemented());
-    return mt.inner_matrix();
+  // TODO This is not yet implemented ... we need matrix views for that
+  assert_dbg(false, krims::ExcNotImplemented());
+  return mt.inner_matrix();
 }
 //@}
 
@@ -70,24 +69,24 @@ template <typename Matrix,
                 IsMatrix<typename std::remove_reference<Matrix>::type>::value &&
                 !HasComplexScalar<Matrix>::value>>
 auto conjtrans(Matrix&& m) -> decltype(trans(std::forward<Matrix>(m))) {
-    return trans(std::forward<Matrix>(m));
+  return trans(std::forward<Matrix>(m));
 }
 
 /** Take the conjugate transpose (Hermitian conjugate): Specialisation
  * for scalar data types */
-template <typename Matrix,
-          krims::enable_if_t<
-                IsMatrix<typename std::remove_reference<Matrix>::type>::value &&
-                      HasComplexScalar<Matrix>::value,
-                int> = 0>
+template <
+      typename Matrix,
+      krims::enable_if_t<IsMatrix<typename std::remove_reference<Matrix>::type>::value &&
+                               HasComplexScalar<Matrix>::value,
+                         int> = 0>
 auto conjtrans(Matrix&& m) -> decltype(trans(std::forward<Matrix>(m))) {
-    static_assert(IsMatrix<Matrix>::value, "Matrix should be a matrix.");
-    // TODO change once we have tested Transposed::ConjTrans on most objects
-    // Also have a ConjugateTransposeProxy class
-    static_assert(false && !HasComplexScalar<Matrix>::value,
-                  "conjtrans is currently only implemented for real scalar "
-                  "types.");
-    return trans(std::forward<Matrix>(m));
+  static_assert(IsMatrix<Matrix>::value, "Matrix should be a matrix.");
+  // TODO change once we have tested Transposed::ConjTrans on most objects
+  // Also have a ConjugateTransposeProxy class
+  static_assert(false && !HasComplexScalar<Matrix>::value,
+                "conjtrans is currently only implemented for real scalar "
+                "types.");
+  return trans(std::forward<Matrix>(m));
 }
 
 }  // namespace linalgwrap

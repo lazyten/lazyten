@@ -33,26 +33,26 @@ namespace detail {
 /** Default implementation: Not allowed */
 template <typename Value, typename Enable = void>
 struct Numeric {
-    static_assert(!std::is_same<Enable, void>::value,
-                  "Numeric is only available for floating point types.");
+  static_assert(!std::is_same<Enable, void>::value,
+                "Numeric is only available for floating point types.");
 };
 
 /** Construct a numeric stored vector */
 template <typename Scalar>
-struct Numeric<Scalar, typename std::enable_if<
-                             std::is_floating_point<Scalar>::value>::type> {
-    typedef Scalar scalar_type;
-    static rc::Gen<Scalar> numeric();
+struct Numeric<Scalar,
+               typename std::enable_if<std::is_floating_point<Scalar>::value>::type> {
+  typedef Scalar scalar_type;
+  static rc::Gen<Scalar> numeric();
 };
 
 /** Construct a numeric complex value */
 template <typename Real>
 struct Numeric<std::complex<Real>> {
-    typedef std::complex<Real> scalar_type;
-    static rc::Gen<scalar_type> numeric() {
-        return rc::gen::construct<scalar_type>(Numeric<Real>::numeric(),
-                                               Numeric<Real>::numeric());
-    }
+  typedef std::complex<Real> scalar_type;
+  static rc::Gen<scalar_type> numeric() {
+    return rc::gen::construct<scalar_type>(Numeric<Real>::numeric(),
+                                           Numeric<Real>::numeric());
+  }
 };
 }  // namespace detail
 
@@ -65,7 +65,7 @@ struct Numeric<std::complex<Real>> {
  */
 template <typename Value>
 rc::Gen<Value> numeric() {
-    return detail::Numeric<Value>::numeric();
+  return detail::Numeric<Value>::numeric();
 }
 
 //
@@ -74,32 +74,32 @@ rc::Gen<Value> numeric() {
 
 template <typename Scalar>
 rc::Gen<Scalar> detail::Numeric<
-      Scalar, typename std::enable_if<
-                    std::is_floating_point<Scalar>::value>::type>::numeric() {
-    // TODO better do this in terms of 2-based numbers
-    //      and convert them to decimal later.
+      Scalar,
+      typename std::enable_if<std::is_floating_point<Scalar>::value>::type>::numeric() {
+  // TODO better do this in terms of 2-based numbers
+  //      and convert them to decimal later.
 
-    // Define a lambda that returns a new matrix element:
-    auto gen_element = [=] {
-        typedef long gen_type;
+  // Define a lambda that returns a new matrix element:
+  auto gen_element = [=] {
+    typedef long gen_type;
 
-        // Generate an arbitrary value
-        const gen_type gen_value = *rc::gen::arbitrary<gen_type>();
+    // Generate an arbitrary value
+    const gen_type gen_value = *rc::gen::arbitrary<gen_type>();
 
-        // Bring it to scale between -1 and 1:
-        const scalar_type ratio = static_cast<scalar_type>(gen_value) /
-                                  std::numeric_limits<gen_type>::max();
+    // Bring it to scale between -1 and 1:
+    const scalar_type ratio =
+          static_cast<scalar_type>(gen_value) / std::numeric_limits<gen_type>::max();
 
-        // Compute value and return it if large enough, else 0.
-        const scalar_type value = ratio * max_value;
-        if (std::fabs(value) < min_value) {
-            return static_cast<scalar_type>(0.);
-        } else {
-            return value;
-        }
-    };
+    // Compute value and return it if large enough, else 0.
+    const scalar_type value = ratio * max_value;
+    if (std::fabs(value) < min_value) {
+      return static_cast<scalar_type>(0.);
+    } else {
+      return value;
+    }
+  };
 
-    return rc::gen::exec(gen_element);
+  return rc::gen::exec(gen_element);
 }
 
 }  // gen

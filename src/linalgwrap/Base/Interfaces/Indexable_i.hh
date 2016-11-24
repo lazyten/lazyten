@@ -47,50 +47,50 @@ namespace linalgwrap {
  */
 template <typename Scalar>
 class Indexable_i : public krims::Subscribable {
-  public:
-    /** The scalar type to use. All elements are stored in terms of the scalar
-     * type */
-    typedef Scalar scalar_type;
+ public:
+  /** The scalar type to use. All elements are stored in terms of the scalar
+   * type */
+  typedef Scalar scalar_type;
 
-    /** The real type to use. All norms and similar are returned in terms of the
-     * real type */
-    typedef typename krims::RealTypeOf<Scalar>::type real_type;
+  /** The real type to use. All norms and similar are returned in terms of the
+   * real type */
+  typedef typename krims::RealTypeOf<Scalar>::type real_type;
 
-    /** The size type to use. All counting and indexing is done in terms of the
-     * size type */
-    typedef size_t size_type;
+  /** The size type to use. All counting and indexing is done in terms of the
+   * size type */
+  typedef size_t size_type;
 
-    // /** The shape type to use. The shape of the indexable object (extent in
-    // the
-    //  * dimensions) is returned in terms of this type and indexing using
-    //  operator()
-    //  *  uses this type as well. */
-    // typedef const Index<R> shape_type;
-    //
-    // /** The rank of this indexable */
-    // constexpr unsigned int rank() { return R; }
-    //
-    // /** \brief Return the shape of the indexable memory */
-    // virtual shape_type shape() const = 0;
-    //
-    // /** \brief return an element of the indexable memory */
-    // virtual scalar_type operator()(shape_type i) const = 0;
+  // /** The shape type to use. The shape of the indexable object (extent in
+  // the
+  //  * dimensions) is returned in terms of this type and indexing using
+  //  operator()
+  //  *  uses this type as well. */
+  // typedef const Index<R> shape_type;
+  //
+  // /** The rank of this indexable */
+  // constexpr unsigned int rank() { return R; }
+  //
+  // /** \brief Return the shape of the indexable memory */
+  // virtual shape_type shape() const = 0;
+  //
+  // /** \brief return an element of the indexable memory */
+  // virtual scalar_type operator()(shape_type i) const = 0;
 
-    /** \brief Return the number of elements of the indexable memory */
-    virtual size_type n_elem() const = 0;
+  /** \brief Return the number of elements of the indexable memory */
+  virtual size_type n_elem() const = 0;
 
-    /** \brief return an element of the indexable memory */
-    virtual scalar_type operator[](size_type i) const = 0;
+  /** \brief return an element of the indexable memory */
+  virtual scalar_type operator[](size_type i) const = 0;
 
-    /** \brief Default constructors and assignment */
-    //@{
-    Indexable_i() = default;
-    virtual ~Indexable_i() = default;
-    Indexable_i(const Indexable_i&) = default;
-    Indexable_i(Indexable_i&&) = default;
-    Indexable_i& operator=(const Indexable_i&) = default;
-    Indexable_i& operator=(Indexable_i&&) = default;
-    //@}
+  /** \brief Default constructors and assignment */
+  //@{
+  Indexable_i() = default;
+  virtual ~Indexable_i() = default;
+  Indexable_i(const Indexable_i&) = default;
+  Indexable_i(Indexable_i&&) = default;
+  Indexable_i& operator=(const Indexable_i&) = default;
+  Indexable_i& operator=(Indexable_i&&) = default;
+  //@}
 };
 
 //@{
@@ -111,8 +111,7 @@ struct IsIndexable<T, krims::VoidType<typename T::scalar_type>>
 /** Type alias to obtain the scalar type of a valid Indexable object */
 template <typename T>
 using ValidIndexableScalarT =
-      typename std::enable_if<IsIndexable<T>::value,
-                              typename T::scalar_type>::type;
+      typename std::enable_if<IsIndexable<T>::value, typename T::scalar_type>::type;
 
 /** Type alias to assert that the index type is valid */
 template <typename T>
@@ -126,21 +125,21 @@ using ValidIndexableT = typename std::enable_if<IsIndexable<T>::value, T>::type;
  *  */
 template <typename Scalar>
 std::ostream& operator<<(std::ostream& o, const Indexable_i<Scalar>& ible) {
-    for (size_t i = 0; i < ible.n_elem(); ++i) {
-        o << ible[i] << " ";
-    }
+  for (size_t i = 0; i < ible.n_elem(); ++i) {
+    o << ible[i] << " ";
+  }
 
-    // TODO extend
-    // assert_dbg(false, krims::ExcNotImplemented());
-    // io::MatrixPrinter().print(m, o);
-    return o;
+  // TODO extend
+  // assert_dbg(false, krims::ExcNotImplemented());
+  // io::MatrixPrinter().print(m, o);
+  return o;
 }
 
 /** Convert an indexable with only one element into this scalar element */
 template <typename Scalar>
 Scalar as_scalar(const Indexable_i<Scalar>& i) {
-    assert_size(i.n_elem(), 1);
-    return i[0];
+  assert_size(i.n_elem(), 1);
+  return i[0];
 }
 
 }  // namespace linalgwrap

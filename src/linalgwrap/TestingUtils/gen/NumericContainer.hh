@@ -30,8 +30,7 @@ namespace gen {
  */
 template <typename Container>
 rc::Gen<Container> numeric_container(size_t count) {
-    return rc::gen::container<Container>(
-          count, numeric<typename Container::value_type>());
+  return rc::gen::container<Container>(count, numeric<typename Container::value_type>());
 }
 
 /** \brief Generator for a container filled with numeric values
@@ -41,8 +40,7 @@ rc::Gen<Container> numeric_container(size_t count) {
  */
 template <typename Container>
 rc::Gen<Container> numeric_container() {
-    return rc::gen::exec(
-          [] { return *numeric_container<Container>(*numeric_size<1>()); });
+  return rc::gen::exec([] { return *numeric_container<Container>(*numeric_size<1>()); });
 }
 }  // gen
 }  // linalgwrap

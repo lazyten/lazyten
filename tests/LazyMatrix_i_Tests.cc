@@ -31,71 +31,69 @@ namespace lazymatrix_i_tests {
 
 template <typename StoredMatrix>
 class SimpleLazyMatrix : public LazyMatrix_i<StoredMatrix> {
-  public:
-    typedef LazyMatrix_i<StoredMatrix> base_type;
-    typedef typename base_type::stored_matrix_type stored_matrix_type;
-    typedef typename base_type::size_type size_type;
-    typedef typename base_type::scalar_type scalar_type;
-    typedef typename base_type::lazy_matrix_expression_ptr_type
-          lazy_matrix_expression_ptr_type;
+ public:
+  typedef LazyMatrix_i<StoredMatrix> base_type;
+  typedef typename base_type::stored_matrix_type stored_matrix_type;
+  typedef typename base_type::size_type size_type;
+  typedef typename base_type::scalar_type scalar_type;
+  typedef typename base_type::lazy_matrix_expression_ptr_type
+        lazy_matrix_expression_ptr_type;
 
-    SimpleLazyMatrix(stored_matrix_type m) : m_stored{m} {}
+  SimpleLazyMatrix(stored_matrix_type m) : m_stored{m} {}
 
-    // Also test the transpose stuff
-    bool has_transpose_operation_mode() const override { return true; }
+  // Also test the transpose stuff
+  bool has_transpose_operation_mode() const override { return true; }
 
-    size_type n_rows() const override { return m_stored.n_rows(); }
-    size_type n_cols() const override { return m_stored.n_cols(); }
-    scalar_type operator()(size_type i, size_type j) const override {
-        return m_stored(i, j);
-    }
+  size_type n_rows() const override { return m_stored.n_rows(); }
+  size_type n_cols() const override { return m_stored.n_cols(); }
+  scalar_type operator()(size_type i, size_type j) const override {
+    return m_stored(i, j);
+  }
 
-    lazy_matrix_expression_ptr_type clone() const override {
-        return lazy_matrix_expression_ptr_type(new SimpleLazyMatrix(*this));
-    }
+  lazy_matrix_expression_ptr_type clone() const override {
+    return lazy_matrix_expression_ptr_type(new SimpleLazyMatrix(*this));
+  }
 
-  private:
-    stored_matrix_type m_stored;
+ private:
+  stored_matrix_type m_stored;
 };
 }
 
 TEST_CASE("LazyMatrix_i abstract class", "[LazyMatrix_i]") {
-    using namespace lazymatrix_i_tests;
-    // Test constructor
-    // Test swapping
+  using namespace lazymatrix_i_tests;
+  // Test constructor
+  // Test swapping
 
-    typedef double scalar_type;
-    typedef SmallMatrix<scalar_type> stored_matrix_type;
-    typedef SimpleLazyMatrix<stored_matrix_type> lazy_matrix_type;
-    typedef typename stored_matrix_type::size_type size_type;
+  typedef double scalar_type;
+  typedef SmallMatrix<scalar_type> stored_matrix_type;
+  typedef SimpleLazyMatrix<stored_matrix_type> lazy_matrix_type;
+  typedef typename stored_matrix_type::size_type size_type;
 
-    // Generator for the args
-    auto args_generator = [] {
-        stored_matrix_type m =
-              *gen::arbitrary<stored_matrix_type>().as("Inner matrix");
-        // TODO remove to test empty matrix case.
-        RC_PRE(m.n_cols() > size_type{0} && m.n_rows() > size_type{0});
-        return m;
-    };
+  // Generator for the args
+  auto args_generator = [] {
+    stored_matrix_type m = *gen::arbitrary<stored_matrix_type>().as("Inner matrix");
+    // TODO remove to test empty matrix case.
+    RC_PRE(m.n_cols() > size_type{0} && m.n_rows() > size_type{0});
+    return m;
+  };
 
-    // Generator for the model.
-    auto model_generator = [](stored_matrix_type m) { return m; };
+  // Generator for the model.
+  auto model_generator = [](stored_matrix_type m) { return m; };
 
-    // Generator for the sut
-    auto lazy_generator = [](stored_matrix_type m) {
-        lazy_matrix_type wrap{m};
-        return wrap;
-    };
+  // Generator for the sut
+  auto lazy_generator = [](stored_matrix_type m) {
+    lazy_matrix_type wrap{m};
+    return wrap;
+  };
 
-    SECTION("Default lazy matrix tests") {
-        typedef lazy_matrix_tests::TestingLibrary<lazy_matrix_type,
-                                                  decltype(args_generator())>
-              testlib;
+  SECTION("Default lazy matrix tests") {
+    typedef lazy_matrix_tests::TestingLibrary<lazy_matrix_type,
+                                              decltype(args_generator())>
+          testlib;
 
-        testlib{args_generator, model_generator, lazy_generator,
-                "LazyMatrix_i: "}
-              .run_checks();
-    }
+    testlib{args_generator, model_generator, lazy_generator, "LazyMatrix_i: "}
+          .run_checks();
+  }
 }
 
 }  // tests

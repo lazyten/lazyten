@@ -34,7 +34,7 @@ namespace gen {
  */
 template <typename Value>
 rc::Gen<Value> numeric_around(Value v) {
-    return rc::gen::map(gen::numeric<Value>(), [v](Value x) { return x + v; });
+  return rc::gen::map(gen::numeric<Value>(), [v](Value x) { return x + v; });
 }
 
 }  // gen

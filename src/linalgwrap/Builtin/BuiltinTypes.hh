@@ -24,12 +24,12 @@ template <typename Scalar>
 class BuiltinVector;
 
 struct BuiltinTypes {
-    template <typename Scalar>
-    using vector = BuiltinVector<Scalar>;
+  template <typename Scalar>
+  using vector = BuiltinVector<Scalar>;
 
-    // TODO there is no builtin matrix yet.
-    template <typename Scalar>
-    using matrix = void;
+  // TODO there is no builtin matrix yet.
+  template <typename Scalar>
+  using matrix = void;
 };
 
 }  // namespace linalgwrap

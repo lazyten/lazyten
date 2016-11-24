@@ -27,9 +27,9 @@ namespace linalgwrap {
 /** Compute the sum of all values of the indexable object */
 template <typename Indexable>
 ValidIndexableScalarT<Indexable> accumulate(const Indexable& i) {
-    linalgwrap_called_fallback();
-    typedef ValidIndexableScalarT<Indexable> scalar_type;
-    return std::accumulate(i.begin(), i.end(), Constants<scalar_type>::zero);
+  linalgwrap_called_fallback();
+  typedef ValidIndexableScalarT<Indexable> scalar_type;
+  return std::accumulate(i.begin(), i.end(), Constants<scalar_type>::zero);
 }
 
 }  // namespace linalgwrap

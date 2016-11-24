@@ -21,13 +21,13 @@
 namespace linalgwrap {
 
 void SolverStateBase::fail(std::string reason) {
-    m_failed = true;
-    m_fail_reason = reason;
+  m_failed = true;
+  m_fail_reason = reason;
 }
 
 void SolverStateBase::clear_failed() {
-    m_failed = false;
-    m_fail_reason = "";
+  m_failed = false;
+  m_fail_reason = "";
 }
 
 }  // namespace linalgwrap

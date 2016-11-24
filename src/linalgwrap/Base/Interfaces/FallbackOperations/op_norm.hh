@@ -33,32 +33,32 @@ namespace linalgwrap {
 template <typename Vector,
           typename std::enable_if<IsVector<Vector>::value, int>::type = 0>
 typename Vector::real_type norm_l1(const Vector& v) {
-    linalgwrap_called_fallback();
-    return accumulate(abs(v));
+  linalgwrap_called_fallback();
+  return accumulate(abs(v));
 }
 
 /** Calculate the linf norm of the vector (abs. largest element) */
 template <typename Vector,
           typename std::enable_if<IsVector<Vector>::value, int>::type = 0>
 typename Vector::real_type norm_linf(const Vector& v) {
-    linalgwrap_called_fallback();
-    return max(abs(v));
+  linalgwrap_called_fallback();
+  return max(abs(v));
 }
 
 /** Calculate the l2 norm squared of the vector. */
 template <typename Vector,
           typename std::enable_if<IsVector<Vector>::value, int>::type = 0>
 typename Vector::real_type norm_l2_squared(const Vector& v) {
-    linalgwrap_called_fallback();
-    return std::real(cdot(v, v));
+  linalgwrap_called_fallback();
+  return std::real(cdot(v, v));
 }
 
 /** Calculate the l2 norm of the vector */
 template <typename Vector,
           typename std::enable_if<IsVector<Vector>::value, int>::type = 0>
 typename Vector::real_type norm_l2(const Vector& v) {
-    linalgwrap_called_fallback();
-    return std::sqrt(norm_l2_squared(v));
+  linalgwrap_called_fallback();
+  return std::sqrt(norm_l2_squared(v));
 }
 ///@}
 

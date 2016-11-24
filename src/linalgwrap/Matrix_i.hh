@@ -54,98 +54,96 @@ class MatrixIteratorDefaultCore;
  * */
 template <typename Scalar>
 class Matrix_i : public Indexable_i<Scalar> {
-  public:
-    typedef Indexable_i<Scalar> base_type;
-    typedef typename base_type::size_type size_type;
-    typedef typename base_type::scalar_type scalar_type;
-    typedef typename base_type::real_type real_type;
+ public:
+  typedef Indexable_i<Scalar> base_type;
+  typedef typename base_type::size_type size_type;
+  typedef typename base_type::scalar_type scalar_type;
+  typedef typename base_type::real_type real_type;
 
-    //! The iterator type (a const iterator)
-    typedef DefaultMatrixConstIterator<Matrix_i<Scalar>> iterator;
+  //! The iterator type (a const iterator)
+  typedef DefaultMatrixConstIterator<Matrix_i<Scalar>> iterator;
 
-    //! The const iterator type
-    typedef DefaultMatrixConstIterator<Matrix_i<Scalar>> const_iterator;
+  //! The const iterator type
+  typedef DefaultMatrixConstIterator<Matrix_i<Scalar>> const_iterator;
 
-    /** \name Matrix constructor, destructor and assignment */
-    ///@{
-    virtual ~Matrix_i() = default;
-    Matrix_i() = default;
-    Matrix_i(const Matrix_i&) = default;
-    Matrix_i(Matrix_i&&) = default;
-    Matrix_i& operator=(const Matrix_i&) = default;
-    Matrix_i& operator=(Matrix_i&&) = default;
-    ///@}
+  /** \name Matrix constructor, destructor and assignment */
+  ///@{
+  virtual ~Matrix_i() = default;
+  Matrix_i() = default;
+  Matrix_i(const Matrix_i&) = default;
+  Matrix_i(Matrix_i&&) = default;
+  Matrix_i& operator=(const Matrix_i&) = default;
+  Matrix_i& operator=(Matrix_i&&) = default;
+  ///@}
 
-    /** \name Matrix properties
-     *        Access to properties common to all matrices
-     */
-    ///@{
-    /** \brief Number of rows of the matrix */
-    virtual size_type n_rows() const = 0;
+  /** \name Matrix properties
+   *        Access to properties common to all matrices
+   */
+  ///@{
+  /** \brief Number of rows of the matrix */
+  virtual size_type n_rows() const = 0;
 
-    /** \brief Number of columns of the matrix */
-    virtual size_type n_cols() const = 0;
+  /** \brief Number of columns of the matrix */
+  virtual size_type n_cols() const = 0;
 
-    /** \brief Return the number of elements of the matrix */
-    virtual size_type n_elem() const override { return n_rows() * n_cols(); }
-    ///@}
+  /** \brief Return the number of elements of the matrix */
+  virtual size_type n_elem() const override { return n_rows() * n_cols(); }
+  ///@}
 
-    /** \name Data access
-     *        Access to matrix data
-     */
-    ///@{
-    /** \brief return an element of the matrix    */
-    virtual scalar_type operator()(size_type row, size_type col) const = 0;
+  /** \name Data access
+   *        Access to matrix data
+   */
+  ///@{
+  /** \brief return an element of the matrix    */
+  virtual scalar_type operator()(size_type row, size_type col) const = 0;
 
-    /** \brief return an element of the vectorised matrix object
-     *
-     * Access the element in row-major ordering (i.e. the matrix is
-     * traversed row by row)
-     */
-    virtual scalar_type operator[](size_type i) const override;
-    ///@}
+  /** \brief return an element of the vectorised matrix object
+   *
+   * Access the element in row-major ordering (i.e. the matrix is
+   * traversed row by row)
+   */
+  virtual scalar_type operator[](size_type i) const override;
+  ///@}
 
-    /** \name Iterators
-     */
-    ///@{
-    /** Return an iterator to the beginning */
-    iterator begin() { return iterator(*this, {0, 0}); }
+  /** \name Iterators
+   */
+  ///@{
+  /** Return an iterator to the beginning */
+  iterator begin() { return iterator(*this, {0, 0}); }
 
-    /** Return a const_iterator to the beginning */
-    const_iterator begin() const { return cbegin(); }
+  /** Return a const_iterator to the beginning */
+  const_iterator begin() const { return cbegin(); }
 
-    /** Return a const_iterator to the beginning */
-    const_iterator cbegin() const { return const_iterator(*this, {0, 0}); }
+  /** Return a const_iterator to the beginning */
+  const_iterator cbegin() const { return const_iterator(*this, {0, 0}); }
 
-    /** Return an iterator to the end */
-    iterator end() { return iterator(*this); }
+  /** Return an iterator to the end */
+  iterator end() { return iterator(*this); }
 
-    /** Return a const_iterator to the end */
-    const_iterator end() const { return cend(); }
+  /** Return a const_iterator to the end */
+  const_iterator end() const { return cend(); }
 
-    /** Return a const_iterator to the end */
-    const_iterator cend() const { return const_iterator(*this); }
-    ///@}
+  /** Return a const_iterator to the end */
+  const_iterator cend() const { return const_iterator(*this); }
+  ///@}
 
-    /** \name Check for matrix properties
-     */
-    ///@{
-    /** \brief Check whether the matrix is symmetric
-     *
-     * Loops over all elements and check whether the difference
-     * between m(i,j) and m(j,i) is less than the tolerance given
-     * */
-    bool is_symmetric(
-          real_type tolerance = Constants<real_type>::default_tolerance) const;
+  /** \name Check for matrix properties
+   */
+  ///@{
+  /** \brief Check whether the matrix is symmetric
+   *
+   * Loops over all elements and check whether the difference
+   * between m(i,j) and m(j,i) is less than the tolerance given
+   * */
+  bool is_symmetric(real_type tolerance = Constants<real_type>::default_tolerance) const;
 
-    /** \brief Check whether the matrix is Hermitian
-     *
-     * Loops over all elements and check whether the difference
-     * between conj(m(i,j)) and m(j,i) is less than the tolerance given
-     * */
-    bool is_hermitian(
-          real_type tolerance = Constants<real_type>::default_tolerance) const;
-    ///@}
+  /** \brief Check whether the matrix is Hermitian
+   *
+   * Loops over all elements and check whether the difference
+   * between conj(m(i,j)) and m(j,i) is less than the tolerance given
+   * */
+  bool is_hermitian(real_type tolerance = Constants<real_type>::default_tolerance) const;
+  ///@}
 };
 
 //@{
@@ -182,7 +180,7 @@ Scalar trace(const Matrix_i<Scalar>& m);
 /** Accumulate all matrix values */
 template <typename Scalar>
 Scalar accumulate(const Matrix_i<Scalar>& m) {
-    return std::accumulate(m.begin(), m.end(), Constants<Scalar>::zero);
+  return std::accumulate(m.begin(), m.end(), Constants<Scalar>::zero);
 }
 
 /** Compute the l1 norm (maximum of the sums over columns) */
@@ -200,8 +198,8 @@ Scalar norm_linf(const Matrix_i<Scalar>& m);
  */
 template <typename Scalar>
 Scalar norm_frobenius(const Matrix_i<Scalar>& m) {
-    // sqrt of square of all matrix elements
-    return std::sqrt(norm_frobenius_squared(m));
+  // sqrt of square of all matrix elements
+  return std::sqrt(norm_frobenius_squared(m));
 }
 
 /** Calculate the Frobenius norm squared
@@ -219,44 +217,41 @@ Scalar norm_frobenius_squared(const Matrix_i<Scalar>& m);
 // Matrix_i
 //
 template <typename Scalar>
-typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::operator[](
-      size_type i) const {
-    // Check that we do not overshoot.
-    assert_range(0u, i, n_cols() * n_rows());
+typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::operator[](size_type i) const {
+  // Check that we do not overshoot.
+  assert_range(0u, i, n_cols() * n_rows());
 
-    const size_type i_row = i / n_cols();
-    const size_type i_col = i % n_cols();
-    return (*this)(i_row, i_col);
+  const size_type i_row = i / n_cols();
+  const size_type i_col = i % n_cols();
+  return (*this)(i_row, i_col);
 }
 
 template <typename Scalar>
 bool Matrix_i<Scalar>::is_symmetric(real_type tolerance) const {
-    // Check that the matrix is quadratic:
-    if (n_rows() != n_cols()) return false;
+  // Check that the matrix is quadratic:
+  if (n_rows() != n_cols()) return false;
 
-    // Check if lower and upper triangle agree:
-    for (size_type i = 0; i < n_rows(); ++i) {
-        for (size_type j = 0; j < n_cols(); ++j) {
-            if (std::abs((*this)(i, j) - (*this)(j, i)) > tolerance)
-                return false;
-        }
+  // Check if lower and upper triangle agree:
+  for (size_type i = 0; i < n_rows(); ++i) {
+    for (size_type j = 0; j < n_cols(); ++j) {
+      if (std::abs((*this)(i, j) - (*this)(j, i)) > tolerance) return false;
     }
-    return true;
+  }
+  return true;
 }
 
 template <typename Scalar>
 bool Matrix_i<Scalar>::is_hermitian(real_type tolerance) const {
-    // Check that the matrix is quadratic:
-    if (n_rows() != n_cols()) return false;
+  // Check that the matrix is quadratic:
+  if (n_rows() != n_cols()) return false;
 
-    // Check if lower and upper triangle agree:
-    for (size_type i = 0; i < n_rows(); ++i) {
-        for (size_type j = 0; j < n_cols(); ++j) {
-            if (std::abs(std::conj((*this)(i, j)) - (*this)(j, i)) > tolerance)
-                return false;
-        }
+  // Check if lower and upper triangle agree:
+  for (size_type i = 0; i < n_rows(); ++i) {
+    for (size_type j = 0; j < n_cols(); ++j) {
+      if (std::abs(std::conj((*this)(i, j)) - (*this)(j, i)) > tolerance) return false;
     }
-    return true;
+  }
+  return true;
 }
 
 //
@@ -265,66 +260,66 @@ bool Matrix_i<Scalar>::is_hermitian(real_type tolerance) const {
 
 template <typename Scalar>
 Scalar norm_l1(const Matrix_i<Scalar>& m) {
-    typedef typename Matrix_i<Scalar>::size_type size_type;
-    // This way is real bad for the cache and hence really slow.
-    // One should do this in blocks of row indices, which fit the cache size.
+  typedef typename Matrix_i<Scalar>::size_type size_type;
+  // This way is real bad for the cache and hence really slow.
+  // One should do this in blocks of row indices, which fit the cache size.
 
-    // maximum of the colsums
-    //
-    Scalar res(Constants<Scalar>::zero);
-    for (size_type col = 0; col < m.n_cols(); ++col) {
-        // sum of absolute entries of this column
-        Scalar colsum = Constants<Scalar>::zero;
-        for (size_type row = 0; row < m.n_rows(); ++row) {
-            colsum += std::abs(m(row, col));
-        }
-        res = std::max(res, colsum);
+  // maximum of the colsums
+  //
+  Scalar res(Constants<Scalar>::zero);
+  for (size_type col = 0; col < m.n_cols(); ++col) {
+    // sum of absolute entries of this column
+    Scalar colsum = Constants<Scalar>::zero;
+    for (size_type row = 0; row < m.n_rows(); ++row) {
+      colsum += std::abs(m(row, col));
     }
-    return res;
+    res = std::max(res, colsum);
+  }
+  return res;
 }
 
 template <typename Scalar>
 Scalar norm_linf(const Matrix_i<Scalar>& m) {
-    typedef typename Matrix_i<Scalar>::size_type size_type;
+  typedef typename Matrix_i<Scalar>::size_type size_type;
 
-    Scalar res = Constants<Scalar>::zero;
-    for (size_type row = 0; row < m.n_rows(); ++row) {
-        // sum of absolute entries of this row
-        Scalar rowsum = Constants<Scalar>::zero;
-        for (size_type col = 0; col < m.n_cols(); ++col) {
-            rowsum += std::abs(m(row, col));
-        }
-        res = std::max(res, rowsum);
+  Scalar res = Constants<Scalar>::zero;
+  for (size_type row = 0; row < m.n_rows(); ++row) {
+    // sum of absolute entries of this row
+    Scalar rowsum = Constants<Scalar>::zero;
+    for (size_type col = 0; col < m.n_cols(); ++col) {
+      rowsum += std::abs(m(row, col));
     }
-    return res;
+    res = std::max(res, rowsum);
+  }
+  return res;
 }
 
 template <typename Scalar>
 Scalar norm_frobenius_squared(const Matrix_i<Scalar>& m) {
-    // sum of squares of all matrix elements
-    Scalar sum = Constants<Scalar>::zero;
-    for (auto it = m.begin(); it != m.end(); ++it) {
-        sum += (*it) * (*it);
-    }
-    return sum;
+  // sum of squares of all matrix elements
+  Scalar sum = Constants<Scalar>::zero;
+  for (auto it = m.begin(); it != m.end(); ++it) {
+    sum += (*it) * (*it);
+  }
+  return sum;
 }
 
 template <typename Scalar>
 Scalar trace(const Matrix_i<Scalar>& m) {
-    typedef typename Matrix_i<Scalar>::size_type size_type;
-    assert_dbg(m.n_rows() == m.n_cols(), ExcMatrixNotSquare());
+  typedef typename Matrix_i<Scalar>::size_type size_type;
+  assert_dbg(m.n_rows() == m.n_cols(), ExcMatrixNotSquare());
 
-    Scalar trace{Constants<Scalar>::zero};
-    for (size_type i = 0; i < m.n_rows(); ++i) {
-        trace += m(i, i);
-    }
-    return trace;
+  Scalar trace{Constants<Scalar>::zero};
+  for (size_type i = 0; i < m.n_rows(); ++i) {
+    trace += m(i, i);
+  }
+  return trace;
 }
 
 template <typename Scalar>
 std::ostream& operator<<(std::ostream& o, const Matrix_i<Scalar>& m) {
-    io::MatrixPrinter().print(m, o);
-    return o;
+  io::MatrixPrinter().print(m, o);
+  return o;
 }
 
 }  // namespace linalgwrap

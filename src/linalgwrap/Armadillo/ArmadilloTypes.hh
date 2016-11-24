@@ -30,11 +30,11 @@ template <typename Scalar>
 class ArmadilloVector;
 
 struct ArmadilloTypes {
-    template <typename Scalar>
-    using vector = ArmadilloVector<Scalar>;
+  template <typename Scalar>
+  using vector = ArmadilloVector<Scalar>;
 
-    template <typename Scalar>
-    using matrix = ArmadilloMatrix<Scalar>;
+  template <typename Scalar>
+  using matrix = ArmadilloMatrix<Scalar>;
 };
 
 }  // end namespace linalgwrap

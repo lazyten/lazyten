@@ -50,84 +50,84 @@ using namespace krims;
  */
 template <typename Model, typename Sut, typename Args>
 struct RCTestableGenerator {
-    /** Type of the model implementation we test against */
-    typedef Model model_type;
+  /** Type of the model implementation we test against */
+  typedef Model model_type;
 
-    /** Type of the system under test we want to test */
-    typedef Sut sut_type;
+  /** Type of the system under test we want to test */
+  typedef Sut sut_type;
 
-    /** Type of the arguments, which are needed to construct a model and a sut
-     * object */
-    typedef Args args_type;
+  /** Type of the arguments, which are needed to construct a model and a sut
+   * object */
+  typedef Args args_type;
 
-    /** Type of a testfunction template, which implements a comparative test. */
-    typedef std::function<void(const model_type&, const sut_type&,
-                               const NumCompAccuracyLevel)>
-          testfunction_type;
+  /** Type of a testfunction template, which implements a comparative test. */
+  typedef std::function<void(const model_type&, const sut_type&,
+                             const NumCompAccuracyLevel)>
+        testfunction_type;
 
-    /** \brief Construct a RapidcheckTestableGenerator object.
-     *
-     * \param sut_generator  A function that derives a System-under-test
-     *                      matrix from an randomly generated core model
-     *                      matrix of type compmat_type.
-     * \param model_generator  A function that derives a compmat_type model
-     *                        matrix in the same state as the test matrix
-     *                        yielded by sutgenerator when applied to the
-     *                        same core model matrix.
-     */
-    RCTestableGenerator(std::function<args_type(void)> args_generator_,
-                        std::function<model_type(args_type)> model_generator_,
-                        std::function<sut_type(args_type)> sut_generator_)
-          : args_generator(args_generator_),
-            model_generator(model_generator_),
-            sut_generator(sut_generator_) {}
+  /** \brief Construct a RapidcheckTestableGenerator object.
+   *
+   * \param sut_generator  A function that derives a System-under-test
+   *                      matrix from an randomly generated core model
+   *                      matrix of type compmat_type.
+   * \param model_generator  A function that derives a compmat_type model
+   *                        matrix in the same state as the test matrix
+   *                        yielded by sutgenerator when applied to the
+   *                        same core model matrix.
+   */
+  RCTestableGenerator(std::function<args_type(void)> args_generator_,
+                      std::function<model_type(args_type)> model_generator_,
+                      std::function<sut_type(args_type)> sut_generator_)
+        : args_generator(args_generator_),
+          model_generator(model_generator_),
+          sut_generator(sut_generator_) {}
 
-    /** \brief Construct a RCTestableGenerator object.
-     *
-     * Use explicit conversion to the sut_type and the model_type to obtain
-     * the sut and the model from the args
-     */
-    RCTestableGenerator(std::function<args_type(void)> args_generator_)
-          : args_generator(args_generator_),
-            model_generator([](args_type t) { return model_type{t}; }),
-            sut_generator([](args_type t) { return sut_type{t}; }) {}
+  /** \brief Construct a RCTestableGenerator object.
+   *
+   * Use explicit conversion to the sut_type and the model_type to obtain
+   * the sut and the model from the args
+   */
+  RCTestableGenerator(std::function<args_type(void)> args_generator_)
+        : args_generator(args_generator_),
+          model_generator([](args_type t) { return model_type{t}; }),
+          sut_generator([](args_type t) { return sut_type{t}; }) {}
 
-    /** \brief Construct a RCTestableGenerator object.
-     *
-     * Use explicit conversion to the model_type to obtain
-     * the model from the args
-     */
-    RCTestableGenerator(std::function<args_type(void)> args_generator_,
-                        std::function<sut_type(args_type)> sut_generator_)
-          : args_generator(args_generator_),
-            model_generator([](args_type t) { return model_type{t}; }),
-            sut_generator(sut_generator_) {}
+  /** \brief Construct a RCTestableGenerator object.
+   *
+   * Use explicit conversion to the model_type to obtain
+   * the model from the args
+   */
+  RCTestableGenerator(std::function<args_type(void)> args_generator_,
+                      std::function<sut_type(args_type)> sut_generator_)
+        : args_generator(args_generator_),
+          model_generator([](args_type t) { return model_type{t}; }),
+          sut_generator(sut_generator_) {}
 
-    /* Return a std::function object that creates random arguments of type
-     * args_type, then passes them to the model_generator and the sut_generator
-     * to generate a model and a sut and then calles the testfunction func
-     * in order to test whether the model and sut agree. r
-     *
-     * \param tolerance  The numeric tolerance level to use.
-     * */
-    std::function<void(void)> generate(
-          testfunction_type func, const NumCompAccuracyLevel tolerance =
-                                        NumCompAccuracyLevel::Default) const;
+  /* Return a std::function object that creates random arguments of type
+   * args_type, then passes them to the model_generator and the sut_generator
+   * to generate a model and a sut and then calles the testfunction func
+   * in order to test whether the model and sut agree. r
+   *
+   * \param tolerance  The numeric tolerance level to use.
+   * */
+  std::function<void(void)> generate(
+        testfunction_type func,
+        const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default) const;
 
-    /** Generate a testable using ``generate()`` and run it using rapidcheck
-     *
-     * \param description for Rapidcheck
-     * \param tolerance  The numeric tolerance level to use.
-     * */
-    bool run_test(std::string description, testfunction_type func,
-                  const NumCompAccuracyLevel tolerance =
-                        NumCompAccuracyLevel::Default) const {
-        return rc::check(description, generate(func, tolerance));
-    }
+  /** Generate a testable using ``generate()`` and run it using rapidcheck
+   *
+   * \param description for Rapidcheck
+   * \param tolerance  The numeric tolerance level to use.
+   * */
+  bool run_test(
+        std::string description, testfunction_type func,
+        const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default) const {
+    return rc::check(description, generate(func, tolerance));
+  }
 
-    std::function<args_type(void)> args_generator;
-    std::function<model_type(args_type)> model_generator;
-    std::function<sut_type(args_type)> sut_generator;
+  std::function<args_type(void)> args_generator;
+  std::function<model_type(args_type)> model_generator;
+  std::function<sut_type(args_type)> sut_generator;
 };
 
 //
@@ -136,14 +136,14 @@ struct RCTestableGenerator {
 template <typename Model, typename Sut, typename Args>
 std::function<void(void)> RCTestableGenerator<Model, Sut, Args>::generate(
       testfunction_type func, const NumCompAccuracyLevel tolerance) const {
-    // Return a lambda which calls the test appropriately.
-    return [=] {
-        // Generate the args
-        Args arg = args_generator();
+  // Return a lambda which calls the test appropriately.
+  return [=] {
+    // Generate the args
+    Args arg = args_generator();
 
-        // Call test function with appropriate model and sut:
-        func(model_generator(arg), sut_generator(arg), tolerance);
-    };
+    // Call test function with appropriate model and sut:
+    func(model_generator(arg), sut_generator(arg), tolerance);
+  };
 }
 
 }  // namespace tests
