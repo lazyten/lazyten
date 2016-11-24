@@ -33,7 +33,7 @@ class OstreamState {
     OstreamState(std::ostream& o);
 
     //! Destruct class, set state back to the ostream.
-    ~OstreamState();
+    ~OstreamState() { restore_to(m_o); }
 
     //! Default copy constructor
     OstreamState(const OstreamState&) = default;
@@ -81,8 +81,6 @@ inline OstreamState::OstreamState(std::ostream& o)
         m_orig_width{o.width()},
         m_orig_precision{o.precision()},
         m_orig_fill{o.fill()} {}
-
-inline OstreamState::~OstreamState() { restore_to(m_o); }
 
 inline void OstreamState::restore_to(std::ostream& o) const {
     o.flags(m_orig_flags);
