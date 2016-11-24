@@ -39,7 +39,7 @@ class IterativeSolverState {
   count_type increase_iteration_count() { return ++m_count; }
 
   /** Return the current iteration count */
-  count_type n_iter_count() const { return m_count; }
+  count_type n_iter() const { return m_count; }
 
  protected:
   count_type m_count;
