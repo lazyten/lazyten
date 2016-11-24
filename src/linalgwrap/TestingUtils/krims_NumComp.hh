@@ -35,115 +35,110 @@ namespace krims {
 namespace detail {
 template <typename Ible1, typename Ible2>
 struct NumCompIndexableBase {
-    static_assert(std::is_same<typename Ible1::size_type,
-                               typename Ible2::size_type>::value,
-                  "The size types of Ible1 and Ible2 do not agree.");
-    static_assert(std::is_same<typename Ible1::scalar_type,
-                               typename Ible2::scalar_type>::value,
-                  "The scalar types of Ible1 and Ible2 do not agree.");
+  static_assert(std::is_same<typename Ible1::size_type, typename Ible2::size_type>::value,
+                "The size types of Ible1 and Ible2 do not agree.");
+  static_assert(
+        std::is_same<typename Ible1::scalar_type, typename Ible2::scalar_type>::value,
+        "The scalar types of Ible1 and Ible2 do not agree.");
 
-    typedef typename Ible1::scalar_type scalar_type;
-    typedef typename Ible1::size_type size_type;
-    typedef typename RealTypeOf<scalar_type>::type real_type;
+  typedef typename Ible1::scalar_type scalar_type;
+  typedef typename Ible1::size_type size_type;
+  typedef typename RealTypeOf<scalar_type>::type real_type;
 
-    // Check whether the sizes match only
-    bool sizes_match(size_type lhs_value, size_type rhs_value,
-                     std::string what) const;
+  // Check whether the sizes match only
+  bool sizes_match(size_type lhs_value, size_type rhs_value, std::string what) const;
 
-    // Compare the number of elements
-    bool number_elem_match(const Ible1& lhs, const Ible2& rhs,
-                           std::string object_name) const;
-    bool element_values_match(const Ible1& lhs, const Ible2& rhs,
-                              std::string object_name) const;
+  // Compare the number of elements
+  bool number_elem_match(const Ible1& lhs, const Ible2& rhs,
+                         std::string object_name) const;
+  bool element_values_match(const Ible1& lhs, const Ible2& rhs,
+                            std::string object_name) const;
 
-    const real_type tolerance;
-    const NumCompActionType failure_action;
+  const real_type tolerance;
+  const NumCompActionType failure_action;
 
-    NumCompIndexableBase(const real_type tolerance_,
-                         const NumCompActionType failure_action_)
-          : tolerance(tolerance_), failure_action(failure_action_) {}
+  NumCompIndexableBase(const real_type tolerance_,
+                       const NumCompActionType failure_action_)
+        : tolerance(tolerance_), failure_action(failure_action_) {}
 };
 }  // namespace detail
 
 /** \brief Functor to check that two indexables are numerically equal
  */
 template <typename Ible1, typename Ible2>
-struct NumEqual<Ible1, Ible2,
-                typename std::enable_if<
-                      linalgwrap::IsIndexable<Ible1>::value &&
-                      linalgwrap::IsIndexable<Ible2>::value &&
-                      !linalgwrap::IsMatrix<Ible1>::value &&
-                      !linalgwrap::IsMatrix<Ible2>::value &&
-                      !linalgwrap::IsVector<Ible1>::value &&
-                      !linalgwrap::IsVector<Ible2>::value &&
-                      std::is_same<typename Ible1::scalar_type,
-                                   typename Ible2::scalar_type>::value>::type>
+struct NumEqual<
+      Ible1, Ible2,
+      typename std::enable_if<
+            linalgwrap::IsIndexable<Ible1>::value &&
+            linalgwrap::IsIndexable<Ible2>::value &&
+            !linalgwrap::IsMatrix<Ible1>::value && !linalgwrap::IsMatrix<Ible2>::value &&
+            !linalgwrap::IsVector<Ible1>::value && !linalgwrap::IsVector<Ible2>::value &&
+            std::is_same<typename Ible1::scalar_type,
+                         typename Ible2::scalar_type>::value>::type>
       : private detail::NumCompIndexableBase<Ible1, Ible2> {
-    typedef const Ible1& first_argument_type;
-    typedef const Ible2& second_argument_type;
-    typedef bool result_type;
+  typedef const Ible1& first_argument_type;
+  typedef const Ible2& second_argument_type;
+  typedef bool result_type;
 
-    typedef detail::NumCompIndexableBase<Ible1, Ible2> base_type;
-    typedef typename base_type::real_type real_type;
-    typedef typename base_type::size_type size_type;
-    typedef typename base_type::scalar_type scalar_type;
+  typedef detail::NumCompIndexableBase<Ible1, Ible2> base_type;
+  typedef typename base_type::real_type real_type;
+  typedef typename base_type::size_type size_type;
+  typedef typename base_type::scalar_type scalar_type;
 
-    NumEqual(const real_type tolerance, const NumCompActionType failure_action)
-          : base_type{tolerance, failure_action} {}
+  NumEqual(const real_type tolerance, const NumCompActionType failure_action)
+        : base_type{tolerance, failure_action} {}
 
-    bool operator()(const Ible1& lhs, const Ible2& rhs) const;
+  bool operator()(const Ible1& lhs, const Ible2& rhs) const;
 };
 
 /** \brief Functor to check that two matrices (of possibly different type)
  * are numerically equal
  */
 template <typename Mat1, typename Mat2>
-struct NumEqual<Mat1, Mat2,
-                typename std::enable_if<
-                      linalgwrap::IsMatrix<Mat1>::value &&
-                      linalgwrap::IsMatrix<Mat2>::value &&
-                      std::is_same<typename Mat1::scalar_type,
-                                   typename Mat2::scalar_type>::value>::type>
+struct NumEqual<Mat1, Mat2, typename std::enable_if<
+                                  linalgwrap::IsMatrix<Mat1>::value &&
+                                  linalgwrap::IsMatrix<Mat2>::value &&
+                                  std::is_same<typename Mat1::scalar_type,
+                                               typename Mat2::scalar_type>::value>::type>
       : private detail::NumCompIndexableBase<Mat1, Mat2> {
-    typedef const Mat1& first_argument_type;
-    typedef const Mat2& second_argument_type;
-    typedef bool result_type;
+  typedef const Mat1& first_argument_type;
+  typedef const Mat2& second_argument_type;
+  typedef bool result_type;
 
-    typedef detail::NumCompIndexableBase<Mat1, Mat2> base_type;
-    typedef typename base_type::real_type real_type;
-    typedef typename base_type::size_type size_type;
-    typedef typename base_type::scalar_type scalar_type;
+  typedef detail::NumCompIndexableBase<Mat1, Mat2> base_type;
+  typedef typename base_type::real_type real_type;
+  typedef typename base_type::size_type size_type;
+  typedef typename base_type::scalar_type scalar_type;
 
-    NumEqual(const real_type tolerance, const NumCompActionType failure_action)
-          : base_type{tolerance, failure_action} {}
+  NumEqual(const real_type tolerance, const NumCompActionType failure_action)
+        : base_type{tolerance, failure_action} {}
 
-    bool operator()(const Mat1& lhs, const Mat2& rhs) const;
+  bool operator()(const Mat1& lhs, const Mat2& rhs) const;
 };
 
 /** \brief Functor to check that two vectors (of possibly different type)
  * are numerically equal
  */
 template <typename Vec1, typename Vec2>
-struct NumEqual<Vec1, Vec2,
-                typename std::enable_if<
-                      linalgwrap::IsVector<Vec1>::value &&
-                      linalgwrap::IsVector<Vec2>::value &&
-                      std::is_same<typename Vec1::scalar_type,
-                                   typename Vec2::scalar_type>::value>::type>
+struct NumEqual<Vec1, Vec2, typename std::enable_if<
+                                  linalgwrap::IsVector<Vec1>::value &&
+                                  linalgwrap::IsVector<Vec2>::value &&
+                                  std::is_same<typename Vec1::scalar_type,
+                                               typename Vec2::scalar_type>::value>::type>
       : private detail::NumCompIndexableBase<Vec1, Vec2> {
-    typedef const Vec1& first_argument_type;
-    typedef const Vec2& second_argument_type;
-    typedef bool result_type;
+  typedef const Vec1& first_argument_type;
+  typedef const Vec2& second_argument_type;
+  typedef bool result_type;
 
-    typedef detail::NumCompIndexableBase<Vec1, Vec2> base_type;
-    typedef typename base_type::real_type real_type;
-    typedef typename base_type::size_type size_type;
-    typedef typename base_type::scalar_type scalar_type;
+  typedef detail::NumCompIndexableBase<Vec1, Vec2> base_type;
+  typedef typename base_type::real_type real_type;
+  typedef typename base_type::size_type size_type;
+  typedef typename base_type::scalar_type scalar_type;
 
-    NumEqual(const real_type tolerance, const NumCompActionType failure_action)
-          : base_type(tolerance, failure_action) {}
+  NumEqual(const real_type tolerance, const NumCompActionType failure_action)
+        : base_type(tolerance, failure_action) {}
 
-    bool operator()(const Vec1& lhs, const Vec2& rhs) const;
+  bool operator()(const Vec1& lhs, const Vec2& rhs) const;
 };
 
 /** \brief Functor to check that two multivectors
@@ -151,30 +146,30 @@ struct NumEqual<Vec1, Vec2,
  * are numerically equal
  */
 template <typename Vec1, typename Vec2>
-struct NumEqual<linalgwrap::MultiVector<Vec1>, linalgwrap::MultiVector<Vec2>,
-                typename std::enable_if<
-                      linalgwrap::IsVector<Vec1>::value &&
-                      linalgwrap::IsVector<Vec2>::value &&
-                      std::is_same<typename Vec1::scalar_type,
-                                   typename Vec2::scalar_type>::value>::type>
+struct NumEqual<
+      linalgwrap::MultiVector<Vec1>, linalgwrap::MultiVector<Vec2>,
+      typename std::enable_if<linalgwrap::IsVector<Vec1>::value &&
+                              linalgwrap::IsVector<Vec2>::value &&
+                              std::is_same<typename Vec1::scalar_type,
+                                           typename Vec2::scalar_type>::value>::type>
       : private detail::NumCompIndexableBase<linalgwrap::MultiVector<Vec1>,
                                              linalgwrap::MultiVector<Vec2>> {
-    typedef const linalgwrap::MultiVector<Vec1>& first_argument_type;
-    typedef const linalgwrap::MultiVector<Vec2>& second_argument_type;
-    typedef bool result_type;
+  typedef const linalgwrap::MultiVector<Vec1>& first_argument_type;
+  typedef const linalgwrap::MultiVector<Vec2>& second_argument_type;
+  typedef bool result_type;
 
-    typedef detail::NumCompIndexableBase<linalgwrap::MultiVector<Vec1>,
-                                         linalgwrap::MultiVector<Vec2>>
-          base_type;
-    typedef typename base_type::real_type real_type;
-    typedef typename base_type::size_type size_type;
-    typedef typename base_type::scalar_type scalar_type;
+  typedef detail::NumCompIndexableBase<linalgwrap::MultiVector<Vec1>,
+                                       linalgwrap::MultiVector<Vec2>>
+        base_type;
+  typedef typename base_type::real_type real_type;
+  typedef typename base_type::size_type size_type;
+  typedef typename base_type::scalar_type scalar_type;
 
-    NumEqual(const real_type tolerance, const NumCompActionType failure_action)
-          : base_type(tolerance, failure_action) {}
+  NumEqual(const real_type tolerance, const NumCompActionType failure_action)
+        : base_type(tolerance, failure_action) {}
 
-    bool operator()(const linalgwrap::MultiVector<Vec1>& lhs,
-                    const linalgwrap::MultiVector<Vec2>& rhs) const;
+  bool operator()(const linalgwrap::MultiVector<Vec1>& lhs,
+                  const linalgwrap::MultiVector<Vec2>& rhs) const;
 };
 
 //
@@ -186,218 +181,211 @@ template <typename Ible1, typename Ible2>
 bool NumCompIndexableBase<Ible1, Ible2>::sizes_match(size_type lhs_value,
                                                      size_type rhs_value,
                                                      std::string what) const {
-    if (lhs_value == rhs_value) {
-        return true;
-    } else if (failure_action == NumCompActionType::ThrowNormal ||
-               failure_action == NumCompActionType::ThrowVerbose) {
+  if (lhs_value == rhs_value) {
+    return true;
+  } else if (failure_action == NumCompActionType::ThrowNormal ||
+             failure_action == NumCompActionType::ThrowVerbose) {
 
-        const size_type diff = lhs_value < rhs_value ? rhs_value - lhs_value
-                                                     : lhs_value - rhs_value;
-        NumCompException<size_type> e(lhs_value, rhs_value, diff, 0, "==",
-                                      "Size mismatch in number of " + what);
-        e.add_exc_data(__FILE__, __LINE__, __PRETTY_FUNCTION__);
-        throw e;
-    } else {
-        return false;
-    }
+    const size_type diff =
+          lhs_value < rhs_value ? rhs_value - lhs_value : lhs_value - rhs_value;
+    NumCompException<size_type> e(lhs_value, rhs_value, diff, 0, "==",
+                                  "Size mismatch in number of " + what);
+    e.add_exc_data(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+    throw e;
+  } else {
+    return false;
+  }
 }
 
 template <typename Ible1, typename Ible2>
 bool NumCompIndexableBase<Ible1, Ible2>::number_elem_match(
       const Ible1& lhs, const Ible2& rhs, std::string object_name) const {
-    // Compare the sizes. If we get an exception just pass it upwards
-    // appending the values in case the user wants detailed throw
-    // information.
-    try {
-        return sizes_match(lhs.n_elem(), rhs.n_elem(), "elements");
-    } catch (NumCompExceptionBase& e) {
-        if (failure_action == NumCompActionType::ThrowVerbose) {
-            std::stringstream ss;
-            ss << " when comparing " << object_name << std::endl
-               << lhs << std::endl
-               << "and" << std::endl
-               << rhs << "." << std::endl;
-            e.append(ss.str());
-        }
-        throw;
+  // Compare the sizes. If we get an exception just pass it upwards
+  // appending the values in case the user wants detailed throw
+  // information.
+  try {
+    return sizes_match(lhs.n_elem(), rhs.n_elem(), "elements");
+  } catch (NumCompExceptionBase& e) {
+    if (failure_action == NumCompActionType::ThrowVerbose) {
+      std::stringstream ss;
+      ss << " when comparing " << object_name << std::endl
+         << lhs << std::endl
+         << "and" << std::endl
+         << rhs << "." << std::endl;
+      e.append(ss.str());
     }
+    throw;
+  }
 }
 
 template <typename Ible1, typename Ible2>
 bool NumCompIndexableBase<Ible1, Ible2>::element_values_match(
       const Ible1& lhs, const Ible2& rhs, std::string object_name) const {
-    // If one is not equal return false or catch the exception and amend
-    // the data we are interested in before rethrowing.
-    NumEqual<scalar_type, scalar_type> is_equal{tolerance, failure_action};
-    for (size_type i = 0; i < lhs.n_elem(); ++i) {
-        try {
-            if (!is_equal(lhs[i], rhs[i])) {
-                return false;
-            }
-        } catch (NumCompExceptionBase& e) {
-            std::stringstream ss;
-            ss << "Entry (" << i << ") not equal";
-            if (failure_action == NumCompActionType::ThrowVerbose) {
-                ss << " when comparing " << object_name << std::endl
-                   << lhs << std::endl
-                   << "and" << std::endl
-                   << rhs << "." << std::endl;
-            } else {
-                ss << ".";
-            }
+  // If one is not equal return false or catch the exception and amend
+  // the data we are interested in before rethrowing.
+  NumEqual<scalar_type, scalar_type> is_equal{tolerance, failure_action};
+  for (size_type i = 0; i < lhs.n_elem(); ++i) {
+    try {
+      if (!is_equal(lhs[i], rhs[i])) {
+        return false;
+      }
+    } catch (NumCompExceptionBase& e) {
+      std::stringstream ss;
+      ss << "Entry (" << i << ") not equal";
+      if (failure_action == NumCompActionType::ThrowVerbose) {
+        ss << " when comparing " << object_name << std::endl
+           << lhs << std::endl
+           << "and" << std::endl
+           << rhs << "." << std::endl;
+      } else {
+        ss << ".";
+      }
 
-            e.append(ss.str());
-            throw;
-        }
+      e.append(ss.str());
+      throw;
     }
-    return true;
+  }
+  return true;
 }
 }  // namespace detail
 
 template <typename Vec1, typename Vec2>
-bool NumEqual<Vec1, Vec2,
-              typename std::enable_if<
-                    linalgwrap::IsVector<Vec1>::value &&
-                    linalgwrap::IsVector<Vec2>::value &&
-                    std::is_same<typename Vec1::scalar_type,
-                                 typename Vec2::scalar_type>::value>::type>::
+bool NumEqual<Vec1, Vec2, typename std::enable_if<
+                                linalgwrap::IsVector<Vec1>::value &&
+                                linalgwrap::IsVector<Vec2>::value &&
+                                std::is_same<typename Vec1::scalar_type,
+                                             typename Vec2::scalar_type>::value>::type>::
 operator()(const Vec1& lhs, const Vec2& rhs) const {
-    return base_type::number_elem_match(lhs, rhs, "vectors") &&
-           base_type::element_values_match(lhs, rhs, "vectors");
+  return base_type::number_elem_match(lhs, rhs, "vectors") &&
+         base_type::element_values_match(lhs, rhs, "vectors");
 }
 
 template <typename Ible1, typename Ible2>
-bool NumEqual<Ible1, Ible2,
-              typename std::enable_if<
-                    linalgwrap::IsIndexable<Ible1>::value &&
-                    linalgwrap::IsIndexable<Ible2>::value &&
-                    !linalgwrap::IsMatrix<Ible1>::value &&
-                    !linalgwrap::IsMatrix<Ible2>::value &&
-                    !linalgwrap::IsVector<Ible1>::value &&
-                    !linalgwrap::IsVector<Ible2>::value &&
-                    std::is_same<typename Ible1::scalar_type,
-                                 typename Ible2::scalar_type>::value>::type>::
+bool NumEqual<
+      Ible1, Ible2,
+      typename std::enable_if<
+            linalgwrap::IsIndexable<Ible1>::value &&
+            linalgwrap::IsIndexable<Ible2>::value &&
+            !linalgwrap::IsMatrix<Ible1>::value && !linalgwrap::IsMatrix<Ible2>::value &&
+            !linalgwrap::IsVector<Ible1>::value && !linalgwrap::IsVector<Ible2>::value &&
+            std::is_same<typename Ible1::scalar_type,
+                         typename Ible2::scalar_type>::value>::type>::
 operator()(const Ible1& lhs, const Ible2& rhs) const {
-    return base_type::number_elem_match(lhs, rhs, "indexables") &&
-           base_type::element_values_match(lhs, rhs, "indexables");
+  return base_type::number_elem_match(lhs, rhs, "indexables") &&
+         base_type::element_values_match(lhs, rhs, "indexables");
 }
 
 template <typename Mat1, typename Mat2>
-bool NumEqual<Mat1, Mat2,
-              typename std::enable_if<
-                    linalgwrap::IsMatrix<Mat1>::value &&
-                    linalgwrap::IsMatrix<Mat2>::value &&
-                    std::is_same<typename Mat1::scalar_type,
-                                 typename Mat2::scalar_type>::value>::type>::
+bool NumEqual<Mat1, Mat2, typename std::enable_if<
+                                linalgwrap::IsMatrix<Mat1>::value &&
+                                linalgwrap::IsMatrix<Mat2>::value &&
+                                std::is_same<typename Mat1::scalar_type,
+                                             typename Mat2::scalar_type>::value>::type>::
 operator()(const Mat1& lhs, const Mat2& rhs) const {
-    // First compare the sizes. If we get an exception just pass it upwards
-    // appending the matrix values in case the user wants detailed throw
-    // information.
-    try {
-        if (!base_type::sizes_match(lhs.n_rows(), rhs.n_rows(), "rows") ||
-            !base_type::sizes_match(rhs.n_cols(), lhs.n_cols(), "columns")) {
-            return false;
+  // First compare the sizes. If we get an exception just pass it upwards
+  // appending the matrix values in case the user wants detailed throw
+  // information.
+  try {
+    if (!base_type::sizes_match(lhs.n_rows(), rhs.n_rows(), "rows") ||
+        !base_type::sizes_match(rhs.n_cols(), lhs.n_cols(), "columns")) {
+      return false;
+    }
+  } catch (NumCompExceptionBase& e) {
+    if (base_type::failure_action == NumCompActionType::ThrowVerbose) {
+      std::stringstream ss;
+      ss << " when comparing matrices " << std::endl
+         << lhs << std::endl
+         << "and" << std::endl
+         << rhs << "." << std::endl;
+      e.append(ss.str());
+    }
+    throw;
+  }
+
+  // Now compare elements.
+  // If one is not equal return false or catch the exception and amend
+  // the data we are interested in before rethrowing.
+  NumEqual<scalar_type, scalar_type> is_equal{base_type::tolerance,
+                                              base_type::failure_action};
+  for (size_type i = 0; i < lhs.n_rows(); ++i) {
+    for (size_type j = 0; j < lhs.n_cols(); ++j) {
+      try {
+        if (!is_equal(lhs(i, j), rhs(i, j))) {
+          return false;
         }
-    } catch (NumCompExceptionBase& e) {
+      } catch (NumCompExceptionBase& e) {
+        std::stringstream ss;
+        ss << "Matrix entry (" << i << "," << j << ") not equal";
         if (base_type::failure_action == NumCompActionType::ThrowVerbose) {
-            std::stringstream ss;
-            ss << " when comparing matrices " << std::endl
-               << lhs << std::endl
-               << "and" << std::endl
-               << rhs << "." << std::endl;
-            e.append(ss.str());
+          ss << " when comparing matrices " << std::endl
+             << lhs << std::endl
+             << "and" << std::endl
+             << rhs << "." << std::endl;
+        } else {
+          ss << ".";
         }
+
+        e.append(ss.str());
         throw;
+      }
     }
-
-    // Now compare elements.
-    // If one is not equal return false or catch the exception and amend
-    // the data we are interested in before rethrowing.
-    NumEqual<scalar_type, scalar_type> is_equal{base_type::tolerance,
-                                                base_type::failure_action};
-    for (size_type i = 0; i < lhs.n_rows(); ++i) {
-        for (size_type j = 0; j < lhs.n_cols(); ++j) {
-            try {
-                if (!is_equal(lhs(i, j), rhs(i, j))) {
-                    return false;
-                }
-            } catch (NumCompExceptionBase& e) {
-                std::stringstream ss;
-                ss << "Matrix entry (" << i << "," << j << ") not equal";
-                if (base_type::failure_action ==
-                    NumCompActionType::ThrowVerbose) {
-                    ss << " when comparing matrices " << std::endl
-                       << lhs << std::endl
-                       << "and" << std::endl
-                       << rhs << "." << std::endl;
-                } else {
-                    ss << ".";
-                }
-
-                e.append(ss.str());
-                throw;
-            }
-        }
-    }
-    return true;
+  }
+  return true;
 }
 
 template <typename Vec1, typename Vec2>
-bool NumEqual<linalgwrap::MultiVector<Vec1>, linalgwrap::MultiVector<Vec2>,
-              typename std::enable_if<
-                    linalgwrap::IsVector<Vec1>::value &&
-                    linalgwrap::IsVector<Vec2>::value &&
-                    std::is_same<typename Vec1::scalar_type,
-                                 typename Vec2::scalar_type>::value>::type>::
-operator()(const linalgwrap::MultiVector<Vec1>& lhs,
-           const linalgwrap::MultiVector<Vec2>& rhs) const {
-    // First compare the sizes. If we get an exception just pass it upwards
-    // appending the matrix values in case the user wants detailed throw
-    // information.
+bool NumEqual<
+      linalgwrap::MultiVector<Vec1>, linalgwrap::MultiVector<Vec2>,
+      typename std::enable_if<
+            linalgwrap::IsVector<Vec1>::value && linalgwrap::IsVector<Vec2>::value &&
+            std::is_same<typename Vec1::scalar_type, typename Vec2::scalar_type>::value>::
+            type>::operator()(const linalgwrap::MultiVector<Vec1>& lhs,
+                              const linalgwrap::MultiVector<Vec2>& rhs) const {
+  // First compare the sizes. If we get an exception just pass it upwards
+  // appending the matrix values in case the user wants detailed throw
+  // information.
+  try {
+    if (!base_type::sizes_match(lhs.n_vectors(), rhs.n_vectors(), "vectors")) {
+      return false;
+    }
+  } catch (NumCompExceptionBase& e) {
+    if (base_type::failure_action == NumCompActionType::ThrowVerbose) {
+      std::stringstream ss;
+      ss << "when comparing MultiVectors " << std::endl
+         << lhs << std::endl
+         << "and" << std::endl
+         << rhs << "." << std::endl;
+      e.append(ss.str());
+    }
+    throw;
+  }
+
+  // Now compare vectors
+  // If one is not equal return false or catch the exception and amend
+  // the data we are interested in before rethrowing.
+  NumEqual<Vec1, Vec2> is_equal{base_type::tolerance, base_type::failure_action};
+  for (size_type i = 0; i < lhs.n_vectors(); ++i) {
     try {
-        if (!base_type::sizes_match(lhs.n_vectors(), rhs.n_vectors(),
-                                    "vectors")) {
-            return false;
-        }
+      if (!is_equal(lhs[i], rhs[i])) {
+        return false;
+      }
     } catch (NumCompExceptionBase& e) {
-        if (base_type::failure_action == NumCompActionType::ThrowVerbose) {
-            std::stringstream ss;
-            ss << "when comparing MultiVectors " << std::endl
-               << lhs << std::endl
-               << "and" << std::endl
-               << rhs << "." << std::endl;
-            e.append(ss.str());
-        }
-        throw;
-    }
+      std::stringstream ss;
+      ss << "Vector (" << i << ") not equal";
+      if (base_type::failure_action == NumCompActionType::ThrowVerbose) {
+        ss << "when comparing MultiVectors " << std::endl
+           << lhs << std::endl
+           << "and" << std::endl
+           << rhs << "." << std::endl;
+      } else {
+        ss << ".";
+      }
 
-    // Now compare vectors
-    // If one is not equal return false or catch the exception and amend
-    // the data we are interested in before rethrowing.
-    NumEqual<Vec1, Vec2> is_equal{base_type::tolerance,
-                                  base_type::failure_action};
-    for (size_type i = 0; i < lhs.n_vectors(); ++i) {
-        try {
-            if (!is_equal(lhs[i], rhs[i])) {
-                return false;
-            }
-        } catch (NumCompExceptionBase& e) {
-            std::stringstream ss;
-            ss << "Vector (" << i << ") not equal";
-            if (base_type::failure_action == NumCompActionType::ThrowVerbose) {
-                ss << "when comparing MultiVectors " << std::endl
-                   << lhs << std::endl
-                   << "and" << std::endl
-                   << rhs << "." << std::endl;
-            } else {
-                ss << ".";
-            }
-
-            e.append(ss.str());
-            throw;
-        }
+      e.append(ss.str());
+      throw;
     }
-    return true;
+  }
+  return true;
 }
 
 }  // namespace krims

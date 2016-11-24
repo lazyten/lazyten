@@ -48,24 +48,24 @@ namespace linalgwrap {
  */
 template <typename Scalar>
 class MutableVector_i : public Vector_i<Scalar> {
-  public:
-    typedef Vector_i<Scalar> base_type;
-    typedef typename base_type::size_type size_type;
-    typedef typename base_type::scalar_type scalar_type;
+ public:
+  typedef Vector_i<Scalar> base_type;
+  typedef typename base_type::size_type size_type;
+  typedef typename base_type::scalar_type scalar_type;
 
-    /** \name Data access
-     *        Access to vector data
-     */
-    ///@{
-    /** \brief return an element of the vector    */
-    virtual scalar_type& operator()(size_type i) = 0;
+  /** \name Data access
+   *        Access to vector data
+   */
+  ///@{
+  /** \brief return an element of the vector    */
+  virtual scalar_type& operator()(size_type i) = 0;
 
-    /** \brief return an element of the vector   */
-    virtual scalar_type& operator[](size_type i) = 0;
-    ///@}
+  /** \brief return an element of the vector   */
+  virtual scalar_type& operator[](size_type i) = 0;
+  ///@}
 
-    /** Set all elements of the vector to zero */
-    virtual void set_zero() = 0;
+  /** Set all elements of the vector to zero */
+  virtual void set_zero() = 0;
 };
 
 //@{

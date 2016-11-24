@@ -37,24 +37,24 @@ namespace linalgwrap {
  */
 template <typename Scalar>
 class Vector_i : public Indexable_i<Scalar> {
-  public:
-    typedef Indexable_i<Scalar> base_type;
-    typedef typename base_type::size_type size_type;
-    typedef typename base_type::scalar_type scalar_type;
+ public:
+  typedef Indexable_i<Scalar> base_type;
+  typedef typename base_type::size_type size_type;
+  typedef typename base_type::scalar_type scalar_type;
 
-    /** The value type of the vectors (for compatibility with STL vectors */
-    typedef scalar_type value_type;
+  /** The value type of the vectors (for compatibility with STL vectors */
+  typedef scalar_type value_type;
 
-    /** Size of the vector */
-    virtual size_type size() const { return this->n_elem(); }
+  /** Size of the vector */
+  virtual size_type size() const { return this->n_elem(); }
 
-    /** \name Data access
-     *        Access to vector data
-     */
-    ///@{
-    /** \brief return an element of the vector   */
-    virtual scalar_type operator()(size_type i) const = 0;
-    ///@}
+  /** \name Data access
+   *        Access to vector data
+   */
+  ///@{
+  /** \brief return an element of the vector   */
+  virtual scalar_type operator()(size_type i) const = 0;
+  ///@}
 };
 
 //@{
@@ -75,8 +75,7 @@ struct IsVector<T, krims::VoidType<typename T::scalar_type>>
 /** Type alias to obtain the scalar type of a valid Vector object */
 template <typename T>
 using ValidVectorScalarT =
-      typename std::enable_if<IsVector<T>::value,
-                              typename T::scalar_type>::type;
+      typename std::enable_if<IsVector<T>::value, typename T::scalar_type>::type;
 
 /** \brief Simple output operator, that plainly shows all entries of
  *  the Matrix one by one.
@@ -86,14 +85,14 @@ using ValidVectorScalarT =
  *  */
 template <typename Scalar>
 std::ostream& operator<<(std::ostream& o, const Vector_i<Scalar>& v) {
-    for (size_t i = 0; i < v.size(); ++i) {
-        o << v[i] << " ";
-    }
+  for (size_t i = 0; i < v.size(); ++i) {
+    o << v[i] << " ";
+  }
 
-    // TODO extend
-    // assert_dbg(false, krims::ExcNotImplemented());
-    // io::MatrixPrinter().print(m, o);
-    return o;
+  // TODO extend
+  // assert_dbg(false, krims::ExcNotImplemented());
+  // io::MatrixPrinter().print(m, o);
+  return o;
 }
 
 }  // namespace linalgwrap

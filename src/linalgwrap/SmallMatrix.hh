@@ -32,7 +32,7 @@ using SmallMatrix = ArmadilloMatrix<Scalar>;
 #else
 template <typename Scalar>
 class SmallMatrix {
-    static_assert(false, "No default implementation for SmallMatrix.");
+  static_assert(false, "No default implementation for SmallMatrix.");
 };
 #endif
 

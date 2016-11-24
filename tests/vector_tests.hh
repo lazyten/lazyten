@@ -35,46 +35,40 @@ namespace vector_tests {
  * \tparam Args The arguments the argsgen function produces
  * \tparam Model The model type to use
  */
-template <typename Vector,
-          typename Args = std::vector<typename Vector::scalar_type>,
-          typename Model =
-                indexable_tests::VectorModel<typename Vector::scalar_type>>
+template <typename Vector, typename Args = std::vector<typename Vector::scalar_type>,
+          typename Model = indexable_tests::VectorModel<typename Vector::scalar_type>>
 struct GeneratorLibrary {
-    /** The args type to use */
-    typedef Args args_type;
+  /** The args type to use */
+  typedef Args args_type;
 
-    /** The type of model to use */
-    typedef Model model_type;
+  /** The type of model to use */
+  typedef Model model_type;
 
-    /** The vector to test */
-    typedef Vector vector_type;
+  /** The vector to test */
+  typedef Vector vector_type;
 
-    /** The type of the testable generator */
-    typedef RCTestableGenerator<model_type, vector_type, args_type>
-          testgen_type;
+  /** The type of the testable generator */
+  typedef RCTestableGenerator<model_type, vector_type, args_type> testgen_type;
 
-    /** The argument generator we use */
-    static constexpr args_type argsgen() {
-        return *gen::scale(genscale, gen::numeric_container<args_type>())
-                      .as("Data");
-    }
+  /** The argument generator we use */
+  static constexpr args_type argsgen() {
+    return *gen::scale(genscale, gen::numeric_container<args_type>()).as("Data");
+  }
 
-    /** Get the generator for tests using the specified generator for the vector
-     *
-     * \param vectorgen The generator to generate the vector to test from the
-     * arguments. By default a simple conversion is performed.
-     */
-    static testgen_type testgenerator(std::function<Vector(Args)> vectorgen =
-                                            [](args_type t) {
-                                                return Vector(t);
-                                            }) {
-        return testgen_type(argsgen, vectorgen);
-    }
+  /** Get the generator for tests using the specified generator for the vector
+   *
+   * \param vectorgen The generator to generate the vector to test from the
+   * arguments. By default a simple conversion is performed.
+   */
+  static testgen_type testgenerator(std::function<Vector(Args)> vectorgen =
+                                          [](args_type t) { return Vector(t); }) {
+    return testgen_type(argsgen, vectorgen);
+  }
 
-  private:
-    static constexpr bool cplx =
-          krims::IsComplexNumber<typename Vector::scalar_type>::value;
-    static constexpr double genscale = cplx ? 0.8 : 1.0;
+ private:
+  static constexpr bool cplx =
+        krims::IsComplexNumber<typename Vector::scalar_type>::value;
+  static constexpr double genscale = cplx ? 0.8 : 1.0;
 };
 
 /** \brief Standard test functions which test a certain
@@ -88,32 +82,32 @@ struct GeneratorLibrary {
  **/
 template <typename Model, typename Sut>
 struct ComparativeTests : public indexable_tests::ComparativeTests<Model, Sut> {
-    typedef indexable_tests::ComparativeTests<Model, Sut> base_type;
-    typedef typename base_type::model_type model_type;
-    typedef typename base_type::sut_type sut_type;
-    typedef typename base_type::size_type size_type;
-    typedef typename base_type::scalar_type scalar_type;
-    typedef typename base_type::real_type real_type;
+  typedef indexable_tests::ComparativeTests<Model, Sut> base_type;
+  typedef typename base_type::model_type model_type;
+  typedef typename base_type::sut_type sut_type;
+  typedef typename base_type::size_type size_type;
+  typedef typename base_type::scalar_type scalar_type;
+  typedef typename base_type::real_type real_type;
 
-    // TODO test swap function!
+  // TODO test swap function!
 
-    /** Test read-only element access via () at random places */
-    linalgwrap_declare_comptest(test_element_access);
+  /** Test read-only element access via () at random places */
+  linalgwrap_declare_comptest(test_element_access);
 
-    /** Test the l1 norm function */
-    linalgwrap_declare_comptest(test_norm_l1);
+  /** Test the l1 norm function */
+  linalgwrap_declare_comptest(test_norm_l1);
 
-    /** Test the linf norm function */
-    linalgwrap_declare_comptest(test_norm_linf);
+  /** Test the linf norm function */
+  linalgwrap_declare_comptest(test_norm_linf);
 
-    /** Test the frobenius norm functions (norm_frobenius and
-     * norm_frobenius_squared) */
-    linalgwrap_declare_comptest(test_norm_l2);
+  /** Test the frobenius norm functions (norm_frobenius and
+   * norm_frobenius_squared) */
+  linalgwrap_declare_comptest(test_norm_l2);
 
-    /** Run all comparative tests (including the ones from indexable_tests) */
-    template <typename Args>
-    static void run_all(const RCTestableGenerator<Model, Sut, Args>& gen,
-                        const std::string& prefix);
+  /** Run all comparative tests (including the ones from indexable_tests) */
+  template <typename Args>
+  static void run_all(const RCTestableGenerator<Model, Sut, Args>& gen,
+                      const std::string& prefix);
 };
 
 //
@@ -121,55 +115,51 @@ struct ComparativeTests : public indexable_tests::ComparativeTests<Model, Sut> {
 //
 
 linalgwrap_define_comptest(test_element_access) {
-    size_type i = *gen::inRange<size_type>(0u, model.size()).as("index");
-    RC_ASSERT_NC(model(i) == numcomp(sut(i)).tolerance(tolerance));
+  size_type i = *gen::inRange<size_type>(0u, model.size()).as("index");
+  RC_ASSERT_NC(model(i) == numcomp(sut(i)).tolerance(tolerance));
 }
 
 linalgwrap_define_comptest(test_norm_l1) {
-    real_type norm{0};
-    for (size_type i = 0; i < model.n_elem(); ++i) {
-        norm += std::abs(model[i]);
-    }
-    RC_ASSERT_NC(norm_l1(sut) == numcomp(norm).tolerance(tolerance));
+  real_type norm{0};
+  for (size_type i = 0; i < model.n_elem(); ++i) {
+    norm += std::abs(model[i]);
+  }
+  RC_ASSERT_NC(norm_l1(sut) == numcomp(norm).tolerance(tolerance));
 }
 
 linalgwrap_define_comptest(test_norm_linf) {
-    real_type norm{0};
-    for (size_type i = 0; i < model.n_elem(); ++i) {
-        norm = std::max(norm, std::abs(model[i]));
-    }
-    RC_ASSERT_NC(norm_linf(sut) == numcomp(norm).tolerance(tolerance));
+  real_type norm{0};
+  for (size_type i = 0; i < model.n_elem(); ++i) {
+    norm = std::max(norm, std::abs(model[i]));
+  }
+  RC_ASSERT_NC(norm_linf(sut) == numcomp(norm).tolerance(tolerance));
 }
 
 linalgwrap_define_comptest(test_norm_l2) {
-    real_type norm_squared{0};
-    for (size_type i = 0; i < model.n_elem(); ++i) {
-        norm_squared += std::abs(model[i]) * std::abs(model[i]);
-    }
-    real_type norm = std::sqrt(norm_squared);
+  real_type norm_squared{0};
+  for (size_type i = 0; i < model.n_elem(); ++i) {
+    norm_squared += std::abs(model[i]) * std::abs(model[i]);
+  }
+  real_type norm = std::sqrt(norm_squared);
 
-    RC_ASSERT_NC(norm_l2_squared(sut) ==
-                 numcomp(norm_squared).tolerance(tolerance));
-    RC_ASSERT_NC(norm_l2(sut) == numcomp(norm).tolerance(tolerance));
+  RC_ASSERT_NC(norm_l2_squared(sut) == numcomp(norm_squared).tolerance(tolerance));
+  RC_ASSERT_NC(norm_l2(sut) == numcomp(norm).tolerance(tolerance));
 }
 
 template <typename Model, typename Sut>
 template <typename Args>
 void ComparativeTests<Model, Sut>::run_all(
-      const RCTestableGenerator<Model, Sut, Args>& gen,
-      const std::string& prefix) {
-    base_type::run_all(gen, prefix);
+      const RCTestableGenerator<Model, Sut, Args>& gen, const std::string& prefix) {
+  base_type::run_all(gen, prefix);
 
-    const NumCompAccuracyLevel eps = NumCompAccuracyLevel::MachinePrecision;
-    const NumCompAccuracyLevel eps10 =
-          NumCompAccuracyLevel::TenMachinePrecision;
+  const NumCompAccuracyLevel eps = NumCompAccuracyLevel::MachinePrecision;
+  const NumCompAccuracyLevel eps10 = NumCompAccuracyLevel::TenMachinePrecision;
 
-    CHECK(gen.run_test(prefix + "Element access via ()", test_element_access,
-                       eps));
+  CHECK(gen.run_test(prefix + "Element access via ()", test_element_access, eps));
 
-    CHECK(gen.run_test(prefix + "l1 norm", test_norm_l1, eps10));
-    CHECK(gen.run_test(prefix + "l2 norm", test_norm_l2, eps10));
-    CHECK(gen.run_test(prefix + "linf norm", test_norm_linf, eps10));
+  CHECK(gen.run_test(prefix + "l1 norm", test_norm_l1, eps10));
+  CHECK(gen.run_test(prefix + "l2 norm", test_norm_l2, eps10));
+  CHECK(gen.run_test(prefix + "linf norm", test_norm_linf, eps10));
 }
 
 }  // vector_tests

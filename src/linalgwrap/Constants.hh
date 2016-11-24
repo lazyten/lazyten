@@ -26,35 +26,33 @@ namespace linalgwrap {
 /** Struct to hold constants for various data types */
 template <typename T>
 struct Constants {
-    typedef T type;
+  typedef T type;
 
-    //! Constant representing 0
-    static constexpr type zero = type(0.);
+  //! Constant representing 0
+  static constexpr type zero = type(0.);
 
-    //! Constant representing 1
-    static constexpr type one = type(1.);
+  //! Constant representing 1
+  static constexpr type one = type(1.);
 
-    /** \brief Constant which should be used for invalid values
-     *
-     * \note This value may well be a valid ``type`` value, so
-     * do not check against it in order to see if the ``type`` value
-     * is invalid.
-     */
-    static constexpr type invalid =
-          std::numeric_limits<type>::has_signaling_NaN
-                ? std::numeric_limits<type>::signaling_NaN()
-                : std::numeric_limits<type>::max();
+  /** \brief Constant which should be used for invalid values
+   *
+   * \note This value may well be a valid ``type`` value, so
+   * do not check against it in order to see if the ``type`` value
+   * is invalid.
+   */
+  static constexpr type invalid = std::numeric_limits<type>::has_signaling_NaN
+                                        ? std::numeric_limits<type>::signaling_NaN()
+                                        : std::numeric_limits<type>::max();
 
-    /** \brief Constant which should be used to signal
-     *  that all available eigenvalues, vectors, whatever should be used
-     *  or computed.
-     */
-    static constexpr type all = invalid;
+  /** \brief Constant which should be used to signal
+   *  that all available eigenvalues, vectors, whatever should be used
+   *  or computed.
+   */
+  static constexpr type all = invalid;
 
-    /** \brief Constant which gives the default numerical tolerance to use
-     *  for a number of checks */
-    static constexpr type default_tolerance =
-          std::numeric_limits<type>::epsilon();
+  /** \brief Constant which gives the default numerical tolerance to use
+   *  for a number of checks */
+  static constexpr type default_tolerance = std::numeric_limits<type>::epsilon();
 };
 
 template <typename T>

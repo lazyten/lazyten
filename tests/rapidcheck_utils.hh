@@ -34,21 +34,20 @@ namespace gen {
 
 // TODO implement into rapidcheck in some sensible way
 template <typename Model, typename GenerationFunc>
-auto commandsScaledLength(const Model &initialState, double scale,
-                          GenerationFunc &&genFunc)
+auto commandsScaledLength(const Model& initialState, double scale,
+                          GenerationFunc&& genFunc)
       -> decltype(commands<Model>(initialState, genFunc)) {
 
-    /// Generate a sequence of commands where the commands themself
-    /// get passed the size ``size``.
-    auto commands_with_size = [=](int size) {
-        return commands<Model>(initialState, [=](const Model &state) {
-            return rc::gen::resize(size, genFunc(state));
-        });
-    };
-
-    return rc::gen::withSize([=](int size) {
-        return rc::gen::scale(scale, commands_with_size(size));
+  /// Generate a sequence of commands where the commands themself
+  /// get passed the size ``size``.
+  auto commands_with_size = [=](int size) {
+    return commands<Model>(initialState, [=](const Model& state) {
+      return rc::gen::resize(size, genFunc(state));
     });
+  };
+
+  return rc::gen::withSize(
+        [=](int size) { return rc::gen::scale(scale, commands_with_size(size)); });
 }
 
 }  // namespace gen
@@ -66,14 +65,14 @@ namespace rapidcheck_utils {
 
 // TODO use until something better exists
 template <typename Model, typename Sut, typename GenFunc>
-void state_check_scaled(const Model &initialState, Sut &sut, double scale,
-                        GenFunc &&generationFunc) {
+void state_check_scaled(const Model& initialState, Sut& sut, double scale,
+                        GenFunc&& generationFunc) {
 
-    const auto commandsGenScaled = *rc::state::gen::commandsScaledLength(
-          initialState, scale, generationFunc);
+  const auto commandsGenScaled =
+        *rc::state::gen::commandsScaledLength(initialState, scale, generationFunc);
 
-    // Run the thing:
-    runAll(commandsGenScaled, initialState, sut);
+  // Run the thing:
+  runAll(commandsGenScaled, initialState, sut);
 }
 
 }  // matrix_test_utils

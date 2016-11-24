@@ -32,7 +32,7 @@ namespace gen {
  **/
 template <typename Value>
 rc::Gen<Value> numeric_nonZero() {
-    return rc::gen::distinctFrom(gen::numeric<Value>(), 0.0);
+  return rc::gen::distinctFrom(gen::numeric<Value>(), 0.0);
 }
 
 }  // gen

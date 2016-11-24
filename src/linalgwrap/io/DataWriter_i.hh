@@ -44,71 +44,68 @@ namespace io {
  */
 template <typename Scalar>
 class DataWriter_i : public krims::Subscribable {
-  public:
-    /** Write a labelled matrix to the ostream under the format represented by
-     * this class.
-     *  Use the provided label string to indicate the matrix
-     *
-     * \return Is the writer still in a good state?
-     *  */
-    virtual bool write(const std::string& label,
-                       const Matrix_i<Scalar>& mat) = 0;
+ public:
+  /** Write a labelled matrix to the ostream under the format represented by
+   * this class.
+   *  Use the provided label string to indicate the matrix
+   *
+   * \return Is the writer still in a good state?
+   *  */
+  virtual bool write(const std::string& label, const Matrix_i<Scalar>& mat) = 0;
 
-    /** Write a non-labelled matrix to the stream represented by this class
-     * under the format represented by this class
-     *
-     * \return Is the writer still in a good state?
-     * */
-    virtual bool write(const Matrix_i<Scalar>& mat) = 0;
+  /** Write a non-labelled matrix to the stream represented by this class
+   * under the format represented by this class
+   *
+   * \return Is the writer still in a good state?
+   * */
+  virtual bool write(const Matrix_i<Scalar>& mat) = 0;
 
-    /** Write a labelled multivector to the ostream under the format represented
-     * by
-     * this class.
-     *  Use the provided label string to indicate the multivector
-     *
-     * \return Is the writer still in a good state?
-     *  */
-    virtual bool write(const std::string& label,
-                       const MultiVector<Vector_i<Scalar>>& vecs) = 0;
+  /** Write a labelled multivector to the ostream under the format represented
+   * by
+   * this class.
+   *  Use the provided label string to indicate the multivector
+   *
+   * \return Is the writer still in a good state?
+   *  */
+  virtual bool write(const std::string& label,
+                     const MultiVector<Vector_i<Scalar>>& vecs) = 0;
 
-    /** Write a non-labelled multivector to the stream represented by this class
-     * under the format represented by this class
-     *
-     * \return Is the writer still in a good state?
-     * */
-    virtual bool write(const MultiVector<Vector_i<Scalar>>& vecs) = 0;
+  /** Write a non-labelled multivector to the stream represented by this class
+   * under the format represented by this class
+   *
+   * \return Is the writer still in a good state?
+   * */
+  virtual bool write(const MultiVector<Vector_i<Scalar>>& vecs) = 0;
 
-    /** Write a comment string
-     *
-     * \return Is the writer still in a good state?
-     * **/
-    virtual bool write_comment(const std::string&) = 0;
+  /** Write a comment string
+   *
+   * \return Is the writer still in a good state?
+   * **/
+  virtual bool write_comment(const std::string&) = 0;
 
-    /** Write an empty line
-     *
-     * \return Is the writer still in a good state?
-     * */
-    virtual bool write_empty_line() = 0;
+  /** Write an empty line
+   *
+   * \return Is the writer still in a good state?
+   * */
+  virtual bool write_empty_line() = 0;
 
-    /** Write a string verbatim as it is.
-     *
-     * \return Is the writer still in a good state?
-     * */
-    virtual bool write_verbatim(const std::string& s) = 0;
+  /** Write a string verbatim as it is.
+   *
+   * \return Is the writer still in a good state?
+   * */
+  virtual bool write_verbatim(const std::string& s) = 0;
 
-    /** Is the writer still in a good state? */
-    virtual bool good() const = 0;
+  /** Is the writer still in a good state? */
+  virtual bool good() const = 0;
 
-    /** Sanitise a label string, such that it satisfies the required format */
-    virtual std::string normalise_label(const std::string& label) const {
-        return label;
-    }
+  /** Sanitise a label string, such that it satisfies the required format */
+  virtual std::string normalise_label(const std::string& label) const { return label; }
 
-    /** Check whether a label string is in the required format.*/
-    virtual bool is_valid_label(const std::string&) const { return true; }
+  /** Check whether a label string is in the required format.*/
+  virtual bool is_valid_label(const std::string&) const { return true; }
 
-    /** Is the writer still in a good state? */
-    operator bool() const { return good(); }
+  /** Is the writer still in a good state? */
+  operator bool() const { return good(); }
 };
 
 }  // namespace io

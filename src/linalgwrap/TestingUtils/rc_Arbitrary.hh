@@ -30,9 +30,9 @@ namespace rc {
 
 template <typename Scalar>
 struct Arbitrary<std::complex<Scalar>> {
-    static Gen<std::complex<Scalar>> arbitrary() {
-        return rc::gen::construct<std::complex<Scalar>>(
-              rc::gen::arbitrary<Scalar>(), rc::gen::arbitrary<Scalar>());
-    }
+  static Gen<std::complex<Scalar>> arbitrary() {
+    return rc::gen::construct<std::complex<Scalar>>(rc::gen::arbitrary<Scalar>(),
+                                                    rc::gen::arbitrary<Scalar>());
+  }
 };
 }  // namespace rc

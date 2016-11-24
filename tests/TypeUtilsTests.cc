@@ -28,41 +28,36 @@ namespace type_utils_tests {
 
 template <typename Scalar>
 class Tests {
-    typedef SmallMatrix<Scalar> mat_type;
-    typedef SmallVector<Scalar> vec_type;
-    typedef LazyMatrixWrapper<mat_type> lazy_mat_type;
+  typedef SmallMatrix<Scalar> mat_type;
+  typedef SmallVector<Scalar> vec_type;
+  typedef LazyMatrixWrapper<mat_type> lazy_mat_type;
 
-    typedef krims::RealTypeOf<Scalar> real_type;
-    static constexpr bool isComplex = krims::IsComplexNumber<Scalar>::value;
+  typedef krims::RealTypeOf<Scalar> real_type;
+  static constexpr bool isComplex = krims::IsComplexNumber<Scalar>::value;
 
-    static_assert(
-          std::is_same<mat_type, typename StoredTypeOf<mat_type>::type>::value,
-          "StoredTypeOf with stored matrix failed.");
-    static_assert(
-          std::is_same<mat_type,
-                       typename StoredTypeOf<lazy_mat_type>::type>::value,
-          "StoredTypeOf with lazy matrix failed.");
-    static_assert(HasComplexScalar<mat_type>::value || !isComplex,
-                  "HasComplexScalar with stored matrix");
-    static_assert(HasComplexScalar<vec_type>::value || !isComplex,
-                  "HasComplexScalar with stored vector");
-    static_assert(HasComplexScalar<lazy_mat_type>::value || !isComplex,
-                  "HasComplexScalar with lazy matrix");
+  static_assert(std::is_same<mat_type, typename StoredTypeOf<mat_type>::type>::value,
+                "StoredTypeOf with stored matrix failed.");
+  static_assert(std::is_same<mat_type, typename StoredTypeOf<lazy_mat_type>::type>::value,
+                "StoredTypeOf with lazy matrix failed.");
+  static_assert(HasComplexScalar<mat_type>::value || !isComplex,
+                "HasComplexScalar with stored matrix");
+  static_assert(HasComplexScalar<vec_type>::value || !isComplex,
+                "HasComplexScalar with stored vector");
+  static_assert(HasComplexScalar<lazy_mat_type>::value || !isComplex,
+                "HasComplexScalar with lazy matrix");
 
-    // References and const
-    static_assert(
-          std::is_same<mat_type, typename StoredTypeOf<mat_type&>::type>::value,
-          "StoredTypeOf with stored matrix lvalue failed.");
-    static_assert(
-          std::is_same<mat_type,
-                       typename StoredTypeOf<lazy_mat_type&&>::type>::value,
-          "StoredTypeOf with lazy matrix rvalue failed.");
-    static_assert(HasComplexScalar<const mat_type>::value || !isComplex,
-                  "HasComplexScalar with const stored matrix");
-    static_assert(HasComplexScalar<const vec_type&&>::value || !isComplex,
-                  "HasComplexScalar with const stored vector reference");
-    static_assert(HasComplexScalar<lazy_mat_type&>::value || !isComplex,
-                  "HasComplexScalar with lazy matrix reference");
+  // References and const
+  static_assert(std::is_same<mat_type, typename StoredTypeOf<mat_type&>::type>::value,
+                "StoredTypeOf with stored matrix lvalue failed.");
+  static_assert(
+        std::is_same<mat_type, typename StoredTypeOf<lazy_mat_type&&>::type>::value,
+        "StoredTypeOf with lazy matrix rvalue failed.");
+  static_assert(HasComplexScalar<const mat_type>::value || !isComplex,
+                "HasComplexScalar with const stored matrix");
+  static_assert(HasComplexScalar<const vec_type&&>::value || !isComplex,
+                "HasComplexScalar with const stored vector reference");
+  static_assert(HasComplexScalar<lazy_mat_type&>::value || !isComplex,
+                "HasComplexScalar with lazy matrix reference");
 };
 
 // Explicit instantiation of test cases:

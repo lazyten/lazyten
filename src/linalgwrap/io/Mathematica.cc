@@ -25,10 +25,9 @@ namespace io {
 Mathematica::Mathematica(int precision)
       : m_thresh{1e-16}, m_check_for_thresh{false}, m_precision{precision} {}
 
-Mathematica::Mathematica(double thresh, int precision)
-      : Mathematica{precision} {
-    m_thresh = thresh;
-    m_check_for_thresh = true;
+Mathematica::Mathematica(double thresh, int precision) : Mathematica{precision} {
+  m_thresh = thresh;
+  m_check_for_thresh = true;
 }
 
 const std::vector<std::string> Mathematica::extensions{"m"};

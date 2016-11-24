@@ -29,20 +29,18 @@ namespace rc {
 
 template <typename Scalar>
 struct Arbitrary<::linalgwrap::ArmadilloMatrix<Scalar>> {
-    typedef ::linalgwrap::ArmadilloMatrix<Scalar> small_matrix_type;
-    static Gen<small_matrix_type> arbitrary() {
-        return linalgwrap::gen::numeric_tensor<small_matrix_type>();
-    };
+  typedef ::linalgwrap::ArmadilloMatrix<Scalar> small_matrix_type;
+  static Gen<small_matrix_type> arbitrary() {
+    return linalgwrap::gen::numeric_tensor<small_matrix_type>();
+  };
 };
 
 template <typename StoredMatrix>
 struct Arbitrary<::linalgwrap::LazyMatrixWrapper<StoredMatrix>> {
-    typedef typename ::linalgwrap::LazyMatrixWrapper<StoredMatrix>
-          generated_type;
-    static Gen<generated_type> arbitrary() {
-        return gen::map(
-              linalgwrap::gen::numeric_tensor<StoredMatrix>(),
-              [](StoredMatrix m) { return generated_type(std::move(m)); });
-    }
+  typedef typename ::linalgwrap::LazyMatrixWrapper<StoredMatrix> generated_type;
+  static Gen<generated_type> arbitrary() {
+    return gen::map(linalgwrap::gen::numeric_tensor<StoredMatrix>(),
+                    [](StoredMatrix m) { return generated_type(std::move(m)); });
+  }
 };
 }

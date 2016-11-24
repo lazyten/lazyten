@@ -22,36 +22,36 @@
 
 namespace linalgwrap {
 class SolverStateBase {
-  public:
-    /** \brief Default constructor
-     *
-     * The failbit is unset and the iteration count is 0.
-     * */
-    SolverStateBase() : m_failed{false}, m_fail_reason{} {}
+ public:
+  /** \brief Default constructor
+   *
+   * The failbit is unset and the iteration count is 0.
+   * */
+  SolverStateBase() : m_failed{false}, m_fail_reason{} {}
 
-    /** Fail the iteraton and specify a reason why */
-    void fail(std::string reason);
+  /** Fail the iteraton and specify a reason why */
+  void fail(std::string reason);
 
-    /** Clear the failed flag and clear the fail reason. */
-    void clear_failed();
+  /** Clear the failed flag and clear the fail reason. */
+  void clear_failed();
 
-    /** Is the failed bit set? */
-    bool is_failed() const { return m_failed; }
+  /** Is the failed bit set? */
+  bool is_failed() const { return m_failed; }
 
-    /** Get the fail reason
-     *
-     * \note Returns an empty string in case that the iteration has not failed.
-     * An empty string does, however, not imply that the iteration has not
-     * failed.
-     */
-    const std::string& fail_reason() const { return m_fail_reason; }
+  /** Get the fail reason
+   *
+   * \note Returns an empty string in case that the iteration has not failed.
+   * An empty string does, however, not imply that the iteration has not
+   * failed.
+   */
+  const std::string& fail_reason() const { return m_fail_reason; }
 
-  protected:
-    //! Has the iteration failed?
-    bool m_failed;
+ protected:
+  //! Has the iteration failed?
+  bool m_failed;
 
-    //! Why has it failed?
-    std::string m_fail_reason;
+  //! Why has it failed?
+  std::string m_fail_reason;
 };
 
 }  // namespace linalgwrap

@@ -30,24 +30,24 @@ namespace detail {
  */
 template <typename Object, typename Scalar = typename Object::scalar_type>
 void scale_or_set(Object& o, Scalar s) {
-    assert_finite(s);
-    if (s == Constants<Scalar>::zero) {
-        o.set_zero();
-    } else {
-        o *= s;
-    }
+  assert_finite(s);
+  if (s == Constants<Scalar>::zero) {
+    o.set_zero();
+  } else {
+    o *= s;
+  }
 }
 
 /** Specialisation of above */
 template <typename Scalar>
 void scale_or_set(MutableMemoryVector_i<Scalar>& o, Scalar s) {
-    assert_finite(s);
-    if (s == Constants<Scalar>::zero) {
-        o.set_zero();
-    } else {
-        std::transform(std::begin(o), std::end(o), std::begin(o),
-                       [s](Scalar& elem) { return s * elem; });
-    }
+  assert_finite(s);
+  if (s == Constants<Scalar>::zero) {
+    o.set_zero();
+  } else {
+    std::transform(std::begin(o), std::end(o), std::begin(o),
+                   [s](Scalar& elem) { return s * elem; });
+  }
 }
 
 }  // namespace detail

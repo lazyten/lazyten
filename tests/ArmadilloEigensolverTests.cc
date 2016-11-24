@@ -26,60 +26,52 @@ namespace tests {
 using namespace rc;
 
 TEST_CASE("ArmadilloEigensolver", "[ArmadilloEigensolver]") {
-    using namespace eigensolver_tests;
-    typedef ArmadilloMatrix<double> matrix_type;
+  using namespace eigensolver_tests;
+  typedef ArmadilloMatrix<double> matrix_type;
 
-    SECTION("Real hermitian normal problems") {
-        typedef EigensolverTestProblem<matrix_type,
-                                       /* Hermitian= */ true,
-                                       /* general= */ false>
-              tprob_type;
-        typedef ArmadilloEigensolver<typename tprob_type::prob_type>
-              solver_type;
+  SECTION("Real hermitian normal problems") {
+    typedef EigensolverTestProblem<matrix_type,
+                                   /* Hermitian= */ true,
+                                   /* general= */ false>
+          tprob_type;
+    typedef ArmadilloEigensolver<typename tprob_type::prob_type> solver_type;
 
-        TestProblemRunner<tprob_type>(
-              DefaultSolveFunctor<tprob_type, solver_type>())
-              .run_all();
-    }  // real hermitian normal problems
+    TestProblemRunner<tprob_type>(DefaultSolveFunctor<tprob_type, solver_type>())
+          .run_all();
+  }  // real hermitian normal problems
 
-    SECTION("Real hermitian generalised problems") {
-        typedef EigensolverTestProblem<matrix_type,
-                                       /* Hermitian= */ true,
-                                       /* general= */ true>
-              tprob_type;
-        typedef ArmadilloEigensolver<typename tprob_type::prob_type>
-              solver_type;
+  SECTION("Real hermitian generalised problems") {
+    typedef EigensolverTestProblem<matrix_type,
+                                   /* Hermitian= */ true,
+                                   /* general= */ true>
+          tprob_type;
+    typedef ArmadilloEigensolver<typename tprob_type::prob_type> solver_type;
 
-        TestProblemRunner<tprob_type>(
-              DefaultSolveFunctor<tprob_type, solver_type>())
-              .run_all();
-    }  // real hermitian generalised problems
+    TestProblemRunner<tprob_type>(DefaultSolveFunctor<tprob_type, solver_type>())
+          .run_all();
+  }  // real hermitian generalised problems
 
-    SECTION("Real non-hermitian normal problems") {
-        typedef EigensolverTestProblem<matrix_type,
-                                       /* Hermitian= */ false,
-                                       /* general= */ false>
-              tprob_type;
-        typedef ArmadilloEigensolver<typename tprob_type::prob_type>
-              solver_type;
+  SECTION("Real non-hermitian normal problems") {
+    typedef EigensolverTestProblem<matrix_type,
+                                   /* Hermitian= */ false,
+                                   /* general= */ false>
+          tprob_type;
+    typedef ArmadilloEigensolver<typename tprob_type::prob_type> solver_type;
 
-        TestProblemRunner<tprob_type>(
-              DefaultSolveFunctor<tprob_type, solver_type>())
-              .run_all();
-    }  // real non-hermitian normal problems
+    TestProblemRunner<tprob_type>(DefaultSolveFunctor<tprob_type, solver_type>())
+          .run_all();
+  }  // real non-hermitian normal problems
 
-    SECTION("Real non-hermitian generalised problems") {
-        typedef EigensolverTestProblem<matrix_type,
-                                       /* Hermitian= */ false,
-                                       /* general= */ true>
-              tprob_type;
-        typedef ArmadilloEigensolver<typename tprob_type::prob_type>
-              solver_type;
+  SECTION("Real non-hermitian generalised problems") {
+    typedef EigensolverTestProblem<matrix_type,
+                                   /* Hermitian= */ false,
+                                   /* general= */ true>
+          tprob_type;
+    typedef ArmadilloEigensolver<typename tprob_type::prob_type> solver_type;
 
-        TestProblemRunner<tprob_type>(
-              DefaultSolveFunctor<tprob_type, solver_type>())
-              .run_all();
-    }  // real non-hermitian generalised problems
+    TestProblemRunner<tprob_type>(DefaultSolveFunctor<tprob_type, solver_type>())
+          .run_all();
+  }  // real non-hermitian generalised problems
 
 }  // ArmadilloEigensolver
 }  // tests

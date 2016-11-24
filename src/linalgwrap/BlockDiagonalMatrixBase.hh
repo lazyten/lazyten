@@ -57,23 +57,22 @@ class BlockDiagonalMatrixTypeTraits<> {};
 /** Explicit specialisation of type traits class for a matrix object with
  *  exactly one matrix  */
 template <typename Matrix>
-class BlockDiagonalMatrixTypeTraits<Matrix>
-      : public BlockDiagonalMatrixTypeTraits<> {
-  public:
-    typedef typename std::remove_reference<Matrix>::type matrix_type;
-    typedef typename matrix_type::size_type size_type;
-    typedef typename matrix_type::scalar_type scalar_type;
+class BlockDiagonalMatrixTypeTraits<Matrix> : public BlockDiagonalMatrixTypeTraits<> {
+ public:
+  typedef typename std::remove_reference<Matrix>::type matrix_type;
+  typedef typename matrix_type::size_type size_type;
+  typedef typename matrix_type::scalar_type scalar_type;
 
-    // Check that the matrices are of a sensible type
-    static_assert(IsStoredMatrix<Matrix>::value || IsLazyMatrix<Matrix>::value,
-                  "Constituents of BlockDiagonalMatrix objects need to be "
-                  "stored or lazy.");
-    static_assert(!IsBlockDiagonalMatrix<Matrix>::value,
-                  "Constituents of BlockDiagonalMatrix objects cannot be "
-                  "BlockDiagonalMatrix objects themself.");
+  // Check that the matrices are of a sensible type
+  static_assert(IsStoredMatrix<Matrix>::value || IsLazyMatrix<Matrix>::value,
+                "Constituents of BlockDiagonalMatrix objects need to be "
+                "stored or lazy.");
+  static_assert(!IsBlockDiagonalMatrix<Matrix>::value,
+                "Constituents of BlockDiagonalMatrix objects cannot be "
+                "BlockDiagonalMatrix objects themself.");
 
-    //! Are all matrices in this diagonal matrix stored?
-    static bool constexpr all_stored = IsStoredMatrix<Matrix>::value;
+  //! Are all matrices in this diagonal matrix stored?
+  static bool constexpr all_stored = IsStoredMatrix<Matrix>::value;
 };
 
 /** Explicit specialisation of type traits class for a matrix object with
@@ -81,31 +80,29 @@ class BlockDiagonalMatrixTypeTraits<Matrix>
 template <typename Matrix, typename... Matrices>
 class BlockDiagonalMatrixTypeTraits<Matrix, Matrices...>
       : public BlockDiagonalMatrixTypeTraits<Matrices...> {
-  public:
-    typedef BlockDiagonalMatrixTypeTraits<Matrices...> base_type;
-    typedef typename base_type::size_type size_type;
-    typedef typename base_type::scalar_type scalar_type;
+ public:
+  typedef BlockDiagonalMatrixTypeTraits<Matrices...> base_type;
+  typedef typename base_type::size_type size_type;
+  typedef typename base_type::scalar_type scalar_type;
 
-    // Check that size and scalar types agree.
-    static_assert(std::is_same<size_type, typename Matrix::size_type>::value,
-                  "All constituent matrices of a block diagonal matrix need to "
-                  "have the same size type");
-    static_assert(
-          std::is_same<scalar_type, typename Matrix::scalar_type>::value,
-          "All constituent matrices of a block diagonal matrix need to have "
-          "the same scalar type");
+  // Check that size and scalar types agree.
+  static_assert(std::is_same<size_type, typename Matrix::size_type>::value,
+                "All constituent matrices of a block diagonal matrix need to "
+                "have the same size type");
+  static_assert(std::is_same<scalar_type, typename Matrix::scalar_type>::value,
+                "All constituent matrices of a block diagonal matrix need to have "
+                "the same scalar type");
 
-    // Check that the matrices are of a sensible type
-    static_assert(
-          IsMatrix<Matrix>::value,
-          "Constituents of BlockDiagonalMatrix objects need to be matrices.");
-    static_assert(!IsBlockDiagonalMatrix<Matrix>::value,
-                  "Constituents of BlockDiagonalMatrix objects cannot be "
-                  "BlockDiagonalMatrix objects themself.");
+  // Check that the matrices are of a sensible type
+  static_assert(IsMatrix<Matrix>::value,
+                "Constituents of BlockDiagonalMatrix objects need to be matrices.");
+  static_assert(!IsBlockDiagonalMatrix<Matrix>::value,
+                "Constituents of BlockDiagonalMatrix objects cannot be "
+                "BlockDiagonalMatrix objects themself.");
 
-    //! Are all matrices in this diagonal matrix stored matrices?
-    static bool constexpr all_stored =
-          base_type::all_stored && IsStoredMatrix<Matrix>::value;
+  //! Are all matrices in this diagonal matrix stored matrices?
+  static bool constexpr all_stored =
+        base_type::all_stored && IsStoredMatrix<Matrix>::value;
 };
 }  // namespace detail
 
@@ -121,34 +118,32 @@ class BlockDiagonalMatrixTypeTraits<Matrix, Matrices...>
 template <typename... Matrices>
 class BlockDiagonalMatrixBase
       : detail::BlockDiagonalMatrixTypeTraits<Matrices...>,
-        public Matrix_i<typename detail::BlockDiagonalMatrixTypeTraits<
-              Matrices...>::scalar_type> {
-    /* TODO Implementation of StoredMatrix_i interface
+        public Matrix_i<
+              typename detail::BlockDiagonalMatrixTypeTraits<Matrices...>::scalar_type> {
+  /* TODO Implementation of StoredMatrix_i interface
 public std::conditional<
-  BlockDiagonalMatrixTypeTraits<Matrices...>::all_stored,
-  StoredMatrix_i<typename BlockDiagonalMatrixTypeTraits<
-        Matrices...>::scalar_type>,
-  Matrix_i<typename BlockDiagonalMatrixTypeTraits<
-        Matrices...>::scalar_type>>::type {
-        */
-  public:
-    typedef detail::BlockDiagonalMatrixTypeTraits<Matrices...> traits_type;
-    typedef typename traits_type::size_type size_type;
-    typedef typename traits_type::scalar_type scalar_type;
+BlockDiagonalMatrixTypeTraits<Matrices...>::all_stored,
+StoredMatrix_i<typename BlockDiagonalMatrixTypeTraits<
+      Matrices...>::scalar_type>,
+Matrix_i<typename BlockDiagonalMatrixTypeTraits<
+      Matrices...>::scalar_type>>::type {
+      */
+ public:
+  typedef detail::BlockDiagonalMatrixTypeTraits<Matrices...> traits_type;
+  typedef typename traits_type::size_type size_type;
+  typedef typename traits_type::scalar_type scalar_type;
 
-    typedef typename std::conditional<traits_type::all_stored,
-                                      StoredMatrix_i<scalar_type>,
-                                      Matrix_i<scalar_type>>::type base_type;
-    static_assert(
-          std::is_same<scalar_type, typename base_type::scalar_type>::value,
-          "Scalar type of base type and of all constituent matrices does not "
-          "agree.");
-    static_assert(std::is_same<size_type, typename base_type::size_type>::value,
-                  "Size type of base type and of all constituent matrices does "
-                  "not agree.");
+  typedef typename std::conditional<traits_type::all_stored, StoredMatrix_i<scalar_type>,
+                                    Matrix_i<scalar_type>>::type base_type;
+  static_assert(std::is_same<scalar_type, typename base_type::scalar_type>::value,
+                "Scalar type of base type and of all constituent matrices does not "
+                "agree.");
+  static_assert(std::is_same<size_type, typename base_type::size_type>::value,
+                "Size type of base type and of all constituent matrices does "
+                "not agree.");
 
-    /** \brief Const access to the matrix blocks */
-    virtual std::tuple<const Matrices&...> blocks() const = 0;
+  /** \brief Const access to the matrix blocks */
+  virtual std::tuple<const Matrices&...> blocks() const = 0;
 };
 
 /** \name BlockDiagonalMatrix operations */
@@ -158,8 +153,8 @@ public std::conditional<
 template <typename... MatricesLHS, typename... MatricesRHS>
 auto operator+(const BlockDiagonalMatrixBase<MatricesLHS...>& lhs,
                const BlockDiagonalMatrixBase<MatricesRHS...>& rhs)
-      -> decltype(make_block_diagonal(tuple_map(detail::PlusFctr{},
-                                                lhs.blocks(), rhs.blocks())));
+      -> decltype(make_block_diagonal(tuple_map(detail::PlusFctr{}, lhs.blocks(),
+                                                rhs.blocks())));
 
 //! Subtract two block diagonal matrices
 template <typename... MatricesLHS, typename... MatricesRHS>
@@ -171,23 +166,21 @@ auto operator-(const BlockDiagonalMatrixBase<MatricesLHS...>& lhs,
 template <typename... MatricesLHS, typename... MatricesRHS>
 auto operator*(const BlockDiagonalMatrixBase<MatricesLHS...>& lhs,
                const BlockDiagonalMatrixBase<MatricesRHS...>& rhs)
-      -> decltype(make_block_diagonal(tuple_map(detail::MultipliesFctr{},
-                                                lhs.blocks(), rhs.blocks())));
+      -> decltype(make_block_diagonal(tuple_map(detail::MultipliesFctr{}, lhs.blocks(),
+                                                rhs.blocks())));
 
 //! Unary minus on a block diagonal matrix
 template <typename... Matrices>
 auto operator-(const BlockDiagonalMatrixBase<Matrices...>& bm)
-      -> decltype(make_block_diagonal(tuple_map(detail::NegateFctr{},
-                                                bm.blocks())));
+      -> decltype(make_block_diagonal(tuple_map(detail::NegateFctr{}, bm.blocks())));
 
 //@{
 //! Scale a block diagonal matrix
 template <typename Matrix, typename... OtherMatrices>
 auto operator*(const BlockDiagonalMatrixBase<Matrix, OtherMatrices...>& bm,
                typename Matrix::scalar_type s)
-      -> decltype(make_block_diagonal(
-            tuple_map(detail::ScaleByFctr<typename Matrix::scalar_type>{s},
-                      bm.blocks())));
+      -> decltype(make_block_diagonal(tuple_map(
+            detail::ScaleByFctr<typename Matrix::scalar_type>{s}, bm.blocks())));
 
 template <typename Matrix, typename... OtherMatrices>
 auto operator*(typename Matrix::scalar_type s,
@@ -207,98 +200,95 @@ auto operator/(const BlockDiagonalMatrixBase<Matrix, OtherMatrices...>& bm,
 template <typename... MatricesLHS, typename... MatricesRHS>
 auto operator+(const BlockDiagonalMatrixBase<MatricesLHS...>& lhs,
                const BlockDiagonalMatrixBase<MatricesRHS...>& rhs)
-      -> decltype(make_block_diagonal(tuple_map(detail::PlusFctr{},
-                                                lhs.blocks(), rhs.blocks()))) {
-    // Generic lambdas are not part of c++11, so we cannot use them
-    // auto plus = [](auto& x, auto& y) { return x + y; };
+      -> decltype(make_block_diagonal(tuple_map(detail::PlusFctr{}, lhs.blocks(),
+                                                rhs.blocks()))) {
+  // Generic lambdas are not part of c++11, so we cannot use them
+  // auto plus = [](auto& x, auto& y) { return x + y; };
 
-    // Apply generic plus functor to all elements of the tuple:
-    auto result = tuple_map(detail::PlusFctr{}, lhs.blocks(), rhs.blocks());
+  // Apply generic plus functor to all elements of the tuple:
+  auto result = tuple_map(detail::PlusFctr{}, lhs.blocks(), rhs.blocks());
 
-    // Return the result enwrapped inside a BlockDiagonalMatrix:
-    return make_block_diagonal(std::move(result));
+  // Return the result enwrapped inside a BlockDiagonalMatrix:
+  return make_block_diagonal(std::move(result));
 }
 
 template <typename... MatricesLHS, typename... MatricesRHS>
 auto operator-(const BlockDiagonalMatrixBase<MatricesLHS...>& lhs,
                const BlockDiagonalMatrixBase<MatricesRHS...>& rhs)
       -> decltype(lhs + (-rhs)) {
-    // Generic lambdas are not part of c++11, so we cannot use them
-    // auto bminus = [](auto& x, auto& y) { return x - y; };
+  // Generic lambdas are not part of c++11, so we cannot use them
+  // auto bminus = [](auto& x, auto& y) { return x - y; };
 
-    // Apply generic minus functor  to all elements of the tuple:
-    auto result = tuple_map(detail::MinusFctr{}, lhs.blocks(), rhs.blocks());
+  // Apply generic minus functor  to all elements of the tuple:
+  auto result = tuple_map(detail::MinusFctr{}, lhs.blocks(), rhs.blocks());
 
-    // Return the result enwrapped inside a BlockDiagonalMatrix:
-    return make_block_diagonal(std::move(result));
+  // Return the result enwrapped inside a BlockDiagonalMatrix:
+  return make_block_diagonal(std::move(result));
 }
 
 template <typename... MatricesLHS, typename... MatricesRHS>
 auto operator*(const BlockDiagonalMatrixBase<MatricesLHS...>& lhs,
                const BlockDiagonalMatrixBase<MatricesRHS...>& rhs)
-      -> decltype(make_block_diagonal(tuple_map(detail::MultipliesFctr{},
-                                                lhs.blocks(), rhs.blocks()))) {
-    // Avoid generic lambda (C++14 and above only)
-    // auto times = [](auto& x, auto& y) { return x * y; };
+      -> decltype(make_block_diagonal(tuple_map(detail::MultipliesFctr{}, lhs.blocks(),
+                                                rhs.blocks()))) {
+  // Avoid generic lambda (C++14 and above only)
+  // auto times = [](auto& x, auto& y) { return x * y; };
 
-    // Apply generic multiplication functor to all elements of the tuple:
-    auto result =
-          tuple_map(detail::MultipliesFctr{}, lhs.blocks(), rhs.blocks());
+  // Apply generic multiplication functor to all elements of the tuple:
+  auto result = tuple_map(detail::MultipliesFctr{}, lhs.blocks(), rhs.blocks());
 
-    // Return the result enwrapped inside a BlockDiagonalMatrix:
-    return make_block_diagonal(std::move(result));
+  // Return the result enwrapped inside a BlockDiagonalMatrix:
+  return make_block_diagonal(std::move(result));
 }
 
 template <typename... Matrices>
 auto operator-(const BlockDiagonalMatrixBase<Matrices...>& bm)
-      -> decltype(make_block_diagonal(tuple_map(detail::NegateFctr{},
-                                                bm.blocks()))) {
-    // Avoid generic lambda (C++14 and above only)
-    // auto uminus = [](auto& x) { return -x; };
+      -> decltype(make_block_diagonal(tuple_map(detail::NegateFctr{}, bm.blocks()))) {
+  // Avoid generic lambda (C++14 and above only)
+  // auto uminus = [](auto& x) { return -x; };
 
-    // Apply generic negation functor to all elements of the tuple:
-    auto result = tuple_map(detail::NegateFctr{}, bm.blocks());
+  // Apply generic negation functor to all elements of the tuple:
+  auto result = tuple_map(detail::NegateFctr{}, bm.blocks());
 
-    // Return the result enwrapped inside a BlockDiagonalMatrix:
-    return make_block_diagonal(std::move(result));
+  // Return the result enwrapped inside a BlockDiagonalMatrix:
+  return make_block_diagonal(std::move(result));
 }
 
 template <typename Matrix, typename... OtherMatrices>
 auto operator*(const BlockDiagonalMatrixBase<Matrix, OtherMatrices...>& bm,
                typename Matrix::scalar_type s)
-      -> decltype(make_block_diagonal(
-            tuple_map(detail::ScaleByFctr<typename Matrix::scalar_type>{s},
-                      bm.blocks()))) {
-    // Avoid generic lambda (C++14 and above only)
-    // auto scalemult = [&](auto& x) { return s * x; };
-    detail::ScaleByFctr<typename Matrix::scalar_type> scalemult{s};
+      -> decltype(make_block_diagonal(tuple_map(
+            detail::ScaleByFctr<typename Matrix::scalar_type>{s}, bm.blocks()))) {
+  // Avoid generic lambda (C++14 and above only)
+  // auto scalemult = [&](auto& x) { return s * x; };
+  detail::ScaleByFctr<typename Matrix::scalar_type> scalemult{s};
 
-    // Apply it to all elements of the tuple:
-    auto result = tuple_map(std::move(scalemult), bm.blocks());
+  // Apply it to all elements of the tuple:
+  auto result = tuple_map(std::move(scalemult), bm.blocks());
 
-    // Return the result enwrapped inside a BlockDiagonalMatrix:
-    return make_block_diagonal(std::move(result));
+  // Return the result enwrapped inside a BlockDiagonalMatrix:
+  return make_block_diagonal(std::move(result));
 }
 
 template <typename Matrix, typename... OtherMatrices>
 auto operator*(typename Matrix::scalar_type s,
                const BlockDiagonalMatrixBase<Matrix, OtherMatrices...>& bm)
       -> decltype(bm * s) {
-    return bm * s;
+  return bm * s;
 }
 
 template <typename Matrix, typename... OtherMatrices>
 auto operator/(const BlockDiagonalMatrixBase<Matrix, OtherMatrices...>& bm,
                typename Matrix::scalar_type s) -> decltype(bm * (1 / s)) {
-    // Avoid generic lambda (C++14 and above only)
-    // auto scalediv = [&](auto& x) { return x / s; };
-    detail::DivideByFctr<typename Matrix::scalar_type> scalediv{s};
+  // Avoid generic lambda (C++14 and above only)
+  // auto scalediv = [&](auto& x) { return x / s; };
+  detail::DivideByFctr<typename Matrix::scalar_type> scalediv{s};
 
-    // Apply it to all elements of the tuple:
-    auto result = tuple_map(std::move(scalediv), bm.blocks());
+  // Apply it to all elements of the tuple:
+  auto result = tuple_map(std::move(scalediv), bm.blocks());
 
-    // Return the result enwrapped inside a BlockDiagonalMatrix:
-    return make_block_diagonal(std::move(result));
+  // Return the result enwrapped inside a BlockDiagonalMatrix:
+  return make_block_diagonal(std::move(result));
 }
 
 }  // namespace linalgwrap

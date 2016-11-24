@@ -30,67 +30,66 @@ namespace linalgwrap {
  */
 template <typename Evalue, typename Evector>
 struct Eigensolution {
-    /** \name Type definitions */
-    ///@{
-    /** The size type used in this class */
-    typedef typename Evector::size_type size_type;
+  /** \name Type definitions */
+  ///@{
+  /** The size type used in this class */
+  typedef typename Evector::size_type size_type;
 
-    /** The type used for the eigenvectors */
-    typedef Evector evector_type;
+  /** The type used for the eigenvectors */
+  typedef Evector evector_type;
 
-    /** The type used for the eigenvalues */
-    typedef Evalue evalue_type;
-    ///@}
+  /** The type used for the eigenvalues */
+  typedef Evalue evalue_type;
+  ///@}
 
-    /* \name Member attributes */
-    ///@{
-    /** Pointer to the eigenvectors */
-    std::shared_ptr<MultiVector<evector_type>> evectors_ptr;
+  /* \name Member attributes */
+  ///@{
+  /** Pointer to the eigenvectors */
+  std::shared_ptr<MultiVector<evector_type>> evectors_ptr;
 
-    /** Pointer to the eigenvalues */
-    std::shared_ptr<std::vector<evalue_type>> evalues_ptr;
-    ///@}
+  /** Pointer to the eigenvalues */
+  std::shared_ptr<std::vector<evalue_type>> evalues_ptr;
+  ///@}
 
-    /** \name Convenience access to attributes and properties*/
-    ///@{
-    /** The number of eigenpairs */
-    size_type n_ep() const { return evalues_ptr->size(); }
+  /** \name Convenience access to attributes and properties*/
+  ///@{
+  /** The number of eigenpairs */
+  size_type n_ep() const { return evalues_ptr->size(); }
 
-    /**  Access to the eigenvectors
-     *
-     * The ordering of the eigenvectors agrees with the ordering of the
-     * eigenvalues
-     * */
-    MultiVector<evector_type>& evectors() { return *evectors_ptr; }
+  /**  Access to the eigenvectors
+   *
+   * The ordering of the eigenvectors agrees with the ordering of the
+   * eigenvalues
+   * */
+  MultiVector<evector_type>& evectors() { return *evectors_ptr; }
 
-    /** Access to the eigenvectors non-const version. */
-    const MultiVector<evector_type>& evectors() const { return *evectors_ptr; }
+  /** Access to the eigenvectors non-const version. */
+  const MultiVector<evector_type>& evectors() const { return *evectors_ptr; }
 
-    /** Access to the eigenvalues
-     *
-     * The eigenvectors are by convention ordered by arithmetic value (real
-     * eigenvalues)
-     * or magnitude (complex eigenvalues)
-     * */
-    std::vector<evalue_type>& evalues() { return *evalues_ptr; }
+  /** Access to the eigenvalues
+   *
+   * The eigenvectors are by convention ordered by arithmetic value (real
+   * eigenvalues)
+   * or magnitude (complex eigenvalues)
+   * */
+  std::vector<evalue_type>& evalues() { return *evalues_ptr; }
 
-    /** Access to the eigenvalues non-const version  */
-    const std::vector<evalue_type>& evalues() const { return *evalues_ptr; }
-    ///@}
+  /** Access to the eigenvalues non-const version  */
+  const std::vector<evalue_type>& evalues() const { return *evalues_ptr; }
+  ///@}
 
-    /** \brief Construct by copying the provided pointers into the inner
-     * structure. */
-    Eigensolution(std::shared_ptr<MultiVector<evector_type>> evectors_ptr_,
-                  std::shared_ptr<std::vector<evalue_type>> evalues_ptr_)
-          : evectors_ptr(std::move(evectors_ptr_)),
-            evalues_ptr(std::move(evalues_ptr_)) {
-        assert_size(evalues_ptr->size(), evectors_ptr->n_vectors());
-    }
+  /** \brief Construct by copying the provided pointers into the inner
+   * structure. */
+  Eigensolution(std::shared_ptr<MultiVector<evector_type>> evectors_ptr_,
+                std::shared_ptr<std::vector<evalue_type>> evalues_ptr_)
+        : evectors_ptr(std::move(evectors_ptr_)), evalues_ptr(std::move(evalues_ptr_)) {
+    assert_size(evalues_ptr->size(), evectors_ptr->n_vectors());
+  }
 
-    /** Default constructor: Allocate empty structures */
-    Eigensolution()
-          : evectors_ptr(new MultiVector<evector_type>{}),
-            evalues_ptr(new std::vector<evalue_type>{}) {}
+  /** Default constructor: Allocate empty structures */
+  Eigensolution()
+        : evectors_ptr(new MultiVector<evector_type>{}),
+          evalues_ptr(new std::vector<evalue_type>{}) {}
 };
 
 namespace detail {
@@ -100,17 +99,17 @@ namespace detail {
  * \tparam MatrixScalar  The scalar type of the problem matrix
  */
 template <bool isHermitian, typename MatrixScalar>
-using Eigenvalue_t_inner = typename std::conditional<
-      isHermitian || krims::IsComplexNumber<MatrixScalar>::value, MatrixScalar,
-      std::complex<MatrixScalar>>::type;
+using Eigenvalue_t_inner =
+      typename std::conditional<isHermitian ||
+                                      krims::IsComplexNumber<MatrixScalar>::value,
+                                MatrixScalar, std::complex<MatrixScalar>>::type;
 // If hermitian or complex, keep type, else make it complex.
 // TODO in theory real eigenvalues should work in this case
 // as well but to keep the interface simple, complex eigenvalues
 // are used in this case as well.
 
 template <bool isHermitian, typename Matrix>
-using Eigenvalue_t =
-      Eigenvalue_t_inner<isHermitian, typename Matrix::scalar_type>;
+using Eigenvalue_t = Eigenvalue_t_inner<isHermitian, typename Matrix::scalar_type>;
 
 /** Determine eigenvector type for an eigenproblem
  *
@@ -118,9 +117,8 @@ using Eigenvalue_t =
  * \tparam Matrix        The problem matrix
  */
 template <bool isHermitian, typename Matrix>
-using Eigenvector_t =
-      typename StoredTypeOf<Matrix>::type::type_family::template vector<
-            Eigenvalue_t<isHermitian, Matrix>>;
+using Eigenvector_t = typename StoredTypeOf<Matrix>::type::type_family::template vector<
+      Eigenvalue_t<isHermitian, Matrix>>;
 // Use vector corresponding to the underlying stored matrix type's
 // type family but of the scalar type of the eigenvalue.
 }  // namespace detail
@@ -142,8 +140,7 @@ using Eigenvector_t =
  *                                eigenvectors
  * */
 template <bool isHermitian, typename Matrix>
-using EigensolutionTypeFor =
-      Eigensolution<detail::Eigenvalue_t<isHermitian, Matrix>,
-                    detail::Eigenvector_t<isHermitian, Matrix>>;
+using EigensolutionTypeFor = Eigensolution<detail::Eigenvalue_t<isHermitian, Matrix>,
+                                           detail::Eigenvector_t<isHermitian, Matrix>>;
 
 }  // namespace linalgwrap

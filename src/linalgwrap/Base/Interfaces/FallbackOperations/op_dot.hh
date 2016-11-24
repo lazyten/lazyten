@@ -41,10 +41,9 @@ dot(const Indexable1& A, const Indexable2& B);
  * Complex conjugation is underdone in the first argument A.
  */
 template <typename Indexable1, typename Indexable2>
-auto cdot(const Indexable1& A, const Indexable2& B)
-      -> decltype(dot(conj(A), B)) {
-    linalgwrap_called_fallback();
-    return dot(conj(A), B);
+auto cdot(const Indexable1& A, const Indexable2& B) -> decltype(dot(conj(A), B)) {
+  linalgwrap_called_fallback();
+  return dot(conj(A), B);
 }
 ///@}
 
@@ -56,14 +55,12 @@ template <typename Indexable1, typename Indexable2>
 typename std::common_type<ValidIndexableScalarT<Indexable1>,
                           ValidIndexableScalarT<Indexable2>>::type
 dot(const Indexable1& A, const Indexable2& B) {
-    assert_size(A.n_elem(), B.n_elem());
-    linalgwrap_called_fallback();
-    typedef typename std::common_type<typename Indexable1::scalar_type,
-                                      typename Indexable2::scalar_type>::type
-          ret_type;
+  assert_size(A.n_elem(), B.n_elem());
+  linalgwrap_called_fallback();
+  typedef typename std::common_type<typename Indexable1::scalar_type,
+                                    typename Indexable2::scalar_type>::type ret_type;
 
-    return std::inner_product(A.begin(), A.end(), B.begin(),
-                              Constants<ret_type>::zero);
+  return std::inner_product(A.begin(), A.end(), B.begin(), Constants<ret_type>::zero);
 }
 
 }  // namespace linalgwrap

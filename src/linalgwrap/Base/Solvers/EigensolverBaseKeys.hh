@@ -24,11 +24,11 @@ namespace linalgwrap {
 /** Struct which contains the keys used for setting the
  *  EigensolverControlBase parameters */
 struct EigensolverBaseKeys {
-    /** The convergence tolerance use. Type: real_type */
-    static const std::string tolerance;
+  /** The convergence tolerance use. Type: real_type */
+  static const std::string tolerance;
 
-    /** Which eigenpairs to compute. Type: std::string */
-    static const std::string which;
+  /** Which eigenpairs to compute. Type: std::string */
+  static const std::string which;
 };
 
 }  // namespace linalgwrap

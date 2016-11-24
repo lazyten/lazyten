@@ -33,21 +33,19 @@ namespace linalgwrap {
  *  */
 template <typename Matrix, typename = void>
 struct StoredTypeOf {
-    // Neither lazy nor stored -> don't have any type
+  // Neither lazy nor stored -> don't have any type
 };
 
 template <typename Matrix>
-struct StoredTypeOf<Matrix,
-                    typename std::enable_if<IsStoredMatrix<
-                          typename std::decay<Matrix>::type>::value>::type> {
-    typedef typename std::decay<Matrix>::type type;
+struct StoredTypeOf<Matrix, typename std::enable_if<IsStoredMatrix<
+                                  typename std::decay<Matrix>::type>::value>::type> {
+  typedef typename std::decay<Matrix>::type type;
 };
 
 template <typename Matrix>
-struct StoredTypeOf<Matrix,
-                    typename std::enable_if<IsLazyMatrix<
-                          typename std::decay<Matrix>::type>::value>::type> {
-    typedef typename std::decay<Matrix>::type::stored_matrix_type type;
+struct StoredTypeOf<Matrix, typename std::enable_if<IsLazyMatrix<
+                                  typename std::decay<Matrix>::type>::value>::type> {
+  typedef typename std::decay<Matrix>::type::stored_matrix_type type;
 };
 //@}
 

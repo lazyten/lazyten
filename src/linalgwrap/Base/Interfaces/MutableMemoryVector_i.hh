@@ -44,74 +44,72 @@ namespace linalgwrap {
  */
 template <typename Scalar>
 class MutableMemoryVector_i : public MutableVector_i<Scalar> {
-  public:
-    typedef MutableVector_i<Scalar> base_type;
-    typedef typename base_type::scalar_type scalar_type;
-    typedef typename base_type::size_type size_type;
+ public:
+  typedef MutableVector_i<Scalar> base_type;
+  typedef typename base_type::scalar_type scalar_type;
+  typedef typename base_type::size_type size_type;
 
-    //! The default iterator types for MutableMemoryVectors
-    //@{
-    typedef scalar_type* iterator;
-    typedef const scalar_type* const_iterator;
-    //@}
+  //! The default iterator types for MutableMemoryVectors
+  //@{
+  typedef scalar_type* iterator;
+  typedef const scalar_type* const_iterator;
+  //@}
 
-    /** \name Data access
-     *        Access to vector data
-     */
-    ///@{
-    /** Access to the underlying memory */
-    virtual scalar_type* memptr() = 0;
+  /** \name Data access
+   *        Access to vector data
+   */
+  ///@{
+  /** Access to the underlying memory */
+  virtual scalar_type* memptr() = 0;
 
-    /** Const access to the underlying memory */
-    virtual const scalar_type* memptr() const = 0;
+  /** Const access to the underlying memory */
+  virtual const scalar_type* memptr() const = 0;
 
-    /** \brief return an element of the vector   */
-    virtual scalar_type operator()(size_type i) const override {
-        return (*this)[i];
-    }
+  /** \brief return an element of the vector   */
+  virtual scalar_type operator()(size_type i) const override { return (*this)[i]; }
 
-    /** \brief return an element of the vector   */
-    virtual scalar_type operator[](size_type i) const override {
-        assert_range(0, i, this->n_elem());
-        return *(memptr() + i);
-    }
+  /** \brief return an element of the vector   */
+  virtual scalar_type operator[](size_type i) const override {
+    assert_range(0, i, this->n_elem());
+    return *(memptr() + i);
+  }
 
-    /** \brief return an element of the vector    */
-    virtual scalar_type& operator()(size_type i) override { return (*this)[i]; }
+  /** \brief return an element of the vector    */
+  virtual scalar_type& operator()(size_type i) override { return (*this)[i]; }
 
-    /** \brief return an element of the vector   */
-    virtual scalar_type& operator[](size_type i) override {
-        assert_range(0, i, this->n_elem());
-        return *(memptr() + i);
-    }
-    ///@}
+  /** \brief return an element of the vector   */
+  virtual scalar_type& operator[](size_type i) override {
+    assert_range(0, i, this->n_elem());
+    return *(memptr() + i);
+  }
+  ///@}
 
-    /** Set all elements of the vector to zero */
-    virtual void set_zero() override {
-        std::fill(begin(), end(), Constants<scalar_type>::zero);
-    }
+  /** Set all elements of the vector to zero */
+  virtual void set_zero() override {
+    std::fill(begin(), end(), Constants<scalar_type>::zero);
+  }
 
-    /** \name Iterators
-     */
-    ///@{
-    /** Return an iterator to the beginning */
-    iterator begin() { return memptr(); }
+  /** \name Iterators
+   */
+  ///@{
+  /** Return an iterator to the beginning */
+  iterator begin() { return memptr(); }
 
-    /** Return a const_iterator to the beginning */
-    const_iterator begin() const { return cbegin(); }
+  /** Return a const_iterator to the beginning */
+  const_iterator begin() const { return cbegin(); }
 
-    /** Return a const_iterator to the beginning */
-    const_iterator cbegin() const { return memptr(); }
+  /** Return a const_iterator to the beginning */
+  const_iterator cbegin() const { return memptr(); }
 
-    /** Return an iterator to the end */
-    iterator end() { return (memptr() + this->n_elem()); }
+  /** Return an iterator to the end */
+  iterator end() { return (memptr() + this->n_elem()); }
 
-    /** Return a const_iterator to the end */
-    const_iterator end() const { return cend(); }
+  /** Return a const_iterator to the end */
+  const_iterator end() const { return cend(); }
 
-    /** Return a const_iterator to the end */
-    const_iterator cend() const { return (memptr() + this->n_elem()); }
-    ///@}
+  /** Return a const_iterator to the end */
+  const_iterator cend() const { return (memptr() + this->n_elem()); }
+  ///@}
 };
 
 //@{
@@ -123,7 +121,6 @@ struct IsMutableMemoryVector : public std::false_type {};
 
 template <typename T>
 struct IsMutableMemoryVector<T, krims::VoidType<typename T::scalar_type>>
-      : public std::is_base_of<MutableMemoryVector_i<typename T::scalar_type>,
-                               T> {};
+      : public std::is_base_of<MutableMemoryVector_i<typename T::scalar_type>, T> {};
 //@}
 }  // namespace linalgwrap

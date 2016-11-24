@@ -47,52 +47,49 @@ DefException1(ExcInvalidDataForFileType, std::string,
  * or sparse matrices) can also be provided when implementing this class.
  * */
 class FileType_i {
-  public:
-    /** Write a labelled matrix to the ostream under the format represented by
-     * this class.
-     *  Use the provided label string to indicate the matrix */
-    template <typename Scalar>
-    void write(std::ostream&, const std::string&,
-               const Matrix_i<Scalar>&) const {
-        assert_dbg(false, krims::ExcNotImplemented());
-    }
+ public:
+  /** Write a labelled matrix to the ostream under the format represented by
+   * this class.
+   *  Use the provided label string to indicate the matrix */
+  template <typename Scalar>
+  void write(std::ostream&, const std::string&, const Matrix_i<Scalar>&) const {
+    assert_dbg(false, krims::ExcNotImplemented());
+  }
 
-    /** Write a non-labelled matrix to the ostream under the format represented
-     * by this class. */
-    template <typename Scalar>
-    void write(std::ostream&, const Matrix_i<Scalar>&) const {
-        assert_dbg(false, krims::ExcNotImplemented());
-    }
+  /** Write a non-labelled matrix to the ostream under the format represented
+   * by this class. */
+  template <typename Scalar>
+  void write(std::ostream&, const Matrix_i<Scalar>&) const {
+    assert_dbg(false, krims::ExcNotImplemented());
+  }
 
-    /** Write a labelled multivector to the ostream under the format represented
-     * by this class.
-     *  Use the provided label string to indicate the multivector
-     */
-    template <typename Scalar>
-    void write(std::ostream&, const std::string&,
-               const MultiVector<Vector_i<Scalar>>&) const {
-        assert_dbg(false, krims::ExcNotImplemented());
-    }
+  /** Write a labelled multivector to the ostream under the format represented
+   * by this class.
+   *  Use the provided label string to indicate the multivector
+   */
+  template <typename Scalar>
+  void write(std::ostream&, const std::string&,
+             const MultiVector<Vector_i<Scalar>>&) const {
+    assert_dbg(false, krims::ExcNotImplemented());
+  }
 
-    /** Write a non-labelled multivector to the stream represented by this class
-     * under the format represented by this class */
-    template <typename Scalar>
-    void write(std::ostream&, const MultiVector<Vector_i<Scalar>>&) const {
-        assert_dbg(false, krims::ExcNotImplemented());
-    }
+  /** Write a non-labelled multivector to the stream represented by this class
+   * under the format represented by this class */
+  template <typename Scalar>
+  void write(std::ostream&, const MultiVector<Vector_i<Scalar>>&) const {
+    assert_dbg(false, krims::ExcNotImplemented());
+  }
 
-    /** Write a comment string **/
-    virtual void write_comment(std::ostream&, const std::string&) const = 0;
+  /** Write a comment string **/
+  virtual void write_comment(std::ostream&, const std::string&) const = 0;
 
-    /** Sanitise a label string, such that it satisfies the requirements of
-     * the FileType */
-    virtual std::string normalise_label(const std::string& label) const {
-        return label;
-    }
+  /** Sanitise a label string, such that it satisfies the requirements of
+   * the FileType */
+  virtual std::string normalise_label(const std::string& label) const { return label; }
 
-    /** Check weather a label string satisfies the requirements of the FileType
-     */
-    virtual bool is_valid_label(const std::string&) const { return true; }
+  /** Check weather a label string satisfies the requirements of the FileType
+   */
+  virtual bool is_valid_label(const std::string&) const { return true; }
 };
 
 }  // namespace io

@@ -27,23 +27,21 @@ namespace linalgwrap {
 ///@{
 //! Check whether two Indexables are equal
 template <typename Indexable1, typename Indexable2>
-typename std::enable_if<IsIndexable<Indexable1>::value &&
-                              IsIndexable<Indexable2>::value,
+typename std::enable_if<IsIndexable<Indexable1>::value && IsIndexable<Indexable2>::value,
                         bool>::type
 operator==(const Indexable1& A, const Indexable2& B) {
-    linalgwrap_called_fallback();
-    if (A.n_elem() != B.n_elem()) return false;
-    return std::equal(A.begin(), A.end(), B.begin());
+  linalgwrap_called_fallback();
+  if (A.n_elem() != B.n_elem()) return false;
+  return std::equal(A.begin(), A.end(), B.begin());
 }
 
 //! Check whether two Indexables are not equal
 template <typename Indexable1, typename Indexable2>
-typename std::enable_if<IsIndexable<Indexable1>::value &&
-                              IsIndexable<Indexable2>::value,
+typename std::enable_if<IsIndexable<Indexable1>::value && IsIndexable<Indexable2>::value,
                         bool>::type
 operator!=(const Indexable1& A, const Indexable2& B) {
-    linalgwrap_called_fallback();
-    return !operator==(A, B);
+  linalgwrap_called_fallback();
+  return !operator==(A, B);
 }
 ///@}
 

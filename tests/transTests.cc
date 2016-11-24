@@ -27,124 +27,124 @@ namespace tests {
 using namespace rc;
 
 TEST_CASE("trans function", "[trans]") {
-    typedef double scalar_type;
-    typedef SmallMatrix<scalar_type> matrix_type;
-    typedef typename matrix_type::size_type size_type;
+  typedef double scalar_type;
+  typedef SmallMatrix<scalar_type> matrix_type;
+  typedef typename matrix_type::size_type size_type;
 
-    SECTION("trans by lvalue") {
-        auto test = [] {
-            auto mat = *gen::numeric_tensor<matrix_type>().as("Inner matrix");
+  SECTION("trans by lvalue") {
+    auto test = [] {
+      auto mat = *gen::numeric_tensor<matrix_type>().as("Inner matrix");
 
-            auto transp = trans(mat);
-            RC_ASSERT(mat.n_rows() == transp.n_cols());
-            RC_ASSERT(mat.n_cols() == transp.n_rows());
-            for (size_type i = 0; i < mat.n_rows(); ++i) {
-                for (size_type j = 0; j < mat.n_cols(); ++j) {
-                    RC_ASSERT(mat(i, j) == transp(j, i));
-                }
-            }
+      auto transp = trans(mat);
+      RC_ASSERT(mat.n_rows() == transp.n_cols());
+      RC_ASSERT(mat.n_cols() == transp.n_rows());
+      for (size_type i = 0; i < mat.n_rows(); ++i) {
+        for (size_type j = 0; j < mat.n_cols(); ++j) {
+          RC_ASSERT(mat(i, j) == transp(j, i));
+        }
+      }
 
-            RC_ASSERT(!transp.owns_inner_matrix());
-        };
-        CHECK(rc::check("trans called with lvalue", test));
-    }
+      RC_ASSERT(!transp.owns_inner_matrix());
+    };
+    CHECK(rc::check("trans called with lvalue", test));
+  }
 
-    SECTION("trans by rvalue") {
-        auto test = [] {
-            auto mat = *gen::numeric_tensor<matrix_type>().as("Inner matrix");
+  SECTION("trans by rvalue") {
+    auto test = [] {
+      auto mat = *gen::numeric_tensor<matrix_type>().as("Inner matrix");
 
-            std::unique_ptr<matrix_type> copyptr(new matrix_type{mat});
-            auto transp = trans(std::move(*copyptr));
+      std::unique_ptr<matrix_type> copyptr(new matrix_type{mat});
+      auto transp = trans(std::move(*copyptr));
 
-            RC_ASSERT(mat.n_rows() == transp.n_cols());
-            RC_ASSERT(mat.n_cols() == transp.n_rows());
-            for (size_type i = 0; i < mat.n_rows(); ++i) {
-                for (size_type j = 0; j < mat.n_cols(); ++j) {
-                    RC_ASSERT(mat(i, j) == transp(j, i));
-                }
-            }
+      RC_ASSERT(mat.n_rows() == transp.n_cols());
+      RC_ASSERT(mat.n_cols() == transp.n_rows());
+      for (size_type i = 0; i < mat.n_rows(); ++i) {
+        for (size_type j = 0; j < mat.n_cols(); ++j) {
+          RC_ASSERT(mat(i, j) == transp(j, i));
+        }
+      }
 
-            RC_ASSERT(transp.owns_inner_matrix());
-            // Check that move really happened, this should not raise an
-            // exception:
-            copyptr.reset();
-        };
-        CHECK(rc::check("trans called with rvalue", test));
-    }
+      RC_ASSERT(transp.owns_inner_matrix());
+      // Check that move really happened, this should not raise an
+      // exception:
+      copyptr.reset();
+    };
+    CHECK(rc::check("trans called with rvalue", test));
+  }
 
-    SECTION("Transposing a trans") {
-        auto test = [] {
-            auto mat = *gen::numeric_tensor<matrix_type>().as("Inner matrix");
+  SECTION("Transposing a trans") {
+    auto test = [] {
+      auto mat = *gen::numeric_tensor<matrix_type>().as("Inner matrix");
 
-            matrix_type copy(mat);
-            auto transp = trans(std::move(copy));
-            auto backtransp = trans(std::move(transp));
+      matrix_type copy(mat);
+      auto transp = trans(std::move(copy));
+      auto backtransp = trans(std::move(transp));
 
-            RC_ASSERT_NC(mat == numcomp(backtransp));
-        };
-        CHECK(rc::check("Transposing a trans", test));
-    }
+      RC_ASSERT_NC(mat == numcomp(backtransp));
+    };
+    CHECK(rc::check("Transposing a trans", test));
+  }
 }  // Testing trans
 
 TEST_CASE("conjtrans function", "[conjtrans]") {
-    // TODO Extend to complex scalar types once these are implemented
-    typedef double scalar_type;
-    typedef SmallMatrix<scalar_type> matrix_type;
-    typedef typename matrix_type::size_type size_type;
+  // TODO Extend to complex scalar types once these are implemented
+  typedef double scalar_type;
+  typedef SmallMatrix<scalar_type> matrix_type;
+  typedef typename matrix_type::size_type size_type;
 
-    SECTION("conjtrans by lvalue") {
-        auto test = [] {
-            auto mat = *gen::numeric_tensor<matrix_type>().as("Inner matrix");
+  SECTION("conjtrans by lvalue") {
+    auto test = [] {
+      auto mat = *gen::numeric_tensor<matrix_type>().as("Inner matrix");
 
-            auto transp = conjtrans(mat);
-            RC_ASSERT(mat.n_rows() == transp.n_cols());
-            RC_ASSERT(mat.n_cols() == transp.n_rows());
-            for (size_type i = 0; i < mat.n_rows(); ++i) {
-                for (size_type j = 0; j < mat.n_cols(); ++j) {
-                    RC_ASSERT(mat(i, j) == transp(j, i));
-                }
-            }
+      auto transp = conjtrans(mat);
+      RC_ASSERT(mat.n_rows() == transp.n_cols());
+      RC_ASSERT(mat.n_cols() == transp.n_rows());
+      for (size_type i = 0; i < mat.n_rows(); ++i) {
+        for (size_type j = 0; j < mat.n_cols(); ++j) {
+          RC_ASSERT(mat(i, j) == transp(j, i));
+        }
+      }
 
-            RC_ASSERT(!transp.owns_inner_matrix());
-        };
-        CHECK(rc::check("conjtrans called with lvalue", test));
-    }
+      RC_ASSERT(!transp.owns_inner_matrix());
+    };
+    CHECK(rc::check("conjtrans called with lvalue", test));
+  }
 
-    SECTION("conjtrans by rvalue") {
-        auto test = [] {
-            auto mat = *gen::numeric_tensor<matrix_type>().as("Inner matrix");
+  SECTION("conjtrans by rvalue") {
+    auto test = [] {
+      auto mat = *gen::numeric_tensor<matrix_type>().as("Inner matrix");
 
-            std::unique_ptr<matrix_type> copyptr(new matrix_type{mat});
-            auto transp = conjtrans(std::move(*copyptr));
+      std::unique_ptr<matrix_type> copyptr(new matrix_type{mat});
+      auto transp = conjtrans(std::move(*copyptr));
 
-            RC_ASSERT(mat.n_rows() == transp.n_cols());
-            RC_ASSERT(mat.n_cols() == transp.n_rows());
-            for (size_type i = 0; i < mat.n_rows(); ++i) {
-                for (size_type j = 0; j < mat.n_cols(); ++j) {
-                    RC_ASSERT(mat(i, j) == transp(j, i));
-                }
-            }
+      RC_ASSERT(mat.n_rows() == transp.n_cols());
+      RC_ASSERT(mat.n_cols() == transp.n_rows());
+      for (size_type i = 0; i < mat.n_rows(); ++i) {
+        for (size_type j = 0; j < mat.n_cols(); ++j) {
+          RC_ASSERT(mat(i, j) == transp(j, i));
+        }
+      }
 
-            RC_ASSERT(transp.owns_inner_matrix());
-            // Check that move really happened, this should not raise an
-            // exception:
-            copyptr.reset();
-        };
-        CHECK(rc::check("conjtrans called with rvalue", test));
-    }
+      RC_ASSERT(transp.owns_inner_matrix());
+      // Check that move really happened, this should not raise an
+      // exception:
+      copyptr.reset();
+    };
+    CHECK(rc::check("conjtrans called with rvalue", test));
+  }
 
-    SECTION("Transposing a conjtrans") {
-        auto test = [] {
-            auto mat = *gen::numeric_tensor<matrix_type>().as("Inner matrix");
+  SECTION("Transposing a conjtrans") {
+    auto test = [] {
+      auto mat = *gen::numeric_tensor<matrix_type>().as("Inner matrix");
 
-            matrix_type copy(mat);
-            auto transp = conjtrans(std::move(copy));
-            auto backtransp = conjtrans(std::move(transp));
+      matrix_type copy(mat);
+      auto transp = conjtrans(std::move(copy));
+      auto backtransp = conjtrans(std::move(transp));
 
-            RC_ASSERT_NC(mat == numcomp(backtransp));
-        };
-        CHECK(rc::check("Transposing a conjtrans", test));
-    }
+      RC_ASSERT_NC(mat == numcomp(backtransp));
+    };
+    CHECK(rc::check("Transposing a conjtrans", test));
+  }
 }  // Testing trans
 
 }  // tests

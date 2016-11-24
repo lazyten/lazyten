@@ -35,71 +35,71 @@ namespace linalgwrap {
  */
 template <typename Eigenproblem>
 class EigensolverStateBase : public SolverStateBase {
-  public:
-    /** \name Type definitions */
-    ///@{
-    /** The type of the eigenproblem */
-    typedef Eigenproblem eproblem_type;
+ public:
+  /** \name Type definitions */
+  ///@{
+  /** The type of the eigenproblem */
+  typedef Eigenproblem eproblem_type;
 
-    /** The stored matrix type of the eigenproblem */
-    typedef typename eproblem_type::stored_matrix_type stored_matrix_type;
+  /** The stored matrix type of the eigenproblem */
+  typedef typename eproblem_type::stored_matrix_type stored_matrix_type;
 
-    /** The size type of the eigenproblem */
-    typedef typename eproblem_type::size_type size_type;
+  /** The size type of the eigenproblem */
+  typedef typename eproblem_type::size_type size_type;
 
-    /** The scalar type of the eigenproblem
-     *  (but not necessarily of the solution) */
-    typedef typename eproblem_type::scalar_type scalar_type;
+  /** The scalar type of the eigenproblem
+   *  (but not necessarily of the solution) */
+  typedef typename eproblem_type::scalar_type scalar_type;
 
-    /** The real type of the eigenproblem */
-    typedef typename eproblem_type::real_type real_type;
+  /** The real type of the eigenproblem */
+  typedef typename eproblem_type::real_type real_type;
 
-    /** The type of the eigensolution object as determined by the
-     * EigensolutionTypeFor using statement. **/
-    typedef EigensolutionTypeFor<eproblem_type::hermitian,
-                                 typename eproblem_type::matrix_diag_type>
-          esoln_type;
+  /** The type of the eigensolution object as determined by the
+   * EigensolutionTypeFor using statement. **/
+  typedef EigensolutionTypeFor<eproblem_type::hermitian,
+                               typename eproblem_type::matrix_diag_type>
+        esoln_type;
 
-    /** The eigenvalue type we use.
-     * \note For details how this type is constructed see the
-     *       EigensolutionTypeFor using statement (in Eigensolution.hh).
-     **/
-    typedef typename esoln_type::evalue_type evalue_type;
+  /** The eigenvalue type we use.
+   * \note For details how this type is constructed see the
+   *       EigensolutionTypeFor using statement (in Eigensolution.hh).
+   **/
+  typedef typename esoln_type::evalue_type evalue_type;
 
-    /** The eigenvector type we use
-     * \note For details how this type is constructed see the Eigensolution_t
-     *using statement.
-     **/
-    typedef typename esoln_type::evector_type evector_type;
-    ///@}
+  /** The eigenvector type we use
+   * \note For details how this type is constructed see the Eigensolution_t
+   *using statement.
+   **/
+  typedef typename esoln_type::evector_type evector_type;
+  ///@}
 
-    /** Access to eigenproblem */
-    const eproblem_type& eigenproblem() const { return m_eigenproblem; }
+  /** Access to eigenproblem */
+  const eproblem_type& eigenproblem() const { return m_eigenproblem; }
 
-    /** Const access to eigensolution */
-    const esoln_type& eigensolution() const { return m_eigensolution; }
+  /** Const access to eigensolution */
+  const esoln_type& eigensolution() const { return m_eigensolution; }
 
-    /** Access to eigensolution*/
-    esoln_type& eigensolution() { return m_eigensolution; }
+  /** Access to eigensolution*/
+  esoln_type& eigensolution() { return m_eigensolution; }
 
-    /** \brief Constructor
-     *
-     * Initialise the eigensolver state from an eigenproblem object,
-     * which is copied into the current object
-     * (This is fine since the eigenproblem object contains only
-     * pointers or refererences)
-     */
-    EigensolverStateBase(const eproblem_type eigenproblem)
-          : m_eigenproblem(std::move(eigenproblem)), m_eigensolution{} {};
+  /** \brief Constructor
+   *
+   * Initialise the eigensolver state from an eigenproblem object,
+   * which is copied into the current object
+   * (This is fine since the eigenproblem object contains only
+   * pointers or refererences)
+   */
+  EigensolverStateBase(const eproblem_type eigenproblem)
+        : m_eigenproblem(std::move(eigenproblem)), m_eigensolution{} {};
 
-  private:
-    /* The eigenproblem we wish to solve (contains only pointers
-     *  ->ok to store) */
-    const eproblem_type m_eigenproblem;
+ private:
+  /* The eigenproblem we wish to solve (contains only pointers
+   *  ->ok to store) */
+  const eproblem_type m_eigenproblem;
 
-    /* The container for the eigensolution (contains only pointers
-     *  ->ok to store) */
-    esoln_type m_eigensolution;
+  /* The container for the eigensolution (contains only pointers
+   *  ->ok to store) */
+  esoln_type m_eigensolution;
 };
 
 //@{
@@ -111,8 +111,7 @@ struct IsEigensolverState : public std::false_type {};
 
 template <typename T>
 struct IsEigensolverState<T, krims::VoidType<typename T::eproblem_type>>
-      : public std::is_base_of<EigensolverStateBase<typename T::eproblem_type>,
-                               T> {};
+      : public std::is_base_of<EigensolverStateBase<typename T::eproblem_type>, T> {};
 //@}
 
 }  // namespace linalgwrap

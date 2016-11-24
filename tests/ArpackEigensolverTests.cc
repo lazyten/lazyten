@@ -27,39 +27,38 @@ namespace tests {
 using namespace rc;
 
 TEST_CASE("ArpackEigensolver", "[ArpackEigensolver]") {
-    using namespace eigensolver_tests;
-    typedef SmallMatrix<double> matrix_type;
+  using namespace eigensolver_tests;
+  typedef SmallMatrix<double> matrix_type;
 
-    /* The filter functor to filter out problems which make no sense
-     * for us here*/
-    auto filter = [](const EigensolverTestProblemBase<matrix_type>& problem) {
-        // Arpack cannot deal with cases where the dimensionality is equal
-        // to the number of eigenpairs to be seeked
-        if (problem.n_ep >= problem.dim) return false;
-        //
-        // Arpack is bad at finding the smallest magnitude eigenvalues
-        if (problem.params.at<std::string>(EigensolverBaseKeys::which, "SR") ==
-            std::string("SM"))
-            return false;
+  /* The filter functor to filter out problems which make no sense
+   * for us here*/
+  auto filter = [](const EigensolverTestProblemBase<matrix_type>& problem) {
+    // Arpack cannot deal with cases where the dimensionality is equal
+    // to the number of eigenpairs to be seeked
+    if (problem.n_ep >= problem.dim) return false;
+    //
+    // Arpack is bad at finding the smallest magnitude eigenvalues
+    if (problem.params.at<std::string>(EigensolverBaseKeys::which, "SR") ==
+        std::string("SM"))
+      return false;
 
-        return true;
-    };
+    return true;
+  };
 
-    SECTION("Real hermitian normal problems") {
-        typedef EigensolverTestProblem<matrix_type,
-                                       /* Hermitian= */ true,
-                                       /* general= */ false>
-              tprob_type;
-        typedef ArpackEigensolver<typename tprob_type::prob_type> solver_type;
+  SECTION("Real hermitian normal problems") {
+    typedef EigensolverTestProblem<matrix_type,
+                                   /* Hermitian= */ true,
+                                   /* general= */ false>
+          tprob_type;
+    typedef ArpackEigensolver<typename tprob_type::prob_type> solver_type;
 
-        TestProblemRunner<tprob_type>(
-              DefaultSolveFunctor<tprob_type, solver_type>())
-              .run_matching(filter);
-    }  // real hermitian normal problems
+    TestProblemRunner<tprob_type>(DefaultSolveFunctor<tprob_type, solver_type>())
+          .run_matching(filter);
+  }  // real hermitian normal problems
 
-    // TODO test real hermitian generalised problems
-    // TODO test real non-hermitian problems
-    // TODO test real non-hermitian generalised problems
+  // TODO test real hermitian generalised problems
+  // TODO test real non-hermitian problems
+  // TODO test real non-hermitian generalised problems
 
 }  // ArpackEigensolver
 

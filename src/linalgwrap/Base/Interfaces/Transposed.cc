@@ -21,17 +21,17 @@
 
 namespace linalgwrap {
 std::ostream& operator<<(std::ostream& o, Transposed mode) {
-    switch (mode) {
-        case Transposed::None:
-            o << "None";
-            break;
-        case Transposed::Trans:
-            o << "Trans";
-            break;
-        case Transposed::ConjTrans:
-            o << "ConjTrans";
-            break;
-    }
-    return o;
+  switch (mode) {
+    case Transposed::None:
+      o << "None";
+      break;
+    case Transposed::Trans:
+      o << "Trans";
+      break;
+    case Transposed::ConjTrans:
+      o << "ConjTrans";
+      break;
+  }
+  return o;
 }
 }  // namespace linalgwrap
