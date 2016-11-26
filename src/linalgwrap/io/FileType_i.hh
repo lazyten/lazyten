@@ -80,6 +80,22 @@ class FileType_i {
     assert_dbg(false, krims::ExcNotImplemented());
   }
 
+  /** Write a labelled scalar under the format represented by this class
+   * \return Is the writer still in a good state?
+   * */
+  template <typename Scalar>
+  void write(std::ostream&, const std::string&, Scalar) const {
+    assert_dbg(false, krims::ExcNotImplemented());
+  }
+
+  /** Write a non-labelled scalar under the format represented by this class
+   * \return Is the writer still in a good state?
+   * */
+  template <typename Scalar>
+  void write(std::ostream&, const std::string&) const {
+    assert_dbg(false, krims::ExcNotImplemented());
+  }
+
   /** Write a comment string **/
   virtual void write_comment(std::ostream&, const std::string&) const = 0;
 

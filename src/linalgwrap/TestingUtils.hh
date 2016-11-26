@@ -18,6 +18,7 @@
 //
 
 #pragma once
+#include "TestingUtils/adjust_phase.hh"
 #include "TestingUtils/gen.hh"
 #include "TestingUtils/krims_NumComp.hh"
 #include "TestingUtils/rc_Arbitrary.hh"

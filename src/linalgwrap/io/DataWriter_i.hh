@@ -77,6 +77,16 @@ class DataWriter_i : public krims::Subscribable {
    * */
   virtual bool write(const MultiVector<Vector_i<Scalar>>& vecs) = 0;
 
+  /** Write a labelled scalar under the format represented by this class
+   * \return Is the writer still in a good state?
+   * */
+  virtual bool write(const std::string& label, Scalar s) = 0;
+
+  /** Write a non-labelled scalar under the format represented by this class
+   * \return Is the writer still in a good state?
+   * */
+  virtual bool write(Scalar s) = 0;
+
   /** Write a comment string
    *
    * \return Is the writer still in a good state?

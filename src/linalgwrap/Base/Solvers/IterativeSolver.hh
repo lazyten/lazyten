@@ -100,8 +100,7 @@ class IterativeSolver : public Base {
 template <typename State>
 void IterativeSolver<State>::start_iteration_step(state_type& s) const {
   // Assert that we are not beyond the iteration count already
-  solver_assert(s.n_iter_count() < max_iter, s,
-                ExcMaximumNumberOfIterationsReached(max_iter));
+  solver_assert(s.n_iter() < max_iter, s, ExcMaximumNumberOfIterationsReached(max_iter));
 
   s.increase_iteration_count();
   base_type::start_iteration_step(s);
