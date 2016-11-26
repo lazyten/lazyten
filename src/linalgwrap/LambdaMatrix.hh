@@ -17,7 +17,5 @@
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "eigensystem.hh"
-namespace linalgwrap {
-const std::string EigensystemKeys::method = "method";
-}  // namespace linalgwrap
+// TODO lazy matrix for which each element is constructed by a lambda expression
+// taking row and column indices as arguments

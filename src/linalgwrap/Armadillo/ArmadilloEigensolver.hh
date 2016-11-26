@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -79,11 +79,6 @@ class ArmadilloEigensolver : public EigensolverBase<State> {
   static_assert(std::is_same<typename Eigenproblem::scalar_type, double>::value,
                 "ArmadilloEigensolver has only been tested for real problems at "
                 "double precision at the moment.");
-
-  static_assert(std::is_same<typename Eigenproblem::matrix_a_type,
-                             typename Eigenproblem::matrix_diag_type>::value,
-                "This eigensolver requires the A matrix and the Diag  matrix "
-                "to be the same object.");
 
   static_assert(std::is_same<typename Eigenproblem::stored_matrix_type,
                              ArmadilloMatrix<typename Eigenproblem::scalar_type>>::value,
@@ -283,7 +278,7 @@ void ArmadilloEigensolver<Eigenproblem, State>::assert_valid_control_params(
   //
   // A and Diag
   //
-  solver_assert(&problem.A() == &problem.Diag(), state,
+  solver_assert((void*)&problem.A() == (void*)&problem.Diag(), state,
                 ExcInvalidSolverParametersEncountered("The matrices A and Diag need "
                                                       "to be the same objects."));
 }

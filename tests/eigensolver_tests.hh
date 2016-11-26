@@ -32,14 +32,41 @@ namespace eigensolver_tests {
 using namespace krims;
 using namespace rc;
 
+/** A default functor for the solvefctn in TestProblemRunner, which is usually
+ *  well-suited for eigensolvers */
+template <typename SolverTraits>
+struct DefaultSolveFunctor {
+
+  template <typename Testproblem>
+  typename Testproblem::esoln_type operator()(const Testproblem& problem) const {
+    if (problem.generalised_only() || force_generalised) {
+      // Solve as a generalised eigenproblem:
+      typedef typename Testproblem::gen_prob_type prob_type;
+      typedef typename SolverTraits::template Solver<prob_type> solver_type;
+      return solver_type{problem.params}
+            .solve(problem.generalised_eigenproblem())
+            .eigensolution();
+    } else {
+      typedef typename Testproblem::prob_type prob_type;
+      typedef typename SolverTraits::template Solver<prob_type> solver_type;
+      return solver_type{problem.params}.solve(problem.eigenproblem()).eigensolution();
+    }
+  }
+
+  /** Force all eigenproblems to be generalised problems including the
+   *  once where the metric matrix is the identity */
+  bool force_generalised = false;
+};
+
 /** Class which runs all or a selected subset of the eigensolver test problems
  * the EigensolverTestProblemLibrary yields for the provided type fo test
  * problems
  *
- * \tparam TestProblem  testproblem to solve
- * \tparam Solver       eigensolver to use
+ * \tparam TestProblem     testproblem to solve
+ * \tparam SolverFunctor   Functor which takes a testproblem and returns
+ *                         a solution for it.
  * */
-template <typename Testproblem>
+template <typename Testproblem, typename SolveFunctor>
 class TestProblemRunner {
  public:
   typedef Testproblem testproblem_type;
@@ -60,38 +87,42 @@ class TestProblemRunner {
     run_matching([](const EigensolverTestProblemBase<matrix_type>&) { return true; });
   }
 
+  /** Run all normal (i.e. non-general) test problems the library yields */
+  void run_normal() const {
+    run_matching([](const EigensolverTestProblemBase<matrix_type>& p) {
+      return !p.generalised_only();
+    });
+  }
+
+  /** Run matching normal (i.e. non-general) test problems the library yields */
+  void run_normal_matching(
+        std::function<bool(const EigensolverTestProblemBase<matrix_type>&)> predicate)
+        const {
+    run_matching([predicate](const EigensolverTestProblemBase<matrix_type>& p) {
+      return !p.generalised_only() && predicate(p);
+    });
+  }
+
   /** Construct a TestProblemRunner from a functor which takes an
    * EigensolverTestProblem and returns the solution to it */
-  TestProblemRunner(
-        std::function<typename testproblem_type::soln_type(const testproblem_type&)>
-              solvefctn)
+  TestProblemRunner(SolveFunctor solvefctn = SolveFunctor{})
         : m_solve_testproblem(solvefctn) {}
+
+  /** Access to the inner solve functor which is used */
+  SolveFunctor& solve_functor() { return m_solve_testproblem; }
+  const SolveFunctor& solve_functor() const { return m_solve_testproblem; }
 
  private:
   /** Function which takes the test problem and returns the solution*/
-  std::function<typename testproblem_type::soln_type(const testproblem_type&)>
-        m_solve_testproblem;
-};
-
-/** A default functor for the solvefctn in TestProblemRunner, which is usually
- *  well-suited for eigensolvers */
-template <typename Testproblem, typename Solver>
-struct DefaultSolveFunctor {
-  typedef typename Solver::esoln_type esoln_type;
-  typedef Testproblem testproblem_type;
-
-  esoln_type operator()(const testproblem_type& problem) {
-    Solver solver(problem.params);
-    return solver.solve(problem.eigenproblem()).eigensolution();
-  }
+  SolveFunctor m_solve_testproblem;
 };
 
 //
 // ---------------------------------------------------------------------
 //
 
-template <typename Testproblem>
-void TestProblemRunner<Testproblem>::run_matching(
+template <typename Testproblem, typename SolveFunctor>
+void TestProblemRunner<Testproblem, SolveFunctor>::run_matching(
       std::function<bool(const EigensolverTestProblemBase<matrix_type>&)> predicate)
       const {
   const std::vector<testproblem_type> problems = testproblemlib_type::get_all();

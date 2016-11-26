@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -26,6 +26,12 @@ namespace linalgwrap {
 namespace tests {
 using namespace rc;
 
+/** Traits class needed for the tests */
+struct ArpackEigensolverTraits {
+  template <typename Eigenproblem>
+  using Solver = ArpackEigensolver<Eigenproblem>;
+};
+
 TEST_CASE("ArpackEigensolver", "[ArpackEigensolver]") {
   using namespace eigensolver_tests;
   typedef SmallMatrix<double> matrix_type;
@@ -41,22 +47,28 @@ TEST_CASE("ArpackEigensolver", "[ArpackEigensolver]") {
     if (problem.params.at<std::string>(EigensolverBaseKeys::which, "SR") ==
         std::string("SM"))
       return false;
+    if (problem.params.at<std::string>(EigensolverBaseKeys::which, "SR") ==
+        std::string("SR"))
+      return false;
 
     return true;
   };
 
   SECTION("Real hermitian normal problems") {
-    typedef EigensolverTestProblem<matrix_type,
-                                   /* Hermitian= */ true,
-                                   /* general= */ false>
-          tprob_type;
-    typedef ArpackEigensolver<typename tprob_type::prob_type> solver_type;
-
-    TestProblemRunner<tprob_type>(DefaultSolveFunctor<tprob_type, solver_type>())
-          .run_matching(filter);
+    typedef EigensolverTestProblem<matrix_type, /* Hermitian= */ true> tprob_type;
+    TestProblemRunner<tprob_type, DefaultSolveFunctor<ArpackEigensolverTraits>> tr;
+    tr.run_normal_matching(filter);
   }  // real hermitian normal problems
 
-  // TODO test real hermitian generalised problems
+  SECTION("Real hermitian generalised problems") {
+    typedef EigensolverTestProblem<matrix_type, /* Hermitian= */ true> tprob_type;
+    TestProblemRunner<tprob_type, DefaultSolveFunctor<ArpackEigensolverTraits>> tr;
+
+    // Run all problems as generalised problems.
+    tr.solve_functor().force_generalised = true;
+    tr.run_matching(filter);
+  }  // real hermitian generalised problems
+
   // TODO test real non-hermitian problems
   // TODO test real non-hermitian generalised problems
 

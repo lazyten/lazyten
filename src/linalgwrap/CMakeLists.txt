@@ -31,8 +31,8 @@ set(LINALGWRAP_SOURCES
 	Base/Solvers/EigensolverBaseKeys.cc
 	Base/Solvers/LinearSolverBaseKeys.cc
 	Arpack/ArpackEigensolver.cc
-	eigensystem.cc
 	LinearSolver.cc
+	EigensystemKeys.cc
 )
 
 # Dump the current version as an include file.

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -98,7 +98,7 @@ struct ArpackEigensolverState : public EigensolverStateBase<Eigenproblem> {
 };
 
 DefException1(ExcArpackInvalidIdo, int,
-              << "Arpack ido parameter " << arg1
+              << "ARPACK ido parameter " << arg1
               << " is unknown to us. Check ARPACK documentation.");
 DefSolverException2(ExcArpackInfo, std::string, function, int, info,
                     << "Arpack function " << function << " returned with info value "
@@ -106,14 +106,14 @@ DefSolverException2(ExcArpackInfo, std::string, function, int, info,
                     << ". Check Arpack documentation for the meaning of this value.");
 
 DefSolverException2(ExcArpackCannotFindMoreEigenpairs, size_t, desired, size_t, found,
-                    << "Arpack has found all eigenpairs it can possibly find. " << desired
+                    << "ARPACK has found all eigenpairs it can possibly find. " << desired
                     << " eigenpairs were desired, but " << found
                     << " eigenpairs were found.");
 
 DefSolverException1(ExcArpackCouldNotApplyShifts, size_t, n_arnoldi_vectors,
-                    << "Arpac has failed with info==3, which implies that it could "
+                    << "ARPACK has failed with info==3, which implies that it could "
                     << "not apply shifts during the implicit restart. One way to "
-                    << "tackle this problem is to increase the number of arnoldi"
+                    << "tackle this problem is to increase the number of Arnoldi "
                     << "vectors beyond the current value ( " << n_arnoldi_vectors
                     << " ) using the key 'n_arnoldi_vectors' in a ParameterMap.");
 
@@ -163,10 +163,13 @@ struct ArpackEigensolverKeys : public EigensolverBaseKeys {
  *
  * ### mode 2
  * Generalised solve mode by taking the inverse of B.
- * Diag == $B^{-1} A$.
+ * For this the metric matrix needs to have an implemented
+ * apply_inverse function, for details how to get this see the
+ * inverse() method
  *
  * ### mode 3
  * Shift-and-invert mode. Diag == $(A - \sigma B)^{-1}$
+ * May be a generalised or a non-generalised problem.
  *
  * ### modes > 3
  * Not supported. Check Arpack documentation for dnaupd,
@@ -198,16 +201,6 @@ class ArpackEigensolver : public EigensolverBase<State> {
   // TODO remove assertion and generalise
   static_assert(Eigenproblem::hermitian,
                 "Can only solve Hermitian eigenproblems at the moment.");
-
-  // TODO remove assertion and generalise
-  static_assert(!Eigenproblem::generalised,
-                "Can only solve non-general eigenproblems at the moment.");
-
-  // TODO remove assertion and generalise
-  static_assert(std::is_same<typename Eigenproblem::matrix_a_type,
-                             typename Eigenproblem::matrix_diag_type>::value,
-                "The type of the A matrix and the diag matrix needs to agree "
-                "at the moment.");
 
  public:
   //@{
@@ -250,7 +243,7 @@ class ArpackEigensolver : public EigensolverBase<State> {
    *  std::min(dim, 3*n_ep/2) vectors, where dim is the dimensionality
    *  of the problem and n_ep is the number of eigenpairs.
    */
-  size_t n_arnoldi_vectors = 0;
+  size_t n_arnoldi_vectors = 0;  // i.e. auto-determine
 
   /** Maximum number of iterations */
   size_t max_iter = 100;
@@ -335,11 +328,24 @@ void ArpackEigensolver<Eigenproblem, State>::assert_valid_control_params(
                       "The value " + std::to_string(mode) +
                       " for mode is not allowed. Only values within [1,5] are ok."));
 
-  if (mode == 1) {
-    solver_assert(
-          &problem.A() == &problem.Diag(), state,
-          ExcInvalidSolverParametersEncountered("For mode 1 the matrices A and Diag need "
-                                                "to be the same objects."));
+  if (mode == 1 || mode == 2) {
+    solver_assert((void*)&problem.A() == (void*)&problem.Diag(), state,
+                  ExcInvalidSolverParametersEncountered(
+                        "For mode 1 or 2 the matrices A and Diag need "
+                        "to be the same objects."));
+  } else {
+    solver_assert((void*)&problem.A() != (void*)&problem.Diag(), state,
+                  ExcInvalidSolverParametersEncountered(
+                        "For modes > 2 the matrices A and Diag have to be different "
+                        "objects, e.g. for mode 3 we need Diag = (A-sigma*S)^{-1}"));
+  }
+
+  if (mode == 2) {
+    solver_assert(problem.B().has_apply_inverse(), state,
+                  ExcInvalidSolverParametersEncountered(
+                        "For mode 2 the metric B needs to have an implemented "
+                        "apply_inverse function (See documentation of the function "
+                        "inverse() how to get this)."));
   }
 
   //
@@ -387,34 +393,47 @@ void ArpackEigensolver<Eigenproblem, State>::arpack_ido_step(
   // Note: Since Arpack uses 1-based indices (Fortran) we need to
   // take one away before we use them.
   scalar_type* workd = &(*state.workd_ptr)[0];
-  auto x = make_as_multivector<const ptrvec_t>(workd + ipntr[0] - 1, problem.dim());
+  auto x = make_as_multivector<ptrvec_t>(workd + ipntr[0] - 1, problem.dim());
   auto y = make_as_multivector<ptrvec_t>(workd + ipntr[1] - 1, problem.dim());
   auto Bx = make_as_multivector<const ptrvec_t>(workd + ipntr[2] - 1, problem.dim());
 
+  if (mode == 3 && state.ido == -1) {
+    // Arpack wants y = Diag*x.
+    // and Bx is not yet valid.
+    //
+    // Note:
+    // Our definition of Diag differs from the one
+    // Arpack uses for the case mode == 3,
+    // this is why this case is treated specially.
+
+    std::unique_ptr<scalar_type[]> tmp_ptr(new scalar_type[problem.dim()]);
+    auto tmp = make_as_multivector<ptrvec_t>(tmp_ptr.get(), problem.dim());
+    problem.B().apply(x, tmp);  // tmp = B x
+    // y = (A - \sigma B)^{-1} tmp
+    problem.Diag().apply(tmp, y);
+    return;
+  }
+
   switch (state.ido) {
     case -1:
-      // Arpack wants  y = Diag*x and Bx is not valid.
-      if (mode == 3) {
-        // special, since our definition
-        // of the Operator Diag deviates from
-        // the one Arpack uses.
-        std::unique_ptr<scalar_type[]> tmp_ptr(new scalar_type[problem.dim()]);
-        auto tmp = make_as_multivector<ptrvec_t>(tmp_ptr.get(), problem.dim());
-        problem.B().apply(x, tmp);  // tmp = B x
-        // y = (A - \sigma B)^{-1} tmp
-        problem.Diag().apply(tmp, y);
-      } else {
-        problem.Diag().apply(x, y);  // y = Diag * x
-      }
-      break;
     case 1:
-      // Arpack wants  y = Diag*x and Bx is valid.
-      if (mode == 3) {
-        // special, see above
+      // Arpack wants  y = Diag*x
+      //   - if ido == -1:  Bx is not valid.
+      //   - if ido ==  1:  Bx is valid.
+      if (mode == 2) {
+        problem.A().apply(x, y);  // y = A*x
+        // Copy from y to x; Note: This is strictly required by ARPACK
+        std::copy(std::begin(y[0]), std::end(y[0]), std::begin(x[0]));
+        problem.B().apply_inverse(x, y);  // y = B^{-1} * (A*x)
+      } else if (mode == 3) {
+        // This has already been dealt with above, we should
+        // never get here:
+        assert_dbg(state.ido == 1, krims::ExcInternalError());
+
+        // special, since our definition of Diag differs
+        // from ARPACK's (see above)
         // y = (A - \sigma B)^{-1} * B * x
         problem.Diag().apply(Bx, y);
-        // TODO Implement apply like this:
-        // https://trilinos.org/docs/r12.8/packages/tpetra/doc/html/classTpetra_1_1Operator.html#a900b02363414fa0decad11d466c320ce
       } else {
         problem.Diag().apply(x, y);  // y = Diag * x
       }
@@ -435,7 +454,7 @@ void ArpackEigensolver<Eigenproblem, State>::arpack_ido_step(
 template <typename Eigenproblem, typename State>
 void ArpackEigensolver<Eigenproblem, State>::solve_state(state_type& state) const {
   // TODO Remove assertions and generalise.
-  assert_dbg(mode == 1, krims::ExcNotImplemented());
+  assert_dbg(mode == 2 || mode == 1, krims::ExcNotImplemented());
 
   // -------
 
@@ -491,9 +510,6 @@ void ArpackEigensolver<Eigenproblem, State>::solve_state(state_type& state) cons
   //           number of arnoldi vectors has been too small
   solver_assert(info != 3, state, ExcArpackCouldNotApplyShifts(n_arnoldi_actual));
   solver_assert(info == 0 || info == 1, state, ExcArpackInfo("dsaupd", info));
-
-  // TODO The case of info == 1 has never been tested.
-  assert_sufficiently_tested(info != 1);
 
   //
   // Compute eigenpairs

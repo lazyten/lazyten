@@ -26,12 +26,34 @@ namespace linalgwrap {
 namespace tests {
 using namespace rc;
 
+struct HermitianSolveFunctor {
+  template <typename Testproblem>
+  typename Testproblem::esoln_type operator()(const Testproblem& problem) const {
+    if (problem.generalised_only()) {
+      return eigensystem_hermitian(problem.A(), problem.B(), problem.n_ep,
+                                   problem.params);
+    } else {
+      return eigensystem_hermitian(problem.A(), problem.n_ep, problem.params);
+    }
+  }
+};
+
+struct SolveFunctor {
+  template <typename Testproblem>
+  typename Testproblem::esoln_type operator()(const Testproblem& problem) const {
+    if (problem.generalised_only()) {
+      return eigensystem(problem.A(), problem.B(), problem.n_ep, problem.params);
+    } else {
+      return eigensystem(problem.A(), problem.n_ep, problem.params);
+    }
+  }
+};
+
 TEST_CASE("eigensystem", "[eigensystem]") {
   using namespace eigensolver_tests;
   typedef SmallMatrix<double> matrix_type;
 
-  /* The filter functor to filter out problems which make no sense for us
-   * here*/
+  /* The filter functor to filter out problems which make no sense for eigensystem() */
   auto filter = [](const EigensolverTestProblemBase<matrix_type>& problem) {
     // We cannot deal with cases where diag is different from A
     // from the eigensystem.hh framework
@@ -40,68 +62,15 @@ TEST_CASE("eigensystem", "[eigensystem]") {
     return true;
   };
 
-  SECTION("Real hermitian normal problems") {
-    typedef EigensolverTestProblem<matrix_type,
-                                   /* Hermitian= */ true,
-                                   /* general= */ false>
-          tprob_type;
-
-    /** The solver functor: just call eigensystem_hermitian */
-    auto solver = [](const tprob_type& problem) {
-      return eigensystem_hermitian(problem.A(), problem.evalues.size(), problem.params);
-    };
-
-    TestProblemRunner<tprob_type> runner(solver);
-    runner.run_matching(filter);
+  SECTION("Real hermitian problems") {
+    typedef EigensolverTestProblem<matrix_type, /* Hermitian= */ true> tprob_type;
+    TestProblemRunner<tprob_type, HermitianSolveFunctor>{}.run_matching(filter);
   }  // real hermitian normal problems
 
-  SECTION("Real hermitian generalised problems") {
-    typedef EigensolverTestProblem<matrix_type,
-                                   /* Hermitian= */ true,
-                                   /* general= */ true>
-          tprob_type;
-
-    /** The solver functor: just call eigensystem_hermitian */
-    auto solver = [](const tprob_type& problem) {
-      return eigensystem_hermitian(problem.A(), problem.B(), problem.evalues.size(),
-                                   problem.params);
-    };
-
-    TestProblemRunner<tprob_type> runner(solver);
-    runner.run_matching(filter);
-  }  // real hermitian generalised problems
-
-  SECTION("Real non-hermitian normal problems") {
-    typedef EigensolverTestProblem<matrix_type,
-                                   /* Hermitian= */ true,
-                                   /* general= */ false>
-          tprob_type;
-
-    /** The solver functor: just call eigensystem_hermitian */
-    auto solver = [](const tprob_type& problem) {
-      return eigensystem_hermitian(problem.A(), problem.evalues.size(), problem.params);
-    };
-
-    TestProblemRunner<tprob_type> runner(solver);
-    runner.run_matching(filter);
-  }  // real non-hermitian normal problems
-
-  SECTION("Real non-hermitian generalised problems") {
-    typedef EigensolverTestProblem<matrix_type,
-                                   /* Hermitian= */ true,
-                                   /* general= */ true>
-          tprob_type;
-
-    /** The solver functor: just call eigensystem_hermitian */
-    auto solver = [](const tprob_type& problem) {
-      return eigensystem_hermitian(problem.A(), problem.B(), problem.evalues.size(),
-                                   problem.params);
-    };
-
-    TestProblemRunner<tprob_type> runner(solver);
-    runner.run_matching(filter);
-  }  // real non-hermitian generalised problems
-
+  SECTION("Real non-hermitian problems") {
+    typedef EigensolverTestProblem<matrix_type, /* Hermitian= */ false> tprob_type;
+    TestProblemRunner<tprob_type, SolveFunctor>{}.run_matching(filter);
+  }  // real hermitian normal problems
 }  // eigensystem
 
 }  // tests
