@@ -1,3 +1,22 @@
+//
+// Copyright (C) 2017 by the linalgwrap authors
+//
+// This file is part of linalgwrap.
+//
+// linalgwrap is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// linalgwrap is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
+//
+
 #include <linalgwrap/DiagonalMatrix.hh>
 #include <linalgwrap/SmallMatrix.hh>
 #include <linalgwrap/SmallVector.hh>
@@ -58,15 +77,60 @@ int main() {
   // Compute solution for eigensystem given by
   // lazy matrix expression
   //
-  map.update("method", "auto");
-  SmallVector<scalar_type> diagonal{1, 2, -200, -1, 0, 0};
-  auto diagmatrix = make_diagmat(std::move(diagonal));
+  {
+    map.update("method", "auto");
+    SmallVector<scalar_type> diagonal{1, 2, -200, -1, 0, 0};
+    auto diagmatrix = make_diagmat(std::move(diagonal));
 
-  const auto sum = diagmatrix + A;
-  const auto solution_lazy = linalgwrap::eigensystem_hermitian(sum, n_ep, map);
-  std::cout << "Lazy matrix eigenpairs: " << std::endl;
-  print_solution(solution_lazy);
-  std::cout << std::endl;
+    const auto sum = diagmatrix + A;
+    const auto solution_lazy = linalgwrap::eigensystem_hermitian(sum, n_ep, map);
+    std::cout << "Lazy matrix eigenpairs: " << std::endl;
+    print_solution(solution_lazy);
+    std::cout << std::endl;
+  }
+
+  //
+  // Compute solution for generalised eigensystem
+  // given by two lazy matrix expressions
+  //
+  {
+    map.update("method", "auto");
+    SmallMatrix<scalar_type> A{
+          {-37.827087025623456, 7.737383999517007, -6.868688554610827, 0.4582402410539501,
+           20.25022267287818, -7.264272891184383, 17.13528963873486, -0.6958437952983445},
+          {7.737383999517007, -8.907240678731085, -10.491465613577162,
+           -32.400293305571346, 1.9050289475850448, 38.08086976760322, 33.58637188467661,
+           16.93991633946149},
+          {-6.868688554610827, -10.491465613577162, -40.64686080355078,
+           26.642223861646016, 26.870722616736714, 10.117350139698132,
+           -0.19698340817648585, 14.714415823222282},
+          {0.4582402410539501, -32.400293305571346, 26.642223861646016,
+           -28.78493388224115, -10.56060566681876, -7.7461795092692824,
+           -9.341941942209004, -3.682243002650196},
+          {20.25022267287818, 1.9050289475850448, 26.870722616736714, -10.56060566681876,
+           -35.21142298086606, 4.5353204853178966, 41.307563515495005,
+           -10.243149796300195},
+          {-7.264272891184383, 38.08086976760322, 10.117350139698132, -7.7461795092692824,
+           4.5353204853178966, 46.221528657079915, -11.029394211181724,
+           33.71103101586654},
+          {17.13528963873486, 33.58637188467661, -0.19698340817648585, -9.341941942209004,
+           41.307563515495005, -11.029394211181724, 24.566705894503286,
+           -5.017034388900839},
+          {-0.6958437952983445, 16.93991633946149, 14.714415823222282, -3.682243002650196,
+           -10.243149796300195, 33.71103101586654, -5.017034388900839,
+           13.035884650583398}};
+
+    SmallVector<scalar_type> diagonal{1, 2, 3, 1, 2, 4, 8, 9};
+    auto diagmatrix = make_diagmat(std::move(diagonal));
+
+    const size_t n_ep = 2;
+    const auto sum = A + 100 * diagmatrix;
+    const auto solution_lgen =
+          linalgwrap::eigensystem_hermitian(sum, diagmatrix, n_ep, map);
+    std::cout << "Lazy matrix generalised eigenpairs: " << std::endl;
+    print_solution(solution_lgen);
+    std::cout << std::endl;
+  }
 
   return 0;
 }
