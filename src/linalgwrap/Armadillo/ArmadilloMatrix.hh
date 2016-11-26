@@ -208,6 +208,17 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
   // We have a transpose operation mode available
   bool has_transpose_operation_mode() const override { return true; }
 
+  /** Does this Matrix have an implemented inverse apply method?
+   *
+   * The idea is to allow special matrices to offer a method to take
+   * advantage of their internal structure when one wants to apply
+   * the inverse of such a matrix to a multivector. Possible examples
+   * are diagonal and tridiagonal matrices.
+   *
+   * \note The inverse_apply should never be iterative.
+   **/
+  virtual bool has_apply_inverse() const override { return false; }
+
   /** \name Matrix application and matrix products
    */
   ///@{
@@ -220,6 +231,23 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
              const Transposed mode = Transposed::None,
              const scalar_type c_this = Constants<scalar_type>::one,
              const scalar_type c_y = Constants<scalar_type>::zero) const;
+
+  /** \brief Compute the application of the inverse of the matrix
+   *  (or the inverse of the transpose of the matrix) to a MultiVector
+   * For details see LazyMatrixExpression
+   */
+  template <typename VectorIn, typename VectorOut,
+            mat_vec_apply_enabled_t<ArmadilloMatrix, VectorIn, VectorOut>...>
+  void apply_inverse(const MultiVector<VectorIn>& /*x*/, MultiVector<VectorOut>& /*y*/,
+                     const Transposed /*mode */ = Transposed::None,
+                     const scalar_type /*c_this */ = 1,
+                     const scalar_type /*c_y*/ = 0) const {
+    // In general there is no easy way to do an inverse:
+    assert_throw(false, krims::ExcDisabled("The apply_inverse function is in general "
+                                           "very expensive and is only implemented in "
+                                           "some cases. Use the function "
+                                           "has_apply_inverse() to check when."));
+  }
 
   /** Perform the Matrix-Vector product */
   template <typename Vector,

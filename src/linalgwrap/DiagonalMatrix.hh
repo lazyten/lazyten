@@ -21,7 +21,7 @@
 #include "LazyMatrixExpression.hh"
 #include <krims/SubscriptionPointer.hh>
 
-// TODO generalisation for non-square diagnoal matrices
+// TODO generalisation for non-square diagonal matrices
 
 namespace linalgwrap {
 /** \brief Make a diagonal matrix out of the vector of the diagonal elements */
@@ -63,6 +63,9 @@ class DiagonalMatrix : public LazyMatrixExpression<StoredMatrix> {
    *  supported for this matrix type.
    **/
   bool has_transpose_operation_mode() const override { return true; }
+
+  /** Is inverse_apply available for this matrix type */
+  bool has_apply_inverse() const override { return true; }
 
   /** Extract a block of a matrix and (optionally) add it to
    * a different matrix.
@@ -116,6 +119,36 @@ class DiagonalMatrix : public LazyMatrixExpression<StoredMatrix> {
              const Transposed mode = Transposed::None,
              const scalar_type c_this = Constants<scalar_type>::one,
              const scalar_type c_y = Constants<scalar_type>::zero) const override;
+
+  /** \brief Compute the Inverse-Multivector application
+   *
+   * Loosely speaking we perform
+   * \[ y = c_this \cdot (A^{-1})^\text{mode} \cdot x + c_y \cdot y. \]
+   *
+   * See LazyMatrixExpression for more details
+   */
+  template <typename VectorIn, typename VectorOut,
+            mat_vec_apply_enabled_t<DiagonalMatrix, VectorIn, VectorOut>...>
+  void apply_inverse(const MultiVector<VectorIn>& x, MultiVector<VectorOut>& y,
+                     const Transposed mode = Transposed::None,
+                     const scalar_type c_this = 1, const scalar_type c_y = 0) const {
+    MultiVector<const MutableMemoryVector_i<scalar_type>> x_wrapped(x);
+    MultiVector<MutableMemoryVector_i<scalar_type>> y_wrapped(y);
+    apply_inverse(x_wrapped, y_wrapped, mode, c_this, c_y);
+  }
+
+  /** \brief Compute the Inverse-Multivector application
+   *
+   * Loosely speaking we perform
+   * \[ y = c_this \cdot (A^{-1})^\text{mode} \cdot x + c_y \cdot y. \]
+   *
+   * See LazyMatrixExpression for more details
+   */
+  virtual void apply_inverse(
+        const MultiVector<const MutableMemoryVector_i<scalar_type>>& x,
+        MultiVector<MutableMemoryVector_i<scalar_type>>& y,
+        const Transposed mode = Transposed::None, const scalar_type c_this = 1,
+        const scalar_type c_y = 0) const override;
 
   /** Perform a matrix-matrix product.
    *
@@ -219,11 +252,11 @@ void DiagonalMatrix<StoredMatrix>::apply(
   assert_finite(c_y);
   assert_size(x.n_vectors(), y.n_vectors());
   if (mode == Transposed::Trans || mode == Transposed::ConjTrans) {
-    assert_size(x.n_elem(), this->n_rows());
-    assert_size(y.n_elem(), this->n_cols());
-  } else {
     assert_size(x.n_elem(), this->n_cols());
     assert_size(y.n_elem(), this->n_rows());
+  } else {
+    assert_size(x.n_elem(), this->n_rows());
+    assert_size(y.n_elem(), this->n_cols());
   }
   assert_sufficiently_tested(mode != Transposed::ConjTrans);
 
@@ -249,6 +282,47 @@ void DiagonalMatrix<StoredMatrix>::apply(
           // data type if scalar is real only.
           detail::ConjFctr mconj;
           vecout[ei] += c_this * vecin[ei] * mconj((*m_diagonal_ptr)[ei]);
+          break;
+      }  // mode
+    }    // ei
+  }      // vi
+}
+
+template <typename StoredMatrix>
+void DiagonalMatrix<StoredMatrix>::apply_inverse(
+      const MultiVector<const MutableMemoryVector_i<scalar_type>>& x,
+      MultiVector<MutableMemoryVector_i<scalar_type>>& y, const Transposed mode,
+      const scalar_type c_this, const scalar_type c_y) const {
+  assert_finite(c_this);
+  assert_finite(c_y);
+  assert_size(x.n_vectors(), y.n_vectors());
+  assert_size(n_rows(), n_cols());  // only quadratic mat have inverses
+  assert_size(x.n_elem(), this->n_rows());
+  assert_size(y.n_elem(), this->n_rows());
+  assert_sufficiently_tested(mode != Transposed::ConjTrans);
+
+  // Scale the current values of out or set them to zero
+  // (if c_y == 0): We are now done with c_y and do not
+  // need to worry about it any more in this function
+  for (auto& vec : y) detail::scale_or_set(vec, c_y);
+
+  // if c_this == 0 we are done
+  if (c_this == Constants<scalar_type>::zero) return;
+
+  for (size_type vi = 0; vi < y.n_vectors(); ++vi) {
+    for (size_type ei = 0; ei < y.n_elem(); ++ei) {
+      const auto& vecin = x[vi];
+      auto& vecout = y[vi];
+      switch (mode) {
+        case Transposed::None:
+        case Transposed::Trans:
+          vecout[ei] += c_this * vecin[ei] / (*m_diagonal_ptr)[ei];
+          break;
+        case Transposed::ConjTrans:
+          // A variant of std::conj, which does not return a complex
+          // data type if scalar is real only.
+          detail::ConjFctr mconj;
+          vecout[ei] += c_this * vecin[ei] / mconj((*m_diagonal_ptr)[ei]);
           break;
       }  // mode
     }    // ei

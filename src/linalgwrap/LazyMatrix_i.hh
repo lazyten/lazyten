@@ -77,6 +77,9 @@ namespace linalgwrap {
  *             const Transposed mode,const scalar_type c_this,
  *             const scalar_type c_out) const;```
  *     Perform a gemm-like matrix-matrix product.
+ *    - If a simple inversion of the matrix with closed-form algorithms is possible
+ *      the methods ``has_apply_inverse`` and ``inverse_apply`` (see LazyMatrixExpression)
+ *      should be overloaded as well.
  *
  * \tparam StoredMatrix   The type of stored matrix to use
  */

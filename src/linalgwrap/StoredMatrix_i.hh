@@ -128,12 +128,23 @@ class StoredMatrix_i : public Matrix_i<Scalar> {
    *  supported for this matrix type
    *
    * These operation modes are important for the functions apply,
-   * mmult and extract_block
+   * apply_inverse, mmult and extract_block
    *
    * \note It is highly recommended that stored matrices support
    * all operation modes!
    **/
   virtual bool has_transpose_operation_mode() const { return false; }
+
+  /** Does this Matrix have an implemented inverse apply method?
+   *
+   * The idea is to allow special matrices to offer a method to take
+   * advantage of their internal structure when one wants to apply
+   * the inverse of such a matrix to a multivector. Possible examples
+   * are diagonal and tridiagonal matrices.
+   *
+   * \note The inverse_apply should never be iterative.
+   **/
+  virtual bool has_apply_inverse() const { return false; }
   ///@}
 
   /** \name Data access */

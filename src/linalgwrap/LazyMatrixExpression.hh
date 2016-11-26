@@ -64,13 +64,31 @@ class LazyMatrixExpression : public Matrix_i<typename StoredMatrix::scalar_type>
   /** \name Matrix properties
    */
   ///@{
+  // TODO rename to has_transpose_mode
   /** Are operation modes Transposed::Trans and Transposed::ConjTrans
    *  supported for this matrix type
    *
    * These operation modes are important for the functions apply,
-   * mmult and extract_block
+   * apply_inverse, mmult and extract_block
    **/
   virtual bool has_transpose_operation_mode() const = 0;
+
+  /** Does this Matrix have an implemented inverse apply method?
+   *
+   * The idea is to allow special matrices to offer a method to take
+   * advantage of their internal structure when one wants to apply
+   * the inverse of such a matrix to a multivector. Possible examples
+   * are diagonal and tridiagonal matrices.
+   *
+   * \note The inverse_apply should never be iterative.
+   **/
+  virtual bool has_apply_inverse() const { return false; }
+
+  // TODO has_element_access (i.e. operator() and extract_block
+  //      has_mmult (i.e. has matrix-matrix multiplication
+  //
+  //      flags supported_operations() -> return flags
+  //      bool has_support_for(flags)
   ///@}
 
   /** \name Data access
@@ -154,11 +172,6 @@ class LazyMatrixExpression : public Matrix_i<typename StoredMatrix::scalar_type>
    * should be implemented as well as it assures that conversion to
    * MultiVector<MutableMemoryVector_i<scalar_type>> can actually occur
    * automatically.
-   *
-   * \note The interface is chosen in this generic way, such that a smooth
-   * transition to a LazyMatrix system where product and sum are actually
-   * internally tuples (instead of a std::vector) of objects, i.e. when
-   * the type is preserved, we can allow for generic apply calls as well.
    */
   template <typename VectorIn, typename VectorOut,
             mat_vec_apply_enabled_t<LazyMatrixExpression, VectorIn, VectorOut>...>
@@ -181,6 +194,57 @@ class LazyMatrixExpression : public Matrix_i<typename StoredMatrix::scalar_type>
                      const Transposed mode = Transposed::None,
                      const scalar_type c_this = Constants<scalar_type>::one,
                      const scalar_type c_y = Constants<scalar_type>::zero) const = 0;
+
+  /** \brief Compute the application of the inverse of the matrix
+   *  (or the inverse of the transpose of the matrix) to a MultiVector
+   *
+   * Loosely performs the operation
+   * \[ y = c_this \cdot (A^{-1})^\text{mode} \cdot x + c_y \cdot y. \]
+   * where mode gives the mode how the current object is to be
+   * applied (normal, transposed, conjugate transposed)
+   *
+   * The implementation
+   *  - **may** avoid the operator and just scale $y$ if $c_this == 0$.
+   *  - **must** overwrite $y$ if $c_y == 0$ since the memory of
+   *    y may be uninitialised and we want to avoid NaN values in y
+   *    to be of effect)
+   *
+   *  \note This function is only implemented for stored vectors or
+   *  modifyable vectors, whose storage can be accessed via a pointer.
+   *
+   * \note Whenever the virtual apply_inverse method is overwritten,
+   * this method should be implemented as well as it assures that conversion to
+   * MultiVector<MutableMemoryVector_i<scalar_type>> can actually occur
+   * automatically.
+   *
+   */
+  template <typename VectorIn, typename VectorOut,
+            mat_vec_apply_enabled_t<LazyMatrixExpression, VectorIn, VectorOut>...>
+  void apply_inverse(const MultiVector<VectorIn>& /*x*/, MultiVector<VectorOut>& /*y*/,
+                     const Transposed /*mode*/ = Transposed::None,
+                     const scalar_type /*c_this*/ = 1,
+                     const scalar_type /*c_y*/ = 0) const {
+    // In general there is no easy way to do an inverse:
+    assert_throw(false, krims::ExcDisabled("The apply_inverse function is in general "
+                                           "very expensive and is only implemented in "
+                                           "some cases. Use the function "
+                                           "has_apply_inverse() to check when."));
+  }
+
+  /** \brief Compute the application of the inverse of the matrix.
+   * This is a specialisation of the above method.
+   */
+  virtual void apply_inverse(
+        const MultiVector<const MutableMemoryVector_i<scalar_type>>& /*x*/,
+        MultiVector<MutableMemoryVector_i<scalar_type>>& /*y*/,
+        const Transposed /*mode */ = Transposed::None, const scalar_type /*c_this */ = 1,
+        const scalar_type /*c_y */ = 0) const {
+    // In general there is no easy way to do an inverse:
+    assert_throw(false, krims::ExcDisabled("The apply_inverse function is in general "
+                                           "very expensive and is only implemented in "
+                                           "some cases. Use the function "
+                                           "has_apply_inverse() to check when."));
+  }
 
   /** Perform a matrix-matrix product.
    *
