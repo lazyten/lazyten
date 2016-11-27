@@ -84,6 +84,10 @@ find_repo() {
 		echo "external/$REPO"
 		return 0
 	fi
+	if [ -e "modules/$REPO/.git" ]; then
+		echo "modules/$REPO"
+		return 0
+	fi
 	return 1
 }
 
