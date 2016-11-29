@@ -27,7 +27,7 @@ set(LINALGWRAP_SOURCES
 	io/Mathematica.cc
 	Base/Interfaces/Transposed.cc
 	Base/Solvers/SolverStateBase.cc
-	Base/Solvers/IterativeSolverKeys.cc
+	Base/Solvers/IterativeWrapperKeys.cc
 	Base/Solvers/EigensolverBaseKeys.cc
 	Base/Solvers/LinearSolverBaseKeys.cc
 	Arpack/ArpackEigensolver.cc

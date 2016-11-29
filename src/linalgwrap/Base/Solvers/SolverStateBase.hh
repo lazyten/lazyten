@@ -29,6 +29,12 @@ class SolverStateBase {
    * */
   SolverStateBase() : m_failed{false}, m_fail_reason{} {}
 
+  virtual ~SolverStateBase() = default;
+  SolverStateBase(const SolverStateBase&) = default;
+  SolverStateBase(SolverStateBase&&) = default;
+  SolverStateBase& operator=(const SolverStateBase&) = default;
+  SolverStateBase& operator=(SolverStateBase&&) = default;
+
   /** Fail the iteraton and specify a reason why */
   void fail(std::string reason);
 

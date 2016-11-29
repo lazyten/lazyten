@@ -28,9 +28,9 @@
 #include "Solvers/SolverStateBase.hh"
 
 // Iterative methods base types and structs
-#include "Solvers/IterativeSolver.hh"
-#include "Solvers/IterativeSolverKeys.hh"
-#include "Solvers/IterativeSolverState.hh"
+#include "Solvers/IterativeStateWrapper.hh"
+#include "Solvers/IterativeWrapper.hh"
+#include "Solvers/IterativeWrapperKeys.hh"
 
 // Linear solver base types and structs
 #include "Solvers/LinearProblem.hh"
