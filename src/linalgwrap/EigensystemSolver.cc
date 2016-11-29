@@ -16,12 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
-#pragma once
-#include "Base/Solvers/EigensolverBaseKeys.hh"
+#include "EigensystemSolver.hh"
 
 namespace linalgwrap {
-struct EigensystemKeys : public EigensolverBaseKeys {
-  /** The solver method to use. Type: string */
-  static const std::string method;
-};
+const std::string EigensystemSolverKeys::method = "method";
 }  // namespace linalgwrap

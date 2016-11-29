@@ -57,7 +57,7 @@ struct ArpackEigensolverState : public EigensolverStateBase<Eigenproblem> {
   /** The pointer to the current residual vector */
   std::shared_ptr<std::vector<scalar_type>> resid_ptr;
 
-  /** Is the residual from a previous run or a fresh one? */
+  /** Do we have a residual from a previous run */
   bool have_old_residual;
 
   /** The pointer to the reverse communication workbench */
@@ -70,10 +70,10 @@ struct ArpackEigensolverState : public EigensolverStateBase<Eigenproblem> {
    *  iteration count, the value this function returns
    *  is 0 unless the iteration has converged.
    **/
-  size_type n_iter_count() const {
+  size_t n_iter() const override {
     if (ido == 99) {
       // return Arpack value
-      return static_cast<size_type>(iparam[2]);
+      return static_cast<size_t>(iparam[2]);
     } else {
       return 0u;
     }
@@ -89,12 +89,9 @@ struct ArpackEigensolverState : public EigensolverStateBase<Eigenproblem> {
           n_bmtx_applies(iparam[9]),
           n_reortho_steps(iparam[10]),
           resid_ptr{new std::vector<scalar_type>(base_type::eigenproblem().dim(), 0.0)},
-          have_old_residual{false},
+          have_old_residual(false),
           workd_ptr{
-                new std::vector<scalar_type>(3 * base_type::eigenproblem().dim(), 0.0)} {
-    // Zero the array:
-    std::fill(iparam.begin(), iparam.end(), 0);
-  }
+                new std::vector<scalar_type>(3 * base_type::eigenproblem().dim(), 0.0)} {}
 };
 
 DefException1(ExcArpackInvalidIdo, int,
@@ -256,6 +253,16 @@ class ArpackEigensolver : public EigensolverBase<State> {
           map.at(ArpackEigensolverKeys::n_arnoldi_vectors, n_arnoldi_vectors);
     mode = map.at(ArpackEigensolverKeys::mode, mode);
   }
+
+  /** Get the current settings of all internal control parameters and
+   *  update the ParameterMap accordingly.
+   */
+  void get_control_params(krims::ParameterMap& map) const {
+    base_type::get_control_params(map);
+    map.update(ArpackEigensolverKeys::max_iter, max_iter);
+    map.update(ArpackEigensolverKeys::n_arnoldi_vectors, n_arnoldi_vectors);
+    map.update(ArpackEigensolverKeys::mode, mode);
+  }
   ///@}
 
   /** Implementation of the IterativeSolver method */
@@ -266,6 +273,11 @@ class ArpackEigensolver : public EigensolverBase<State> {
    *  In case its not, raise an ExcInvalidEigensolverParameters
    *  exception */
   void assert_valid_control_params(state_type& s) const;
+
+  /** Setup the state before actually running the solve steps
+   *  (i.e. reset some counters, install a guess, ... )
+   */
+  void setup_state(state_type& s) const;
 
   /** Deal with the ido parameter we got */
   void arpack_ido_step(state_type& s, std::array<int, 14> ipntr) const;
@@ -454,11 +466,47 @@ void ArpackEigensolver<Eigenproblem, State>::arpack_ido_step(
 }
 
 template <typename Eigenproblem, typename State>
+void ArpackEigensolver<Eigenproblem, State>::setup_state(state_type& state) const {
+  // Clear the ido and the iparam:
+  state.ido = 0;
+
+  // Setup iparam array:
+  std::fill(state.iparam.begin(), state.iparam.end(), 0);
+  state.iparam[0] = 1;  // Automatically determine shifts
+  state.iparam[2] = static_cast<int>(max_iter);
+  state.iparam[6] = mode;
+
+  esoln_type& soln = state.eigensolution();
+  auto& evectors = soln.evectors();
+  std::vector<scalar_type>& resvec = *state.resid_ptr;
+
+  //
+  // Compute residual (if needed and possible)
+  //
+  if (evectors.n_vectors() > 0 && !state.have_old_residual) {
+    // Accumulate eigenvalue-weighted average eigenvector in res
+    PtrVector<scalar_type> res(resvec.data(), resvec.size());
+    for (size_t i = 0; i < evectors.n_vectors(); ++i) {
+      for (size_t j = 0; j < evectors.n_elem(); ++j) {
+        res(j) += evectors[i](j);
+      }
+    }
+    res /= norm_l2(res);
+
+    state.have_old_residual = true;
+  }
+}
+
+template <typename Eigenproblem, typename State>
 void ArpackEigensolver<Eigenproblem, State>::solve_state(state_type& state) const {
   // TODO Remove assertions and generalise.
   assert_dbg(mode == 2 || mode == 1, krims::ExcNotImplemented());
 
+  static_assert(std::is_same<typename Eigenproblem::scalar_type, double>::value,
+                "Arpack can only solve real problems at double precision at "
+                "the moment");
   // -------
+  assert_dbg(!state.is_failed(), krims::ExcInvalidState("Cannot solve a failed state"));
 
   const Eigenproblem& problem = state.eigenproblem();
   esoln_type& soln = state.eigensolution();
@@ -466,7 +514,13 @@ void ArpackEigensolver<Eigenproblem, State>::solve_state(state_type& state) cons
   // Assert that control parameters and state fit.
   assert_valid_control_params(state);
 
-  // Setup Arpack wrapper
+  // Setup the state for the solver run
+  setup_state(state);
+
+  //
+  // Setup local parameters
+  //
+  // Number of arnoldi vectors (0 == autodetermined)
   size_t n_arnoldi_actual = n_arnoldi_vectors;
   if (n_arnoldi_actual == 0) {
     // Auto-determine number of arnoldi vectors:
@@ -474,35 +528,27 @@ void ArpackEigensolver<Eigenproblem, State>::solve_state(state_type& state) cons
     if (n_arnoldi_actual < 2) n_arnoldi_actual = 2;
   }
 
-  static_assert(std::is_same<typename Eigenproblem::scalar_type, double>::value,
-                "Arpack can only solve real problems at double precision at "
-                "the moment");
+  // Info parameter for ARPACK:
+  // If == 1 ARPACK uses the residual we provide (or computed
+  // in setup_state), else a random residual vector is used.
+  int info = state.have_old_residual ? 1 : 0;
 
+  //
+  // Run arpack ds_upd
+  //
+
+  // Setup Arpack wrapper
   detail::ds_upd_wrapper arpack{
         Eigenproblem::generalised, problem.dim(),    base_type::which, problem.n_ep(),
         base_type::tolerance,      n_arnoldi_actual, state.resid_ptr,  state.workd_ptr};
 
-  // Setup iparam array:
-  // TODO In theory one *could* expose this first feature to the interface
-  state.iparam[0] = 1;  // Automatically determine shifts
-  state.iparam[2] = static_cast<int>(max_iter);
-  state.iparam[6] = mode;
-
-  // The info parameter. If different from 0 on first call
-  // a residual from a previous run is reused.
-  int info = state.have_old_residual ? 1 : 0;
-  state.have_old_residual = true;
-
-  // start_iteration_step and end_iteration_step are
-  // unused in this implementation, since we do not
-  // really know when an iteration starts.
+  // Perform an Arnoldi/Lanczos step in Arpack and then deal with the ido until Arpack
+  // flags convergence.
   while (state.ido != 99) {
-    // Perform an Arnoldi/Lanczos step in Arpack
-    // and then deal with the ido until Arpack
-    // flags convergence.
     arpack.arnoldi_step(state.ido, state.iparam, info);
     arpack_ido_step(state, arpack.ipntr);
   }
+  state.have_old_residual = true;
 
   // info == 0 implies that all is fine
   // info == 1 implies that we cannot find any more Ritz vectors
@@ -512,6 +558,10 @@ void ArpackEigensolver<Eigenproblem, State>::solve_state(state_type& state) cons
   //           number of arnoldi vectors has been too small
   solver_assert(info != 3, state, ExcArpackCouldNotApplyShifts(n_arnoldi_actual));
   solver_assert(info == 0 || info == 1, state, ExcArpackInfo("dsaupd", info));
+
+  // Purge eigenpairs from previous runs:
+  soln.evalues().clear();
+  soln.evectors().clear();
 
   //
   // Compute eigenpairs

@@ -18,7 +18,7 @@
 //
 
 #pragma once
-#include "IterativeSolverKeys.hh"
+#include <string>
 namespace linalgwrap {
 
 /** Struct which contains the keys used for setting the

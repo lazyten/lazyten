@@ -39,9 +39,6 @@ struct ArmadilloEigensolverState : public EigensolverStateBase<Eigenproblem> {
   /** Setup the initial state from an eigenproblem to solve */
   ArmadilloEigensolverState(const eproblem_type problem)
         : base_type(std::move(problem)) {}
-
-  /** Return the iteration count (always 1) */
-  constexpr size_type n_iter_count() const { return 1; }
 };
 
 /** Class which contains all ParameterMap keys which are understood
@@ -238,6 +235,8 @@ void ArmadilloEigensolver<Eigenproblem, State>::copy_to_solution(
   assert_dbg(idcs.size() == n_ep, krims::ExcInternalError());
 
   // Reserve space to copy the values in
+  soln.evalues().clear();
+  soln.evectors().clear();
   soln.evalues().reserve(n_ep);
   soln.evectors().reserve(n_ep);
 
@@ -286,6 +285,8 @@ void ArmadilloEigensolver<Eigenproblem, State>::assert_valid_control_params(
 
 template <typename Eigenproblem, typename State>
 void ArmadilloEigensolver<Eigenproblem, State>::solve_state(state_type& state) const {
+  assert_dbg(!state.is_failed(), krims::ExcInvalidState("Cannot solve a failed state"));
+
   esoln_type& soln = state.eigensolution();
   const Eigenproblem& problem = state.eigenproblem();
 

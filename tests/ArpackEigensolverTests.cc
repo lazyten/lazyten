@@ -36,6 +36,8 @@ TEST_CASE("ArpackEigensolver", "[ArpackEigensolver]") {
   using namespace eigensolver_tests;
   typedef SmallMatrix<double> matrix_type;
 
+  // TODO check that providing guess reduces number of steps
+
   /* The filter functor to filter out problems which make no sense
    * for us here*/
   auto filter = [](const EigensolverTestProblemBase<matrix_type>& problem) {

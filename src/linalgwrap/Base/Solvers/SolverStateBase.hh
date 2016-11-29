@@ -46,6 +46,14 @@ class SolverStateBase {
    */
   const std::string& fail_reason() const { return m_fail_reason; }
 
+  /** Return the number of iterations needed up to this point
+   *  (for non-iterative solvers this should return exactly 1 */
+  virtual size_t n_iter() const { return 1; }
+
+  /** Setup the guess of this state. from another state.
+   * In this case this function does nothing */
+  void obtain_guess_from(const SolverStateBase&) {}
+
  protected:
   //! Has the iteration failed?
   bool m_failed;
