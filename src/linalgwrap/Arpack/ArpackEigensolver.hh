@@ -45,9 +45,6 @@ struct ArpackEigensolverState : public EigensolverStateBase<Eigenproblem> {
   /** The number of converged ritz values */
   const int& n_conv_ritz;
 
-  /** The number of operator applies (A*x or Diag*x) */
-  const int& n_mtx_applies;
-
   /** The number of applies B*x */
   const int& n_bmtx_applies;
 
@@ -70,14 +67,14 @@ struct ArpackEigensolverState : public EigensolverStateBase<Eigenproblem> {
    *  iteration count, the value this function returns
    *  is 0 unless the iteration has converged.
    **/
-  size_t n_iter() const override {
-    if (ido == 99) {
-      // return Arpack value
-      return static_cast<size_t>(iparam[2]);
-    } else {
-      return 0u;
-    }
-  }
+  size_t n_iter() const override { return static_cast<size_t>(iparam[2]); }
+
+  /** Get the number of Problem matrix applies (A*x or Diag*x)
+   *
+   * \note This value is only sensible once the Arpack
+   * iterations are converged.
+   */
+  size_t n_mtx_applies() const override { return static_cast<size_t>(iparam[8]); }
 
   /** Setup the initial state from an eigenproblem to solve */
   ArpackEigensolverState(const eproblem_type problem)
@@ -85,7 +82,6 @@ struct ArpackEigensolverState : public EigensolverStateBase<Eigenproblem> {
           ido(0),
           iparam(),
           n_conv_ritz(iparam[4]),
-          n_mtx_applies(iparam[8]),
           n_bmtx_applies(iparam[9]),
           n_reortho_steps(iparam[10]),
           resid_ptr{new std::vector<scalar_type>(base_type::eigenproblem().dim(), 0.0)},

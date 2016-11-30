@@ -53,8 +53,16 @@ class SolverStateBase {
   const std::string& fail_reason() const { return m_fail_reason; }
 
   /** Return the number of iterations needed up to this point
-   *  (for non-iterative solvers this should return exactly 1 */
+   *
+   * \note Non-iterative solvers return exactly 1 here
+   **/
   virtual size_t n_iter() const { return 1; }
+
+  /** Return the number of problem matrix applies the solver
+   *  required to solve the problem
+   *  \note Dense solvers work on the memory and return exactly 0
+   **/
+  virtual size_t n_mtx_applies() const { return 0; }
 
   /** Setup the guess of this state. from another state.
    * In this case this function does nothing */

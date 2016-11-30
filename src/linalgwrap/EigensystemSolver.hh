@@ -42,18 +42,28 @@ class EigensystemSolverState final : public EigensolverStateBase<Eigenproblem> {
 
   /** Setup the initial state from an eigenproblem to solve */
   EigensystemSolverState(const eproblem_type problem)
-        : base_type(std::move(problem)), m_n_iter{0} {}
+        : base_type(std::move(problem)), m_n_iter{0}, m_n_mtx_applies(0) {}
 
   /** Transfer data from an arbitrary other state by copying
-   * it into this one. */
-  explicit EigensystemSolverState(const base_type& old_state)
-        : base_type(old_state), m_n_iter(old_state.n_iter()) {}
+   * it into this one. This is needed, since we need to get the
+   * data back here once the inner solvers are done with
+   * (partially) solving the eigenproblem.
+   *
+   * \note Do not use this to setup a guess state.
+   * For this case the function obtain_guess_from exists.
+   **/
+  void push_intermediate_results(base_type&& other_state) {
+    m_n_iter += other_state.n_iter();
+    m_n_mtx_applies += other_state.n_mtx_applies();
+    static_cast<base_type&>(*this) = other_state;
+  }
 
   size_t n_iter() const override final { return m_n_iter; }
   size_t n_mtx_applies() const override final { return m_n_mtx_applies; }
 
  private:
   size_t m_n_iter;
+  size_t m_n_mtx_applies;
 };
 
 struct EigensystemSolverKeys final : public EigensolverBaseKeys {
@@ -218,7 +228,7 @@ void EigensystemSolver<Eigenproblem>::run_solver(state_type& state) const {
     state.push_intermediate_results(std::move(inner_state));
   } catch (SolverException& e) {
     // On exception still update the state reference
-    state = std::move(state_type(inner_state));
+    state.push_intermediate_results(std::move(inner_state));
     throw;
   }
 }
