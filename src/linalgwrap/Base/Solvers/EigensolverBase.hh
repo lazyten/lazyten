@@ -135,7 +135,8 @@ class EigensolverBase : public SolverBase<State> {
   template <typename GuessState,
             typename = krims::enable_if_t<std::is_base_of<
                   EigensolverStateBase<eproblem_type>, GuessState>::value>>
-  state_type solve(const eproblem_type problem, const GuessState& guess_state) const {
+  state_type solve_with_guess(const eproblem_type problem,
+                              const GuessState& guess_state) const {
     // Create a new state and install the guess state:
     state_type state{std::move(problem)};
     state.obtain_guess_from(guess_state);
@@ -151,7 +152,7 @@ class EigensolverBase : public SolverBase<State> {
   template <typename GuessState,
             typename = krims::enable_if_t<std::is_base_of<
                   EigensolverStateBase<eproblem_type>, GuessState>::value>>
-  state_type solve(const GuessState& guess_state) const {
+  state_type solve_with_guess(const GuessState& guess_state) const {
     return solve(guess_state.problem(), guess_state);
   }
 

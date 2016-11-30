@@ -37,6 +37,15 @@ TEST_CASE("ArpackEigensolver", "[ArpackEigensolver]") {
   typedef SmallMatrix<double> matrix_type;
 
   // TODO check that providing guess reduces number of steps
+  /*
+   *
+   *  // Re-run the problem and check that we have less iterations:
+   *  auto ret2 = solver.solve_with_guess(prob, ret);
+   *  size_t n_iter2 = ret2.n_iter();
+   *  CHECK(n_iter2 < n_iter1);
+   *  CHECK(n_iter2 == 1);
+   *
+   */
 
   /* The filter functor to filter out problems which make no sense
    * for us here*/
