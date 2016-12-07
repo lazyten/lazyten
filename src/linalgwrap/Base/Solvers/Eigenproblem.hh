@@ -209,10 +209,12 @@ class Eigenproblem : public EigenproblemBase<isHermitian, MatrixA, MatrixDiag> {
    *               A value equal to IterationConstants<size_type>::all
    *               implies that all eigenpairs should be computed
    **/
-  Eigenproblem(const typename std::enable_if<std::is_same<MatrixA, MatrixDiag>::value,
-                                             MatrixA>::type& A,
-               const MatrixB& B, size_type n_ep = Constants<size_type>::all)
-        : Eigenproblem(A, B, n_ep, A){};
+  template <typename Matrix,
+            typename = krims::enable_if_cond_same_t<
+                  std::is_same<MatrixA, MatrixDiag>::value, Matrix, MatrixA>>
+  Eigenproblem(const Matrix& A, const MatrixB& B,
+               size_type n_ep = Constants<size_type>::all)
+        : Eigenproblem(A, B, n_ep, A){}
   ///@}
 
  private:
@@ -238,7 +240,7 @@ struct Eigenproblem<isHermitian, MatrixA, void, MatrixDiag>
   static constexpr bool generalised = false;
 
   /** Never call this routine. */
-  const MatrixA B() const {
+  const MatrixA& B() const {
     assert_dbg(false, krims::ExcDisabled("The method B() for a non-generalised "
                                          "eigenproblem should not be called."));
     return base_type::A();
@@ -268,9 +270,10 @@ struct Eigenproblem<isHermitian, MatrixA, void, MatrixDiag>
    *               A value equal to IterationConstants<size_type>::all
    *               implies that all eigenpairs should be computed
    **/
-  Eigenproblem(const typename std::enable_if<std::is_same<MatrixA, MatrixDiag>::value,
-                                             MatrixA>::type& A,
-               size_type n_ep = Constants<size_type>::all)
+  template <typename Matrix,
+            typename = krims::enable_if_cond_same_t<
+                  std::is_same<MatrixA, MatrixDiag>::value, Matrix, MatrixA>>
+  Eigenproblem(const Matrix& A, size_type n_ep = Constants<size_type>::all)
         : Eigenproblem(A, n_ep, A) {}
 };
 //@}
