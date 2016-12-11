@@ -60,8 +60,10 @@ We hope to produce some more detailed documentation at some point.
 
 Some of the design concepts and ideas that lead to the development
 of the present version of ``linalgwrap`` can also be found in the material on
-[blog.mfhs.eu](http://blog.mfhs.eu/uploads-publications/#Linalgwrap),
-most notably the [MWM 2016 Poster](http://docs.mfhs.eu/conferences/2016_mwm/linalgwrap_lazy_linear_algebra_library.pdf).
+[blog.mfhs.eu](http://blog.mfhs.eu/uploads-publications/#lazyqchem),
+most notably the [MWM 2016 Poster](http://docs.mfhs.eu/conferences/2016_mwm/linalgwrap_lazy_linear_algebra_library.pdf)
+as well as parts of the [Design of ``molsturm``](http://docs.mfhs.eu/phd/invited_talks/2016.12.09_Design_Molsturm.pdf)
+talk.
 
 ### BaseInterfaces
 - The classes in [BaseInterfaces](src/linalgwrap/BaseInterfaces)
