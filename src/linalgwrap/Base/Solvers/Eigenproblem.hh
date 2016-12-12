@@ -95,7 +95,16 @@ class EigenproblemBase {
   const MatrixDiag& Diag() const { return *m_diag_ptr; }
 
   /** The number of eigenpairs to compute */
+  //@{
   size_type n_ep() const { return m_n_ep; }
+  //@}
+
+  /** Update the number of eigenpairs to compute
+   *
+   * If \t new_n_ep > dim() the value is reduced to n_ep = dim()
+   * automatically.
+   * */
+  void n_ep(size_type new_n_ep) { m_n_ep = std::min(dim(), new_n_ep); }
 
   /** Return the dimensionality of the eigenproblem */
   size_type dim() const { return A().n_cols(); }

@@ -33,6 +33,7 @@ set(LINALGWRAP_SOURCES
 	Arpack/ArpackEigensolver.cc
 	LinearSolver.cc
 	EigensystemSolver.cc
+	rescue.cc
 )
 
 # Dump the current version as an include file.
