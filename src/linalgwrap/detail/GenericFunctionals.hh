@@ -116,5 +116,19 @@ struct ConjFctr {
   }
 };
 
+struct RealFctr {
+  template <typename Scalar>
+  auto operator()(const Scalar& s) const -> decltype(std::real(s)) {
+    return std::real(s);
+  }
+};
+
+struct ImagFctr {
+  template <typename Scalar>
+  auto operator()(const Scalar& s) const -> decltype(std::imag(s)) {
+    return std::imag(s);
+  }
+};
+
 }  // namespace detail
 }  // namespace linalgwrap
