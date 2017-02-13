@@ -28,7 +28,7 @@
 # Settings
 #
 # The git repo to checkout
-FROM="https://github.com/emil-e/rapidcheck"
+FROM="https://github.com/emil-e/rapidcheck.git"
 
 # Folder to check it out to
 WHAT="rapidcheck"

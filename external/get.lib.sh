@@ -39,7 +39,7 @@ is_url_available() {
 	I_URL="$1"
 
 	# Extract hostname from FROM url
-	I_FROMHOST=`echo "$I_URL" | cut -d "/" -f 3`
+	I_FROMHOST=`echo "$I_URL" | cut -d "/" -f 3 | sed 's/^.*@//; s/:.*$//'`
 	if [ -z "$I_FROMHOST" ]; then
 		echo "Invalid url given to is_url_available" >&2
 		exit 1
