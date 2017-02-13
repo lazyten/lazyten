@@ -143,6 +143,8 @@ class MultiVector : public detail::MultiVectorBase<InnerVector>,
   /** Make a deep copy */
   MultiVector copy_deep() const;
 
+  // TODO also have copy_shallow
+
   /** Obtain a view (shallow copy) of a part of the columns */
   MultiVector subview(const krims::Range<size_type>& colrange);
 
@@ -383,7 +385,7 @@ MultiVector<InnerVector> MultiVector<InnerVector>::subview(
       const krims::Range<size_type>& col_range) {
   base_type::assert_valid_state();
   if (!col_range.empty()) {
-    assert_greater_equal(col_range.last(), base_type::n_vectors());
+    assert_greater_equal(col_range.upper_bound(), base_type::n_vectors());
   }
 
   MultiVector res;
@@ -399,7 +401,7 @@ MultiVector<const InnerVector> MultiVector<InnerVector>::csubview(
       const krims::Range<size_type>& col_range) const {
   base_type::assert_valid_state();
   if (!col_range.empty()) {
-    assert_greater_equal(col_range.last(), base_type::n_vectors());
+    assert_greater_equal(col_range.upper_bound(), base_type::n_vectors());
   }
 
   MultiVector<const InnerVector> res;
