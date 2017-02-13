@@ -27,3 +27,4 @@ update_file "krims" "external/get.lib.sh" || exit 1
 update_file "krims" "external/get_rapidcheck.sh" || exit 1
 update_file "krims" "cmake/findRapidcheck.cmake" || exit 1
 update_file "krims" "cmake/findCatch.cmake" || exit 1
+update_file "krims" "templates/README.md" || exit 1
