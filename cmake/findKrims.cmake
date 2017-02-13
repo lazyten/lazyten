@@ -83,7 +83,7 @@ was found.")
 
 	message(FATAL_ERROR "Could not find krims library.
 Either provide the installation prefix of the krims library in the environment \
-variable krims_DIR or enable autocheckout via -DAUTOCHECKOUT_MISSING_REPOS=ON.")
+variable krims_DIR or enable autocheckout via '-DAUTOCHECKOUT_MISSING_REPOS=ON'.")
 endif()
 
 message(WARNING "This part of findKrims has never been tested.")
