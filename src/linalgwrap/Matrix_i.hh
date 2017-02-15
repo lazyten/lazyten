@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -19,6 +19,7 @@
 
 #pragma once
 #include "Base/Interfaces/Indexable_i.hh"
+#include "Base/Interfaces/OperatorProperties.hh"
 #include "Constants.hh"
 #include "DefaultMatrixIterator.hh"
 #include "Exceptions.hh"
@@ -127,7 +128,7 @@ class Matrix_i : public Indexable_i<Scalar> {
   const_iterator cend() const { return const_iterator(*this); }
   ///@}
 
-  /** \name Check for matrix properties
+  /** \name Matrix properties
    */
   ///@{
   /** \brief Check whether the matrix is symmetric
@@ -143,7 +144,51 @@ class Matrix_i : public Indexable_i<Scalar> {
    * between conj(m(i,j)) and m(j,i) is less than the tolerance given
    * */
   bool is_hermitian(real_type tolerance = Constants<real_type>::default_tolerance) const;
+
+  /** \brief Return the properties satisfied by this matrix by means of its internal
+   * structure.
+   *
+   * The idea is to return the set of properties which is satisfied out of the box.
+   * In other words the function should return in O(1) time.
+   * */
+  virtual OperatorProperties properties() const {
+    return m_properties;
+    // TODO later: return OperatorProperties::None;
+  }
+
+  /** \brief Check whether the requested properties are satisfied by the matrix
+   *
+   * Unlike ``properties()`` this functions performs actual checking by looking
+   * at the matrix elements.
+   */
+  bool has_properties(
+        OperatorProperties prop,
+        real_type tolerance = Constants<real_type>::default_tolerance) const;
+
+  /** \brief Check whether the matrix satisfies the given properties and sets them
+   * internally to be satisfied if this is the case.
+   *
+   * TODO Do the replacement.
+   *
+   * \note This function is a temporary hack to get going, but will be removed and
+   * replaced by something more sensible at some point.
+   *
+   * \return  True if the properties were set.
+   * */
+  bool check_and_set_properties(
+        OperatorProperties prop,
+        real_type tolerance = Constants<real_type>::default_tolerance) {
+    if (has_properties(prop, tolerance)) {
+      m_properties |= prop;
+      return true;
+    }
+    return false;
+  }
   ///@}
+
+ private:
+  // TODO tmp: Remove once we have property forwarding in products and sums
+  OperatorProperties m_properties;
 };
 
 //@{
@@ -252,6 +297,30 @@ bool Matrix_i<Scalar>::is_hermitian(real_type tolerance) const {
     }
   }
   return true;
+}
+
+template <typename Scalar>
+bool Matrix_i<Scalar>::has_properties(OperatorProperties prop,
+                                      real_type tolerance) const {
+  bool ret = true;
+  if (props_contained_in(OperatorProperties::Hermitian, prop)) {
+    ret = ret && is_hermitian(tolerance);
+  }
+
+  if (props_contained_in(OperatorProperties::Real, prop)) {
+    ret = ret && !krims::IsComplexNumber<Scalar>::value;
+  }
+  // The two above routines check RealSymmetric as well implicitly.
+
+  // TODO quick check for positive semi-definiteness and positive definiteness
+  assert_dbg(!props_contained_in(OperatorProperties::PositiveSemiDefinite, prop),
+             krims::ExcNotImplemented());
+
+  // TODO check for anti-Hermitian
+  assert_dbg(!props_contained_in(OperatorProperties::AntiHermitian, prop),
+             krims::ExcNotImplemented());
+
+  return ret;
 }
 
 //

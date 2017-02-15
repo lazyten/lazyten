@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -17,10 +17,10 @@
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "linalgwrap/solve.hh"
 #include "linalgwrap/SmallMatrix.hh"
 #include "linalgwrap/SmallVector.hh"
 #include "linalgwrap/TestingUtils.hh"
+#include "linalgwrap/solve.hh"
 #include "rapidcheck_utils.hh"
 #include <catch.hpp>
 
@@ -122,6 +122,10 @@ static std::vector<SolveTestProblem<Matrix>> real_hermitian_problems() {
 
   res.push_back({"10x10 Problem", M10, rhs10, sol10});
 
+  for (auto& prob : res) {
+    prob.M.check_and_set_properties(OperatorProperties::RealSymmetric);
+  }
+
   return res;
 }
 
@@ -136,16 +140,16 @@ TEST_CASE("solve", "[solve]") {
   std::vector<SolveTestProblem<matrix_type>> real_hermitian =
         real_hermitian_problems<matrix_type>();
 
-  SECTION("solve_hermitian with reference problems") {
+  SECTION("solve with hermitian reference problems") {
     typedef typename SolveTestProblem<matrix_type>::vector_type vector_type;
     for (const auto& prb : real_hermitian) {
       vector_type res(prb.ref_soln.size());
-      solve_hermitian(prb.M, res, prb.rhs);
+      solve(prb.M, res, prb.rhs);
       REQUIRE(res == numcomp(prb.ref_soln));
     }
-  }  // solve_hermitian with reference problems
+  }  // solve with hermitian reference problems
 
-  SECTION("solve_hermitian with random problems") {
+  SECTION("solve with random hermitian problems") {
     typedef SmallVector<typename matrix_type::scalar_type> vector_type;
 
     auto test = [&] {
@@ -157,6 +161,8 @@ TEST_CASE("solve", "[solve]") {
         for (size_t i = 0; i < m.n_rows(); ++i) {
           m(i, i) += 1.;
         }
+
+        m.check_and_set_properties(OperatorProperties::RealSymmetric);
         return m;
       };
 
@@ -167,13 +173,13 @@ TEST_CASE("solve", "[solve]") {
       // Generate the vectors and solve
       auto rhs = *gen::numeric_tensor<vector_type>(M.n_rows());
       vector_type sol(M.n_rows());
-      solve_hermitian(M, sol, rhs);
+      solve(M, sol, rhs);
 
       // Check that we agree:
       RC_ASSERT_NC(M * sol == numcomp(rhs).tolerance(NumCompAccuracyLevel::Sloppy));
     };
 
-    CHECK(rc::check("solve_hermitian with random problems", test));
+    CHECK(rc::check("solve with random hermitian problems", test));
   }  // solve_hermitian with random problems
 
 }  // solve
