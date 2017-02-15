@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -24,6 +24,9 @@
 #include <krims/SubscriptionPointer.hh>
 
 namespace linalgwrap {
+
+// TODO Would it be a big problem if the interface here was more flexible,
+//      i.e. that more parameters could be altered post-construction time?
 
 /** \brief Base class for eigenproblems.
  *  The common stuff both general and non-general eigenproblems
@@ -214,7 +217,7 @@ class Eigenproblem : public EigenproblemBase<isHermitian, MatrixA, MatrixDiag> {
                   std::is_same<MatrixA, MatrixDiag>::value, Matrix, MatrixA>>
   Eigenproblem(const Matrix& A, const MatrixB& B,
                size_type n_ep = Constants<size_type>::all)
-        : Eigenproblem(A, B, n_ep, A){}
+        : Eigenproblem(A, B, n_ep, A) {}
   ///@}
 
  private:

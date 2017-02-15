@@ -1,6 +1,6 @@
 ## ---------------------------------------------------------------------
 ##
-## Copyright (C) 2016 by the linalgwrap authors
+## Copyright (C) 2016-17 by the linalgwrap authors
 ##
 ## This file is part of linalgwrap.
 ##
@@ -29,8 +29,10 @@ set(LINALGWRAP_SOURCES
 	Base/Solvers/SolverStateBase.cc
 	Base/Solvers/IterativeSolverKeys.cc
 	Base/Solvers/EigensolverBaseKeys.cc
+	Base/Solvers/LinearSolverBaseKeys.cc
 	Arpack/ArpackEigensolver.cc
 	eigensystem.cc
+	LinearSolver.cc
 )
 
 # Dump the current version as an include file.
