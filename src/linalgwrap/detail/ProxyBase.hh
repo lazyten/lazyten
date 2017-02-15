@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -24,6 +24,8 @@
 namespace linalgwrap {
 
 namespace detail {
+// TODO Probably it is better to use dynamic polymorphism here some day,
+//      i.e. take the inner matrix via an abstract base type reference or so.
 
 /** ProxyBase class for stored matrices */
 template <typename Matrix, typename StoredMatrix = typename StoredTypeOf<Matrix>::type,

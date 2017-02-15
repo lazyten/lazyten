@@ -79,6 +79,8 @@ TEST_CASE("DiagonalMatrix class", "[DiagonalMatrix]") {
     testlib{args_generator, model_generator, diagonal_generator{}, "DiagonalMatrix: "}
           .run_checks();
   }
+
+  SECTION("DiagonalMatrix inverse tests") {}
 }
 
 }  // tests

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -142,7 +142,8 @@ class StoredMatrix_i : public Matrix_i<Scalar> {
    * the inverse of such a matrix to a multivector. Possible examples
    * are diagonal and tridiagonal matrices.
    *
-   * \note The inverse_apply should never be iterative.
+   * \note The inverse_apply should not be iterative or otherwise
+   *       indirect.
    **/
   virtual bool has_apply_inverse() const { return false; }
   ///@}

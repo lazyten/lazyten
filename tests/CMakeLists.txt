@@ -47,6 +47,7 @@ set(LINALGWRAP_TESTS_SOURCES
 	# Proxies and other matrix functionality
 	TransposeProxyTests.cc
 	transTests.cc
+	inverseTests.cc
 
 	# Lazy matrix implementations
 	BlockDiagonalMatrixTests.cc

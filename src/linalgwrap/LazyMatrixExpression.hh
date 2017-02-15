@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -80,7 +80,10 @@ class LazyMatrixExpression : public Matrix_i<typename StoredMatrix::scalar_type>
    * the inverse of such a matrix to a multivector. Possible examples
    * are diagonal and tridiagonal matrices.
    *
-   * \note The inverse_apply should never be iterative.
+   * \note The inverse_apply should not be iterative or otherwise
+   *       implicit. (With the exception of ImplicitlyInvertibleMatrix,
+   *       which serves exactly the purpose to attach an implicit
+   *       inverse to another matrix)
    **/
   virtual bool has_apply_inverse() const { return false; }
 
