@@ -23,7 +23,7 @@
 #include "detail.hh"
 #include "linalgwrap/Base/Solvers.hh"
 #include <armadillo>
-#include <krims/argsort.hh>
+#include <krims/Algorithm.hh>
 
 namespace linalgwrap {
 

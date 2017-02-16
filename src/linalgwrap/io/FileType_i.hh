@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -48,6 +48,13 @@ DefException1(ExcInvalidDataForFileType, std::string,
  * */
 class FileType_i {
  public:
+  virtual ~FileType_i() = default;
+  FileType_i() = default;
+  FileType_i(const FileType_i&) = default;
+  FileType_i(FileType_i&&) = default;
+  FileType_i& operator=(FileType_i&&) = default;
+  FileType_i& operator=(const FileType_i&) = default;
+
   /** Write a labelled matrix to the ostream under the format represented by
    * this class.
    *  Use the provided label string to indicate the matrix */

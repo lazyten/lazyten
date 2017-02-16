@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -203,13 +203,17 @@ eigensystem_with_method(const std::string& method, const Eigenproblem problem,
                             ") is not available. Either you spelled it wrong "
                             "or this method has not ben compiled into this "
                             "version of linalgwrapj"));
+
+  return EigensolutionTypeFor<Eigenproblem::hermitian,
+                              typename Eigenproblem::matrix_diag_type>{};
 }
 }  // namespace detail
 
 template <typename Matrix>
 EigensolutionTypeFor<true, Matrix> eigensystem_hermitian(
-      const Matrix& A, typename std::enable_if<IsMatrix<Matrix>::value,
-                                               typename Matrix::size_type>::type n_ep,
+      const Matrix& A,
+      typename std::enable_if<IsMatrix<Matrix>::value, typename Matrix::size_type>::type
+            n_ep,
       const krims::ParameterMap& map) {
   // Setup problem
   typedef Eigenproblem<true, Matrix> problem_type;
@@ -259,8 +263,9 @@ EigensolutionTypeFor<true, MatrixA> eigensystem_hermitian(
 
 template <typename Matrix>
 EigensolutionTypeFor<false, Matrix> eigensystem(
-      const Matrix& A, typename std::enable_if<IsMatrix<Matrix>::value,
-                                               typename Matrix::size_type>::type n_ep,
+      const Matrix& A,
+      typename std::enable_if<IsMatrix<Matrix>::value, typename Matrix::size_type>::type
+            n_ep,
       const krims::ParameterMap& map) {
   // TODO This code is untested!
   assert_sufficiently_tested(false);
