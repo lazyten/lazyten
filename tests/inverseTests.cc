@@ -17,6 +17,7 @@
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "lazy_matrix_tests.hh"
 #include "rapidcheck_utils.hh"
 #include <catch.hpp>
 #include <linalgwrap/LazyMatrix_i.hh>
@@ -194,18 +195,25 @@ TEST_CASE("inverse function", "[inverse]") {
     REQUIRE(rc::check("Test with SimpleInvertable", testable));
   }  // inverse * matrix == identity
 
-  SECTION("Test with arbitrary hermitian matrix and make_invertible") {
-    auto testable = []() {
-      auto n = *gen::scale(0.8, gen::numeric_size<2>()).as("Matrix size");
-      auto M = *gen::with_properties(gen::numeric_tensor<matrix_type>(n, n),
-                                     OperatorProperties::RealSymmetric)
-                      .as("Problem matrix");
-
+  auto random_matrix_generator = [] {
+    auto n = *gen::scale(0.8, gen::numeric_size<2>()).as("Matrix size");
+    auto mat_gen = gen::with_properties(gen::numeric_tensor<matrix_type>(n, n),
+                                        OperatorProperties::RealSymmetric);
+    auto add_one = [](matrix_type m) {
       // Add one on the diagonal to make matrix less singular:
-      for (size_t i = 0; i < M.n_rows(); ++i) {
-        M(i, i) += 1.;
+      for (size_t i = 0; i < m.n_rows(); ++i) {
+        m(i, i) += 1.;
       }
+      return m;
+    };
+    auto M = *gen::map(mat_gen, add_one).as("Problem matrix");
 
+    return M;
+  };
+
+  SECTION("Test with arbitrary hermitian matrix and make_invertible") {
+    auto testable = [random_matrix_generator]() {
+      auto M = random_matrix_generator();
       auto Minv = make_invertible(M);
 
       auto op = Minv * inverse(Minv);
@@ -227,6 +235,29 @@ TEST_CASE("inverse function", "[inverse]") {
 
     REQUIRE(rc::check("Test with arbitrary hermitian matrix and make_invertible",
                       testable));
+  }
+
+  SECTION("Test object resulting from make_invertible.") {
+    // Generator for the model.
+    auto model_generator = [](matrix_type m) { return m; };
+
+    // Generator for the sut
+    struct invertible_generator {
+      auto operator()(matrix_type m) -> decltype(make_invertible(m)) {
+        m_ptr.reset(new matrix_type(std::move(m)));
+        return make_invertible(*m_ptr);
+      }
+      std::shared_ptr<matrix_type> m_ptr;
+    };
+
+    typedef lazy_matrix_tests::TestingLibrary<
+          typename std::result_of<invertible_generator(matrix_type)>::type, matrix_type>
+          testlib;
+
+    testlib tl{random_matrix_generator, model_generator, invertible_generator{},
+               "make_invertible(): "};
+    tl.enable_inverse_apply();
+    tl.run_checks();
   }
 
 }  // inverse

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -38,11 +38,12 @@ TEST_CASE("DiagonalMatrix class", "[DiagonalMatrix]") {
 
   // Generator for the args
   auto args_generator = [] {
-    auto val_size = *gen::scale(0.6, gen::numeric_size<1>().as("Diagonal size"));
+    auto count = *gen::scale(0.6, gen::numeric_size<1>()).as("Diagonal size");
     // TODO allow zero-sized matrices
-    RC_PRE(val_size > 0u);
-    auto vals = *gen::numeric_container<std::vector<scalar_type>>(val_size).as(
-          "diagonal values");
+    RC_PRE(count > 0u);
+    auto vals = *rc::gen::container<std::vector<scalar_type>>(
+                       count, gen::numeric_around<scalar_type>(1.0))
+                       .as("Diagonal values");
     return vector_type{vals};
   };
 
@@ -76,11 +77,18 @@ TEST_CASE("DiagonalMatrix class", "[DiagonalMatrix]") {
     auto lowertol = NumCompConstants::change_temporary(
           0.01 * krims::NumCompConstants::default_tolerance_factor);
 
-    testlib{args_generator, model_generator, diagonal_generator{}, "DiagonalMatrix: "}
-          .run_checks();
-  }
+    testlib tl{args_generator, model_generator, diagonal_generator{}, "DiagonalMatrix: "};
 
-  SECTION("DiagonalMatrix inverse tests") {}
+    // Only enable the inverse tests if this predicate is true:
+    auto enable_inverse_predicate = [](const vector_type& d) {
+      for (const auto& elem : d) {
+        if (std::abs(elem) < 1e-5) return false;
+      }
+      return true;
+    };
+    tl.enable_inverse_apply_if(enable_inverse_predicate);
+    tl.run_checks();
+  }
 }
 
 }  // tests

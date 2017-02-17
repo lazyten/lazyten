@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -223,6 +223,10 @@ struct ComparativeTests {
    *  matrix yields the same result in both model and sut */
   template <typename Vector>
   linalgwrap_declare_comptest(test_transpose_apply_to);
+
+  /** Test inverse application */
+  template <typename Vector>
+  linalgwrap_declare_comptest(test_inv_apply_to);
 
   /** Are easy problems allowed (by default yes) */
   static bool allow_easy_problems;
@@ -960,9 +964,65 @@ linalgwrap_define_comptest_tmpl(test_transpose_apply_to, Vector) {
   RC_ASSERT_NC(model_out == numcomp(mvout).tolerance(tolerance));
 }
 
+linalgwrap_define_comptest_tmpl(test_inv_apply_to, Vector) {
+  auto n_vectors = *gen::inRange<size_type>(1, 6).as("Number of vectors to apply to");
+  auto ivec_gen =
+        gen::with_l2_norm_in_range(0, 1e2, gen::numeric_tensor<Vector>(model.n_cols()));
+  auto mvin = *gen::numeric_tensor<MultiVector<Vector>>(n_vectors, ivec_gen)
+                     .as("Input vectors");
+  auto ovec_gen =
+        gen::with_l2_norm_in_range(0, 1e2, gen::numeric_tensor<Vector>(model.n_cols()));
+  auto mvout = *gen::numeric_tensor<MultiVector<Vector>>(n_vectors, ovec_gen)
+                      .as("Result vectors");
+  auto c_this = *gen::map(gen::inRange<long>(10000000, 1000000001), [](long l) {
+                   return l / 1e8;
+                 }).as("Coefficient for sut matrix");
+  auto coeff = *gen_c_out().as("Coefficient for out vectors");
+
+  // Vector for the results:
+  MultiVector<Vector> res(mvin.n_elem(), mvin.n_vectors(), false);
+
+  // TODO also test ConjTrans and Trans (should work with this test setup as well!)
+  const Transposed transop = Transposed::None;
+
+  auto mvoutcopy = mvout.copy_deep();
+
+  // First apply_inverse:
+  try {
+    sut.apply_inverse(mvin, mvout, transop, c_this, coeff);
+  } catch (const krims::ExcDisabled& e) {
+    // This means that this matrix does not support values of coeff other than 0
+    coeff = 0;
+    sut.apply_inverse(mvin, mvout, transop, c_this, coeff);
+  }
+  // mvout now holds:
+  //   c_this * M^{-1} * mvin + coeff * mvout
+
+  // Now undo that:
+  sut.apply(mvout, res, transop, 1 / c_this, 0);
+
+  // Res now holds:
+  //  1/c_this * M * mvout = 1/c_this * M * (c_this * M^{-1} * mvin + coeff * mvout)
+  //                       = mvin + coeff / c_this * M * mvout
+
+  // Use the model to compute the part we need to add to mvin
+  MultiVector<Vector> model_out(mvin.n_elem(), mvin.n_vectors(), false);
+  for (size_type vec = 0; vec < n_vectors; ++vec) {
+    const auto& vi = mvin[vec];
+    const auto& vo = mvoutcopy[vec];
+    auto& mo = model_out[vec];
+
+    Vector tmp(mo.size());
+    matrix_apply(model, vo, tmp);
+    mo = vi + coeff / c_this * tmp;
+  }
+
+  // Check that it agrees:
+  RC_ASSERT_NC(model_out == numcomp(res).tolerance(tolerance));
+}
+
 /** Test whether addition of another arbitrary matrix
- * gives
- *  rise to the same results in model and sut.
+ * gives rise to the same results in model and sut.
  */
 template <typename CompMatrix, typename SutMatrix>
 template <typename OtherMatrix>
