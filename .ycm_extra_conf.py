@@ -1,6 +1,6 @@
 ## ---------------------------------------------------------------------
 ##
-## Copyright (C) 2016 by the linalgwrap authors
+## Copyright (C) 2016-17 by the linalgwrap authors
 ##
 ## This file is part of linalgwrap.
 ##
@@ -35,8 +35,14 @@ flags = [
     # https://programmers.stackexchange.com/questions/122608#124574
     '-Wall',
     '-Wextra',
-    '-Werror',
+    '-Wnon-virtual-dtor',
+    '-Woverloaded-virtual',
+    '-Wold-style-cast',
+    '-Wcast-align',
+    '-Wconversion',
+    '-Wsign-conversion',
     '-pedantic',
+    '-Werror',
     # Generate unwind information
     '-fexceptions',
     # Compile debug code as well
