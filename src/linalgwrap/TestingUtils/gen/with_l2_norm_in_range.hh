@@ -36,8 +36,8 @@ rc::Gen<Tensor> with_l2_norm_in_range(typename Tensor::real_type min_norm,
 
     // Discard cases with too small or too large norms
     // => cannot scale without great numerical error
-    RC_PRE(t_norm >= min_norm / 1e3);
-    RC_PRE(t_norm <= 1e3 * max_norm);
+    RC_PRE(t_norm >= min_norm / 1e6);
+    RC_PRE(t_norm <= 1e6 * max_norm);
 
     // Bring to min_norm
     if (t_norm < min_norm) t *= min_norm / t_norm;

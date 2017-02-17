@@ -153,22 +153,15 @@ TEST_CASE("solve", "[solve]") {
     typedef SmallVector<typename matrix_type::scalar_type> vector_type;
 
     auto test = [&] {
-      // Generate the matrix
-      auto symm = [](matrix_type m) {
-        m.symmetrise();
-
-        // Add one on the diagonal to make matrix less singular:
-        for (size_t i = 0; i < m.n_rows(); ++i) {
-          m(i, i) += 1.;
-        }
-
-        m.check_and_set_properties(OperatorProperties::RealSymmetric);
-        return m;
-      };
-
       auto n = *gen::scale(0.8, gen::numeric_size<2>()).as("Matrix size");
-      auto M =
-            *gen::map(gen::numeric_tensor<matrix_type>(n, n), symm).as("Problem matrix");
+      auto M = *gen::with_properties(gen::numeric_tensor<matrix_type>(n, n),
+                                     OperatorProperties::RealSymmetric)
+                      .as("Problem matrix");
+
+      // Add one on the diagonal to make matrix less singular:
+      for (size_t i = 0; i < M.n_rows(); ++i) {
+        M(i, i) += 1.;
+      }
 
       // Generate the vectors and solve
       auto rhs = *gen::numeric_tensor<vector_type>(M.n_rows());
