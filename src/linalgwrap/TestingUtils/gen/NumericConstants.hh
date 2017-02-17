@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -24,10 +24,15 @@ namespace linalgwrap {
 namespace gen {
 
 /* \brief The maximum an arbitrary numeric value may be. */
-static constexpr long double max_value = 1e6;
+static constexpr long double max_value = 1e5;
 
 /** \brief The minimum an arbitrary numeric value may be */
-static constexpr long double min_value = 1e-6;
+static constexpr long double min_value = 1e-5;
+
+/** \brief The maximum l2 norm all values in a numeric container/tensor may have
+ *         (objects with larger norms will have their values scaled down)
+ * */
+static constexpr long double max_norm = max_value;
 
 }  // namespace gen
 }  // namespace linalgwrap
