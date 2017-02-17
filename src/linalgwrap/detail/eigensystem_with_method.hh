@@ -122,6 +122,8 @@ eigensystem_with_method(const std::string& method, const Eigenproblem problem,
                             ") is not available. Either you spelled it wrong "
                             "or this method has not ben compiled into this "
                             "version of linalgwrapj"));
+  return EigensolutionTypeFor<Eigenproblem::hermitian,
+                              typename Eigenproblem::matrix_diag_type>{};
 }
 
 }  // namespace detail

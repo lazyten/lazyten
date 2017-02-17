@@ -278,7 +278,8 @@ void ArmadilloEigensolver<Eigenproblem, State>::assert_valid_control_params(
   //
   // A and Diag
   //
-  solver_assert((void*)&problem.A() == (void*)&problem.Diag(), state,
+  // note: We compare memory addresses
+  solver_assert(&problem.A() == &problem.Diag(), state,
                 ExcInvalidSolverParametersEncountered("The matrices A and Diag need "
                                                       "to be the same objects."));
 }

@@ -329,12 +329,14 @@ void ArpackEigensolver<Eigenproblem, State>::assert_valid_control_params(
                       " for mode is not allowed. Only values within [1,5] are ok."));
 
   if (mode == 1 || mode == 2) {
-    solver_assert((void*)&problem.A() == (void*)&problem.Diag(), state,
+    // note: We compare memory addresses
+    solver_assert(&problem.A() == &problem.Diag(), state,
                   ExcInvalidSolverParametersEncountered(
                         "For mode 1 or 2 the matrices A and Diag need "
                         "to be the same objects."));
   } else {
-    solver_assert((void*)&problem.A() != (void*)&problem.Diag(), state,
+    // note: We compare memory addresses
+    solver_assert(&problem.A() != &problem.Diag(), state,
                   ExcInvalidSolverParametersEncountered(
                         "For modes > 2 the matrices A and Diag have to be different "
                         "objects, e.g. for mode 3 we need Diag = (A-sigma*S)^{-1}"));

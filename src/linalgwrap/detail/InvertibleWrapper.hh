@@ -123,7 +123,7 @@ class InvertibleWrapper
   template <typename VectorIn, typename VectorOut,
             mat_vec_apply_enabled_t<InvertibleWrapper, VectorIn, VectorOut>...>
   void apply(const MultiVector<VectorIn>& x, MultiVector<VectorOut>& y,
-             const Transposed mode,
+             const Transposed mode = Transposed::None,
              const scalar_type c_this = Constants<scalar_type>::one,
              const scalar_type c_y = Constants<scalar_type>::zero) const {
     m_inner_ptr->apply(x, y, mode, c_this, c_y);
