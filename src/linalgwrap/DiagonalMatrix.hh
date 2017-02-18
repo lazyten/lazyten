@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -166,7 +166,7 @@ class DiagonalMatrix : public LazyMatrixExpression<StoredMatrix> {
    *
    * \note does nothing
    */
-  void update(const krims::ParameterMap&) override {}
+  void update(const krims::GenMap&) override {}
 
   /** Clone function */
   lazy_matrix_expression_ptr_type clone() const override {

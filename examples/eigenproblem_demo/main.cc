@@ -52,7 +52,7 @@ int main() {
 
   // Compute the 4 largest real eigenpairs
   const size_t n_ep = 4;
-  krims::ParameterMap map{{"which", "LR"}};
+  krims::GenMap map{{"which", "LR"}};
 
   //
   // Compute solution to the eigensystem using Arpack

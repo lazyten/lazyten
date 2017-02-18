@@ -41,7 +41,7 @@ struct SolveTestProblem {
   vector_type rhs;                 //< The rhs vector
   vector_type ref_soln;            //< The expected solution
   NumCompAccuracyLevel tolerance;  //< The accuracy level
-  ParameterMap params;             //< Parameters to run the solver with
+  GenMap params;                   //< Parameters to run the solver with
 
   SolveTestProblem(std::string description_, matrix_type M_, vector_type rhs_,
                    vector_type ref_soln_)

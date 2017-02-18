@@ -25,7 +25,7 @@
 #include "linalgwrap/LazyMatrixSum.hh"
 #include "linalgwrap/Matrix_i.hh"
 #include "linalgwrap/StoredMatrix_i.hh"
-#include <krims/ParameterMap.hh>
+#include <krims/GenMap.hh>
 
 namespace linalgwrap {
 
@@ -268,9 +268,9 @@ class LazyMatrixExpression : public Matrix_i<typename StoredMatrix::scalar_type>
   ///@}
 
   /** \brief Update the internal data of all objects in this expression
-   * given the ParameterMap
+   * given the GenMap
    * */
-  virtual void update(const krims::ParameterMap& map) = 0;
+  virtual void update(const krims::GenMap& map) = 0;
 
   /** \brief Clone the expression
    *

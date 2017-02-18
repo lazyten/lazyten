@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -20,7 +20,7 @@
 #pragma once
 #include "SolverExceptions.hh"
 #include "SolverStateBase.hh"
-#include <krims/ParameterMap.hh>
+#include <krims/GenMap.hh>
 
 namespace linalgwrap {
 template <typename State>
@@ -36,12 +36,12 @@ class SolverBase {
   /** Bulk-update control parameters from a parameter map.
    *
    * This version does nothing since there are no parameters*/
-  void update_control_params(const krims::ParameterMap&) {}
+  void update_control_params(const krims::GenMap&) {}
 
   /** Get the current settings of all internal control parameters and
-   *  update the ParameterMap accordingly.
+   *  update the GenMap accordingly.
    */
-  void get_control_params(krims::ParameterMap&) const {}
+  void get_control_params(krims::GenMap&) const {}
   ///@}
 
   /** \brief Run the solver by advancing the provided

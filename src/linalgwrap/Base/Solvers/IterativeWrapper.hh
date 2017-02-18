@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -22,7 +22,7 @@
 #include "IterativeWrapperKeys.hh"
 #include "SolverBase.hh"
 #include "SolverExceptions.hh"
-#include <krims/ParameterMap.hh>
+#include <krims/GenMap.hh>
 
 namespace linalgwrap {
 
@@ -61,15 +61,15 @@ class IterativeWrapper : public Base {
    *
    * For the list of available keys, see IterativeSolverKeys.hh
    */
-  void update_control_params(const krims::ParameterMap& map) {
+  void update_control_params(const krims::GenMap& map) {
     base_type::update_control_params(map);
     max_iter = map.at(IterativeWrapperKeys::max_iter, max_iter);
   }
 
   /** Get the current settings of all internal control parameters and
-   *  update the ParameterMap accordingly.
+   *  update the GenMap accordingly.
    */
-  void get_control_params(krims::ParameterMap& map) const {
+  void get_control_params(krims::GenMap& map) const {
     base_type::get_control_params(map);
     map.update(IterativeWrapperKeys::max_iter, max_iter);
   }

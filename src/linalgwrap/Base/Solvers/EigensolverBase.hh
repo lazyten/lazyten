@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -91,16 +91,16 @@ class EigensolverBase : public SolverBase<State> {
    *
    * For the list of available keys, see EigensolverBaseKeys.hh
    */
-  void update_control_params(const krims::ParameterMap& map) {
+  void update_control_params(const krims::GenMap& map) {
     base_type::update_control_params(map);
     which = map.at(EigensolverBaseKeys::which, which);
     tolerance = map.at(EigensolverBaseKeys::tolerance, tolerance);
   }
 
   /** Get the current settings of all internal control parameters and
-   *  update the ParameterMap accordingly.
+   *  update the GenMap accordingly.
    */
-  void get_control_params(krims::ParameterMap& map) const {
+  void get_control_params(krims::GenMap& map) const {
     base_type::get_control_params(map);
     map.update(EigensolverBaseKeys::which, which);
     map.update(EigensolverBaseKeys::tolerance, tolerance);

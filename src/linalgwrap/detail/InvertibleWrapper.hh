@@ -245,7 +245,7 @@ class InvertibleWrapper
   }
 
   /** \brief Update the InvertibleWrapper */
-  void update(const krims::ParameterMap& /* map */) override {
+  void update(const krims::GenMap& /* map */) override {
     // Cannot be done, since InvertibleWrapper is only
     // holding a const reference.
     assert_throw(false, krims::ExcDisabled("Cannot update an InvertibleWrapper."));

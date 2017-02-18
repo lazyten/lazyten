@@ -37,7 +37,7 @@ class SimpleInvertible : public LazyMatrix_i<Matrix> {
   typedef typename LazyMatrix_i<Matrix>::lazy_matrix_expression_ptr_type
         lazy_matrix_expression_ptr_type;
 
-  void update(const krims::ParameterMap&) override {}
+  void update(const krims::GenMap&) override {}
 
   bool has_apply_inverse() const override { return true; }
 

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -146,7 +146,7 @@ class EigensystemSolver final
   EigensystemSolver() {}
 
   /** Construct an eigensolver setting the parameters from the map */
-  EigensystemSolver(const krims::ParameterMap& map) : EigensystemSolver() {
+  EigensystemSolver(const krims::GenMap& map) : EigensystemSolver() {
     update_control_params(map);
   }
   //@}
@@ -157,7 +157,7 @@ class EigensystemSolver final
   std::string method = "auto";
 
   /** Update control parameters from Parameter map */
-  void update_control_params(const krims::ParameterMap& map) {
+  void update_control_params(const krims::GenMap& map) {
     base_type::update_control_params(map);
     method = map.at(EigensystemSolverKeys::method, method);
 
@@ -167,8 +167,8 @@ class EigensystemSolver final
   }
 
   /** Get the current settings of all internal control parameters and
-   *  update the ParameterMap accordingly. */
-  void get_control_params(krims::ParameterMap& map) const {
+   *  update the GenMap accordingly. */
+  void get_control_params(krims::GenMap& map) const {
     base_type::get_control_params(map);
     map.update(EigensystemSolverKeys::method, method);
   }
@@ -190,7 +190,7 @@ class EigensystemSolver final
    * in this class and the subclasses. Should be updated with
    * get_control_params *before* the actual inner eigensolver invocation.
    */
-  mutable krims::ParameterMap m_solver_params;
+  mutable krims::GenMap m_solver_params;
 };
 
 //

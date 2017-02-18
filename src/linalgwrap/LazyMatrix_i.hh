@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -177,11 +177,11 @@ class LazyMatrix_i : public LazyMatrixExpression<StoredMatrix> {
              const scalar_type c_out = Constants<scalar_type>::zero) const override;
 
   /** \brief Update the internal data of all objects in this expression
-   *         given the ParameterMap
+   *         given the GenMap
    *
    *   This function raises an ExcNotImplemented exception.
    * */
-  virtual void update(const krims::ParameterMap&) override {
+  virtual void update(const krims::GenMap&) override {
     assert_dbg(false, krims::ExcNotImplemented());
   }
 };

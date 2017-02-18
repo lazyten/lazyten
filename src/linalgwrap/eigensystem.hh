@@ -36,7 +36,7 @@ EigensolutionTypeFor<true, Matrix> eigensystem_hermitian(
       const Matrix& A,
       typename std::enable_if<IsMatrix<Matrix>::value, typename Matrix::size_type>::type
             n_ep = Constants<typename Matrix::size_type>::all,
-      const krims::ParameterMap& map = krims::ParameterMap());
+      const krims::GenMap& map = krims::GenMap());
 
 /** Solve a generalised hermitian eigensystem
  *
@@ -61,7 +61,7 @@ EigensolutionTypeFor<true, MatrixA> eigensystem_hermitian(
       typename std::enable_if<IsMatrix<MatrixA>::value && IsMatrix<MatrixB>::value,
                               typename MatrixA::size_type>::type n_ep =
             Constants<typename MatrixA::size_type>::all,
-      const krims::ParameterMap& map = krims::ParameterMap());
+      const krims::GenMap& map = krims::GenMap());
 
 /** Solve a normal eigensystem
  *
@@ -84,7 +84,7 @@ EigensolutionTypeFor<false, Matrix> eigensystem(
       const Matrix& A,
       typename std::enable_if<IsMatrix<Matrix>::value, typename Matrix::size_type>::type
             n_ep = Constants<typename Matrix::size_type>::all,
-      const krims::ParameterMap& map = krims::ParameterMap());
+      const krims::GenMap& map = krims::GenMap());
 
 /** Solve a generalised eigensystem
  *
@@ -107,7 +107,7 @@ EigensolutionTypeFor<false, MatrixA> eigensystem(
       typename std::enable_if<IsMatrix<MatrixA>::value && IsMatrix<MatrixB>::value,
                               typename MatrixA::size_type>::type n_ep =
             Constants<typename MatrixA::size_type>::all,
-      const krims::ParameterMap& map = krims::ParameterMap());
+      const krims::GenMap& map = krims::GenMap());
 
 //
 // ------------------------------------------------------
@@ -118,7 +118,7 @@ EigensolutionTypeFor<true, Matrix> eigensystem_hermitian(
       const Matrix& A,
       typename std::enable_if<IsMatrix<Matrix>::value, typename Matrix::size_type>::type
             n_ep,
-      const krims::ParameterMap& map) {
+      const krims::GenMap& map) {
   typedef Eigenproblem<true, Matrix> problem_type;
   problem_type problem{A, n_ep};
 
@@ -130,7 +130,7 @@ EigensolutionTypeFor<true, MatrixA> eigensystem_hermitian(
       const MatrixA& A, const MatrixB& B,
       typename std::enable_if<IsMatrix<MatrixA>::value && IsMatrix<MatrixB>::value,
                               typename MatrixA::size_type>::type n_ep,
-      const krims::ParameterMap& map) {
+      const krims::GenMap& map) {
   typedef Eigenproblem<true, MatrixA, MatrixB> problem_type;
   problem_type problem{A, B, n_ep};
   return EigensystemSolver<problem_type>{map}.solve(problem).eigensolution();
@@ -141,7 +141,7 @@ EigensolutionTypeFor<false, Matrix> eigensystem(
       const Matrix& A,
       typename std::enable_if<IsMatrix<Matrix>::value, typename Matrix::size_type>::type
             n_ep,
-      const krims::ParameterMap& map) {
+      const krims::GenMap& map) {
   // TODO This code is untested!
   assert_sufficiently_tested(false);
 
@@ -156,7 +156,7 @@ EigensolutionTypeFor<false, MatrixA> eigensystem(
       const MatrixA& A, const MatrixB& B,
       typename std::enable_if<IsMatrix<MatrixA>::value && IsMatrix<MatrixB>::value,
                               typename MatrixA::size_type>::type n_ep,
-      const krims::ParameterMap& map) {
+      const krims::GenMap& map) {
   // TODO This code is untested!
   assert_sufficiently_tested(false);
 

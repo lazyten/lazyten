@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -201,7 +201,7 @@ class LazyMatrixWrapper : public LazyMatrixExpression<StoredMatrix> {
    *
    *  In this case does nothing.
    * */
-  void update(const krims::ParameterMap&) override {
+  void update(const krims::GenMap&) override {
     // Do nothing.
   }
 

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -89,13 +89,13 @@ int main() {
   //
   // Update the diagonal of the diag matrix
   //
-  // This is done via a ParameterMap object, which maps an identifier string
+  // This is done via a GenMap object, which maps an identifier string
   // to a pointer to an object. As pointer types both shared pointers as well
   // as SubscriptionPointers are allowed.
   // Here we use a SubscriptionPointer, which is implicitly constructed using
   // the make_subscription function from linalgwrap.
   diagonal = SmallVector<scalar_type>{-1., 2., 3.};
-  diag.update(krims::ParameterMap{{"diagonal", diagonal}});
+  diag.update(krims::GenMap{{"diagonal", diagonal}});
 
   // The output of the diag should change
   std::cout << "diag (updated diag) = " << std::endl << diag << std::endl << std::endl;
@@ -109,7 +109,7 @@ int main() {
 
   // Update the diag again, this time via matrix_diag
   diagonal = SmallVector<scalar_type>{4., 3., 2.};
-  krims::ParameterMap map{{"diagonal", diagonal}};
+  krims::GenMap map{{"diagonal", diagonal}};
   matrix_diag.update(map);
 
   // This time this is unchanged

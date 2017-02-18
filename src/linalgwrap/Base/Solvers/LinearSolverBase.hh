@@ -79,7 +79,7 @@ class LinearSolverBase : public SolverBase<State> {
    *
    * For the list of available keys, see LinearSolverBaseKeys.hh
    */
-  void update_control_params(const krims::ParameterMap& map) {
+  void update_control_params(const krims::GenMap& map) {
     base_type::update_control_params(map);
     tolerance = map.at(LinearSolverBaseKeys::tolerance, tolerance);
   }

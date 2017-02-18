@@ -24,7 +24,7 @@ namespace linalgwrap {
 
 namespace detail {
 template <bool cond>
-using ParameterMap_if = typename std::enable_if<cond, krims::ParameterMap>::type;
+using GenMap_if = typename std::enable_if<cond, krims::GenMap>::type;
 }
 
 //@{
@@ -38,10 +38,10 @@ using ParameterMap_if = typename std::enable_if<cond, krims::ParameterMap>::type
  * \throws      Subclass of SolverException in case there is an error.
  **/
 template <typename Matrix, typename Vector>
-void solve(const Matrix& A, MultiVector<Vector>& x, const MultiVector<const Vector>& b,
-           const detail::ParameterMap_if<IsMatrix<Matrix>::value &&
-                                         IsMutableVector<Vector>::value>& map =
-                 krims::ParameterMap()) {
+void solve(
+      const Matrix& A, MultiVector<Vector>& x, const MultiVector<const Vector>& b,
+      const detail::GenMap_if<IsMatrix<Matrix>::value && IsMutableVector<Vector>::value>&
+            map = krims::GenMap()) {
   assert_size(x.n_vectors(), b.n_vectors());
   assert_size(A.n_rows(), b.n_elem());
   assert_size(A.n_cols(), x.n_elem());
@@ -61,10 +61,10 @@ void solve(const Matrix& A, MultiVector<Vector>& x, const MultiVector<const Vect
 }
 
 template <typename Matrix, typename Vector>
-void solve(const Matrix& A, Vector& x, const Vector& b,
-           const detail::ParameterMap_if<IsMatrix<Matrix>::value &&
-                                         IsMutableVector<Vector>::value>& map =
-                 krims::ParameterMap()) {
+void solve(
+      const Matrix& A, Vector& x, const Vector& b,
+      const detail::GenMap_if<IsMatrix<Matrix>::value && IsMutableVector<Vector>::value>&
+            map = krims::GenMap()) {
   MultiVector<Vector> x_mv(x);
   MultiVector<const Vector> b_mv(b);
   solve(A, x_mv, b_mv, map);

@@ -108,9 +108,9 @@ DefSolverException1(ExcArpackCouldNotApplyShifts, size_t, n_arnoldi_vectors,
                     << "not apply shifts during the implicit restart. One way to "
                     << "tackle this problem is to increase the number of Arnoldi "
                     << "vectors beyond the current value ( " << n_arnoldi_vectors
-                    << " ) using the key 'n_arnoldi_vectors' in a ParameterMap.");
+                    << " ) using the key 'n_arnoldi_vectors' in a GenMap.");
 
-/** Class which contains all ParameterMap keys which are understood
+/** Class which contains all GenMap keys which are understood
  *  by the ArpackSolver update_control_params as static string
  *  members.
  *  See their doc strings for the types required. */
@@ -215,7 +215,7 @@ class ArpackEigensolver : public EigensolverBase<State> {
   ArpackEigensolver() {}
 
   /** Construct an eigensolver setting the parameters from the map */
-  ArpackEigensolver(const krims::ParameterMap& map) : ArpackEigensolver() {
+  ArpackEigensolver(const krims::GenMap& map) : ArpackEigensolver() {
     update_control_params(map);
   }
   //@}
@@ -243,7 +243,7 @@ class ArpackEigensolver : public EigensolverBase<State> {
   size_t max_iter = 100;
 
   /** Update control parameters from Parameter map */
-  void update_control_params(const krims::ParameterMap& map) {
+  void update_control_params(const krims::GenMap& map) {
     base_type::update_control_params(map);
     max_iter = map.at(ArpackEigensolverKeys::max_iter, max_iter);
     n_arnoldi_vectors =
@@ -252,9 +252,9 @@ class ArpackEigensolver : public EigensolverBase<State> {
   }
 
   /** Get the current settings of all internal control parameters and
-   *  update the ParameterMap accordingly.
+   *  update the GenMap accordingly.
    */
-  void get_control_params(krims::ParameterMap& map) const {
+  void get_control_params(krims::GenMap& map) const {
     base_type::get_control_params(map);
     map.update(ArpackEigensolverKeys::max_iter, max_iter);
     map.update(ArpackEigensolverKeys::n_arnoldi_vectors, n_arnoldi_vectors);

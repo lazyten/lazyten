@@ -41,7 +41,7 @@ struct ArmadilloEigensolverState : public EigensolverStateBase<Eigenproblem> {
         : base_type(std::move(problem)) {}
 };
 
-/** Class which contains all ParameterMap keys which are understood
+/** Class which contains all GenMap keys which are understood
  *  by the ArmadilloSolver update_control_params as static string
  *  members.
  *  See their doc strings for the types required. */
@@ -102,7 +102,7 @@ class ArmadilloEigensolver : public EigensolverBase<State> {
   ArmadilloEigensolver() {}
 
   /** Construct an eigensolver setting the parameters from the map */
-  ArmadilloEigensolver(const krims::ParameterMap& map) : ArmadilloEigensolver() {
+  ArmadilloEigensolver(const krims::GenMap& map) : ArmadilloEigensolver() {
     base_type::update_control_params(map);
   }
   //@}
@@ -212,7 +212,8 @@ void ArmadilloEigensolver<Eigenproblem, State>::copy_to_solution(
       (!Eigenproblem::real && base_type::which[1] == 'M')) {
     // The ordering we just did is the default ordering
     // => just shrink the vector to the entries we care about
-    idcs = std::vector<size_t>(std::begin(idcs) + start, std::begin(idcs) + end);
+    idcs = std::vector<size_t>(std::begin(idcs) + static_cast<ptrdiff_t>(start),
+                               std::begin(idcs) + static_cast<ptrdiff_t>(end));
   } else {
     // Build a temporary evalues array:
     std::vector<evalue_type> tmp;

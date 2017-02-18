@@ -43,7 +43,7 @@ class ProxyBase : public LazyMatrixExpression<StoredMatrix> {
    *
    *  In this case does nothing.
    * */
-  void update(const krims::ParameterMap&) override {}
+  void update(const krims::GenMap&) override {}
 
   /** Does this class own the inner matrix
    *
@@ -83,7 +83,7 @@ class ProxyBase<Matrix, StoredMatrix, /*isStored*/ false,
    *  In this case does nothing, since the internal object is
    *  either a stored matrix or const.
    * */
-  void update(const krims::ParameterMap&) override {
+  void update(const krims::GenMap&) override {
     assert_dbg(false, krims::ExcDisabled("Update is not possible for this Matrix "
                                          "expression, since the matrix inside the "
                                          "Proxy object is const."));
@@ -128,7 +128,7 @@ class ProxyBase<Matrix, StoredMatrix, /*isStored*/ false,
    *  In this case does nothing, since the internal object is
    *  either a stored matrix or const.
    * */
-  void update(const krims::ParameterMap& map) override { m_inner.update(map); }
+  void update(const krims::GenMap& map) override { m_inner.update(map); }
 
   /** Does this class own the inner matrix
    *

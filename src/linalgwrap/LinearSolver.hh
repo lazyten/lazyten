@@ -87,9 +87,9 @@ class LinearSolver final : public LinearSolverBase<LinearSolverState<LinearProbl
   }
 
   //  /** Get the current settings of all internal control parameters and
-  //   *  update the ParameterMap accordingly.
+  //   *  update the GenMap accordingly.
   //   */
-  //  void get_control_params(krims::ParameterMap& map) const {
+  //  void get_control_params(krims::GenMap& map) const {
   //    base_type::get_control_params(map);
   //    map.update(LinearSolverKeys::method, method);
   //  }
