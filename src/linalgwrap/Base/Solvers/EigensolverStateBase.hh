@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -73,7 +73,7 @@ class EigensolverStateBase : public SolverStateBase {
   typedef typename esoln_type::evector_type evector_type;
   ///@}
 
-  /** Access to eigenproblem */
+  /** Const access to eigenproblem */
   const eproblem_type& eigenproblem() const { return m_eigenproblem; }
 
   /** Const access to eigensolution */
@@ -92,10 +92,18 @@ class EigensolverStateBase : public SolverStateBase {
   EigensolverStateBase(const eproblem_type eigenproblem)
         : m_eigenproblem(std::move(eigenproblem)), m_eigensolution{} {};
 
+  /** Setup the guess of this state. from another state. */
+  void obtain_guess_from(const EigensolverStateBase& other) {
+    eigensolution() = other.eigensolution();
+  }
+
+  /** Setup the guess of this state. from another eigensolution. */
+  void obtain_guess_from(const esoln_type& other_soln) { eigensolution() = other_soln; }
+
  private:
   /* The eigenproblem we wish to solve (contains only pointers
    *  ->ok to store) */
-  const eproblem_type m_eigenproblem;
+  /* const */ eproblem_type m_eigenproblem;
 
   /* The container for the eigensolution (contains only pointers
    *  ->ok to store) */

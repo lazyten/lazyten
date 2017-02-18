@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -20,6 +20,7 @@
 #pragma once
 #include <linalgwrap/Base/Solvers.hh>
 #include <linalgwrap/TestingUtils.hh>
+#include <linalgwrap/inverse.hh>
 
 namespace linalgwrap {
 namespace tests {
@@ -27,11 +28,11 @@ namespace tests {
 namespace eigensolver_tests {
 using namespace krims;
 
-/** Base class for describing test problems for testing eigensolvers */
+/** Class for describing test problems for testing eigensolvers */
 template <typename Matrix>
-class EigensolverTestProblemBase {
- public:
+struct EigensolverTestProblemBase {
   typedef Matrix matrix_type;
+  typedef decltype(make_invertible(matrix_type(0, 0))) invmat_type;
   typedef typename matrix_type::size_type size_type;
 
   std::string description;  //< A short description of the test
@@ -45,9 +46,8 @@ class EigensolverTestProblemBase {
   //! The accuracy level to be used when comparing results
   NumCompAccuracyLevel tolerance;
 
-  /** The parameters which should be used when
-      running the solver. */
-  ParameterMap params;
+  /** The parameters which should be used when running the eigensolver. */
+  GenMap params;
 
   /** Matrix getters */
   ///@{
@@ -56,46 +56,80 @@ class EigensolverTestProblemBase {
 
   matrix_type& Diag() { return *Diag_ptr; }
   const matrix_type& Diag() const { return *Diag_ptr; }
+
+  invmat_type& B() { return B_inv; }
+  const invmat_type& B() const { return B_inv; }
   ///@}
 
   /** Do we have a special Diag matrix, which the eigensolver should
    * diagonalise instead of A */
   bool have_Diag() const { return Diag_ptr != nullptr; }
 
-  EigensolverTestProblemBase(std::string description_, size_type n_ep_,
+  /** Is this a problem which can only be solved as a generalised
+   *  eigenproblem? */
+  bool generalised_only() const { return m_generalised_only; }
+
+  EigensolverTestProblemBase(std::string description_, size_type n_ep_, size_type dim_,
                              std::shared_ptr<matrix_type> A_ptr_,
+                             std::shared_ptr<matrix_type> B_ptr_,
                              std::shared_ptr<matrix_type> Diag_ptr_)
         : description(description_),
           n_ep(n_ep_),
-          dim(A_ptr_->n_cols()),
+          dim(dim_),
           tolerance(NumCompAccuracyLevel::Default),
           params(),
-          A_ptr(A_ptr_),
-          Diag_ptr(Diag_ptr_) {}
+          m_generalised_only(B_ptr_ != nullptr),
+          A_ptr(std::move(A_ptr_)),
+          B_ptr(B_ptr_ == nullptr
+                      ? std::make_shared<matrix_type>(A_ptr->n_rows(), A_ptr->n_cols())
+                      : std::move(B_ptr_)),
+          B_inv(*B_ptr),
+          Diag_ptr(std::move(Diag_ptr_)) {
 
- protected:
+    if (!m_generalised_only) {
+      // At construction time B_ptr_ was a nullptr,
+      // hence B_ptr now contains a zero matrix.
+      // We now make the identity out of it:
+      for (size_t i = 0; i < A().n_rows(); ++i) {
+        (*B_ptr)(i, i) = 1;
+      }
+    }
+
+    // Set B to be symmetric
+    assert_throw(B_ptr->check_and_set_properties(OperatorProperties::RealSymmetric),
+                 ExcMatrixNotSymmetric());
+  }
+
+ private:
+  //! Can this problem only be solved as a generalised eigenproblem?
+  bool m_generalised_only;
+
   //! The matrix A of $Ax =\lambda B x$ or $Ax = \lambda x$
   std::shared_ptr<matrix_type> A_ptr;
+
+  //! The matrix B of $Ax =\lambda B x$ ( or nullptr if non-general problem)
+  std::shared_ptr<matrix_type> B_ptr;
+
+  //! The actual invertable version of B:
+  invmat_type B_inv;
 
   //! The matrix to diagonalise (or nullptr if equal to A)
   std::shared_ptr<matrix_type> Diag_ptr;
 };
 
-/** Class describing a test problem for testing eigensolvers
- *
- * This is the case for generalised eigenproblems */
-template <typename Matrix, bool isHermitian, bool isGeneral>
+/** Class for describing test problems for testing eigensolvers */
+template <typename Matrix, bool isHermitian>
 class EigensolverTestProblem : public EigensolverTestProblemBase<Matrix> {
-  static_assert(isGeneral, "Something went wrong with the template specialisation");
-
  public:
+  typedef EigensolverTestProblemBase<Matrix> base_type;
   typedef Matrix matrix_type;
+  typedef typename base_type::invmat_type invmat_type;
+  typedef Eigenproblem<isHermitian, matrix_type, invmat_type, matrix_type> gen_prob_type;
+  typedef Eigenproblem<isHermitian, matrix_type, void, matrix_type> prob_type;
 
-  typedef Eigenproblem<isHermitian, matrix_type, matrix_type, matrix_type> prob_type;
-
-  typedef EigensolutionTypeFor<isHermitian, Matrix> soln_type;
-  typedef typename soln_type::evector_type evector_type;
-  typedef typename soln_type::evalue_type evalue_type;
+  typedef EigensolutionTypeFor<isHermitian, Matrix> esoln_type;
+  typedef typename esoln_type::evector_type evector_type;
+  typedef typename esoln_type::evalue_type evalue_type;
   typedef typename prob_type::size_type size_type;
   typedef typename prob_type::scalar_type scalar_type;
 
@@ -107,101 +141,62 @@ class EigensolverTestProblem : public EigensolverTestProblemBase<Matrix> {
   std::vector<evector_type> evectors;
 
   /** Get the eigenproblem object representing this test problem.
+   *
+   * If generalised() is true, than this function should not be used.
    */
   prob_type eigenproblem() const {
-    if (base_type::Diag_ptr == nullptr) {
-      return prob_type(base_type::A(), B(), base_type::n_ep);
-    } else {
-      return prob_type(base_type::A(), B(), base_type::n_ep, base_type::Diag());
-    }
-  }
-
-  EigensolverTestProblem(std::string description_, matrix_type A_, matrix_type B_,
-                         std::vector<evalue_type> evalues_,
-                         std::vector<evector_type> evectors_, matrix_type Diag_)
-        : base_type{description_, evalues_.size(),
-                    std::make_shared<matrix_type>(std::move(A_)),
-                    std::make_shared<matrix_type>(std::move(Diag_))},
-          evalues(evalues_),
-          evectors(evectors_),
-          B_ptr{new matrix_type(std::move(B_))} {}
-
-  EigensolverTestProblem(std::string description_, matrix_type A_, matrix_type B_,
-                         std::vector<evalue_type> evalues_,
-                         std::vector<evector_type> evectors_)
-        : base_type{description_, evalues_.size(),
-                    std::make_shared<matrix_type>(std::move(A_)), nullptr},
-          evalues(evalues_),
-          evectors(evectors_),
-          B_ptr{new matrix_type(std::move(B_))} {}
-
-  /** Matrix getters */
-  ///@{
-  matrix_type& B() { return *B_ptr; }
-  const matrix_type& B() const { return *B_ptr; }
-  ///@}
-
- protected:
-  typedef EigensolverTestProblemBase<Matrix> base_type;
-
-  //! The matrix B of $Ax =\lambda B x$ ( or nullptr if non-general problem)
-  std::shared_ptr<matrix_type> B_ptr;
-};
-
-/** Class describing a test problem for testing eigensolvers
- *
- * This is the case for normal eigenproblems */
-template <typename Matrix, bool isHermitian>
-class EigensolverTestProblem<Matrix, isHermitian, false>
-      : public EigensolverTestProblemBase<Matrix> {
- public:
-  typedef Matrix matrix_type;
-
-  typedef Eigenproblem<isHermitian, matrix_type, void, matrix_type> prob_type;
-
-  typedef EigensolutionTypeFor<isHermitian, Matrix> soln_type;
-  typedef typename soln_type::evector_type evector_type;
-  typedef typename soln_type::evalue_type evalue_type;
-  typedef typename prob_type::size_type size_type;
-  typedef typename prob_type::scalar_type scalar_type;
-
-  //! The eigenvalues ordered by magnitude (complex case)
-  //  or ordered algebraically (real case)
-  //  This number also gives the number of eigenvalues to be seeked
-  std::vector<evalue_type> evalues;
-
-  //! The according eigenvectors
-  std::vector<evector_type> evectors;
-
-  /** Get the eigenproblem object representing this test problem.
-   */
-  prob_type eigenproblem() const {
-    if (base_type::Diag_ptr == nullptr) {
-      return prob_type(base_type::A(), base_type::n_ep);
-    } else {
+    assert_throw(!base_type::generalised_only(), krims::ExcInternalError());
+    if (base_type::have_Diag()) {
       return prob_type(base_type::A(), base_type::n_ep, base_type::Diag());
+    } else {
+      return prob_type(base_type::A(), base_type::n_ep);
+    }
+  }
+
+  gen_prob_type generalised_eigenproblem() const {
+    if (base_type::have_Diag()) {
+      return gen_prob_type(base_type::A(), base_type::B(), base_type::n_ep,
+                           base_type::Diag());
+    } else {
+      return gen_prob_type(base_type::A(), base_type::B(), base_type::n_ep);
     }
   }
 
   EigensolverTestProblem(std::string description_, matrix_type A_,
                          std::vector<evalue_type> evalues_,
+                         std::vector<evector_type> evectors_)
+        : base_type(description_, evalues_.size(), A_.n_cols(),
+                    std::make_shared<matrix_type>(std::move(A_)), nullptr, nullptr),
+          evalues(std::move(evalues_)),
+          evectors(std::move(evectors_)) {}
+
+  EigensolverTestProblem(std::string description_, matrix_type A_, matrix_type B_,
+                         std::vector<evalue_type> evalues_,
                          std::vector<evector_type> evectors_, matrix_type Diag_)
-        : base_type{description_, evalues_.size(),
+        : base_type(description_, evalues_.size(), A_.n_cols(),
                     std::make_shared<matrix_type>(std::move(A_)),
-                    std::make_shared<matrix_type>(std::move(Diag_))},
-          evalues(evalues_),
-          evectors(evectors_) {}
+                    std::make_shared<matrix_type>(std::move(B_)),
+                    std::make_shared<matrix_type>(std::move(Diag_))),
+          evalues(std::move(evalues_)),
+          evectors(std::move(evectors_)) {}
+
+  EigensolverTestProblem(std::string description_, matrix_type A_, matrix_type B_,
+                         std::vector<evalue_type> evalues_,
+                         std::vector<evector_type> evectors_)
+        : base_type(description_, evalues_.size(), A_.n_cols(),
+                    std::make_shared<matrix_type>(std::move(A_)),
+                    std::make_shared<matrix_type>(std::move(B_)), nullptr),
+          evalues(std::move(evalues_)),
+          evectors(std::move(evectors_)) {}
 
   EigensolverTestProblem(std::string description_, matrix_type A_,
                          std::vector<evalue_type> evalues_,
-                         std::vector<evector_type> evectors_)
-        : base_type{description_, evalues_.size(),
-                    std::make_shared<matrix_type>(std::move(A_)), nullptr},
-          evalues(evalues_),
-          evectors(evectors_) {}
-
- protected:
-  typedef EigensolverTestProblemBase<Matrix> base_type;
+                         std::vector<evector_type> evectors_, matrix_type Diag_)
+        : base_type(description_, evalues_.size(), A_.n_cols(),
+                    std::make_shared<matrix_type>(std::move(A_)), nullptr,
+                    std::make_shared<matrix_type>(std::move(Diag_))),
+          evalues(std::move(evalues_)),
+          evectors(std::move(evectors_)) {}
 };
 
 /** Struct to obtain a list of library test problems */
@@ -211,50 +206,20 @@ template <typename EigensolverTestProblem,
 struct EigensolverTestProblemLibrary {};
 
 template <typename Matrix>
-struct EigensolverTestProblemLibrary<
-      EigensolverTestProblem<Matrix, /*Hermitian=*/true, /*generalised=*/false>,
-      /*complex=*/false> {
-  typedef EigensolverTestProblem<Matrix, /*Hermitian=*/true,
-                                 /*generalised=*/false>
-        testproblem_type;
-
-  /** Get all Hermitian non-generalised test problems */
-  static std::vector<testproblem_type> get_all();
-};
-
-template <typename Matrix>
-struct EigensolverTestProblemLibrary<
-      EigensolverTestProblem<Matrix, /*Hermitian=*/true, /*generalised=*/true>,
-      /*complex=*/false> {
-  typedef EigensolverTestProblem<Matrix, /*Hermitian=*/true,
-                                 /*generalised=*/true>
-        testproblem_type;
-
-  /** Get all Hermitian generalised test problems */
-  static std::vector<testproblem_type> get_all();
-};
-
-template <typename Matrix>
-struct EigensolverTestProblemLibrary<EigensolverTestProblem<Matrix, /*Hermitian=*/false,
-                                                            /*generalised=*/false>,
+struct EigensolverTestProblemLibrary<EigensolverTestProblem<Matrix, /*Hermitian=*/true>,
                                      /*complex=*/false> {
-  typedef EigensolverTestProblem<Matrix, /*Hermitian=*/false,
-                                 /*generalised=*/false>
-        testproblem_type;
+  typedef EigensolverTestProblem<Matrix, /*Hermitian=*/true> testproblem_type;
+
+  /** Get all Hermitian test problems */
+  static std::vector<testproblem_type> get_all();
+};
+
+template <typename Matrix>
+struct EigensolverTestProblemLibrary<EigensolverTestProblem<Matrix, /*Hermitian=*/false>,
+                                     /*complex=*/false> {
+  typedef EigensolverTestProblem<Matrix, /*Hermitian=*/false> testproblem_type;
 
   /** Get all non-Hermitian test problems */
-  static std::vector<testproblem_type> get_all();
-};
-
-template <typename Matrix>
-struct EigensolverTestProblemLibrary<
-      EigensolverTestProblem<Matrix, /*Hermitian=*/false, /*generalised=*/true>,
-      /*complex=*/false> {
-  typedef EigensolverTestProblem<Matrix, /*Hermitian=*/false,
-                                 /*generalised=*/true>
-        testproblem_type;
-
-  /** Get all non-Hermitian generalised test problems */
   static std::vector<testproblem_type> get_all();
 };
 
@@ -263,14 +228,20 @@ struct EigensolverTestProblemLibrary<
 //
 
 template <typename Matrix>
-std::vector<EigensolverTestProblem<Matrix, true, false>> EigensolverTestProblemLibrary<
-      EigensolverTestProblem<Matrix, /*Hermitian=*/true, /*generalised=*/false>,
-      /*complex=*/false>::get_all() {
+std::vector<EigensolverTestProblem<Matrix, true>>
+EigensolverTestProblemLibrary<EigensolverTestProblem<Matrix, /*Hermitian=*/true>,
+                              /*complex=*/false>::get_all() {
   typedef typename testproblem_type::matrix_type matrix_type;
   typedef typename testproblem_type::evalue_type evalue_type;
   typedef typename testproblem_type::evector_type evector_type;
 
   std::vector<testproblem_type> res;
+
+  //
+  //
+  // Normal problems
+  //
+  //
 
   //
   // Simple near-diagonal problem (all eigenvalues)
@@ -451,27 +422,68 @@ std::vector<EigensolverTestProblem<Matrix, true, false>> EigensolverTestProblemL
                        -0.25950637523118303, -0.3026407483904913, 0.3177288444600617,
                        -0.14283290746786131}};
 
-    testproblem_type prob{"10x10 dense problem (4 eigenvalues)", A, evalues, evectors};
+    testproblem_type prob{"10x10 dense problem (4 LM)", A, evalues, evectors};
     prob.params.update({{EigensolverBaseKeys::which, "LM"}});
     res.push_back(std::move(prob));
   }
 
-  return res;
-}
-
-template <typename Matrix>
-std::vector<EigensolverTestProblem<Matrix, true, true>> EigensolverTestProblemLibrary<
-      EigensolverTestProblem<Matrix, /*Hermitian=*/true, /*generalised=*/true>,
-      /*complex=*/false>::get_all() {
-  typedef typename testproblem_type::matrix_type matrix_type;
-  typedef typename testproblem_type::evalue_type evalue_type;
-  typedef typename testproblem_type::evector_type evector_type;
-
-  std::vector<testproblem_type> res;
-
   //
-  // Simple generalised 4x4 problem (all eigenpairs)
   //
+  // Generalised problems
+  //
+  //
+
+  {
+    matrix_type A{{1, 0, 0, 0, 0, 0},   //
+                  {0, 3, 0, 0, 0, 0},   //
+                  {0, 0, 5, 0, 0, 0},   //
+                  {0, 0, 0, 6, 0, 0},   //
+                  {0, 0, 0, 0, 14, 0},  //
+                  {0, 0, 0, 0, 0, 19}};
+
+    matrix_type B{{1, 0, 0, 0, 0, 0},  //
+                  {0, 1, 0, 0, 0, 0},  //
+                  {0, 0, 1, 0, 0, 0},  //
+                  {0, 0, 0, 1, 0, 0},  //
+                  {0, 0, 0, 0, 1, 0},  //
+                  {0, 0, 0, 0, 0, 1}};
+
+    std::vector<evalue_type> evalues{14., 19.};
+    std::vector<evector_type> evectors{evector_type{0, 0, 0, 0, 1, 0},
+                                       evector_type{0, 0, 0, 0, 0, 1}};
+
+    testproblem_type prob{"6x6 simple diagonal problem (2 LargestReal)", A, B, evalues,
+                          evectors};
+    prob.params.update({{EigensolverBaseKeys::which, "LR"}});
+    res.push_back(std::move(prob));
+  }
+
+  {
+    matrix_type A{{1, 0, 0, 0, 0, 0},   //
+                  {0, 3, 0, 0, 0, 0},   //
+                  {0, 0, 5, 0, 0, 0},   //
+                  {0, 0, 0, 10, 0, 0},  //
+                  {0, 0, 0, 0, 7, 0},   //
+                  {0, 0, 0, 0, 0, 36}};
+
+    matrix_type B{{1, 0, 0, 0, 0, 0},  //
+                  {0, 2, 0, 0, 0, 0},  //
+                  {0, 0, 2, 0, 0, 0},  //
+                  {0, 0, 0, 2, 0, 0},  //
+                  {0, 0, 0, 0, 3, 0},  //
+                  {0, 0, 0, 0, 0, 3}};
+
+    std::vector<evalue_type> evalues{5., 12.};
+    std::vector<evector_type> evectors{
+          evector_type{0, 0, 0, .70710678118654752440, 0, 0},
+          evector_type{0, 0, 0, 0, 0, -.57735026918962576451}};
+
+    testproblem_type prob{"6x6 diagonal problem (2 LargestReal)", A, B, evalues,
+                          evectors};
+    prob.params.update({{EigensolverBaseKeys::which, "LR"}});
+    res.push_back(std::move(prob));
+  }
+
   {
     matrix_type A{{-3, 2, 0, 0},  //
                   {2, 1, 0, 0},   //
@@ -722,30 +734,14 @@ std::vector<EigensolverTestProblem<Matrix, true, true>> EigensolverTestProblemLi
 
     }  // 3 LR
   }    // 10x10
+
   return res;
 }
 
 template <typename Matrix>
-std::vector<EigensolverTestProblem<Matrix, false, false>>
-EigensolverTestProblemLibrary<EigensolverTestProblem<Matrix, /*Hermitian=*/false,
-                                                     /*generalised=*/false>,
+std::vector<EigensolverTestProblem<Matrix, false>>
+EigensolverTestProblemLibrary<EigensolverTestProblem<Matrix, /*Hermitian=*/false>,
                               /*complex=*/false>::get_all() {
-  /*typedef typename testproblem_type::matrix_type matrix_type;
-  typedef typename testproblem_type::evalue_type evalue_type;
-  typedef typename testproblem_type::evector_type evector_type;
-  */
-
-  std::vector<testproblem_type> res;
-
-  // TODO
-
-  return res;
-}
-
-template <typename Matrix>
-std::vector<EigensolverTestProblem<Matrix, false, true>> EigensolverTestProblemLibrary<
-      EigensolverTestProblem<Matrix, /*Hermitian=*/false, /*generalised=*/true>,
-      /*complex=*/false>::get_all() {
   /*typedef typename testproblem_type::matrix_type matrix_type;
   typedef typename testproblem_type::evalue_type evalue_type;
   typedef typename testproblem_type::evector_type evector_type;

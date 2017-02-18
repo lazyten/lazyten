@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -28,9 +28,15 @@
 #include "Solvers/SolverStateBase.hh"
 
 // Iterative methods base types and structs
-#include "Solvers/IterativeSolver.hh"
-#include "Solvers/IterativeSolverKeys.hh"
-#include "Solvers/IterativeSolverState.hh"
+#include "Solvers/IterativeStateWrapper.hh"
+#include "Solvers/IterativeWrapper.hh"
+#include "Solvers/IterativeWrapperKeys.hh"
+
+// Linear solver base types and structs
+#include "Solvers/LinearProblem.hh"
+#include "Solvers/LinearSolverBase.hh"
+#include "Solvers/LinearSolverBaseKeys.hh"
+#include "Solvers/LinearSolverStateBase.hh"
 
 // Eigensolvers base types and structs
 #include "Solvers/Eigenproblem.hh"

@@ -19,8 +19,7 @@
 
 #pragma once
 #include "LazyMatrixExpression.hh"
-#include "TypeUtils.hh"
-#include <krims/RCPWrapper.hh>
+#include "detail/ProxyBase.hh"
 
 namespace linalgwrap {
 
@@ -30,141 +29,10 @@ DefExceptionMsg(ExcMatrixHasNoTransposeOperations,
                 "returned false). Hence it cannot be used with "
                 "TransposeProxy.");
 
-namespace detail {
-
-/** TransposeProxyBase class for stored matrices */
-template <typename Matrix, typename StoredMatrix = typename StoredTypeOf<Matrix>::type,
-          bool isStoredMatrix = IsStoredMatrix<Matrix>::value,
-          bool isReadonly = std::is_const<Matrix>::value>
-class TransposeProxyBase : public LazyMatrixExpression<StoredMatrix> {
-  static_assert(IsMatrix<Matrix>::value, "Matrix needs to be a matrix type");
-
- public:
-  //! Matrix type underlying this TransposeProxyBase class
-  typedef Matrix matrix_type;
-  typedef StoredMatrix stored_matrix_type;
-
-  /** \brief Update the internal data
-   *
-   *  In this case does nothing.
-   * */
-  void update(const krims::ParameterMap&) override {}
-
-  /** Does this class own the inner matrix
-   *
-   * In other words are we the one who is responsible for
-   * managing the inner storage or not.V
-   */
-  bool owns_inner_matrix() const { return m_inner_ptr.is_shared_ptr(); }
-
-  /** Access to the inner object */
-  Matrix& inner_matrix() { return *m_inner_ptr; }
-
-  /** Const access to the inner object */
-  const Matrix& inner_matrix() const { return *m_inner_ptr; }
-
- protected:
-  TransposeProxyBase(Matrix& matrix)
-        : m_inner_ptr(krims::make_subscription(matrix, "TransposeProxy")) {}
-
-  TransposeProxyBase(Matrix&& matrix) : m_inner_ptr(std::make_shared<Matrix>(matrix)) {}
-
-  krims::RCPWrapper<Matrix> m_inner_ptr;
-};
-
-/** TransposeProxyBase class for const lazy matrix classes */
-template <typename Matrix, typename StoredMatrix>
-class TransposeProxyBase<Matrix, StoredMatrix, /*isStored*/ false,
-                         /*isReadonly*/ true>
-      : public LazyMatrixExpression<StoredMatrix> {
-  static_assert(IsMatrix<Matrix>::value, "Matrix needs to be a matrix type");
-
- public:
-  //! Matrix type underlying this TransposeProxyBase class
-  typedef Matrix matrix_type;
-  typedef StoredMatrix stored_matrix_type;
-
-  /** \brief Update the internal data
-   *
-   *  In this case does nothing, since the internal object is
-   *  either a stored matrix or const.
-   * */
-  void update(const krims::ParameterMap&) override {
-    assert_dbg(false, krims::ExcDisabled("Update is not possible for this Matrix "
-                                         "expression, since the matrix inside the "
-                                         "TransposeProxy object is const."));
-  }
-
-  /** Does this class own the inner matrix
-   *
-   * In other words are we the one who is responsible for
-   * managing the inner storage or not.V
-   *
-   * In this case it always owns it since it is a lazy matrix object.
-   */
-  constexpr bool owns_inner_matrix() const { return true; }
-
-  /** Access to the inner object */
-  Matrix& inner_matrix() { return m_inner; }
-
-  /** Const access to the inner object */
-  const Matrix& inner_matrix() const { return m_inner; }
-
- protected:
-  TransposeProxyBase(const Matrix& matrix) : m_inner(matrix) {}
-  TransposeProxyBase(Matrix&& matrix) : m_inner(std::move(matrix)) {}
-
-  /** Matrix is lazy, so we can store a full copy */
-  Matrix m_inner;
-};
-
-/** TransposeProxyBase class for mutable lazy matrix classes */
-template <typename Matrix, typename StoredMatrix>
-class TransposeProxyBase<Matrix, StoredMatrix, /*isStored*/ false,
-                         /*isReadonly*/ false>
-      : public LazyMatrixExpression<StoredMatrix> {
-  static_assert(IsMatrix<Matrix>::value, "Matrix needs to be a matrix type");
-
- public:
-  //! Matrix type underlying this TransposeProxyBase class
-  typedef Matrix matrix_type;
-  typedef StoredMatrix stored_matrix_type;
-
-  /** \brief Update the internal data
-   *
-   *  In this case does nothing, since the internal object is
-   *  either a stored matrix or const.
-   * */
-  void update(const krims::ParameterMap& map) override { m_inner.update(map); }
-
-  /** Does this class own the inner matrix
-   *
-   * In other words are we the one who is responsible for
-   * managing the inner storage or not.V
-   *
-   * In this case it always owns it since it is a lazy matrix object.
-   */
-  constexpr bool owns_inner_matrix() const { return true; }
-
-  /** Access to the inner object */
-  Matrix& inner_matrix() { return m_inner; }
-
-  /** Const access to the inner object */
-  const Matrix& inner_matrix() const { return m_inner; }
-
- protected:
-  TransposeProxyBase(const Matrix& matrix) : m_inner(matrix) {}
-  TransposeProxyBase(Matrix&& matrix) : m_inner(std::move(matrix)) {}
-
-  /** Matrix is lazy, so we can store a full copy */
-  Matrix m_inner;
-};
-}  // namespace detail
-
 template <typename Matrix>
-class TransposeProxy : public detail::TransposeProxyBase<Matrix> {
+class TransposeProxy : public detail::ProxyBase<Matrix> {
  public:
-  typedef detail::TransposeProxyBase<Matrix> base_type;
+  typedef detail::ProxyBase<Matrix> base_type;
   typedef typename base_type::stored_matrix_type stored_matrix_type;
   typedef typename base_type::matrix_type matrix_type;
   typedef typename base_type::size_type size_type;
@@ -208,6 +76,11 @@ class TransposeProxy : public detail::TransposeProxyBase<Matrix> {
    **/
   bool has_transpose_operation_mode() const override {
     return true;  // By construction of this class
+  }
+
+  /** Is inverse_apply available for this matrix type */
+  bool has_apply_inverse() const override {
+    return base_type::inner_matrix().has_apply_inverse();
   }
 
   /** Extract a block of a matrix and (optionally) add it to
@@ -258,6 +131,32 @@ class TransposeProxy : public detail::TransposeProxyBase<Matrix> {
              const Transposed mode = Transposed::None,
              const scalar_type c_this = Constants<scalar_type>::one,
              const scalar_type c_y = Constants<scalar_type>::zero) const override;
+
+  /** \brief Compute the Inverse-Multivector application
+   *
+   * Loosely speaking we perform
+   * \[ y = c_this \cdot (A^{-1})^\text{mode} \cdot x + c_y \cdot y. \]
+   *
+   * See LazyMatrixExpression for more details
+   */
+  template <typename VectorIn, typename VectorOut,
+            mat_vec_apply_enabled_t<TransposeProxy, VectorIn, VectorOut>...>
+  void apply_inverse(const MultiVector<VectorIn>& x, MultiVector<VectorOut>& y,
+                     const Transposed mode = Transposed::None,
+                     const scalar_type c_this = 1, const scalar_type c_y = 0) const;
+
+  /** \brief Compute the Inverse-Multivector application
+   *
+   * Loosely speaking we perform
+   * \[ y = c_this \cdot (A^{-1})^\text{mode} \cdot x + c_y \cdot y. \]
+   *
+   * See LazyMatrixExpression for more details
+   */
+  virtual void apply_inverse(
+        const MultiVector<const MutableMemoryVector_i<scalar_type>>& x,
+        MultiVector<MutableMemoryVector_i<scalar_type>>& y,
+        const Transposed mode = Transposed::None, const scalar_type c_this = 1,
+        const scalar_type c_y = 0) const override;
 
   /** Perform a matrix-matrix product.
    *
@@ -374,6 +273,75 @@ void TransposeProxy<Matrix>::apply(
       break;
     case Transposed::Trans:
       base_type::inner_matrix().apply(x, y, Transposed::None, c_this, c_y);
+      break;
+    case Transposed::ConjTrans:
+      // TODO Implement
+      assert_dbg(false, krims::ExcNotImplemented());
+      break;
+  }  // mode
+}
+
+/** \brief Compute the Inverse-Multivector application
+ *
+ * Loosely speaking we perform
+ * \[ y = c_this \cdot (A^{-1})^\text{mode} \cdot x + c_y \cdot y. \]
+ *
+ * See LazyMatrixExpression for more details
+ */
+template <typename Matrix>
+template <typename VectorIn, typename VectorOut,
+          mat_vec_apply_enabled_t<TransposeProxy<Matrix>, VectorIn, VectorOut>...>
+void TransposeProxy<Matrix>::apply_inverse(const MultiVector<VectorIn>& x,
+                                           MultiVector<VectorOut>& y,
+                                           const Transposed mode,
+                                           const scalar_type c_this,
+                                           const scalar_type c_y) const {
+  assert_finite(c_this);
+  assert_finite(c_y);
+  assert_size(x.n_vectors(), y.n_vectors());
+  assert_size(n_rows(), n_cols());  // Only square matrices have inverses.
+  assert_size(x.n_elem(), n_rows());
+  assert_size(y.n_elem(), n_rows());
+
+  switch (mode) {
+    case Transposed::None:
+      base_type::inner_matrix().apply_inverse(x, y, Transposed::Trans, c_this, c_y);
+      break;
+    case Transposed::Trans:
+      base_type::inner_matrix().apply_inverse(x, y, Transposed::None, c_this, c_y);
+      break;
+    case Transposed::ConjTrans:
+      // TODO Implement
+      assert_dbg(false, krims::ExcNotImplemented());
+      break;
+  }  // mode
+}
+
+/** \brief Compute the Inverse-Multivector application
+ *
+ * Loosely speaking we perform
+ * \[ y = c_this \cdot (A^{-1})^\text{mode} \cdot x + c_y \cdot y. \]
+ *
+ * See LazyMatrixExpression for more details
+ */
+template <typename Matrix>
+void TransposeProxy<Matrix>::apply_inverse(
+      const MultiVector<const MutableMemoryVector_i<scalar_type>>& x,
+      MultiVector<MutableMemoryVector_i<scalar_type>>& y, const Transposed mode,
+      const scalar_type c_this, const scalar_type c_y) const {
+  assert_finite(c_this);
+  assert_finite(c_y);
+  assert_size(x.n_vectors(), y.n_vectors());
+  assert_size(n_rows(), n_cols());  // Only square matrices have inverses.
+  assert_size(x.n_elem(), n_rows());
+  assert_size(y.n_elem(), n_rows());
+
+  switch (mode) {
+    case Transposed::None:
+      base_type::inner_matrix().apply_inverse(x, y, Transposed::Trans, c_this, c_y);
+      break;
+    case Transposed::Trans:
+      base_type::inner_matrix().apply_inverse(x, y, Transposed::None, c_this, c_y);
       break;
     case Transposed::ConjTrans:
       // TODO Implement

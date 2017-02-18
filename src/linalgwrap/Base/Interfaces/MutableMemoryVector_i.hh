@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -19,6 +19,7 @@
 
 #pragma once
 #include "MutableVector_i.hh"
+#include <krims/ExceptionSystem.hh>
 
 namespace linalgwrap {
 

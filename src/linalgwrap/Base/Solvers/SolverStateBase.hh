@@ -29,6 +29,12 @@ class SolverStateBase {
    * */
   SolverStateBase() : m_failed{false}, m_fail_reason{} {}
 
+  virtual ~SolverStateBase() = default;
+  SolverStateBase(const SolverStateBase&) = default;
+  SolverStateBase(SolverStateBase&&) = default;
+  SolverStateBase& operator=(const SolverStateBase&) = default;
+  SolverStateBase& operator=(SolverStateBase&&) = default;
+
   /** Fail the iteraton and specify a reason why */
   void fail(std::string reason);
 
@@ -45,6 +51,22 @@ class SolverStateBase {
    * failed.
    */
   const std::string& fail_reason() const { return m_fail_reason; }
+
+  /** Return the number of iterations needed up to this point
+   *
+   * \note Non-iterative solvers return exactly 1 here
+   **/
+  virtual size_t n_iter() const { return 1; }
+
+  /** Return the number of problem matrix applies the solver
+   *  required to solve the problem
+   *  \note Dense solvers work on the memory and return exactly 0
+   **/
+  virtual size_t n_mtx_applies() const { return 0; }
+
+  /** Setup the guess of this state. from another state.
+   * In this case this function does nothing */
+  void obtain_guess_from(const SolverStateBase&) {}
 
  protected:
   //! Has the iteration failed?

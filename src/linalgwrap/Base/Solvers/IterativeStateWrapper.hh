@@ -17,10 +17,31 @@
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "IterativeSolverKeys.hh"
+#pragma once
+#include <string>
 
 namespace linalgwrap {
 
-const std::string IterativeSolverKeys::max_iter = "max_iter";
+/** Extra structure the state of a truely iterative solver
+ *  needs to satisfy on top of another Base class */
+template <typename Base>
+class IterativeStateWrapper : public Base {
+ public:
+  typedef Base it_base_type;
+
+  /** \brief Default constructor */
+  IterativeStateWrapper(Base&& base) : it_base_type(std::move(base)), m_count{0} {}
+
+  /** Increase the iteration count and return the new count */
+  size_t increase_iteration_count() { return ++m_count; }
+
+  /** Return the current iteration count
+   * \note Shadows this function in Base
+   **/
+  size_t n_iter() const override { return m_count; }
+
+ protected:
+  size_t m_count;
+};
 
 }  // namespace linalgwrap

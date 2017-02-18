@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2017 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -17,15 +17,10 @@
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#pragma once
-#include <string>
+#include "LinearSolverBaseKeys.hh"
+
 namespace linalgwrap {
 
-/** Struct which contains the keys used for setting the
- *  IterativeSolver control parameters */
-struct IterativeSolverKeys {
-  /** Maximum number of iterations. Type: size_t */
-  static const std::string max_iter;
-};
+const std::string LinearSolverBaseKeys::tolerance = "tolerance";
 
 }  // namespace linalgwrap

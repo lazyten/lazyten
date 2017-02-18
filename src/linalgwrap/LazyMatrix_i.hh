@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -77,6 +77,9 @@ namespace linalgwrap {
  *             const Transposed mode,const scalar_type c_this,
  *             const scalar_type c_out) const;```
  *     Perform a gemm-like matrix-matrix product.
+ *    - If a simple inversion of the matrix with closed-form algorithms is possible
+ *      the methods ``has_apply_inverse`` and ``inverse_apply`` (see LazyMatrixExpression)
+ *      should be overloaded as well.
  *
  * \tparam StoredMatrix   The type of stored matrix to use
  */
@@ -174,11 +177,11 @@ class LazyMatrix_i : public LazyMatrixExpression<StoredMatrix> {
              const scalar_type c_out = Constants<scalar_type>::zero) const override;
 
   /** \brief Update the internal data of all objects in this expression
-   *         given the ParameterMap
+   *         given the GenMap
    *
    *   This function raises an ExcNotImplemented exception.
    * */
-  virtual void update(const krims::ParameterMap&) override {
+  virtual void update(const krims::GenMap&) override {
     assert_dbg(false, krims::ExcNotImplemented());
   }
 };

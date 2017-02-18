@@ -1,6 +1,6 @@
 ## ---------------------------------------------------------------------
 ##
-## Copyright (C) 2016 by the linalgwrap authors
+## Copyright (C) 2016-17 by the linalgwrap authors
 ##
 ## This file is part of linalgwrap.
 ##
@@ -23,6 +23,9 @@
 # The sources for the test executable
 #
 set(LINALGWRAP_TESTS_SOURCES
+	# Low-level interface classes
+	OperatorPropertiesTests.cc
+
 	# Vector and Matrix LA interfaces
 # TODO	IteratorVectorTests.cc
 	MultiVectorTests.cc
@@ -44,6 +47,7 @@ set(LINALGWRAP_TESTS_SOURCES
 	# Proxies and other matrix functionality
 	TransposeProxyTests.cc
 	transTests.cc
+	inverseTests.cc
 
 	# Lazy matrix implementations
 	BlockDiagonalMatrixTests.cc

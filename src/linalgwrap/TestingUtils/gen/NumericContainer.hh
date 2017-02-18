@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -20,6 +20,7 @@
 #pragma once
 #include "Numeric.hh"
 #include "NumericSize.hh"
+#include "linalgwrap/detail/GenericFunctionals.hh"
 
 namespace linalgwrap {
 namespace gen {
@@ -30,7 +31,21 @@ namespace gen {
  */
 template <typename Container>
 rc::Gen<Container> numeric_container(size_t count) {
-  return rc::gen::container<Container>(count, numeric<typename Container::value_type>());
+  auto gen_container =
+        rc::gen::container<Container>(count, numeric<typename Container::value_type>());
+  auto fix_container_norm = [](Container c) {
+    long double norm = 0.0;
+    linalgwrap::detail::ConjFctr conj;
+    for (const auto& elem : c) norm += std::real(conj(elem) * elem);
+
+    if (norm > max_norm * max_norm) {
+      for (auto& elem : c) elem /= std::sqrt(norm);
+    }
+
+    return c;
+  };
+
+  return rc::gen::map(gen_container, std::move(fix_container_norm));
 }
 
 /** \brief Generator for a container filled with numeric values
@@ -40,7 +55,9 @@ rc::Gen<Container> numeric_container(size_t count) {
  */
 template <typename Container>
 rc::Gen<Container> numeric_container() {
-  return rc::gen::exec([] { return *numeric_container<Container>(*numeric_size<1>()); });
+  return rc::gen::mapcat(numeric_size<1>(), [](size_t count) {
+    return numeric_container<Container>(count);
+  });
 }
 }  // gen
 }  // linalgwrap

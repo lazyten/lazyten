@@ -1,7 +1,7 @@
 #!/bin/sh
 ## ---------------------------------------------------------------------
 ##
-## Copyright (C) 2016 by the linalgwrap authors
+## Copyright (C) 2016-17 by the linalgwrap authors
 ##
 ## This file is part of linalgwrap.
 ##
@@ -24,7 +24,7 @@
 # Settings
 #
 # The git repo to checkout
-FROM="https://github.com/linalgwrap/krims"
+FROM="https://github.com/linalgwrap/krims.git"
 
 # Branch to checkout (empty for default)
 BRANCH=""
@@ -32,8 +32,8 @@ BRANCH=""
 # Folder to check it out to
 WHAT="krims"
 
-# Interval: How often to update:
-INTERVAL="1 hour"
+# Interval: How often to update (in seconds)
+INTERVAL="3600"  # == 1 hour
 
 # File to use in order to test a successful checkout
 CHECKFILE="CMakeLists.txt"

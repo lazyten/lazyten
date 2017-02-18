@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -153,6 +153,18 @@ class TestingLibrary {
   /** Disable the matrix * stored test */
   void disable_run_matrix_times_stored() { m_run_matrix_times_stored = false; }
 
+  /** Enable inverse apply tests if the predicate succeeds on the provided genargs.*/
+  void enable_inverse_apply_if(std::function<bool(const genarg_type&)> f) {
+    m_pred_run_inverse_apply = f;
+    m_run_inverse_apply = true;
+  }
+
+  /** Unconditionally enable inverse_apply tests */
+  void enable_inverse_apply() {
+    m_pred_run_inverse_apply = [](const genarg_type&) { return true; };
+    m_run_inverse_apply = true;
+  }
+
  protected:
   // The testing library and caller type
   typedef matrix_tests::ComparativeTests<stored_matrix_type, matrix_type> comptests;
@@ -165,6 +177,13 @@ class TestingLibrary {
   // The TransposeView * stored operation is not yet implemented for
   // views of lazy matrices. This flag allows to disable this test.
   bool m_run_matrix_times_stored = true;
+
+  // Predicate which defines whether we should run the inverse application tests:
+  std::function<bool(const genarg_type&)> m_pred_run_inverse_apply =
+        [](const genarg_type&) { return false; };
+
+  // Run inverse apply at all.
+  bool m_run_inverse_apply = false;
 };
 
 //
@@ -247,6 +266,13 @@ void TestingLibrary<LazyMatrix, LazyGenArg>::run_checks() const {
   CHECK(rc::check(
         m_prefix + "Multiply a lazy matrix",
         m_gen.generate(comptests::template test_multiply_by<lazy_matrix_type>, sloppy)));
+
+  if (m_run_inverse_apply) {
+    CHECK(m_gen.run_test(
+          m_prefix + "Inverse apply to MultiVector",
+          comptests::template test_inv_apply_to<typename stored_matrix_type::vector_type>,
+          sloppy, m_pred_run_inverse_apply));
+  }
 }
 
 }  // namespace lazy_matrix_tests

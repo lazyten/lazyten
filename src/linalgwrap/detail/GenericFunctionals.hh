@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -113,6 +113,20 @@ struct ConjFctr {
   typename std::enable_if<!krims::IsComplexNumber<Scalar>::value, Scalar>::type
   operator()(const Scalar& s) const {
     return s;
+  }
+};
+
+struct RealFctr {
+  template <typename Scalar>
+  auto operator()(const Scalar& s) const -> decltype(std::real(s)) {
+    return std::real(s);
+  }
+};
+
+struct ImagFctr {
+  template <typename Scalar>
+  auto operator()(const Scalar& s) const -> decltype(std::imag(s)) {
+    return std::imag(s);
   }
 };
 

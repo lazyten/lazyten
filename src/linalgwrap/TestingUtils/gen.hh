@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -25,6 +25,9 @@
 #include "gen/NumericNonZero.hh"
 #include "gen/NumericSize.hh"
 #include "gen/NumericTensor.hh"
+#include "gen/WithProperties.hh"
+#include "gen/with_l2_norm.hh"
+#include "gen/with_l2_norm_in_range.hh"
 
 namespace linalgwrap {
 namespace gen {

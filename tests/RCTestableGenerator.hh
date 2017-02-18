@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -65,6 +65,11 @@ struct RCTestableGenerator {
                              const NumCompAccuracyLevel)>
         testfunction_type;
 
+  /** Type of a predicate function, which we can use to discard certain test
+   *  cases if the args to generate the sut/model objects are not suitable
+   *  for this test */
+  typedef std::function<bool(const args_type&)> predfunction_type;
+
   /** \brief Construct a RapidcheckTestableGenerator object.
    *
    * \param sut_generator  A function that derives a System-under-test
@@ -112,17 +117,20 @@ struct RCTestableGenerator {
    * */
   std::function<void(void)> generate(
         testfunction_type func,
-        const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default) const;
+        const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default,
+        predfunction_type pred = [](args_type) { return true; }) const;
 
   /** Generate a testable using ``generate()`` and run it using rapidcheck
    *
    * \param description for Rapidcheck
    * \param tolerance  The numeric tolerance level to use.
+   * \param pred       Predicate which has to hold for the generated
+   *                   arguments for the test case to be run.
    * */
-  bool run_test(
-        std::string description, testfunction_type func,
-        const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default) const {
-    return rc::check(description, generate(func, tolerance));
+  bool run_test(std::string description, testfunction_type func,
+                const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default,
+                predfunction_type pred = [](args_type) { return true; }) const {
+    return rc::check(description, generate(func, tolerance, std::move(pred)));
   }
 
   std::function<args_type(void)> args_generator;
@@ -135,11 +143,15 @@ struct RCTestableGenerator {
 //
 template <typename Model, typename Sut, typename Args>
 std::function<void(void)> RCTestableGenerator<Model, Sut, Args>::generate(
-      testfunction_type func, const NumCompAccuracyLevel tolerance) const {
+      testfunction_type func, const NumCompAccuracyLevel tolerance,
+      predfunction_type pred) const {
   // Return a lambda which calls the test appropriately.
   return [=] {
     // Generate the args
     Args arg = args_generator();
+
+    // Run this case only if the predicate is true
+    RC_PRE(pred(arg));
 
     // Call test function with appropriate model and sut:
     func(model_generator(arg), sut_generator(arg), tolerance);

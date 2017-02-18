@@ -44,27 +44,27 @@ matrix:
   include:
     # Clang 3.5 with disabled c++14 support
     - install:
-      # Repo for g++-4.9 (to avoid buggy libstdc++)
+      # Repo for libstdc++-4.9-dev (libstdc++ of gcc 4.8 is buggy)
       - sudo add-apt-repository -y "ppa:ubuntu-toolchain-r/test"
       # Update and install
-      - sudo apt-get update
-      - sudo apt-get install -y ninja-build g++-4.9 $DEPEND_PKG
+      - sudo apt-get update -qq
+      - sudo apt-get install -y ninja-build libstdc++-4.9-dev $DEPEND_PKG
       compiler: clang
-      env: CC_COMPILER="clang" CXX_COMPILER="clang++" TESTCASE="linalgwrap_tests_RELEASE"
+      env: CC_COMPILER="clang" CXX_COMPILER="clang++" TEST_REGEX="linalgwrap_tests_"
         EXTRA_OPTS="-DDRB_MAXIMUM_CXX_STANDARD=11"
     #
     # Clang 3.8 (has c++14)
     - install:
-      # Repo for g++-4.9 (has libstdc++ is compatible to c++11, but not c++14)
+      # Repo for libstdc++-4.9-dev (libstdc++ of gcc 4.8 is buggy)
       - sudo add-apt-repository -y "ppa:ubuntu-toolchain-r/test"
       # Repo for clang-3.8
       - sudo wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
       - sudo add-apt-repository -y "deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.8 main"
       # Update and install
-      - sudo apt-get update
-      - sudo apt-get install -y ninja-build clang-3.8 g++-4.9 $DEPEND_PKG
+      - sudo apt-get update -qq
+      - sudo apt-get install -y ninja-build clang-3.8 libstdc++-4.9-dev $DEPEND_PKG
       compiler: clang
-      env: CC_COMPILER="clang-3.8" CXX_COMPILER="clang++-3.8" TESTCASE="linalgwrap_tests_DEBUG"
+      env: CC_COMPILER="clang-3.8" CXX_COMPILER="clang++-3.8" TEST_REGEX="linalgwrap_tests_"
     #
     # gcc-4.8 (c++11 and without tests, since rapidcheck does not compile like this)
     - install:
@@ -80,9 +80,11 @@ matrix:
       - sudo apt-get update
       - sudo apt-get install -y ninja-build g++-5 $DEPEND_PKG
       compiler: gcc
-      env: CC_COMPILER="gcc-5" CXX_COMPILER="g++-5" TESTCASE="linalgwrap_tests_RELEASE"
+      env: CC_COMPILER="gcc-5" CXX_COMPILER="g++-5" TEST_REGEX="linalgwrap_tests_"
 
 script:
+  - cmake --version
+  - ninja --version
   - mkdir build && cd build
   - cmake -DCMAKE_CXX_COMPILER=${CXX_COMPILER} -DCMAKE_C_COMPILER=${CC_COMPILER}
            -DCMAKE_BUILD_TYPE=DebugRelease ${EXTRA_OPTS}
@@ -91,5 +93,5 @@ script:
            -DKRIMS_ENABLE_TESTS=OFF -DKRIMS_ENABLE_EXAMPLES=OFF
            -GNinja ..
   - cmake --build  . -- -j ${CORES}
-  - if [ "${TESTCASE}" ]; then ctest --output-on-failure -R ${TESTCASE}; else true; fi
+  - if [ "${TEST_REGEX}" ]; then ctest --output-on-failure -R ${TEST_REGEX}; else true; fi
 

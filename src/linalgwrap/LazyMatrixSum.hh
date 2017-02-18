@@ -1,5 +1,5 @@
 
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -25,7 +25,7 @@
 #include "linalgwrap/MultiVector.hh"
 #include <algorithm>
 #include <iterator>
-#include <krims/ParameterMap.hh>
+#include <krims/GenMap.hh>
 #include <krims/SubscriptionPointer.hh>
 #include <vector>
 
@@ -349,9 +349,9 @@ class LazyMatrixSum : public LazyMatrixExpression<StoredMatrix> {
              const scalar_type c_out = Constants<scalar_type>::zero) const override;
 
   /** \brief Update the internal data of all objects in this expression
-   *         given the ParameterMap
+   *         given the GenMap
    * */
-  void update(const krims::ParameterMap& map) override {
+  void update(const krims::GenMap& map) override {
     // Pass the call onto all factors:
     for (auto& expression : m_lazy_terms) {
       expression.update(map);

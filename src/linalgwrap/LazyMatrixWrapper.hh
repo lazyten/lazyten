@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -95,6 +95,9 @@ class LazyMatrixWrapper : public LazyMatrixExpression<StoredMatrix> {
     return m_inner->has_transpose_operation_mode();
   }
 
+  /** Is inverse_apply available for this matrix type */
+  bool has_apply_inverse() const override { return m_inner->has_apply_inverse(); }
+
   /** Extract a block of a matrix and (optionally) add it to
    * a different matrix.
    *
@@ -145,10 +148,39 @@ class LazyMatrixWrapper : public LazyMatrixExpression<StoredMatrix> {
    */
   void apply(const MultiVector<const MutableMemoryVector_i<scalar_type>>& x,
              MultiVector<MutableMemoryVector_i<scalar_type>>& y,
-             const Transposed mode = Transposed::None,
-             const scalar_type c_this = Constants<scalar_type>::one,
-             const scalar_type c_y = Constants<scalar_type>::zero) const override {
+             const Transposed mode = Transposed::None, const scalar_type c_this = 0,
+             const scalar_type c_y = 1) const override {
     m_inner->apply(x, y, mode, c_this, c_y);
+  }
+
+  /** \brief Compute the Inverse-Multivector application
+   *
+   * Loosely speaking we perform
+   * \[ y = c_this \cdot (A^{-1})^\text{mode} \cdot x + c_y \cdot y. \]
+   *
+   * See LazyMatrixExpression for more details
+   */
+  template <typename VectorIn, typename VectorOut,
+            mat_vec_apply_enabled_t<LazyMatrixWrapper, VectorIn, VectorOut>...>
+  void apply_inverse(const MultiVector<VectorIn>& x, MultiVector<VectorOut>& y,
+                     const Transposed mode = Transposed::None,
+                     const scalar_type c_this = 1, const scalar_type c_y = 0) const {
+    m_inner->apply_inverse(x, y, mode, c_this, c_y);
+  }
+
+  /** \brief Compute the Inverse-Multivector application
+   *
+   * Loosely speaking we perform
+   * \[ y = c_this \cdot (A^{-1})^\text{mode} \cdot x + c_y \cdot y. \]
+   *
+   * See LazyMatrixExpression for more details
+   */
+  virtual void apply_inverse(
+        const MultiVector<const MutableMemoryVector_i<scalar_type>>& x,
+        MultiVector<MutableMemoryVector_i<scalar_type>>& y,
+        const Transposed mode = Transposed::None, const scalar_type c_this = 1,
+        const scalar_type c_y = 0) const override {
+    m_inner->apply_inverse(x, y, mode, c_this, c_y);
   }
 
   /** Perform a matrix-matrix product.
@@ -169,7 +201,7 @@ class LazyMatrixWrapper : public LazyMatrixExpression<StoredMatrix> {
    *
    *  In this case does nothing.
    * */
-  void update(const krims::ParameterMap&) override {
+  void update(const krims::GenMap&) override {
     // Do nothing.
   }
 

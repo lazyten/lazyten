@@ -1,6 +1,6 @@
 ## ---------------------------------------------------------------------
 ##
-## Copyright (C) 2016 by the linalgwrap authors
+## Copyright (C) 2016-17 by the linalgwrap authors
 ##
 ## This file is part of linalgwrap.
 ##
@@ -27,15 +27,18 @@ set(LINALGWRAP_SOURCES
 	io/Mathematica.cc
 	Base/Interfaces/Transposed.cc
 	Base/Solvers/SolverStateBase.cc
-	Base/Solvers/IterativeSolverKeys.cc
+	Base/Solvers/IterativeWrapperKeys.cc
 	Base/Solvers/EigensolverBaseKeys.cc
+	Base/Solvers/LinearSolverBaseKeys.cc
 	Arpack/ArpackEigensolver.cc
-	eigensystem.cc
+	LinearSolver.cc
+	EigensystemSolver.cc
+	rescue.cc
 )
 
 # Dump the current version as an include file.
 include_krims_cmake_module(WriteVersionHeader)
-WRITE_VERSION_HEADER("${CMAKE_BINARY_DIR}/src/linalgwrap/version_defs.hh")
+WRITE_VERSION_HEADER("${linalgwrap_BINARY_DIR}/src/linalgwrap/version_defs.hh")
 
 # add the libraries for Debug and Release:
 drb_add_library(linalgwrap
@@ -43,16 +46,16 @@ drb_add_library(linalgwrap
 	FILES ${LINALGWRAP_SOURCES}
 )
 
-drb_set_target_properties(ALL linalgwrap 
+drb_set_target_properties(ALL linalgwrap
 	PROPERTIES
 	VERSION "${PROJECT_VERSION}"
 )
 
-drb_target_compile_definitions(ALL     linalgwrap 
+drb_target_compile_definitions(ALL     linalgwrap
 	PUBLIC ${LINALGWRAP_DEFINITIONS})
-drb_target_compile_definitions(DEBUG   linalgwrap 
+drb_target_compile_definitions(DEBUG   linalgwrap
 	PUBLIC ${LINALGWRAP_DEFINITIONS_DEBUG})
-drb_target_compile_definitions(RELEASE linalgwrap 
+drb_target_compile_definitions(RELEASE linalgwrap
 	PUBLIC ${LINALGWRAP_DEFINITIONS_RELEASE})
 
 drb_target_link_libraries(ALL     linalgwrap ${LINALGWRAP_DEPENDENCIES})
@@ -70,12 +73,12 @@ install(TARGETS ${linalgwrap_TARGETS}
 )
 
 # install the includes:
-install(DIRECTORY . 
+install(DIRECTORY .
 	DESTINATION "include/linalgwrap"
 	COMPONENT devel
 	FILES_MATCHING PATTERN "*.hh"
 )
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/version_defs.hh"
+install(FILES "${linalgwrap_BINARY_DIR}/src/linalgwrap/version_defs.hh"
 	DESTINATION "include/linalgwrap"
 	COMPONENT devel
 )

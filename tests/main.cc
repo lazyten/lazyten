@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -17,16 +17,15 @@
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
 
+// Setup the krims exception system for the tests.
+#define KRIMS_INIT_EXCEPTION_SYSTEM
+#include <krims/ExceptionSystem.hh>
+
 #define CATCH_CONFIG_RUNNER
 #include <catch.hpp>
-#include <krims/ExceptionSystem.hh>
 #include <krims/NumComp.hh>
 
 int main(int argc, char* const argv[]) {
-  // Make sure that the program does not get aborted,
-  // but all krims exceptions throw instead.
-  krims::AssertDbgEffect::set_throw();
-
   // Throw in case a numerical comparison fails with very detailed
   // information
   krims::NumCompConstants::default_failure_action =

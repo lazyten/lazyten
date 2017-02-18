@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -36,6 +36,7 @@
 #include "Interfaces/Vector_i.hh"
 
 // Matrices
+#include "Interfaces/OperatorProperties.hh"
 #include "Interfaces/Transposed.hh"
 
 // Default implementations for important Vector/Matrix/Indexable operations.

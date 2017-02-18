@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -23,7 +23,7 @@
 #include "detail.hh"
 #include "linalgwrap/Base/Solvers.hh"
 #include <armadillo>
-#include <krims/argsort.hh>
+#include <krims/Algorithm.hh>
 
 namespace linalgwrap {
 
@@ -39,12 +39,9 @@ struct ArmadilloEigensolverState : public EigensolverStateBase<Eigenproblem> {
   /** Setup the initial state from an eigenproblem to solve */
   ArmadilloEigensolverState(const eproblem_type problem)
         : base_type(std::move(problem)) {}
-
-  /** Return the iteration count (always 1) */
-  constexpr size_type n_iter_count() const { return 1; }
 };
 
-/** Class which contains all ParameterMap keys which are understood
+/** Class which contains all GenMap keys which are understood
  *  by the ArmadilloSolver update_control_params as static string
  *  members.
  *  See their doc strings for the types required. */
@@ -80,11 +77,6 @@ class ArmadilloEigensolver : public EigensolverBase<State> {
                 "ArmadilloEigensolver has only been tested for real problems at "
                 "double precision at the moment.");
 
-  static_assert(std::is_same<typename Eigenproblem::matrix_a_type,
-                             typename Eigenproblem::matrix_diag_type>::value,
-                "This eigensolver requires the A matrix and the Diag  matrix "
-                "to be the same object.");
-
   static_assert(std::is_same<typename Eigenproblem::stored_matrix_type,
                              ArmadilloMatrix<typename Eigenproblem::scalar_type>>::value,
                 "This eigensolver only works for if AmadilloMatrix is the underlying "
@@ -110,7 +102,7 @@ class ArmadilloEigensolver : public EigensolverBase<State> {
   ArmadilloEigensolver() {}
 
   /** Construct an eigensolver setting the parameters from the map */
-  ArmadilloEigensolver(const krims::ParameterMap& map) : ArmadilloEigensolver() {
+  ArmadilloEigensolver(const krims::GenMap& map) : ArmadilloEigensolver() {
     base_type::update_control_params(map);
   }
   //@}
@@ -220,7 +212,8 @@ void ArmadilloEigensolver<Eigenproblem, State>::copy_to_solution(
       (!Eigenproblem::real && base_type::which[1] == 'M')) {
     // The ordering we just did is the default ordering
     // => just shrink the vector to the entries we care about
-    idcs = std::vector<size_t>(std::begin(idcs) + start, std::begin(idcs) + end);
+    idcs = std::vector<size_t>(std::begin(idcs) + static_cast<ptrdiff_t>(start),
+                               std::begin(idcs) + static_cast<ptrdiff_t>(end));
   } else {
     // Build a temporary evalues array:
     std::vector<evalue_type> tmp;
@@ -243,6 +236,8 @@ void ArmadilloEigensolver<Eigenproblem, State>::copy_to_solution(
   assert_dbg(idcs.size() == n_ep, krims::ExcInternalError());
 
   // Reserve space to copy the values in
+  soln.evalues().clear();
+  soln.evectors().clear();
   soln.evalues().reserve(n_ep);
   soln.evectors().reserve(n_ep);
 
@@ -283,6 +278,7 @@ void ArmadilloEigensolver<Eigenproblem, State>::assert_valid_control_params(
   //
   // A and Diag
   //
+  // note: We compare memory addresses
   solver_assert(&problem.A() == &problem.Diag(), state,
                 ExcInvalidSolverParametersEncountered("The matrices A and Diag need "
                                                       "to be the same objects."));
@@ -290,6 +286,8 @@ void ArmadilloEigensolver<Eigenproblem, State>::assert_valid_control_params(
 
 template <typename Eigenproblem, typename State>
 void ArmadilloEigensolver<Eigenproblem, State>::solve_state(state_type& state) const {
+  assert_dbg(!state.is_failed(), krims::ExcInvalidState("Cannot solve a failed state"));
+
   esoln_type& soln = state.eigensolution();
   const Eigenproblem& problem = state.eigenproblem();
 

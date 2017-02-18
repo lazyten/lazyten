@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -19,7 +19,7 @@
 
 #pragma once
 #include <initializer_list>
-#include <krims/ParameterMap.hh>
+#include <krims/GenMap.hh>
 #include <linalgwrap/Constants.hh>
 #include <linalgwrap/LazyMatrix_i.hh>
 #include <linalgwrap/SmallVector.hh>
@@ -70,7 +70,7 @@ class DiagonalUpdatable : public LazyMatrix_i<StoredMatrix> {
   }
 
   /** \brief Provide an update mechanism */
-  void update(const krims::ParameterMap& m) override {
+  void update(const krims::GenMap& m) override {
     const auto& diagonal = m.at<SmallVector<scalar_type>>("diagonal");
 
     // check that we have no size changes
