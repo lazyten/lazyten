@@ -254,6 +254,10 @@ TEST_CASE("inverse function", "[inverse]") {
           typename std::result_of<invertible_generator(matrix_type)>::type, matrix_type>
           testlib;
 
+    // Make testing a little easier for this section
+    auto highertol = NumCompConstants::change_temporary(
+          10. * krims::NumCompConstants::default_tolerance_factor);
+
     testlib tl{random_matrix_generator, model_generator, invertible_generator{},
                "make_invertible(): "};
     tl.enable_inverse_apply();

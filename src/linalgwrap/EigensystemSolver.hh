@@ -30,6 +30,22 @@ static_assert(false,
 
 namespace linalgwrap {
 
+namespace detail {
+/** Run an eigensolver and update the passed state accordingly */
+template <typename Solver>
+struct RunSolver {
+  template <typename State>
+  void run(State& state, const krims::GenMap& params) const;
+};
+
+/** Specialisation of RunSolver for a disabled solver (does nothing) */
+template <>
+struct RunSolver<void> {
+  template <typename State>
+  void run(State&, const krims::GenMap&) const {}
+};
+}  // namespace detail
+
 template <typename Eigenproblem>
 class EigensystemSolverState final : public EigensolverStateBase<Eigenproblem> {
   // Use final to prevent overwriting from this class, see EigensystemSolver
@@ -151,8 +167,7 @@ class EigensystemSolver final
   }
 
   /** Get the current settings of all internal control parameters and
-   *  update the ParameterMap accordingly.
-   */
+   *  update the ParameterMap accordingly. */
   void get_control_params(krims::ParameterMap& map) const {
     base_type::get_control_params(map);
     map.update(EigensystemSolverKeys::method, method);
@@ -164,10 +179,6 @@ class EigensystemSolver final
  private:
   /** Should we use Arpack to do the solving */
   bool should_use_arpack(const Eigenproblem& problem) const;
-
-  /** Run the given solver and update the state accordingly */
-  template <typename Solver>
-  void run_solver(state_type& state) const;
 
   /** Setup and solve using the method provided */
   void solve_with_method(const std::string& method, state_type& state) const;
@@ -185,6 +196,27 @@ class EigensystemSolver final
 //
 // ----------------------------------------------------------
 //
+
+namespace detail {
+template <typename Solver>
+template <typename State>
+void RunSolver<Solver>::run(State& state, const krims::GenMap& params) const {
+  typedef typename Solver::state_type solver_state_type;
+
+  // Setup the inner solver state:
+  solver_state_type inner_state{state.eigenproblem()};
+  inner_state.obtain_guess_from(state);
+
+  try {
+    Solver{params}.solve_state(inner_state);
+    state.push_intermediate_results(std::move(inner_state));
+  } catch (SolverException& e) {
+    // On exception still update the state reference
+    state.push_intermediate_results(std::move(inner_state));
+    throw;
+  }
+}
+}  // namespace detail
 
 template <typename Eigenproblem>
 bool EigensystemSolver<Eigenproblem>::should_use_arpack(
@@ -212,47 +244,31 @@ bool EigensystemSolver<Eigenproblem>::should_use_arpack(
 }
 
 template <typename Eigenproblem>
-template <typename Solver>
-void EigensystemSolver<Eigenproblem>::run_solver(state_type& state) const {
-  typedef typename Solver::state_type solver_state_type;
-
-  // Setup the inner solver state:
-  solver_state_type inner_state{state.eigenproblem()};
-  inner_state.obtain_guess_from(state);
-
-  // Make sure that control parameters are up to date:
-  get_control_params(m_solver_params);
-
-  try {
-    Solver{m_solver_params}.solve_state(inner_state);
-    state.push_intermediate_results(std::move(inner_state));
-  } catch (SolverException& e) {
-    // On exception still update the state reference
-    state.push_intermediate_results(std::move(inner_state));
-    throw;
-  }
-}
-
-template <typename Eigenproblem>
 void EigensystemSolver<Eigenproblem>::solve_with_method(const std::string& method,
                                                         state_type& state) const {
-#define throw_not_compiled_in()                                                         \
-  assert_throw(false, ExcInvalidSolverParametersEncountered(                            \
-                            "The eigensolver method " + method + "(set via the key '" + \
-                            EigensystemSolverKeys::method +                             \
-                            "' is not compiled into this version of linalgwrap."))
+  const std::string errorstring = "The eigensolver method " + method +
+                                  "(set via the key '" + EigensystemSolverKeys::method +
+                                  "') is not compiled into this version of linalgwrap.";
+
+  // Make sure the control parameters are up to date:
+  get_control_params(m_solver_params);
 
   if (method == std::string("arpack")) {
 #ifdef LINALGWRAP_HAVE_ARPACK
-    run_solver<ArpackEigensolver<Eigenproblem>>(state);
+    // Only instantiate the Arpack Eigensolver type in case
+    // the problem is hermitian.
+    typedef typename std::conditional<Eigenproblem::hermitian,
+                                      ArpackEigensolver<Eigenproblem>, void>::type
+          cond_arpack_type;
+    detail::RunSolver<cond_arpack_type>{}.run(state, m_solver_params);
 #else
-    throw_not_compiled_in();
+    assert_throw(false, ExcInvalidSolverParametersEncountered(errorstring));
 #endif
   } else if (method == std::string("armadillo")) {
 #ifdef LINALGWRAP_HAVE_ARMADILLO
-    run_solver<ArmadilloEigensolver<Eigenproblem>>(state);
+    detail::RunSolver<ArmadilloEigensolver<Eigenproblem>>{}.run(state, m_solver_params);
 #else
-    throw_not_compiled_in();
+    assert_throw(false, ExcInvalidSolverParametersEncountered(errorstring));
 #endif
   } else {
     // No method is supported!

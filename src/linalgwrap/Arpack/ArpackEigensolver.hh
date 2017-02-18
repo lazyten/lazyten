@@ -187,6 +187,7 @@ class ArpackEigensolver : public EigensolverBase<State> {
                 "The type Eigenproblem and the implicit eigenproblem type in the SCF "
                 "state have to agree");
 
+  // TODO remove assertion and generalise
   static_assert(std::is_same<typename Eigenproblem::scalar_type, double>::value,
                 "Arpack can only solve real problems at double precision at "
                 "the moment");
