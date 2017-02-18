@@ -63,6 +63,7 @@ if ("${krims_DIR}" STREQUAL "krims_DIR-NOTFOUND")
 		#
 		add_subdirectory(${PROJECT_SOURCE_DIR}/external/krims)
 		include_directories(${PROJECT_SOURCE_DIR}/external/krims/src)
+		include_directories(${PROJECT_BINARY_DIR}/external/krims/src)
 
 		# Extract version from CMakeLists.txt:
 		file(STRINGS "${PROJECT_SOURCE_DIR}/external/krims/CMakeLists.txt"
