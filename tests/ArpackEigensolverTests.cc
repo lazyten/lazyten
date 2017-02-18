@@ -36,17 +36,6 @@ TEST_CASE("ArpackEigensolver", "[ArpackEigensolver]") {
   using namespace eigensolver_tests;
   typedef SmallMatrix<double> matrix_type;
 
-  // TODO check that providing guess reduces number of steps
-  /*
-   *
-   *  // Re-run the problem and check that we have less iterations:
-   *  auto ret2 = solver.solve_with_guess(prob, ret);
-   *  size_t n_iter2 = ret2.n_iter();
-   *  CHECK(n_iter2 < n_iter1);
-   *  CHECK(n_iter2 == 1);
-   *
-   */
-
   /* The filter functor to filter out problems which make no sense
    * for us here*/
   auto filter = [](const EigensolverTestProblemBase<matrix_type>& problem) {
@@ -82,6 +71,61 @@ TEST_CASE("ArpackEigensolver", "[ArpackEigensolver]") {
 
   // TODO test real non-hermitian problems
   // TODO test real non-hermitian generalised problems
+
+  SECTION("Check that providing a guess reduces the number of steps needed") {
+    // TODO Get this into the general testing library
+
+    typedef EigensolverTestProblem<matrix_type, /* Hermitian= */ true> tprob_type;
+    auto allprobs = EigensolverTestProblemLibrary<tprob_type>::get_all();
+
+    for (const tprob_type& testproblem : allprobs) {
+      if (!filter(testproblem)) continue;
+
+      INFO("#");
+      INFO("# " + testproblem.description);
+      INFO("#");
+
+      // Assume the last problem is a generalised eigenproblem
+      auto prob = testproblem.generalised_eigenproblem();
+      ArpackEigensolverState<decltype(prob)> guess_state{prob};
+
+      // Set the results to expect:
+      guess_state.eigensolution().evalues() = testproblem.evalues;
+
+      auto& evecs = guess_state.eigensolution().evectors();
+      evecs.clear();
+      evecs.reserve(testproblem.evectors.size());
+      for (auto& vec : testproblem.evectors) {
+        evecs.push_back(typename tprob_type::evector_type{vec});
+      }
+
+      ArpackEigensolver<decltype(prob)> solver{testproblem.params};
+      auto ret = solver.solve_with_guess(prob, guess_state);
+      size_t n_iter = ret.n_iter();
+
+      // TODO or compare that we have less than normal solve
+      CHECK(n_iter < 10);
+
+      // Check eigenvalues
+      typedef typename tprob_type::evalue_type evalue_type;
+      SmallVector<evalue_type> evals(ret.eigensolution().evalues());
+      SmallVector<evalue_type> evals_ref(testproblem.evalues);
+      CHECK(evals == numcomp(evals_ref).tolerance(testproblem.tolerance));
+
+      // Check eigenvectors
+      for (size_t i = 0; i < testproblem.n_ep; ++i) {
+        const auto& evec = ret.eigensolution().evectors()[i];
+        auto evec_ref = testproblem.evectors[i];
+
+        // Sign-normalise the reference
+        // Note that this is necessary due to the ambiguity in the sign
+        // in the eigenvectors.
+        adjust_phase(evec, evec_ref);
+
+        CHECK(evec == numcomp(evec_ref).tolerance(testproblem.tolerance));
+      }
+    }
+  }
 
 }  // ArpackEigensolver
 

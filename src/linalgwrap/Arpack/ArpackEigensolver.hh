@@ -475,6 +475,7 @@ void ArpackEigensolver<Eigenproblem, State>::setup_state(state_type& state) cons
 
   esoln_type& soln = state.eigensolution();
   auto& evectors = soln.evectors();
+  auto& evalues = soln.evalues();
   std::vector<scalar_type>& resvec = *state.resid_ptr;
 
   //
@@ -485,7 +486,13 @@ void ArpackEigensolver<Eigenproblem, State>::setup_state(state_type& state) cons
     PtrVector<scalar_type> res(resvec.data(), resvec.size());
     for (size_t i = 0; i < evectors.n_vectors(); ++i) {
       for (size_t j = 0; j < evectors.n_elem(); ++j) {
-        res(j) += evectors[i](j);
+        // Since larger eigenvalues are favoured by Krylov-based methods
+        // We use the evalues to damp the components of the individual
+        // vectors
+        //
+        // TODO This entirely my guts feeling. I have not investigated
+        //      closely whether this is sensible or not.
+        res(j) += evectors[i](j) / evalues[i];
       }
     }
     res /= norm_l2(res);

@@ -422,7 +422,7 @@ EigensolverTestProblemLibrary<EigensolverTestProblem<Matrix, /*Hermitian=*/true>
                        -0.25950637523118303, -0.3026407483904913, 0.3177288444600617,
                        -0.14283290746786131}};
 
-    testproblem_type prob{"10x10 dense problem (4 eigenvalues)", A, evalues, evectors};
+    testproblem_type prob{"10x10 dense problem (4 LM)", A, evalues, evectors};
     prob.params.update({{EigensolverBaseKeys::which, "LM"}});
     res.push_back(std::move(prob));
   }

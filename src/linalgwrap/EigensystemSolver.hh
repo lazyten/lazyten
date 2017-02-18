@@ -238,6 +238,7 @@ bool EigensystemSolver<Eigenproblem>::should_use_arpack(
   //   - not if we desire small magnitude eigenvalues
   //     (TODO mode 3 is not yet implemented)
   if (base_type::which == std::string("SM")) return false;
+  if (base_type::which == std::string("SR")) return false;
 
   return true;
 }
