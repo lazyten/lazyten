@@ -33,6 +33,12 @@ template <typename LinearProblem>
 class LinearSolverState final : public LinearSolverStateBase<LinearProblem> {
   // Forward constructors:
   using LinearSolverStateBase<LinearProblem>::LinearSolverStateBase;
+
+  // TODO For now this simple implementation is good enough, since
+  //      we only have one implemented linear solver anyway,
+  //      which is furthermore hard-coded in here.
+  //
+  //      For later see EigensystemSolver.hh on how we do it there.
 };
 
 struct LinearSolverKeys final : public LinearSolverBaseKeys {
@@ -41,12 +47,27 @@ struct LinearSolverKeys final : public LinearSolverBaseKeys {
 };
 
 /** \brief Envelope linear solver that calls some
- *          inner solver depending on certain criteria
+ *         inner Eigensolver depending on certain criteria
  *
- * TODO extend doc
+ * ## Control parameters and their default values
  *
- * \tparam LinearProblem   linear problem type
+ * The GenMap map \t map may be used to provide configurable parameters
+ * to the underlying linear solver. The number of understood options and
+ * their default values and supported values depend on the underlying
+ * solver which is used. The options which are supported for all
+ * solvers are:
+ *   - method:   Enforce that a particular eigensolver method should be
+ *               used. Allowed values:
+ *       - "auto"   Auto-select solver due to hardcoded criteria
+ *                  (tolerance, number of eigenpairs, dimensionality /
+ *                   sparsity of matrix, ...)
+ *       - "armadillo"   Use Armadillo
+ *   - tolerance: Tolerance for eigensolver. Default: Default numeric
+ *                tolerance (as in Constants.hh)
+ *
+ * \tparam LinearProblem  The linear problem type
  */
+
 template <typename LinearProblem>
 class LinearSolver final : public LinearSolverBase<LinearSolverState<LinearProblem>> {
  public:
@@ -86,13 +107,13 @@ class LinearSolver final : public LinearSolverBase<LinearSolverState<LinearProbl
     method = map.at(LinearSolverKeys::method, method);
   }
 
-  //  /** Get the current settings of all internal control parameters and
-  //   *  update the GenMap accordingly.
-  //   */
-  //  void get_control_params(krims::GenMap& map) const {
-  //    base_type::get_control_params(map);
-  //    map.update(LinearSolverKeys::method, method);
-  //  }
+  /** Get the current settings of all internal control parameters and
+   *  update the GenMap accordingly.
+   */
+  void get_control_params(krims::GenMap& map) const {
+    base_type::get_control_params(map);
+    map.update(LinearSolverKeys::method, method);
+  }
   ///@}
 
   virtual void solve_state(state_type& state) const;
@@ -139,6 +160,12 @@ template <typename LinearProblem>
 void LinearSolver<LinearProblem>::solve_state(state_type& state) const {
   assert_dbg(!state.is_failed(), krims::ExcInvalidState("Cannot solve a failed state"));
   const linproblem_type& problem = state.problem();
+
+  // TODO No method except armadillo is supported atm
+  assert_throw(method == "auto" || method == "armadillo",
+               ExcInvalidSolverParametersEncountered(
+                     "The eigensolver method " + method + "(set via the key " +
+                     LinearSolverKeys::method + ") is unknown. Did you spell it wrong?"));
 
   // TODO only real symmetric problems implemented atm
   assert_dbg(

@@ -153,7 +153,7 @@ class EigensolverBase : public SolverBase<State> {
             typename = krims::enable_if_t<std::is_base_of<
                   EigensolverStateBase<eproblem_type>, GuessState>::value>>
   state_type solve_with_guess(const GuessState& guess_state) const {
-    return solve(guess_state.problem(), guess_state);
+    return solve_with_guess(guess_state.problem(), guess_state);
   }
 
   ///@}

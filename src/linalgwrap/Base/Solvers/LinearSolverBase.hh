@@ -83,6 +83,14 @@ class LinearSolverBase : public SolverBase<State> {
     base_type::update_control_params(map);
     tolerance = map.at(LinearSolverBaseKeys::tolerance, tolerance);
   }
+
+  /** Get the current settings of all internal control parameters and
+   *  update the GenMap accordingly.
+   */
+  void get_control_params(krims::GenMap& map) const {
+    base_type::get_control_params(map);
+    map.update(LinearSolverBaseKeys::tolerance, tolerance);
+  }
   ///@}
 
   /** \name Run a linear solver
@@ -114,20 +122,35 @@ class LinearSolverBase : public SolverBase<State> {
     return state;
   }
 
-  /** \brief Run the solver starting from an old state.
+  /** \brief Run the solver on a problem, starting from a guess state
    *
-   * It is assumed, that the input state is not failed.
-   * Note that the fail bit can be unset using the clear_failed() function
-   * in order to continue off a failed state using different solver
-   * control parameters.
+   * Here we use the LinearSolverStateBase in order to be able to use
+   * states of potentially different state_type as well.
    */
-  virtual state_type solve(const state_type& old_state) const {
-    assert_dbg(!old_state.is_failed(),
-               krims::ExcInvalidState("Cannot make use of a failed state"));
-    state_type state{old_state};
+  template <typename GuessState,
+            typename = krims::enable_if_t<std::is_base_of<
+                  LinearSolverStateBase<linproblem_type>, GuessState>::value>>
+  state_type solve_with_guess(const linproblem_type problem, multivector_type& solution,
+                              const GuessState& guess_state) const {
+    // Create a new state and install the guess state:
+    state_type state{std::move(problem), solution};
+    state.obtain_guess_from(guess_state);
     this->solve_state(state);
     return state;
   }
+
+  /** \brief Run the solver on a problem, starting from a guess state
+   *
+   * Here we use the LinearSolverStateBase in order to be able to use
+   * states of potentially different state_type as well.
+   */
+  template <typename GuessState,
+            typename = krims::enable_if_t<std::is_base_of<
+                  LinearSolverStateBase<linproblem_type>, GuessState>::value>>
+  state_type solve_with_guess(const GuessState& guess_state) const {
+    return solve_with_guess(guess_state.problem(), guess_state.solution(), guess_state);
+  }
+
   ///@}
 };
 

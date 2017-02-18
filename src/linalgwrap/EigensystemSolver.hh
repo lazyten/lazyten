@@ -92,7 +92,7 @@ struct EigensystemSolverKeys final : public EigensolverBaseKeys {
  *
  * ## Control parameters and their default values
  *
- * The Parameter map \t map may be used to provide configurable parameters
+ * The GenMap map \t map may be used to provide configurable parameters
  * to the underlying Eigensolver. The number of understood options and
  * their default values and supported values depend on the underlying
  * eigensolver which is used. The options which are supported for all
@@ -118,7 +118,6 @@ struct EigensystemSolverKeys final : public EigensolverBaseKeys {
  *                tolerance (as in Constants.hh)
  *
  * \tparam Eigenproblem  The eigenproblem to solve.
- * \tparam State         The state type of the solver.
  */
 template <typename Eigenproblem>
 class EigensystemSolver final
@@ -156,7 +155,7 @@ class EigensystemSolver final
   // The method to use to actually solve the underlying eigenproblem.
   std::string method = "auto";
 
-  /** Update control parameters from Parameter map */
+  /** Update control parameters from GenMap map */
   void update_control_params(const krims::GenMap& map) {
     base_type::update_control_params(map);
     method = map.at(EigensystemSolverKeys::method, method);
