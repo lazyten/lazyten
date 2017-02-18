@@ -45,7 +45,7 @@ std::string debugout_file();
 template <typename Scalar>
 io::FileTypeWriter<io::Mathematica, Scalar>& debugout() {
   typedef io::Mathematica FileType;
-  static std::ofstream file = std::ofstream(debugout_file());
+  static std::ofstream file(debugout_file());
   static io::FileTypeWriter<FileType, Scalar> writer(file, FileType());
   return writer;
 }
