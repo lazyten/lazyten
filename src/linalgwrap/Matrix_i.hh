@@ -151,38 +151,27 @@ class Matrix_i : public Indexable_i<Scalar> {
    * The idea is to return the set of properties which is satisfied out of the box.
    * In other words the function should return in O(1) time.
    * */
-  virtual OperatorProperties properties() const {
-    return m_properties;
-    // TODO later: return OperatorProperties::None;
-  }
+  virtual OperatorProperties properties() const { return m_properties; }
 
   /** \brief Check whether the requested properties are satisfied by the matrix
    *
    * Unlike ``properties()`` this functions performs actual checking by looking
    * at the matrix elements.
    */
-  bool has_properties(
+  bool check_properties_satisfied(
         OperatorProperties prop,
         real_type tolerance = Constants<real_type>::default_tolerance) const;
 
-  /** \brief Check whether the matrix satisfies the given properties and sets them
-   * internally to be satisfied if this is the case.
+  /** Add some properties to the matrix which are assumed to be satisfied.
    *
-   * TODO Do the replacement.
-   *
-   * \note This function is a temporary hack to get going, but will be removed and
-   * replaced by something more sensible at some point.
-   *
-   * \return  True if the properties were set.
-   * */
-  bool check_and_set_properties(
-        OperatorProperties prop,
-        real_type tolerance = Constants<real_type>::default_tolerance) {
-    if (has_properties(prop, tolerance)) {
-      m_properties |= prop;
-      return true;
-    }
-    return false;
+   * \note In debug mode this function will throw an exception if
+   * ``check_properties_satisfied`` returns false.
+   */
+  void add_properties(OperatorProperties prop,
+                      real_type tolerance = Constants<real_type>::default_tolerance) {
+    assert_throw(check_properties_satisfied(prop, tolerance),
+                 ExcOperatorPropertiesNotSatisfied(prop));
+    m_properties |= prop;
   }
   ///@}
 
@@ -300,8 +289,8 @@ bool Matrix_i<Scalar>::is_hermitian(real_type tolerance) const {
 }
 
 template <typename Scalar>
-bool Matrix_i<Scalar>::has_properties(OperatorProperties prop,
-                                      real_type tolerance) const {
+bool Matrix_i<Scalar>::check_properties_satisfied(OperatorProperties prop,
+                                                  real_type tolerance) const {
   bool ret = true;
   if (props_contained_in(OperatorProperties::Hermitian, prop)) {
     ret = ret && is_hermitian(tolerance);

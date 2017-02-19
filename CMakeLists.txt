@@ -20,6 +20,7 @@
 ## ---------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 3.0.0)
+cmake_policy(VERSION 3.0.0)
 
 # Load the DebugReleaseBuild module for a simultaneous Debug and Release
 # and release build and initialise it.
@@ -40,8 +41,6 @@ option(LINALGWRAP_ENABLE_EXAMPLES "Build linalgwrap examples" ON)
 ##########################################################################
 # Project setup
 
-# enable the new version feature introduced in cmake 3.0.0
-cmake_policy(SET CMP0048 NEW)
 project(linalgwrap VERSION 0.2.0)
 message("\n# Configuring ${PROJECT_NAME}\n#")
 
@@ -58,6 +57,11 @@ enable_testing()
 # Determine and setup compiler flags, enforcing C++11
 drb_setup_compiler_flags(11)
 
+# Export compile commands if cmake supports it.
+if (CMAKE_VERSION VERSION_GREATER 3.5.0)
+	set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+endif()
+
 # setup hard dependencies
 include(cmake/setup_dependencies.cmake)
 
@@ -67,11 +71,11 @@ include(cmake/setup_optional.cmake)
 ##########################################################################
 # Pass on to subdirectories:
 
-# The src directory does most of the work: Here the library is build and 
+# The src directory does most of the work: Here the library is build and
 # installation is configured.
 add_subdirectory(src)
 
-# Add subdirectories for the test.
+# Add subdirectories for the testing.
 if(LINALGWRAP_ENABLE_TESTS) 
 	add_subdirectory(tests)
 endif()
@@ -82,7 +86,7 @@ if(LINALGWRAP_ENABLE_EXAMPLES)
 endif()
 
 ##########################################################################
-# Finally install modules and packages:
+# Finally install package:
 include(cmake/install_package.cmake)
 
 # and print a closing message

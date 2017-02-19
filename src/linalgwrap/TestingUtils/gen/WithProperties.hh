@@ -42,10 +42,10 @@ struct WithProperties {
           }
 
           m.symmetrise();
-
-          if (!m.check_and_set_properties(OperatorProperties::RealSymmetric)) {
+          if (!m.check_properties_satisfied(OperatorProperties::RealSymmetric)) {
             RC_DISCARD("Could not make matrix symmetric");
-          };
+          }
+          m.add_properties(OperatorProperties::RealSymmetric);
           return m;
         };
         return rc::gen::map(gen, make_symmetric);

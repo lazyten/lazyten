@@ -26,8 +26,8 @@
 #include <krims/NumComp.hh>
 
 int main(int argc, char* const argv[]) {
-  // Throw in case a numerical comparison fails with very detailed
-  // information
+  // Throw in case a numerical comparison fails with very
+  // detailed information
   krims::NumCompConstants::default_failure_action =
         krims::NumCompActionType::ThrowVerbose;
 

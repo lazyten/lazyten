@@ -123,7 +123,7 @@ static std::vector<SolveTestProblem<Matrix>> real_hermitian_problems() {
   res.push_back({"10x10 Problem", M10, rhs10, sol10});
 
   for (auto& prob : res) {
-    prob.M.check_and_set_properties(OperatorProperties::RealSymmetric);
+    prob.M.add_properties(OperatorProperties::RealSymmetric);
   }
 
   return res;

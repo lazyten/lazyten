@@ -19,6 +19,7 @@
 
 #pragma once
 #include <krims/ExceptionSystem.hh>
+#include <linalgwrap/Base/Interfaces/OperatorProperties.hh>
 
 namespace linalgwrap {
 //
@@ -42,4 +43,14 @@ DefExceptionMsg(ExcMatrixNotDense,
 /** A matrix which was expected to be quadratic, was not */
 DefExceptionMsg(ExcMatrixNotSquare,
                 "Encountered a non-square matrix where a square matrix was expected");
+
+/** Exception to indicate that an expected operator property is not satisfied
+ *  by a matrix or operator.
+ *
+ *  Essentially a more generic case to the exceptions above. It should only be used
+ *  in cases which are so general that throwing the exceptions above is difficult.
+ */
+DefException1(ExcOperatorPropertiesNotSatisfied, OperatorProperties,
+              << "The matrix does not satisfy the added properties: " << arg1);
+
 }  // linalgwrap

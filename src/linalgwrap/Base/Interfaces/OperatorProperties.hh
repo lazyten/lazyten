@@ -18,7 +18,7 @@
 //
 
 #pragma once
-#include <cstdint>
+#include <ostream>
 #include <type_traits>
 
 namespace linalgwrap {
@@ -85,5 +85,8 @@ inline OperatorProperties& operator|=(OperatorProperties& l, OperatorProperties 
 inline bool props_contained_in(OperatorProperties mask, OperatorProperties other) {
   return (mask & other) == mask;
 }
+
+/** Stream output operator for OperatorProperties objects */
+std::ostream& operator<<(std::ostream& o, OperatorProperties prop);
 
 }  // namespace linalgwrap

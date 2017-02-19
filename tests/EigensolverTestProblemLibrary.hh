@@ -93,11 +93,13 @@ struct EigensolverTestProblemBase {
       for (size_t i = 0; i < A().n_rows(); ++i) {
         (*B_ptr)(i, i) = 1;
       }
+      B_ptr->add_properties(OperatorProperties::RealSymmetric);
     }
 
-    // Set B to be symmetric
-    assert_throw(B_ptr->check_and_set_properties(OperatorProperties::RealSymmetric),
-                 ExcMatrixNotSymmetric());
+    // Assert B to be symmetric:
+    assert_throw(
+          props_contained_in(OperatorProperties::RealSymmetric, B_ptr->properties()),
+          ExcMatrixNotSymmetric());
   }
 
  private:
@@ -251,6 +253,7 @@ EigensolverTestProblemLibrary<EigensolverTestProblem<Matrix, /*Hermitian=*/true>
                   {2, 1, 0, 0},   //
                   {0, 0, -2, 0},  //
                   {0, 0, 0, -100}};
+    A.add_properties(OperatorProperties::RealSymmetric);
 
     std::vector<evalue_type> evalues{-100.00000000000000000, -3.8284271247461900976,
                                      -2.0000000000000000000, 1.8284271247461900976};
@@ -271,6 +274,7 @@ EigensolverTestProblemLibrary<EigensolverTestProblem<Matrix, /*Hermitian=*/true>
                   {2, 1, 0, 0},   //
                   {0, 0, -2, 0},  //
                   {0, 0, 0, -100}};
+    A.add_properties(OperatorProperties::RealSymmetric);
 
     std::vector<evalue_type> evalues{-100.00000000000000000, -3.8284271247461900976};
     std::vector<evector_type> evectors{
@@ -293,6 +297,7 @@ EigensolverTestProblemLibrary<EigensolverTestProblem<Matrix, /*Hermitian=*/true>
                    -19.060589257868173},  //
                   {-2.9748571479165946, 37.53664340401812, -19.060589257868173,
                    9.006913232655023}};  //
+    A.add_properties(OperatorProperties::RealSymmetric);
 
     std::vector<evalue_type> evalues{-62.03057355556985, -9.352391446701581,
                                      -0.35870676156019954, 61.13602401989404};
@@ -324,6 +329,7 @@ EigensolverTestProblemLibrary<EigensolverTestProblem<Matrix, /*Hermitian=*/true>
            -19.060589257868173},
           {-2.9748571479165946, 37.53664340401812, -19.060589257868173,
            9.006913232655023}};
+    A.add_properties(OperatorProperties::RealSymmetric);
 
     std::vector<evalue_type> evalues{61.13602401989404};
 
@@ -348,6 +354,7 @@ EigensolverTestProblemLibrary<EigensolverTestProblem<Matrix, /*Hermitian=*/true>
            -19.060589257868173},
           {-2.9748571479165946, 37.53664340401812, -19.060589257868173,
            9.006913232655023}};
+    A.add_properties(OperatorProperties::RealSymmetric);
 
     std::vector<evalue_type> evalues{-0.35870676156019954};
 
@@ -400,6 +407,7 @@ EigensolverTestProblemLibrary<EigensolverTestProblem<Matrix, /*Hermitian=*/true>
            -2.6132506338280805, 7.556424052704543, -10.252025228591862,
            3.1674507141161925, 3.757319654298165, 20.801864534114983,
            -2.228736245292424}};
+    A.add_properties(OperatorProperties::RealSymmetric);
 
     std::vector<evalue_type> evalues{-105.85950499281432, -87.66911187239057,
                                      68.36805117811491, 83.28666165536679};
@@ -440,6 +448,7 @@ EigensolverTestProblemLibrary<EigensolverTestProblem<Matrix, /*Hermitian=*/true>
                   {0, 0, 0, 6, 0, 0},   //
                   {0, 0, 0, 0, 14, 0},  //
                   {0, 0, 0, 0, 0, 19}};
+    A.add_properties(OperatorProperties::RealSymmetric);
 
     matrix_type B{{1, 0, 0, 0, 0, 0},  //
                   {0, 1, 0, 0, 0, 0},  //
@@ -447,6 +456,7 @@ EigensolverTestProblemLibrary<EigensolverTestProblem<Matrix, /*Hermitian=*/true>
                   {0, 0, 0, 1, 0, 0},  //
                   {0, 0, 0, 0, 1, 0},  //
                   {0, 0, 0, 0, 0, 1}};
+    B.add_properties(OperatorProperties::RealSymmetric);
 
     std::vector<evalue_type> evalues{14., 19.};
     std::vector<evector_type> evectors{evector_type{0, 0, 0, 0, 1, 0},
@@ -465,6 +475,7 @@ EigensolverTestProblemLibrary<EigensolverTestProblem<Matrix, /*Hermitian=*/true>
                   {0, 0, 0, 10, 0, 0},  //
                   {0, 0, 0, 0, 7, 0},   //
                   {0, 0, 0, 0, 0, 36}};
+    A.add_properties(OperatorProperties::RealSymmetric);
 
     matrix_type B{{1, 0, 0, 0, 0, 0},  //
                   {0, 2, 0, 0, 0, 0},  //
@@ -472,6 +483,7 @@ EigensolverTestProblemLibrary<EigensolverTestProblem<Matrix, /*Hermitian=*/true>
                   {0, 0, 0, 2, 0, 0},  //
                   {0, 0, 0, 0, 3, 0},  //
                   {0, 0, 0, 0, 0, 3}};
+    B.add_properties(OperatorProperties::RealSymmetric);
 
     std::vector<evalue_type> evalues{5., 12.};
     std::vector<evector_type> evectors{
@@ -489,11 +501,13 @@ EigensolverTestProblemLibrary<EigensolverTestProblem<Matrix, /*Hermitian=*/true>
                   {2, 1, 0, 0},   //
                   {0, 0, -2, 0},  //
                   {0, 0, 0, -100}};
+    A.add_properties(OperatorProperties::RealSymmetric);
 
     matrix_type B{{2, 0, 0, 0},  //
                   {0, 1, 0, 0},  //
                   {0, 0, 3, -1},
                   {0, 0, -1, 6}};
+    B.add_properties(OperatorProperties::RealSymmetric);
 
     std::vector<evalue_type> evalues{
           -17.687810469499261500914145, -2.137458608817687011338649,
@@ -516,6 +530,7 @@ EigensolverTestProblemLibrary<EigensolverTestProblem<Matrix, /*Hermitian=*/true>
           {-48.30700858824612, -87.11535639272842, 2.3738314209291502, 29.42327462447335},
           {-19.3702010361321, 2.3738314209291502, 55.21571891343558, 7.83398454828334},
           {51.516503440727945, 29.42327462447335, 7.83398454828334, -38.61950221926611}};
+    A.add_properties(OperatorProperties::RealSymmetric);
 
     matrix_type B{
           {96.83468091117089, -4.913791379700475, -18.339421312281036,
@@ -524,6 +539,7 @@ EigensolverTestProblemLibrary<EigensolverTestProblem<Matrix, /*Hermitian=*/true>
           {-18.339421312281036, 28.357509831861982, 34.13774454920027, -3.14768974712774},
           {-20.346322316982484, -33.19377288633707, -3.14768974712774,
            59.28831461068096}};
+    B.add_properties(OperatorProperties::RealSymmetric);
 
     std::vector<evalue_type> evalues_all{-1.4897627147607764, -0.9161984422453742,
                                          -0.029585986915773334, 2.0250925458971345};
@@ -594,6 +610,7 @@ EigensolverTestProblemLibrary<EigensolverTestProblem<Matrix, /*Hermitian=*/true>
           {-33.28607335580642, -19.41260115004485, -24.19973486253687, -73.0816884019255,
            5.0086116408434975, -33.367594431732485, -69.71421300355263,
            -29.084474879859044, -6.375991509337922, 50.66098665912392}};
+    A.add_properties(OperatorProperties::RealSymmetric);
 
     matrix_type B{
           {69.73012444971515, -11.430661933986705, 15.730350842775003, -24.52988856533893,
@@ -630,6 +647,7 @@ EigensolverTestProblemLibrary<EigensolverTestProblem<Matrix, /*Hermitian=*/true>
     // TODO properly symmetrise the matrix such that this is not needed any
     // more.
     B.symmetrise();
+    B.add_properties(OperatorProperties::RealSymmetric);
 
     std::vector<evalue_type> evalues_all{-1.7136036278526083,  -1.355211095728974,
                                          -0.8527445634266658,  -0.698706672984702,
