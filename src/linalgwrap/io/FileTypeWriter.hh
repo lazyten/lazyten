@@ -187,8 +187,7 @@ inline bool FileTypeWriter<FileType, Scalar>::good() const {
 }
 
 template <typename FileType, typename Scalar, typename... GArgs>
-FileTypeWriter<FileType, Scalar> make_formatted_stream_writer(std::ostream& out,
-                                                              GArgs&&... gargs) {
+FileTypeWriter<FileType, Scalar> make_writer(std::ostream& out, GArgs&&... gargs) {
   return FileTypeWriter<FileType, Scalar>{out, FileType{gargs...}};
 }
 
