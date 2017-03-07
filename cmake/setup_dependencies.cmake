@@ -69,12 +69,7 @@ endforeach()
 #-- armadillo --#
 #################
 include(FindArmadillo)
-find_package(Armadillo REQUIRED)
-
-# We need at least 4.000
-if(ARMADILLO_VERSION_STRING VERSION_LESS "4.000")
-	message(FATAL_ERROR "Armadillo version is too old. Expect at least version ${ARMADILLO_MIN_VERSION}.")
-endif()
+find_package(Armadillo 4.000 REQUIRED)
 
 # add to general dependencies and include string
 set(LINALGWRAP_DEPENDENCIES ${LINALGWRAP_DEPENDENCIES} ${ARMADILLO_LIBRARIES})
