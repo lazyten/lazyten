@@ -198,6 +198,11 @@ class LazyMatrixExpression : public Matrix_i<typename StoredMatrix::scalar_type>
                      const scalar_type c_this = Constants<scalar_type>::one,
                      const scalar_type c_y = Constants<scalar_type>::zero) const = 0;
 
+  // TODO Split functions like apply and apply_inverse, ... into an outer interface
+  // function and an apply_kernel, apply_inverse_kernel function which does the actual
+  // work. This way we can do the assertions, simple cases and checks once in the outer
+  // function and only need to do the real work in the kernel function.
+
   /** \brief Compute the application of the inverse of the matrix
    *  (or the inverse of the transpose of the matrix) to a MultiVector
    *

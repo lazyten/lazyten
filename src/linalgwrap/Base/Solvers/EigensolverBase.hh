@@ -132,14 +132,14 @@ class EigensolverBase : public SolverBase<State> {
    * Here we use the EigensolverStateBase in order to be able to use
    * states of potentially different state_type as well.
    */
-  template <typename GuessState,
-            typename = krims::enable_if_t<std::is_base_of<
-                  EigensolverStateBase<eproblem_type>, GuessState>::value>>
+  template <typename GuessState, typename = krims::enable_if_t<std::is_base_of<
+                                       EigensolverStateBase<eproblem_type>,
+                                       krims::remove_reference_t<GuessState>>::value>>
   state_type solve_with_guess(const eproblem_type problem,
-                              const GuessState& guess_state) const {
+                              GuessState&& guess_state) const {
     // Create a new state and install the guess state:
     state_type state{std::move(problem)};
-    state.obtain_guess_from(guess_state);
+    state.obtain_guess_from(std::forward<GuessState>(guess_state));
     this->solve_state(state);
     return state;
   }
@@ -149,11 +149,11 @@ class EigensolverBase : public SolverBase<State> {
    * Here we use the EigensolverStateBase in order to be able to use
    * states of potentially different state_type as well.
    */
-  template <typename GuessState,
-            typename = krims::enable_if_t<std::is_base_of<
-                  EigensolverStateBase<eproblem_type>, GuessState>::value>>
-  state_type solve_with_guess(const GuessState& guess_state) const {
-    return solve_with_guess(guess_state.problem(), guess_state);
+  template <typename GuessState, typename = krims::enable_if_t<std::is_base_of<
+                                       EigensolverStateBase<eproblem_type>,
+                                       krims::remove_reference_t<GuessState>>::value>>
+  state_type solve_with_guess(GuessState&& guess_state) const {
+    return solve_with_guess(guess_state.problem(), std::forward<GuessState>(guess_state));
   }
 
   ///@}

@@ -89,24 +89,30 @@ class EigensolverStateBase : public SolverStateBase {
    * (This is fine since the eigenproblem object contains only
    * pointers or refererences)
    */
-  EigensolverStateBase(const eproblem_type eigenproblem)
+  EigensolverStateBase(eproblem_type eigenproblem)
         : m_eigenproblem(std::move(eigenproblem)), m_eigensolution{} {};
 
-  /** Setup the guess of this state. from another state. */
+  /** Setup the guess of this state by copying the relevant data from another state */
   void obtain_guess_from(const EigensolverStateBase& other) {
-    eigensolution() = other.eigensolution();
+    m_eigensolution = other.m_eigensolution;
   }
 
-  /** Setup the guess of this state. from another eigensolution. */
-  void obtain_guess_from(const esoln_type& other_soln) { eigensolution() = other_soln; }
+  /** Setup the guess of this state by moving the relevant data from another state */
+  void obtain_guess_from(EigensolverStateBase&& other) {
+    m_eigensolution = std::move(other.m_eigensolution);
+  }
+
+  /** Setup the guess of this state by copying the other eigensolution inside */
+  void obtain_guess_from(esoln_type other_soln) {
+    m_eigensolution = std::move(other_soln);
+  }
 
  private:
   /* The eigenproblem we wish to solve (contains only pointers
    *  ->ok to store) */
-  /* const */ eproblem_type m_eigenproblem;
+  eproblem_type m_eigenproblem;
 
-  /* The container for the eigensolution (contains only pointers
-   *  ->ok to store) */
+  /* The container for the eigensolution */
   esoln_type m_eigensolution;
 };
 

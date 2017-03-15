@@ -204,6 +204,8 @@ void RunSolver<Solver>::run(State& state, const krims::GenMap& params) const {
 
   // Setup the inner solver state:
   solver_state_type inner_state{state.eigenproblem()};
+
+  // TODO move the inner eigensolution here -> gets rid of a copy!
   inner_state.obtain_guess_from(state);
 
   try {

@@ -78,8 +78,8 @@ struct Eigensolution {
   const std::vector<evalue_type>& evalues() const { return *evalues_ptr; }
   ///@}
 
-  /** \brief Construct by copying the provided pointers into the inner
-   * structure. */
+  /** \brief Construct by using the provided pointers to store the
+   *         data. */
   Eigensolution(std::shared_ptr<MultiVector<evector_type>> evectors_ptr_,
                 std::shared_ptr<std::vector<evalue_type>> evalues_ptr_)
         : evectors_ptr(std::move(evectors_ptr_)), evalues_ptr(std::move(evalues_ptr_)) {
@@ -90,6 +90,25 @@ struct Eigensolution {
   Eigensolution()
         : evectors_ptr(new MultiVector<evector_type>{}),
           evalues_ptr(new std::vector<evalue_type>{}) {}
+
+  //@{
+  /** Default move assignment and destructors */
+  ~Eigensolution() = default;
+  Eigensolution(Eigensolution&&) = default;
+  Eigensolution& operator=(Eigensolution&&) = default;
+  //@}
+
+  /** Copy constructor: Perform a *deep* copy of the data of other */
+  Eigensolution(const Eigensolution& other)
+        : evectors_ptr{new MultiVector<evector_type>(other.evectors())},
+          evalues_ptr(new std::vector<evalue_type>(other.evalues())) {}
+
+  /** Copy assignment: Perform a *deep* copy of the data of other */
+  Eigensolution& operator=(const Eigensolution& other) {
+    evectors_ptr.reset(new MultiVector<evector_type>(other.evectors()));
+    evalues_ptr.reset(new std::vector<evalue_type>(other.evalues()));
+    return *this;
+  }
 };
 
 namespace detail {

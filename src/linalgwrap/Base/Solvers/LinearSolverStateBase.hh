@@ -84,7 +84,7 @@ class LinearSolverStateBase : public SolverStateBase {
     assert_size(m_linproblem.n_systems(), solution.n_vectors());
   }
 
-  /** Setup the guess of this state. from another state. */
+  /** Setup the guess of this state by copying the relevant data from another state. */
   void obtain_guess_from(const LinearSolverStateBase& other) {
     // Copy solution if the objects are not identical.
     if (&other.solution() != &solution()) {
@@ -92,8 +92,13 @@ class LinearSolverStateBase : public SolverStateBase {
     }
   }
 
-  /** Setup the guess of this state. from another eigensolution. */
-  void obtain_guess_from(const multivector_type& other_soln) { solution() = other_soln; }
+  /** Setup the guess of this state by copying the guess solution inside */
+  void obtain_guess_from(const multivector_type& other_soln) {
+    // Copy solution if the objects are not identical.
+    if (&solution() != &other_soln) {
+      solution() = other_soln;
+    }
+  }
 
  private:
   const linproblem_type m_linproblem;
