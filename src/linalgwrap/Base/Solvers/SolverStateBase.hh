@@ -64,10 +64,6 @@ class SolverStateBase {
    **/
   virtual size_t n_mtx_applies() const { return 0; }
 
-  /** Setup the guess of this state. from another state.
-   * In this case this function does nothing */
-  void obtain_guess_from(const SolverStateBase&) {}
-
  protected:
   //! Has the iteration failed?
   bool m_failed;
