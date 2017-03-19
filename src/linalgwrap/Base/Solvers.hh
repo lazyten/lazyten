@@ -44,3 +44,6 @@
 #include "Solvers/EigensolverBase.hh"
 #include "Solvers/EigensolverBaseKeys.hh"
 #include "Solvers/EigensolverStateBase.hh"
+
+// Helper functions and utilities
+#include "Solvers/select_eigenvalues.hh"
