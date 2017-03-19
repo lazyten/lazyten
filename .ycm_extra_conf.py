@@ -50,6 +50,7 @@ flags = [
     # Compile extra code blocks:
     '-DLINALGWRAP_HAVE_ARMADILLO',
     '-DLINALGWRAP_HAVE_ARPACK',
+    '-DLINALGWRAP_HAVE_LAPACK',
     # C++14 code blocks:
     '-DLINALGWRAP_HAVE_CXX14',
     '-DKRIMS_HAVE_CXX14',

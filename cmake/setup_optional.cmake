@@ -43,6 +43,23 @@ if (NOT CMAKE_CXX_STANDARD VERSION_LESS 17)
 	LIST(APPEND LINALGWRAP_DEFINITIONS "LINALGWRAP_HAVE_CXX17")
 endif()
 
+#########################
+#--  LAPACK and BLAS  --#
+#########################
+set(BLAS_VENDOR "All" CACHE STRING "The BLAS and LAPACK vendor to use \
+(e.g. Intel, ATLAS, OpenBLAS, ACML, Apple)")
+set(BLA_VENDOR ${BLAS_VENDOR})
+
+find_package(LAPACK REQUIRED)
+
+# add to general dependencies
+set(LINALGWRAP_DEPENDENCIES ${LINALGWRAP_DEPENDENCIES} ${LAPACK_LIBRARIES})
+
+# enable lapack-dependant code:
+LIST(APPEND LINALGWRAP_DEFINITIONS "LINALGWRAP_HAVE_LAPACK")
+
+unset(BLA_VENDOR)
+
 ################
 #--  ARPACK  --#
 ################

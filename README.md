@@ -11,20 +11,25 @@ and only a fraction of the planned features are currently implemented.
 ## Dependencies
 ``linalgwrap`` depends on the following libraries:
 - [krims](https://linalgwrap.org/krims) for many basic utilities
-  (ParameterMap, Exception handling, Subscription pointers)
-- [armadillo](http://arma.sourceforge.net/) as the only supported
-  linear-algebra backend (so far)
-- *(optional)* [ARPACK](http://www.caam.rice.edu/software/ARPACK/) in order to use ``linalgwrap`` with the
-  ARPACK eigensolver.
+  (GenMap, Exception handling, Subscription pointers)
+- A BLAS implementation, e.g. [OpenBLAS](https://github.com/xianyi/OpenBLAS/)
+- A LAPACK compatible library, e.g.
+  [LAPACK](http://netlib.org/lapack) in order to use ``linalgwrap`` the
+  LAPACK eigensolvers
+- [armadillo](http://arma.sourceforge.net/) for the armadillo eigensolvers
+  and linear solvers as well as the only linear-algebra backend (so far)
+- *(optional)* [ARPACK](http://www.caam.rice.edu/software/ARPACK/) in order to use
+  ``linalgwrap`` with the ARPACK eigensolver.
 
 Testing ``linalgwrap`` further requires
 - [Catch](https://github.com/philsquared/Catch/) for the testing environment
 - [rapidcheck](https://github.com/emil-e/rapidcheck) for property-based testing
 
 Note, that for building ``linalgwrap`` (see [below](#building)) you really only need to have
-[armadillo](http://arma.sourceforge.net/) installed on your system.
+[armadillo](http://arma.sourceforge.net/), [LAPACK](http://netlib.org/lapack) and a BLAS
+installed on your system.
 All other dependencies can be automatically downloaded during the build process
-if you choose to so (set ``AUTOCHECKOUT_MISSING_REPOS`` to ``ON``,
+if you choose to do so (set ``AUTOCHECKOUT_MISSING_REPOS`` to ``ON``,
 more below)
 
 ## Building
@@ -135,14 +140,16 @@ On global scope we have:
   since their interface is designed to be easy to use and it easy to enforce
   a particular eigensolver explicitly (using the parameter key ``method``).
 - For linear problems the file [solve.hh](src/linalgwrap/solve.hh) similarly
-  contains the methods  ``solve`` and ``solve_hermitian``.
+  contains the method  ``solve``.
 - The folder [Base/Solvers](src/linalgwrap/Base/Solvers) holds all the lower
-  interfaces the solvers use.
-- Currently only [ArpackEigensolver](src/linalgwrap/ArpackEigensolver.hh)
-  and [ArmadilloEigensolver](src/linalgwrap/ArmadilloEigensolver.hh) are implemented
-  as eigensolver backends.
+  interfaces and some utilities the actual solvers use.
+- Currently only [ArpackEigensolver](src/linalgwrap/Arpack/ArpackEigensolver.hh)
+  and some eigensolvers from Lapack (either indirectly via
+  [ArmadilloEigensolver](src/linalgwrap/Armadillo/ArmadilloEigensolver.hh)
+  or directy via [LapackEigensolver](src/linalgwrap/Lapack/LapackEigensolver.hh))
+  are implemented as eigensolver backends.
 - ARPACK is enabled if it is found on the system.
-- Right now linear problems are always solved with ``armadillo``.
+- Linear problems are always solved with ``LAPACK`` via  ``armadillo`` right now.
 
 ### TestingUtils
 This class contains utilities for performing numerics-aware
