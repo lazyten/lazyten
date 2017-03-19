@@ -316,6 +316,10 @@ template <typename InnerVector>
 template <typename... Args>
 void MultiVectorReadonly<InnerVector>::emplace_back(Args&&... args) {
   auto ptr = std::make_shared<vector_type>(std::forward<Args>(args)...);
+  if (m_vs.size() == 0) {
+    // Initial m_n_elem size cache
+    m_n_elem = ptr->size();
+  }
   assert_size(ptr->size(), m_n_elem);
   m_vs.push_back(std::move(vector_rcptr_type{ptr}));
   assert_valid_state();
