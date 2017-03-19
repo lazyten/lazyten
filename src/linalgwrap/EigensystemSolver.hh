@@ -21,12 +21,7 @@
 #include "linalgwrap/Armadillo/ArmadilloEigensolver.hh"
 #include "linalgwrap/Arpack/ArpackEigensolver.hh"
 #include "linalgwrap/Base/Solvers.hh"
-
-#ifndef LINALGWRAP_HAVE_ARMADILLO
-static_assert(false,
-              "We need armadillo in order to have at least a working fallback "
-              "eigensolver.");
-#endif
+#include "linalgwrap/Lapack/LapackEigensolver.hh"
 
 namespace linalgwrap {
 
@@ -104,6 +99,7 @@ struct EigensystemSolverKeys final : public EigensolverBaseKeys {
  *                   sparsity of matrix, ...)
  *       - "arpack"   Use ARPACK
  *       - "armadillo"   Use Armadillo
+ *       - "lapack"      Use Lapack
  *   - which:    Which eigenvalues to target. Default: "SR";
  *     allowed values (for all eigensolvers):
  *       - "SM"   Smallest magnitude
@@ -176,8 +172,9 @@ class EigensystemSolver final
   virtual void solve_state(state_type& state) const override final;
 
  private:
-  /** Should we use Arpack to do the solving */
   bool should_use_arpack(const Eigenproblem& problem) const;
+  bool should_use_armadillo(const Eigenproblem& problem) const;
+  bool should_use_lapack(const Eigenproblem& problem) const;
 
   /** Setup and solve using the method provided */
   void solve_with_method(const std::string& method, state_type& state) const;
@@ -222,6 +219,7 @@ void RunSolver<Solver>::run(State& state, const krims::GenMap& params) const {
 template <typename Eigenproblem>
 bool EigensystemSolver<Eigenproblem>::should_use_arpack(
       const Eigenproblem& problem) const {
+#ifdef LINALGWRAP_HAVE_ARPACK
   // Arpack should be used if:
 
   //   - not a complex or non-hermitian problem:
@@ -243,6 +241,45 @@ bool EigensystemSolver<Eigenproblem>::should_use_arpack(
   if (base_type::which == std::string("SR")) return false;
 
   return true;
+#else
+  return false;
+#endif  // LINALGWRAP_HAVE_ARPACK
+}
+
+template <typename Eigenproblem>
+bool EigensystemSolver<Eigenproblem>::should_use_lapack(
+      const Eigenproblem& /*problem*/) const {
+#ifdef LINALGWRAP_HAVE_LAPACK
+  // Currently we only have Lapack for real, hermitian eigenproblems
+  // implemented.
+  if (Eigenproblem::real && Eigenproblem::hermitian) return true;
+
+  return false;
+#else
+  return false;
+#endif  // LINALGWRAP_HAVE_LAPACK
+}
+
+template <typename Eigenproblem>
+bool EigensystemSolver<Eigenproblem>::should_use_armadillo(
+      const Eigenproblem& /*problem*/) const {
+#ifdef LINALGWRAP_HAVE_ARMADILLO
+  // Armadillo sucks with real hermitian generalised problems
+  // since it exists to do it in complex arithmetic:
+  if (Eigenproblem::real && Eigenproblem::hermitian && Eigenproblem::generalised) {
+    return false;
+  }
+
+  // It is perfect for problems with armadillo matrices:
+  if (std::is_same<typename Eigenproblem::matrix_diag_type,
+                   ArmadilloMatrix<typename Eigenproblem::scalar_type>>::value) {
+    return true;
+  }
+
+  return false;
+#else
+  return false;
+#endif  // LINALGWRAP_HAVE_ARMADILLO
 }
 
 template <typename Eigenproblem>
@@ -255,6 +292,9 @@ void EigensystemSolver<Eigenproblem>::solve_with_method(const std::string& metho
   // Make sure the control parameters are up to date:
   get_control_params(m_solver_params);
 
+  //
+  // Arpack
+  //
   if (method == std::string("arpack")) {
 #ifdef LINALGWRAP_HAVE_ARPACK
     // Only instantiate the Arpack Eigensolver type in case
@@ -263,35 +303,79 @@ void EigensystemSolver<Eigenproblem>::solve_with_method(const std::string& metho
                                       ArpackEigensolver<Eigenproblem>, void>::type
           cond_arpack_type;
     detail::RunSolver<cond_arpack_type>{}.run(state, m_solver_params);
+    return;
 #else
     assert_throw(false, ExcInvalidSolverParametersEncountered(errorstring));
-#endif
-  } else if (method == std::string("armadillo")) {
+#endif  // LINALGWRAP_HAVE_ARPACK
+  }
+
+  //
+  // Lapack
+  //
+  if (method == std::string("lapack")) {
+#ifdef LINALGWRAP_HAVE_LAPACK
+    // Only instantiate the Lapack Eigensolver type in case
+    // the problem is hermitian.
+    typedef typename std::conditional<Eigenproblem::hermitian,
+                                      LapackEigensolver<Eigenproblem>, void>::type
+          cond_lapack_type;
+    detail::RunSolver<cond_lapack_type>{}.run(state, m_solver_params);
+    return;
+#else
+    assert_throw(false, ExcInvalidSolverParametersEncountered(errorstring));
+#endif  // LINALGWRAP_HAVE_LAPACK
+  }
+
+  //
+  // Armadillo
+  //
+  if (method == std::string("armadillo")) {
 #ifdef LINALGWRAP_HAVE_ARMADILLO
     detail::RunSolver<ArmadilloEigensolver<Eigenproblem>>{}.run(state, m_solver_params);
+    return;
 #else
     assert_throw(false, ExcInvalidSolverParametersEncountered(errorstring));
-#endif
-  } else {
-    // No method is supported!
-    assert_throw(false, ExcInvalidSolverParametersEncountered(
-                              "The eigensolver method " + method + "(set via the key " +
-                              EigensystemSolverKeys::method +
-                              ") is unknown. Did you spell it wrong?"));
+#endif  // LINALGWRAP_HAVE_ARMADILLO
   }
+
+  //
+  // No method is supported!
+  //
+  assert_throw(false, ExcInvalidSolverParametersEncountered(
+                            "The eigensolver method " + method + "(set via the key " +
+                            EigensystemSolverKeys::method +
+                            ") is unknown. Did you spell it wrong?"));
 }
 
 template <typename Eigenproblem>
 void EigensystemSolver<Eigenproblem>::solve_state(state_type& state) const {
   assert_dbg(!state.is_failed(), krims::ExcInvalidState("Cannot solve a failed state"));
 
+  /** User-selected */
   if (method != std::string("auto")) {
     solve_with_method(method, state);
-  } else if (should_use_arpack(state.eigenproblem())) {
-    solve_with_method("arpack", state);
-  } else {
-    solve_with_method("armadillo", state);
+    return;
   }
+
+  if (should_use_arpack(state.eigenproblem())) {
+    solve_with_method("arpack", state);
+    return;
+  }
+  if (should_use_armadillo(state.eigenproblem())) {
+    solve_with_method("armadillo", state);
+    return;
+  }
+  if (should_use_lapack(state.eigenproblem())) {
+    solve_with_method("lapack", state);
+    return;
+  }
+
+  assert_throw(false,
+               ExcInvalidSolverParametersEncountered(
+                     "Could not autodetermine an eigensolver for your eigenproblem. "
+                     "This could mean that there are not enough solvers available in "
+                     "your linalgwrap installation. Try forcing the use of an existing "
+                     "solver via the \"method\" parameter in this case."));
 }
 
 }  // namespace linalgwrap
