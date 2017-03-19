@@ -68,7 +68,6 @@ endforeach()
 #################
 #-- armadillo --#
 #################
-include(FindArmadillo)
 find_package(Armadillo 4.000 REQUIRED)
 
 # add to general dependencies and include string

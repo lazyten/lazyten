@@ -136,14 +136,16 @@ class Matrix_i : public Indexable_i<Scalar> {
    * Loops over all elements and check whether the difference
    * between m(i,j) and m(j,i) is less than the tolerance given
    * */
-  bool is_symmetric(real_type tolerance = Constants<real_type>::default_tolerance) const;
+  bool is_symmetric(real_type tolerance = 10 *
+                                          Constants<real_type>::default_tolerance) const;
 
   /** \brief Check whether the matrix is Hermitian
    *
    * Loops over all elements and check whether the difference
    * between conj(m(i,j)) and m(j,i) is less than the tolerance given
    * */
-  bool is_hermitian(real_type tolerance = Constants<real_type>::default_tolerance) const;
+  bool is_hermitian(real_type tolerance = 10 *
+                                          Constants<real_type>::default_tolerance) const;
 
   /** \brief Return the properties satisfied by this matrix by means of its internal
    * structure.

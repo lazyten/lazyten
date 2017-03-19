@@ -38,7 +38,7 @@ env:
     - RC_PARAMS="seed=16920708173099178154 verbose_progress=1 noshrink=1"
     #
     # Dependencies we need to install
-    - DEPEND_PKG="libarmadillo-dev libboost-dev"
+    - DEPEND_PKG="libarmadillo-dev libboost-dev liblapack-dev libblas-dev"
 
 matrix:
   include:

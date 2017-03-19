@@ -133,10 +133,6 @@ class ArmadilloEigensolver : public EigensolverBase<State> {
   void copy_to_solution(size_type n_ep, const arma::Col<evalue_type>& eval_arma,
                         const arma::Mat<typename evector_type::scalar_type>& evec_arma,
                         esoln_type& soln) const;
-
-  /** Perform an argsort by real part, but only if armadillo does not already
-   * guarantee that the eigenvalues are sorted */
-  std::vector<size_t> argsort_by_real_part(const arma::Col<evalue_type>& eval_arma) const;
 };
 
 //
@@ -144,96 +140,21 @@ class ArmadilloEigensolver : public EigensolverBase<State> {
 //
 
 template <typename Eigenproblem, typename State>
-std::vector<size_t> ArmadilloEigensolver<Eigenproblem, State>::argsort_by_real_part(
-      const arma::Col<evalue_type>& eval_arma) const {
-
-  if (!Eigenproblem::generalised && Eigenproblem::hermitian && Eigenproblem::real) {
-    // Sorting by value is already done by armadillo in the case
-    // where we are dealing with an hermitian non-general problem
-    // => just return list of increasing indices.
-    std::vector<size_t> idcs(eval_arma.size());
-    std::iota(std::begin(idcs), std::end(idcs), 0);
-    return idcs;
-  } else {
-    return krims::argsort(std::begin(eval_arma), std::end(eval_arma),
-                          [](const evalue_type& lhs, const evalue_type& rhs) {
-                            return std::real(lhs) < std::real(rhs);
-                          });
-  }
-}
-
-template <typename Eigenproblem, typename State>
 void ArmadilloEigensolver<Eigenproblem, State>::copy_to_solution(
       size_type n_ep, const arma::Col<evalue_type>& eval_arma,
       const arma::Mat<typename evector_type::scalar_type>& evec_arma,
       esoln_type& soln) const {
-  // Indices of the eigenpairs which should be copied into the
-  // solution structure, also gives the order in which they
-  // should appear.
-  std::vector<size_t> idcs;
 
-  // First properly order the eigenpairs
-  // TODO: Improvement only (arg)partition the eigenpairs, don't sort them
-  // fully!
-  /*
-    if (n_ep == static_cast<size_t>(evec_arma.n_cols)) {
-        // No need to order since we will use all of them anyways ...
-        idcs.resize(evec_arma.n_cols);
-        std::iota(std::begin(idcs), std::end(idcs), 0);
-    } else */ if (base_type::which[1] == 'R') {
-    idcs = argsort_by_real_part(eval_arma);
-  } else if (base_type::which[1] == 'I') {
-    // argsort by imaginary part
-    idcs = krims::argsort(std::begin(eval_arma), std::end(eval_arma),
-                          [](const evalue_type& lhs, const evalue_type& rhs) {
-                            return std::imag(lhs) < std::imag(rhs);
-                          });
+  // Armadillo eigenpairs are only sorted canonically if they
+  // result from a real Hermitian non-general problem.
+  //    TODO check for complex eigenvalues!
+  const bool sorted_canonically =
+        !Eigenproblem::generalised && Eigenproblem::hermitian && Eigenproblem::real;
 
-  } else if (base_type::which[1] == 'M') {
-    // argsort by magnitude
-    idcs = krims::argsort(std::begin(eval_arma), std::end(eval_arma),
-                          [](const evalue_type& lhs, const evalue_type& rhs) {
-                            using std::abs;
-                            return abs(lhs) < abs(rhs);
-                          });
-  }
-
-  // Select the ones we care about:
-  // If we want to keep the smallest we need the beginning
-  // of the range, else the end
-  size_t start = 0;
-  size_t end = n_ep;
-  if (base_type::which[0] == 'L') {
-    end = static_cast<size_t>(evec_arma.n_cols);
-    start = end - n_ep;
-  }
-
-  if ((Eigenproblem::real && base_type::which[1] == 'R') ||
-      (!Eigenproblem::real && base_type::which[1] == 'M')) {
-    // The ordering we just did is the default ordering
-    // => just shrink the vector to the entries we care about
-    idcs = std::vector<size_t>(std::begin(idcs) + static_cast<ptrdiff_t>(start),
-                               std::begin(idcs) + static_cast<ptrdiff_t>(end));
-  } else {
-    // Build a temporary evalues array:
-    std::vector<evalue_type> tmp;
-    tmp.reserve(end - start);
-    for (size_t i = start; i < end; ++i) {
-      tmp.push_back(eval_arma[idcs[i]]);
-    }
-
-    // Argsort it using the default eigenpair ordering
-    std::vector<size_t> i2 =
-          krims::argsort(std::begin(tmp), std::end(tmp), eigenpairsorter{});
-
-    std::vector<size_t> idcs_new;
-    idcs_new.reserve(i2.size());
-    for (const auto& i : i2) {
-      idcs_new.push_back(idcs[start + i]);
-    }
-    idcs = idcs_new;
-  }
-  assert_dbg(idcs.size() == n_ep, krims::ExcInternalError());
+  // (Sorted) indices of eigenvalues to keep
+  const std::vector<size_t> idcs =
+        select_eigenvalues(std::begin(eval_arma), std::end(eval_arma), base_type::which,
+                           n_ep, sorted_canonically);
 
   // Reserve space to copy the values in
   soln.evalues().clear();
@@ -256,6 +177,8 @@ void ArmadilloEigensolver<Eigenproblem, State>::assert_valid_control_params(
   //
   // Some stuff is more general and affects multiple solver classes
   // this is not reflected here
+  //
+  // Here is code duplication with LapackEigensolver
 
   const Eigenproblem& problem = state.eigenproblem();
 
@@ -314,4 +237,4 @@ void ArmadilloEigensolver<Eigenproblem, State>::solve_state(state_type& state) c
 }
 
 }  // namespace linalgwrap
-#endif
+#endif  // LINALGWRAP_HAVE_ARMADILLO

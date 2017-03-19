@@ -56,6 +56,7 @@ set(LINALGWRAP_TESTS_SOURCES
 	# Eigensolver
 	ArpackEigensolverTests.cc
 	ArmadilloEigensolverTests.cc
+	LapackEigensolverTests.cc
 	eigensystemTests.cc
 
 	# linear solver
