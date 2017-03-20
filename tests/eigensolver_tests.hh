@@ -43,19 +43,26 @@ struct DefaultSolveFunctor {
       // Solve as a generalised eigenproblem:
       typedef typename Testproblem::gen_prob_type prob_type;
       typedef typename SolverTraits::template Solver<prob_type> solver_type;
-      return solver_type{problem.params}
+      krims::GenMap fparams{problem.params};
+      fparams.update(extra_params);
+      return solver_type{fparams}
             .solve(problem.generalised_eigenproblem())
             .eigensolution();
     } else {
       typedef typename Testproblem::prob_type prob_type;
       typedef typename SolverTraits::template Solver<prob_type> solver_type;
-      return solver_type{problem.params}.solve(problem.eigenproblem()).eigensolution();
+      krims::GenMap fparams{problem.params};
+      fparams.update(extra_params);
+      return solver_type{fparams}.solve(problem.eigenproblem()).eigensolution();
     }
   }
 
   /** Force all eigenproblems to be generalised problems including the
    *  once where the metric matrix is the identity */
   bool force_generalised = false;
+
+  /** Extra parameters to use for this solver */
+  krims::GenMap extra_params{};
 };
 
 /** Class which runs all or a selected subset of the eigensolver test problems

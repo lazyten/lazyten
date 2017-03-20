@@ -20,17 +20,46 @@
 #pragma once
 #ifdef LINALGWRAP_HAVE_LAPACK
 #include "LapackPackedMatrix.hh"
+#include "LapackSymmetricMatrix.hh"
 
 namespace linalgwrap {
 namespace detail {
+
+/** Run the Lapack eigensolver dspev
+ *
+ * The Ap array is copied in and destroyed internally
+ *
+ * \param Ap  A array in packed format
+ * \param evecs   The eigenvectors (in Fortran format, i.e. column-major)
+ *                (will be resized by the function)
+ * \param evals   The eigenvalues ordered by value
+ *                (will be resized by the function)
+ * \param info   The info parameter returned by Lapack
+ */
+void run_dspev(LapackPackedMatrix<double> Ap, std::vector<double>& evals,
+               std::vector<double>& evecs, int& info);
+
+/** Run the Lapack eigensolver dsyev
+ *
+ * The A array is copied in and destroyed internally
+ *
+ * \param A  A array in symmetric lapack matrix format
+ * \param evecs   The eigenvectors (in Fortran format, i.e. column-major)
+ *                (will be resized by the function)
+ * \param evals   The eigenvalues ordered by value
+ *                (will be resized by the function)
+ * \param info   The info parameter returned by Lapack
+ */
+void run_dsyev(LapackSymmetricMatrix<double> A, std::vector<double>& evals,
+               std::vector<double>& evecs, int& info);
 
 /** Run the generalised Lapack eigensolver dspgv
  *
  * The Ap array is copied in and destroyed internally
  * The Bp array is copied in as well
  *
- * \param Ap  A array in packed format (as generated from make_packed_lower)
- * \param Bp  B array in packed format (as generated from make_packed_lower)
+ * \param Ap  A array in packed format
+ * \param Bp  B array in packed format
  * \param evecs   The eigenvectors (in Fortran format, i.e. column-major)
  *                (will be resized by the function)
  * \param evals   The eigenvalues ordered by value
@@ -44,23 +73,25 @@ LapackPackedMatrix<double> run_dspgv(LapackPackedMatrix<double> Ap,
                                      std::vector<double>& evals,
                                      std::vector<double>& evecs, int& info);
 
-/** Run the Lapack eigensolver dspev
+/** Run the generalised Lapack eigensolver dsygv
  *
- * The Ap array is copied in and destroyed internally
+ * The A array is copied in and destroyed internally
+ * The B array is copied in as well
  *
- * \param Ap  A array in packed format (as generated from make_packed_lower)
+ * \param A  A array in symmetric lapack matrix format
+ * \param B  B array in symmetric lapack matrix format
  * \param evecs   The eigenvectors (in Fortran format, i.e. column-major)
  *                (will be resized by the function)
  * \param evals   The eigenvalues ordered by value
  *                (will be resized by the function)
  * \param info   The info parameter returned by Lapack
+ *
+ * \returns  The Choleski factorisation of B in lower-triangle packed format.
  */
-void run_dspev(LapackPackedMatrix<double> Ap, std::vector<double>& evals,
-               std::vector<double>& evecs, int& info);
-
-// TODO What about the many million other interesting lapack solvers ...
-//
-// E.g. dsygst instead of dspgst
+LapackPackedMatrix<double> run_dsygv(LapackSymmetricMatrix<double> A,
+                                     LapackSymmetricMatrix<double> B,
+                                     std::vector<double>& evals,
+                                     std::vector<double>& evecs, int& info);
 
 }  // namespace detail
 }  // namespace linalgwrap

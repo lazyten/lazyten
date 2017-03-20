@@ -32,6 +32,7 @@ set(LINALGWRAP_SOURCES
 	Base/Solvers/LinearSolverBaseKeys.cc
 	Base/Solvers/SolverStateBase.cc
 	Arpack/ArpackEigensolver.cc
+	Lapack/LapackEigensolver.cc
 	Lapack/detail/lapack.cc
 	LinearSolver.cc
 	EigensystemSolver.cc
