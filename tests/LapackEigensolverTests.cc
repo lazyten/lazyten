@@ -20,6 +20,9 @@
 #ifdef LINALGWRAP_HAVE_LAPACK
 #include "eigensolver_tests.hh"
 #include <linalgwrap/Lapack/LapackEigensolver.hh>
+#include <linalgwrap/LazyMatrixWrapper.hh>
+#include <linalgwrap/TestingUtils.hh>
+#include <rapidcheck.h>
 
 namespace linalgwrap {
 namespace tests {
@@ -38,22 +41,63 @@ TEST_CASE("LapackEigensolver", "[LapackEigensolver]") {
   typedef ArmadilloVector<scalar_type> vector_type;
 
   SECTION("Test LapackPackedMatrix") {
-    matrix_type M{{1, 2, 3}, {2, 4, 5}, {3, 5, 6}};
+    SECTION("Simple hard-coded test") {
+      matrix_type M{{1, 2, 3}, {2, 4, 5}, {3, 5, 6}};
+      LazyMatrixWrapper<matrix_type> Mwrap(M);
 
-    detail::LapackPackedMatrix<double> pack(M);
+      detail::LapackPackedMatrix<double> pack(M);
+      detail::LapackPackedMatrix<double> packwrap(Mwrap);
 
-    CHECK(pack.elements.size() == 6);
-    CHECK(pack.elements[0] == 1);
-    CHECK(pack.elements[1] == 2);
-    CHECK(pack.elements[2] == 3);
-    CHECK(pack.elements[3] == 4);
-    CHECK(pack.elements[4] == 5);
-    CHECK(pack.elements[5] == 6);
+      CHECK(pack.elements.size() == 6);
+      CHECK(pack.elements[0] == 1);
+      CHECK(pack.elements[1] == 2);
+      CHECK(pack.elements[2] == 3);
+      CHECK(pack.elements[3] == 4);
+      CHECK(pack.elements[4] == 5);
+      CHECK(pack.elements[5] == 6);
 
-    matrix_type Mback(3, 3);
-    pack.copy_symmetric_to(Mback);
-    CHECK(Mback == M);
-  }
+      CHECK(packwrap.elements.size() == 6);
+      CHECK(packwrap.elements[0] == 1);
+      CHECK(packwrap.elements[1] == 2);
+      CHECK(packwrap.elements[2] == 3);
+      CHECK(packwrap.elements[3] == 4);
+      CHECK(packwrap.elements[4] == 5);
+      CHECK(packwrap.elements[5] == 6);
+
+      matrix_type Mback(3, 3);
+      pack.copy_symmetric_to(Mback);
+      CHECK(Mback == M);
+    }  // Simple hard-coded test
+
+    auto test = []() {
+      const size_t size = *gen::numeric_size<2>().as("Symmetric matrix size");
+      matrix_type M(size, size, false);
+      vector_type comp(size * (size + 1) / 2, false);
+      for (size_t j = 0, c = 0; j < size; ++j) {
+        for (size_t i = j; i < size; ++i, ++c) {
+          const auto val = *gen::numeric<scalar_type>().as(
+                "Element " + std::to_string(i) + "," + std::to_string(j));
+          comp[c] = M(i, j) = M(j, i) = val;
+        }
+      }
+      LazyMatrixWrapper<matrix_type> Mwrap(M);
+      detail::LapackPackedMatrix<scalar_type> pack(M);
+      detail::LapackPackedMatrix<scalar_type> packwrap(Mwrap);
+
+      // Check sizes and content:
+      RC_ASSERT(pack.elements.size() == comp.size());
+      RC_ASSERT(packwrap.elements.size() == comp.size());
+      RC_ASSERT(comp == vector_type(pack.elements));
+      RC_ASSERT(comp == vector_type(packwrap.elements));
+
+      // Transform back and check identity
+      matrix_type Mback(size, size, false);
+      pack.copy_symmetric_to(Mback);
+      RC_ASSERT(Mback == M);
+    };
+
+    REQUIRE(rc::check("LapackPackedMatrix generation and unpacking", test));
+  }  // LapackPackedMatrix
 
   krims::GenMap params1{{LapackEigensolverKeys::prefer_packed_matrices, false}};
   krims::GenMap params2{{LapackEigensolverKeys::prefer_packed_matrices, true}};
