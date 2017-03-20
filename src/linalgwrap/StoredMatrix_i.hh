@@ -153,6 +153,13 @@ class StoredMatrix_i : public Matrix_i<Scalar> {
   /** Read-write access to elements */
   virtual scalar_type& operator()(size_type row, size_type col) = 0;
 
+  /** \brief Read-only access to elements
+   *
+   * Access the element in row-major ordering (i.e. the matrix is
+   * traversed row by row)
+   * */
+  scalar_type operator()(size_type row, size_type col) const override = 0;
+
   /** \brief Read-write access to vectorised matrix object
    *
    * Access the element in row-major ordering (i.e. the matrix is
