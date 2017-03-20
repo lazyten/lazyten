@@ -118,7 +118,7 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
    * This is due to the fact that armadillo matrices are column-major,
    * but we are row-major.
    */
-  explicit ArmadilloMatrix(storage_type inner) : m_arma(inner) {}
+  explicit ArmadilloMatrix(storage_type inner) : m_arma(std::move(inner)) {}
   ///@}
 
   /** \name Matrix operations */
