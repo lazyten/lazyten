@@ -52,18 +52,20 @@ struct LapackSymmetricMatrix {
    * copying the values in */
   explicit LapackSymmetricMatrix(const StoredMatrix_i<Scalar>& m);
 
-#ifdef LINALGWRAP_HAVE_ARMADILLO
-  // TODO Ideally we want something like this for every stored matrix type.
-
   /** Construct from an armadillo matrix */
   explicit LapackSymmetricMatrix(const LazyMatrixExpression<ArmadilloMatrix<Scalar>>& m);
-#else
+  // TODO Ideally we want something like the above function for every stored matrix type.
+
   /** Construct from a usual *symmetric* linalgwrap matrix expression by
    * copying the values in */
   template <typename Stored, typename = krims::enable_if_t<IsStoredMatrix<Stored>::value>>
   explicit LapackSymmetricMatrix(const LazyMatrixExpression<Stored>& m)
-        : LapackSymmetricMatrix(static_cast<Stored>(m)) {}
-#endif  // LINALGWRAP_HAVE_ARMADILLO
+        : LapackSymmetricMatrix(static_cast<Stored>(m)) {
+    assert_dbg(false, krims::ExcDisabled("This version does two copies of the full "
+                                         "matrix and is hence disabled. Implement "
+                                         "similar things to the ArmadilloMatrix version "
+                                         "above for other stored matrix types."));
+  }
 };
 
 //
