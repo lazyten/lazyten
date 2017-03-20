@@ -33,7 +33,9 @@ struct LapackEigensolverTraits {
 
 TEST_CASE("LapackEigensolver", "[LapackEigensolver]") {
   using namespace eigensolver_tests;
-  typedef ArmadilloMatrix<double> matrix_type;
+  typedef double scalar_type;
+  typedef ArmadilloMatrix<scalar_type> matrix_type;
+  typedef ArmadilloVector<scalar_type> vector_type;
 
   SECTION("Test LapackPackedMatrix") {
     matrix_type M{{1, 2, 3}, {2, 4, 5}, {3, 5, 6}};
@@ -53,10 +55,22 @@ TEST_CASE("LapackEigensolver", "[LapackEigensolver]") {
     CHECK(Mback == M);
   }
 
+  krims::GenMap params1{{LapackEigensolverKeys::prefer_packed_matrices, false}};
+  krims::GenMap params2{{LapackEigensolverKeys::prefer_packed_matrices, true}};
+
   SECTION("Real hermitian normal problems") {
     typedef EigensolverTestProblem<matrix_type, /* Hermitian= */ true> tprob_type;
     TestProblemRunner<tprob_type, DefaultSolveFunctor<LapackEigensolverTraits>> tr;
-    tr.run_normal();
+
+    SECTION("Run with first parameter set") {
+      tr.solve_functor().extra_params = params1;
+      tr.run_normal();
+    }
+
+    SECTION("Run with second parameter set") {
+      tr.solve_functor().extra_params = params2;
+      tr.run_normal();
+    }
   }  // real hermitian normal problems
 
   SECTION("Real hermitian generalised problems") {
@@ -65,7 +79,16 @@ TEST_CASE("LapackEigensolver", "[LapackEigensolver]") {
 
     // Run all problems as generalised problems.
     tr.solve_functor().force_generalised = true;
-    tr.run_all();
+
+    SECTION("Run with first parameter set") {
+      tr.solve_functor().extra_params = params1;
+      tr.run_all();
+    }
+
+    SECTION("Run with second parameter set") {
+      tr.solve_functor().extra_params = params2;
+      tr.run_all();
+    }
   }  // real hermitian generalised problems
 
   //  TODO Not yet there

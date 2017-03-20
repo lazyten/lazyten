@@ -46,7 +46,10 @@ struct LapackEigensolverState : public EigensolverStateBase<Eigenproblem> {
  *  by the LapackEigensolver update_control_params as static string
  *  members.
  *  See their doc strings for the types required. */
-struct LapackEigensolverKeys : public EigensolverBaseKeys {};
+struct LapackEigensolverKeys : public EigensolverBaseKeys {
+  /** Use packed matrices when solving symmetric eigenproblems. Type: bool */
+  static const std::string prefer_packed_matrices;
+};
 
 /** \brief Lapack eigensolver class
  *
@@ -105,12 +108,69 @@ class LapackEigensolver : public EigensolverBase<State> {
   }
   //@}
 
+  /** \name Iteration control */
+  ///@{
+  /** \brief Extract packed matrices when solving a symmetric eigenproblem.
+   *
+   * Lapack offers two ways to deal with symmetric matrices:
+   * Either in packed from where the symmetric matrix is stored as a
+   * packed linear vector of the upper/lower triangle or as a full
+   * symmetric matrix where only a triangle is touched, but both
+   * triangles need to be present.
+   *
+   * Since Lapack is destructive with the input matrices provided,
+   * this solver needs to copy the Matrices of the input state anyway
+   * before solving the eigenproblem. If this flag is true, only
+   * packed Lapack matrices, i.e. only the lower Triangle,  will be
+   * extracted and used, else the full matrix will be extracted.
+   *
+   * In other words: This flag is best left as **false** if a large
+   * startup work needs to be done for each call to ``extract_block``.
+   *
+   * If this is set to **true** it reduces the memory requirement
+   * and the amount of copying which has to be done.
+   *
+   * This flag has no effect unless a symmetric eigenproblem is
+   * solved.
+   */
+  bool prefer_packed_matrices = false;
+
+  /** Update control parameters from Parameter map */
+  void update_control_params(const krims::GenMap& map) {
+    base_type::update_control_params(map);
+    prefer_packed_matrices =
+          (LapackEigensolverKeys::prefer_packed_matrices, prefer_packed_matrices);
+  }
+
+  /** Get the current settings of all internal control parameters and
+   *  update the GenMap accordingly.
+   */
+  void get_control_params(krims::GenMap& map) const {
+    base_type::get_control_params(map);
+    map.update(LapackEigensolverKeys::prefer_packed_matrices, prefer_packed_matrices);
+  }
+  ///@}
+
   /** Implementation of the IterativeSolver method */
   virtual void solve_state(state_type& state) const override;
 
  private:
   /** Check that the control parameters are in a valid state */
   void assert_valid_control_params(state_type& state) const;
+
+  /** Run the symmetric version
+   * i.e first build LapackSymmetricMatrix objects for A and B
+   * and then run the Lapack solver for those datastructures.
+   **/
+  void run_packed(state_type& state, std::vector<double>& evals,
+                  std::vector<double>& evecs) const;
+
+  /** Run the packed version
+   * i.e. first build LapackPackedMatrix objects for A and B
+   * and then run the Lapack solvers appropriate for those.
+   **/
+  void run_symmetric(state_type& state, std::vector<double>& evals,
+                     std::vector<double>& evecs) const;
 
   /** Order the eigenvalues and copy the appropriate ones (selected by which)
    * into the solution data structure */
@@ -159,23 +219,17 @@ void LapackEigensolver<Eigenproblem, State>::assert_valid_control_params(
 }
 
 template <typename Eigenproblem, typename State>
-void LapackEigensolver<Eigenproblem, State>::solve_state(state_type& state) const {
-  assert_dbg(!state.is_failed(), krims::ExcInvalidState("Cannot solve a failed state"));
-
-  esoln_type& soln = state.eigensolution();
-  const Eigenproblem& problem = state.eigenproblem();
-
-  assert_valid_control_params(state);
+void LapackEigensolver<Eigenproblem, State>::run_packed(
+      state_type& state, std::vector<double>& evals, std::vector<double>& evecs) const {
   static_assert(std::is_same<typename Eigenproblem::scalar_type, double>::value,
                 "LapackEigensolver is only implemented for double precision scalar type");
   static_assert(Eigenproblem::hermitian,
                 "Can only solve Hermitian eigenproblems at the moment.");
+  const Eigenproblem& problem = state.eigenproblem();
 
   // Run hermitian generalised or normal hermitian
-  // eigenproblem for double precision:
+  // eigenproblem for double precision using packed matrices:
   int info;
-  std::vector<double> evals;
-  std::vector<double> evecs;
   detail::LapackPackedMatrix<double> Ap{problem.A()};
 
   if (Eigenproblem::generalised) {
@@ -184,17 +238,62 @@ void LapackEigensolver<Eigenproblem, State>::solve_state(state_type& state) cons
     // TODO Bp_chol contains the choleski decomposition of B!
     //      Expose this result!
     (void)Bp_chol;
+    solver_assert(info == 0, state, ExcLapackInfo("dspgv", info));
   } else {
     detail::run_dspev(std::move(Ap), evals, evecs, info);
+    solver_assert(info == 0, state, ExcLapackInfo("dspev", info));
   }
-  solver_assert(info == 0, state, ExcLapackInfo("dspgv", info));
+}
+
+template <typename Eigenproblem, typename State>
+void LapackEigensolver<Eigenproblem, State>::run_symmetric(
+      state_type& state, std::vector<double>& evals, std::vector<double>& evecs) const {
+  static_assert(std::is_same<typename Eigenproblem::scalar_type, double>::value,
+                "LapackEigensolver is only implemented for double precision scalar type");
+  static_assert(Eigenproblem::hermitian,
+                "Can only solve Hermitian eigenproblems at the moment.");
+  const Eigenproblem& problem = state.eigenproblem();
+
+  // Run hermitian generalised or normal hermitian
+  // eigenproblem for double precision using symmetric matrices
+  int info;
+  detail::LapackSymmetricMatrix<double> A{problem.A()};
+
+  if (Eigenproblem::generalised) {
+    detail::LapackSymmetricMatrix<double> B{problem.B()};
+    auto Bp_chol = detail::run_dsygv(std::move(A), std::move(B), evals, evecs, info);
+    // TODO Bp_chol contains the choleski decomposition of B!
+    //      Expose this result!
+    (void)Bp_chol;
+    solver_assert(info == 0, state, ExcLapackInfo("dsygv", info));
+  } else {
+    detail::run_dsyev(std::move(A), evals, evecs, info);
+    solver_assert(info == 0, state, ExcLapackInfo("dsyev", info));
+  }
+}
+
+template <typename Eigenproblem, typename State>
+void LapackEigensolver<Eigenproblem, State>::solve_state(state_type& state) const {
+  assert_dbg(!state.is_failed(), krims::ExcInvalidState("Cannot solve a failed state"));
+
+  assert_valid_control_params(state);
+
+  // Container for the eigenvalues/vectors as Lapack returns them
+  std::vector<double> evals;
+  std::vector<double> evecs;
+
+  if (prefer_packed_matrices) {
+    run_packed(state, evals, evecs);
+  } else {
+    run_symmetric(state, evals, evecs);
+  }
 
   // Check that we get the solution in the expected format.
   assert_dbg(evals.size() * evals.size() == evecs.size(), krims::ExcInternalError());
-  assert_dbg(evals.size() >= problem.n_ep(), krims::ExcInternalError());
+  assert_dbg(evals.size() >= state.eigenproblem().n_ep(), krims::ExcInternalError());
 
   // Copy the results over to solution data structure:
-  copy_to_solution(problem.n_ep(), evals, evecs, soln);
+  copy_to_solution(state.eigenproblem().n_ep(), evals, evecs, state.eigensolution());
 }
 
 template <typename Eigenproblem, typename State>
