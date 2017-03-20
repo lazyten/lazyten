@@ -64,6 +64,12 @@ struct LapackEigensolverKeys : public EigensolverBaseKeys {
  *                (only for complex scalar types)
  *       - "LI"   Largest imaginary
  *                (only for complex scalar types)
+ *   - prefer_packed_matrices:
+ *              When solving symmetric eigenproblems prefer
+ *              to extract only a packed matrix instead
+ *              of the full symmetric matrix.
+ *              See documentation below for more details.
+ *              Default: false
  *
  * \note Currently only double precision scalar types can be used
  * \note Currently the tolerance parameter has no effect on the

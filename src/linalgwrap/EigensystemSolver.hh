@@ -265,7 +265,7 @@ bool EigensystemSolver<Eigenproblem>::should_use_armadillo(
       const Eigenproblem& /*problem*/) const {
 #ifdef LINALGWRAP_HAVE_ARMADILLO
   // Armadillo sucks with real hermitian generalised problems
-  // since it exists to do it in complex arithmetic:
+  // since it insists to do it in complex arithmetic:
   if (Eigenproblem::real && Eigenproblem::hermitian && Eigenproblem::generalised) {
     return false;
   }
