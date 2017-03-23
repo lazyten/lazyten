@@ -55,7 +55,6 @@ In order to build without tests run
 mkdir build && cd build
 cmake -DAUTOCHECKOUT_MISSING_REPOS=ON -DLINALGWRAP_ENABLE_TESTS=OFF -DKRIMS_ENABLE_TESTS=OFF ..
 cmake --build .
-ctest
 ```
 
 ## Short description of ``linalgwrap``
