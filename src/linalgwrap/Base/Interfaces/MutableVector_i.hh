@@ -57,6 +57,9 @@ class MutableVector_i : public Vector_i<Scalar> {
    *        Access to vector data
    */
   ///@{
+  using base_type::operator();
+  using base_type::operator[];
+
   /** \brief return an element of the vector    */
   virtual scalar_type& operator()(size_type i) = 0;
 
