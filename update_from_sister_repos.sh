@@ -23,6 +23,7 @@
 . update_from_sisters.lib.sh || exit 1
 
 update_file "krims" ".clang-format" || exit 1
+update_file "krims" ".clang-tidy" || exit 1
 update_file "krims" "external/get.lib.sh" || exit 1
 update_file "krims" "external/get_rapidcheck.sh" || exit 1
 update_file "krims" "cmake/findRapidcheck.cmake" || exit 1
