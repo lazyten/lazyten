@@ -1,6 +1,6 @@
 ## ---------------------------------------------------------------------
 ##
-## Copyright (C) 2016 by the linalgwrap authors
+## Copyright (C) 2017 by the linalgwrap authors
 ##
 ## This file is part of linalgwrap.
 ##
@@ -74,18 +74,26 @@ include(cmake/setup_optional.cmake)
 # The src directory does most of the work: Here the library is build and
 # installation is configured.
 add_subdirectory(src)
+set(LAW_SUBDIRS src)
 
 # Add subdirectories for the testing.
-if(LINALGWRAP_ENABLE_TESTS) 
+if(LINALGWRAP_ENABLE_TESTS)
 	add_subdirectory(tests)
+	set(LAW_SUBDIRS ${LAW_SUBDIRS} tests)
 endif()
 
 # Add subdirectories for the examples.
 if(LINALGWRAP_ENABLE_EXAMPLES)
 	add_subdirectory(examples)
+	set(LAW_SUBDIRS ${LAW_SUBDIRS} examples)
 endif()
 
 ##########################################################################
+# Setup extra targets for clang tools
+include_krims_cmake_module(SetupClangTargets)
+add_available_clang_targets_for(${PROJECT_NAME}
+	DIRECTORIES ${LAW_SUBDIRS})
+
 # Finally install package:
 include(cmake/install_package.cmake)
 
