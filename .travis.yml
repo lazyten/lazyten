@@ -102,8 +102,9 @@ script:
   - cmake --version
   - ninja --version
   - mkdir ${TRAVIS_BUILD_DIR}/build && cd ${TRAVIS_BUILD_DIR}/build
-  - cmake -DCMAKE_CXX_COMPILER=${CXX_COMPILER} -DCMAKE_C_COMPILER=${CC_COMPILER}
+  - cmake -DCMAKE_CXX_COMPILER=${CXX_COMP} -DCMAKE_C_COMPILER=${CC_COMP}
            -DCMAKE_BUILD_TYPE=DebugRelease ${EXTRA_OPTS}
+           -DDRB_COVERAGE_Debug=ON
            -DAUTOCHECKOUT_MISSING_REPOS=ON
            -DRC_ENABLE_TESTS=OFF
            -DKRIMS_ENABLE_TESTS=OFF -DKRIMS_ENABLE_EXAMPLES=OFF
@@ -118,5 +119,4 @@ after_success:
   - if [ "${GCOV}" ]; then coveralls --gcov "$GCOV" --gcov-options '\-lp'
            --root ${PWD} --build-root ${PWD}/build
            --include src
-           --dry-run --verbose
     ;fi
