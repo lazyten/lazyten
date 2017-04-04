@@ -68,8 +68,13 @@ macro(include_krims_cmake_module MODULE)
 			endif()
 		endif()
 
-		include("${EXTERNAL_DIR}/krims/cmake/modules/${MODULE}.cmake")
-	else()
+		include("${EXTERNAL_DIR}/krims/cmake/modules/${MODULE}.cmake"
+			OPTIONAL RESULT_VARIABLE RES)
+	endif()
+
+	if ("${RES}" STREQUAL "NOTFOUND")
+		# We still could not find it.
+
 		message(FATAL_ERROR "Could not find the ${MODULE} module.
 Either provide the installation prefix of the krims library in the environment \
 variable krims_DIR or enable autocheckout via '-DAUTOCHECKOUT_MISSING_REPOS=ON'.")
