@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -20,6 +20,7 @@
 #pragma once
 #include "linalgwrap/Constants.hh"
 #include <iostream>
+#include <krims/ExceptionSystem.hh>
 #include <krims/Subscribable.hh>
 #include <krims/TypeUtils.hh>
 #include <numeric>
