@@ -1,6 +1,6 @@
 // Exception thrown when an iterative solver failed
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -28,10 +28,7 @@ namespace linalgwrap {
 /** Base exception for all iterative solver exceptions */
 class SolverException : public krims::ExceptionBase {
  public:
-  /** Print exception-specific extra information to the outstream */
-  void print_extra(std::ostream& out) const noexcept override {
-    out << "A solver failed to converge.";
-  }
+  SolverException() { m_extra = "A solver failed to converge."; }
 };
 
 //
@@ -41,28 +38,28 @@ class SolverException : public krims::ExceptionBase {
 /**
  * Define a solver exception with no parameter.
  */
-#define DefSolverException0(Exception0, outsequence)                      \
-  class Exception0 : public ::linalgwrap::SolverException {               \
-   public:                                                                \
-    Exception0() {}                                                       \
-    virtual ~Exception0() noexcept {}                                     \
-    virtual void print_extra(std::ostream& out) const noexcept override { \
-      out outsequence << std::endl;                                       \
-    }                                                                     \
+#define DefSolverException0(Exception0, outsequence)        \
+  class Exception0 : public ::linalgwrap::SolverException { \
+   public:                                                  \
+    Exception0() {                                          \
+      std::ostringstream ss;                                \
+      ss outsequence;                                       \
+      ::krims::ExceptionBase::m_extra = ss.str();           \
+    }                                                       \
   }
 
 /**
  * Define a solver exception with one parameter.
  */
-#define DefSolverException1(Exception1, type1, name1, outsequence)        \
-  class Exception1 : public ::linalgwrap::SolverException {               \
-   public:                                                                \
-    Exception1(const type1 a1) : name1(a1) {}                             \
-    virtual ~Exception1() noexcept {}                                     \
-    virtual void print_extra(std::ostream& out) const noexcept override { \
-      out outsequence << std::endl;                                       \
-    }                                                                     \
-    const type1 name1;                                                    \
+#define DefSolverException1(Exception1, type1, name1, outsequence) \
+  class Exception1 : public ::linalgwrap::SolverException {        \
+   public:                                                         \
+    Exception1(const type1 a1) : name1(a1) {                       \
+      std::ostringstream ss;                                       \
+      ss outsequence;                                              \
+      ::krims::ExceptionBase::m_extra = ss.str();                  \
+    }                                                              \
+    const type1 name1;                                             \
   }
 
 /**
@@ -71,10 +68,10 @@ class SolverException : public krims::ExceptionBase {
 #define DefSolverException2(Exception2, type1, name1, type2, name2, outsequence) \
   class Exception2 : public ::linalgwrap::SolverException {                      \
    public:                                                                       \
-    Exception2(const type1 a1, const type2 a2) : name1(a1), name2(a2) {}         \
-    virtual ~Exception2() noexcept {}                                            \
-    virtual void print_extra(std::ostream& out) const noexcept override {        \
-      out outsequence << std::endl;                                              \
+    Exception2(const type1 a1, const type2 a2) : name1(a1), name2(a2) {          \
+      std::ostringstream ss;                                                     \
+      ss outsequence;                                                            \
+      ::krims::ExceptionBase::m_extra = ss.str();                                \
     }                                                                            \
     const type1 name1;                                                           \
     const type2 name2;                                                           \
@@ -88,11 +85,8 @@ class SolverException : public krims::ExceptionBase {
 #define solver_assert(condition, state, exception) \
   {                                                \
     if (!(condition)) {                            \
-      std::stringstream __sTriNg_str;              \
       auto __exc__cept = exception;                \
-      __exc__cept.print_extra(__sTriNg_str);       \
-                                                   \
-      state.fail(__sTriNg_str.str());              \
+      state.fail(__exc__cept.extra());             \
       this->on_failed(state);                      \
                                                    \
       assert_throw(condition, exception);          \

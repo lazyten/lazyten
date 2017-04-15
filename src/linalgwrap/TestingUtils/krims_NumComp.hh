@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -212,7 +212,7 @@ bool NumCompIndexableBase<Ible1, Ible2>::number_elem_match(
          << lhs << std::endl
          << "and" << std::endl
          << rhs << "." << std::endl;
-      e.append(ss.str());
+      e.append_extra(ss.str());
     }
     throw;
   }
@@ -240,8 +240,7 @@ bool NumCompIndexableBase<Ible1, Ible2>::element_values_match(
       } else {
         ss << ".";
       }
-
-      e.append(ss.str());
+      e.append_extra(ss.str());
       throw;
     }
   }
@@ -250,12 +249,12 @@ bool NumCompIndexableBase<Ible1, Ible2>::element_values_match(
 }  // namespace detail
 
 template <typename Vec1, typename Vec2>
-bool NumEqual<Vec1, Vec2, typename std::enable_if<
-                                linalgwrap::IsVector<Vec1>::value &&
-                                linalgwrap::IsVector<Vec2>::value &&
-                                std::is_same<typename Vec1::scalar_type,
-                                             typename Vec2::scalar_type>::value>::type>::
-operator()(const Vec1& lhs, const Vec2& rhs) const {
+bool NumEqual<
+      Vec1, Vec2,
+      typename std::enable_if<
+            linalgwrap::IsVector<Vec1>::value && linalgwrap::IsVector<Vec2>::value &&
+            std::is_same<typename Vec1::scalar_type, typename Vec2::scalar_type>::value>::
+            type>::operator()(const Vec1& lhs, const Vec2& rhs) const {
   return base_type::number_elem_match(lhs, rhs, "vectors") &&
          base_type::element_values_match(lhs, rhs, "vectors");
 }
@@ -276,12 +275,12 @@ operator()(const Ible1& lhs, const Ible2& rhs) const {
 }
 
 template <typename Mat1, typename Mat2>
-bool NumEqual<Mat1, Mat2, typename std::enable_if<
-                                linalgwrap::IsMatrix<Mat1>::value &&
-                                linalgwrap::IsMatrix<Mat2>::value &&
-                                std::is_same<typename Mat1::scalar_type,
-                                             typename Mat2::scalar_type>::value>::type>::
-operator()(const Mat1& lhs, const Mat2& rhs) const {
+bool NumEqual<
+      Mat1, Mat2,
+      typename std::enable_if<
+            linalgwrap::IsMatrix<Mat1>::value && linalgwrap::IsMatrix<Mat2>::value &&
+            std::is_same<typename Mat1::scalar_type, typename Mat2::scalar_type>::value>::
+            type>::operator()(const Mat1& lhs, const Mat2& rhs) const {
   // First compare the sizes. If we get an exception just pass it upwards
   // appending the matrix values in case the user wants detailed throw
   // information.
@@ -297,7 +296,7 @@ operator()(const Mat1& lhs, const Mat2& rhs) const {
          << lhs << std::endl
          << "and" << std::endl
          << rhs << "." << std::endl;
-      e.append(ss.str());
+      e.append_extra(ss.str());
     }
     throw;
   }
@@ -324,8 +323,7 @@ operator()(const Mat1& lhs, const Mat2& rhs) const {
         } else {
           ss << ".";
         }
-
-        e.append(ss.str());
+        e.append_extra(ss.str());
         throw;
       }
     }
@@ -355,7 +353,7 @@ bool NumEqual<
          << lhs << std::endl
          << "and" << std::endl
          << rhs << "." << std::endl;
-      e.append(ss.str());
+      e.append_extra(ss.str());
     }
     throw;
   }
@@ -380,8 +378,7 @@ bool NumEqual<
       } else {
         ss << ".";
       }
-
-      e.append(ss.str());
+      e.append_extra(ss.str());
       throw;
     }
   }
