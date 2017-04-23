@@ -112,7 +112,7 @@ FileTypeWriter<FileType, Scalar> make_writer(std::ostream& out, GArgs&&... gargs
 template <typename FileType, typename Scalar>
 inline FileTypeWriter<FileType, Scalar>::FileTypeWriter(std::ostream& out,
                                                         const file_type ft)
-      : m_out{out}, m_ft{std::forward<const file_type>(ft)} {
+      : m_out(out), m_ft(std::forward<const file_type>(ft)) {
   assert_throw(m_out, krims::ExcIO());
 }
 

@@ -64,7 +64,7 @@ int main() {
   std::cout << std::endl;
 
   //
-  // Compute solution to the eigensystem using Arpack
+  // Compute solution to the eigensystem using Armadillo
   //
   map.update("method", "armadillo");
   const auto solution_armadillo = linalgwrap::eigensystem_hermitian(A, n_ep, map);
