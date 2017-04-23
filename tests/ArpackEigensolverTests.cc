@@ -45,11 +45,13 @@ TEST_CASE("ArpackEigensolver", "[ArpackEigensolver]") {
     //
     // Arpack is bad at finding the smallest magnitude eigenvalues
     if (problem.params.at<std::string>(EigensolverBaseKeys::which, "SR") ==
-        std::string("SM"))
+        std::string("SM")) {
       return false;
+    }
     if (problem.params.at<std::string>(EigensolverBaseKeys::which, "SR") ==
-        std::string("SR"))
+        std::string("SR")) {
       return false;
+    }
 
     return true;
   };
@@ -104,7 +106,7 @@ TEST_CASE("ArpackEigensolver", "[ArpackEigensolver]") {
       size_t n_iter = ret.n_iter();
 
       // TODO or compare that we have less than normal solve
-      CHECK(n_iter < 10);
+      CHECK(n_iter < 12);
 
       // Check eigenvalues
       typedef typename tprob_type::evalue_type evalue_type;
@@ -129,6 +131,6 @@ TEST_CASE("ArpackEigensolver", "[ArpackEigensolver]") {
 
 }  // ArpackEigensolver
 
-}  // tests
-}  // linalgwrap
+}  // namespace tests
+}  // namespace linalgwrap
 #endif

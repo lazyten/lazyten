@@ -37,15 +37,19 @@ struct SolveTestProblem {
   typedef SmallVector<typename Matrix::scalar_type> vector_type;
 
   std::string description;         //< A short description of the test
-  matrix_type M;                   //< The system matrix
+  matrix_type m;                   //< The system matrix
   vector_type rhs;                 //< The rhs vector
   vector_type ref_soln;            //< The expected solution
   NumCompAccuracyLevel tolerance;  //< The accuracy level
   GenMap params;                   //< Parameters to run the solver with
 
-  SolveTestProblem(std::string description_, matrix_type M_, vector_type rhs_,
+  SolveTestProblem(std::string description_, matrix_type m_, vector_type rhs_,
                    vector_type ref_soln_)
-        : description(description_), M(M_), rhs(rhs_), ref_soln(ref_soln_) {}
+        : description(std::move(description_)),
+          m(std::move(m_)),
+          rhs(std::move(rhs_)),
+          ref_soln(std::move(ref_soln_)),
+          tolerance(NumCompAccuracyLevel::Default) {}
 };
 
 /** Get the list of all stored real hermitian problems */
@@ -78,7 +82,7 @@ static std::vector<SolveTestProblem<Matrix>> real_hermitian_problems() {
                  vector_type{-4.2314116993688815, -4.947089428580436}});
   //
   // The system matrix for the 10x10 problem
-  matrix_type M10{
+  matrix_type mat10{
         {-29.77414501699191, 5.023041160944544, -12.299250170229122, -23.004950731622138,
          -3.6892477692559567, 19.036437445495082, 17.064221469147384, -30.938276653698182,
          -31.455418095862406, -16.559794292926625},
@@ -120,10 +124,10 @@ static std::vector<SolveTestProblem<Matrix>> real_hermitian_problems() {
                     -10.322090730773851, -4.220837757412481,  -4.6076227749253125,
                     16.847802793373393};
 
-  res.push_back({"10x10 Problem", M10, rhs10, sol10});
+  res.push_back({"10x10 Problem", mat10, rhs10, sol10});
 
   for (auto& prob : res) {
-    prob.M.add_properties(OperatorProperties::RealSymmetric);
+    prob.m.add_properties(OperatorProperties::RealSymmetric);
   }
 
   return res;
@@ -144,7 +148,7 @@ TEST_CASE("solve", "[solve]") {
     typedef typename SolveTestProblem<matrix_type>::vector_type vector_type;
     for (const auto& prb : real_hermitian) {
       vector_type res(prb.ref_soln.size());
-      solve(prb.M, res, prb.rhs);
+      solve(prb.m, res, prb.rhs);
       REQUIRE(res == numcomp(prb.ref_soln));
     }
   }  // solve with hermitian reference problems
@@ -175,7 +179,7 @@ TEST_CASE("solve", "[solve]") {
     CHECK(rc::check("solve with random hermitian problems", test));
   }  // solve_hermitian with random problems
 
-}  // solve
+}  // namespace solve
 
-}  // tests
-}  // linalgwrap
+}  // namespace tests
+}  // namespace linalgwrap

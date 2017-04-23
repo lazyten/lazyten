@@ -27,16 +27,16 @@ namespace detail {
 
 /** Run the Lapack eigensolver dspev
  *
- * The Ap array is copied in and destroyed internally
+ * The ap array is copied in and destroyed internally
  *
- * \param Ap  A array in packed format
+ * \param ap  A array in packed format
  * \param evecs   The eigenvectors (in Fortran format, i.e. column-major)
  *                (will be resized by the function)
  * \param evals   The eigenvalues ordered by value
  *                (will be resized by the function)
  * \param info   The info parameter returned by Lapack
  */
-void run_dspev(LapackPackedMatrix<double> Ap, std::vector<double>& evals,
+void run_dspev(LapackPackedMatrix<double> ap, std::vector<double>& evals,
                std::vector<double>& evecs, int& info);
 
 /** Run the Lapack eigensolver dsyev
@@ -50,15 +50,15 @@ void run_dspev(LapackPackedMatrix<double> Ap, std::vector<double>& evals,
  *                (will be resized by the function)
  * \param info   The info parameter returned by Lapack
  */
-void run_dsyev(LapackSymmetricMatrix<double> A, std::vector<double>& evals,
+void run_dsyev(LapackSymmetricMatrix<double> a, std::vector<double>& evals,
                std::vector<double>& evecs, int& info);
 
 /** Run the generalised Lapack eigensolver dspgv
  *
- * The Ap array is copied in and destroyed internally
+ * The ap array is copied in and destroyed internally
  * The Bp array is copied in as well
  *
- * \param Ap  A array in packed format
+ * \param ap  A array in packed format
  * \param Bp  B array in packed format
  * \param evecs   The eigenvectors (in Fortran format, i.e. column-major)
  *                (will be resized by the function)
@@ -68,8 +68,8 @@ void run_dsyev(LapackSymmetricMatrix<double> A, std::vector<double>& evals,
  *
  * \returns  The Choleski factorisation of B in lower-triangle packed format.
  */
-LapackPackedMatrix<double> run_dspgv(LapackPackedMatrix<double> Ap,
-                                     LapackPackedMatrix<double> Bp,
+LapackPackedMatrix<double> run_dspgv(LapackPackedMatrix<double> ap,
+                                     LapackPackedMatrix<double> bp,
                                      std::vector<double>& evals,
                                      std::vector<double>& evecs, int& info);
 
@@ -88,8 +88,8 @@ LapackPackedMatrix<double> run_dspgv(LapackPackedMatrix<double> Ap,
  *
  * \returns  The Choleski factorisation of B in lower-triangle packed format.
  */
-LapackPackedMatrix<double> run_dsygv(LapackSymmetricMatrix<double> A,
-                                     LapackSymmetricMatrix<double> B,
+LapackPackedMatrix<double> run_dsygv(LapackSymmetricMatrix<double> a,
+                                     LapackSymmetricMatrix<double> b,
                                      std::vector<double>& evals,
                                      std::vector<double>& evecs, int& info);
 

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -33,17 +33,17 @@ class Tests {
   typedef LazyMatrixWrapper<mat_type> lazy_mat_type;
 
   typedef krims::RealTypeOf<Scalar> real_type;
-  static constexpr bool isComplex = krims::IsComplexNumber<Scalar>::value;
+  static constexpr bool is_complex = krims::IsComplexNumber<Scalar>::value;
 
   static_assert(std::is_same<mat_type, typename StoredTypeOf<mat_type>::type>::value,
                 "StoredTypeOf with stored matrix failed.");
   static_assert(std::is_same<mat_type, typename StoredTypeOf<lazy_mat_type>::type>::value,
                 "StoredTypeOf with lazy matrix failed.");
-  static_assert(HasComplexScalar<mat_type>::value || !isComplex,
+  static_assert(HasComplexScalar<mat_type>::value || !is_complex,
                 "HasComplexScalar with stored matrix");
-  static_assert(HasComplexScalar<vec_type>::value || !isComplex,
+  static_assert(HasComplexScalar<vec_type>::value || !is_complex,
                 "HasComplexScalar with stored vector");
-  static_assert(HasComplexScalar<lazy_mat_type>::value || !isComplex,
+  static_assert(HasComplexScalar<lazy_mat_type>::value || !is_complex,
                 "HasComplexScalar with lazy matrix");
 
   // References and const
@@ -52,11 +52,11 @@ class Tests {
   static_assert(
         std::is_same<mat_type, typename StoredTypeOf<lazy_mat_type&&>::type>::value,
         "StoredTypeOf with lazy matrix rvalue failed.");
-  static_assert(HasComplexScalar<const mat_type>::value || !isComplex,
+  static_assert(HasComplexScalar<const mat_type>::value || !is_complex,
                 "HasComplexScalar with const stored matrix");
-  static_assert(HasComplexScalar<const vec_type&&>::value || !isComplex,
+  static_assert(HasComplexScalar<const vec_type&&>::value || !is_complex,
                 "HasComplexScalar with const stored vector reference");
-  static_assert(HasComplexScalar<lazy_mat_type&>::value || !isComplex,
+  static_assert(HasComplexScalar<lazy_mat_type&>::value || !is_complex,
                 "HasComplexScalar with lazy matrix reference");
 };
 
@@ -66,6 +66,6 @@ template class Tests<float>;
 template class Tests<std::complex<float>>;
 template class Tests<std::complex<double>>;
 
-}  // type_utils_tests
-}  // tests
-}  // linalgwrap
+}  // namespace type_utils_tests
+}  // namespace tests
+}  // namespace linalgwrap

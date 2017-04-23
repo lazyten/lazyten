@@ -37,7 +37,7 @@ class SimpleInvertible : public LazyMatrix_i<Matrix> {
   typedef typename LazyMatrix_i<Matrix>::lazy_matrix_expression_ptr_type
         lazy_matrix_expression_ptr_type;
 
-  void update(const krims::GenMap&) override {}
+  void update(const krims::GenMap& /*map*/) override {}
 
   bool has_apply_inverse() const override { return true; }
 
@@ -55,11 +55,11 @@ class SimpleInvertible : public LazyMatrix_i<Matrix> {
     m_inv.apply(x, y, mode, c_this, c_y);
   }
 
-  virtual void apply_inverse(
-        const MultiVector<const MutableMemoryVector_i<scalar_type>>& x,
-        MultiVector<MutableMemoryVector_i<scalar_type>>& y,
-        const Transposed mode = Transposed::None, const scalar_type c_this = 1,
-        const scalar_type c_y = 0) const override {
+  void apply_inverse(const MultiVector<const MutableMemoryVector_i<scalar_type>>& x,
+                     MultiVector<MutableMemoryVector_i<scalar_type>>& y,
+                     const Transposed mode = Transposed::None,
+                     const scalar_type c_this = 1,
+                     const scalar_type c_y = 0) const override {
     m_inv.apply(x, y, mode, c_this, c_y);
   }
 
@@ -206,21 +206,21 @@ TEST_CASE("inverse function", "[inverse]") {
       }
       return m;
     };
-    auto M = *gen::map(mat_gen, add_one).as("Problem matrix");
+    auto mat = *gen::map(mat_gen, add_one).as("Problem matrix");
 
-    return M;
+    return mat;
   };
 
   SECTION("Test with arbitrary hermitian matrix and make_invertible") {
     auto testable = [random_matrix_generator]() {
-      auto M = random_matrix_generator();
-      auto Minv = make_invertible(M);
+      auto m = random_matrix_generator();
+      auto m_inv = make_invertible(m);
 
-      auto op = Minv * inverse(Minv);
-      auto op2 = inverse(Minv) * Minv;
+      auto op = m_inv * inverse(m_inv);
+      auto op2 = inverse(m_inv) * m_inv;
 
       auto vec_gen = gen::with_l2_norm_in_range(
-            0, 1e4, gen::numeric_tensor<vector_type>(Minv.n_cols()));
+            0, 1e4, gen::numeric_tensor<vector_type>(m_inv.n_cols()));
       auto n_vecs =
             *gen::distinctFrom(gen::numeric_size<2>().as("Number of vectors"), 0ul);
       auto mv =
@@ -242,7 +242,7 @@ TEST_CASE("inverse function", "[inverse]") {
     auto model_generator = [](matrix_type m) { return m; };
 
     // Generator for the sut
-    struct invertible_generator {
+    struct InvertibleGenerator {
       auto operator()(matrix_type m) -> decltype(make_invertible(m)) {
         m_ptr.reset(new matrix_type(std::move(m)));
         return make_invertible(*m_ptr);
@@ -251,19 +251,19 @@ TEST_CASE("inverse function", "[inverse]") {
     };
 
     typedef lazy_matrix_tests::TestingLibrary<
-          typename std::result_of<invertible_generator(matrix_type)>::type, matrix_type>
+          typename std::result_of<InvertibleGenerator(matrix_type)>::type, matrix_type>
           testlib;
 
     // Make testing a little easier for this section
     auto highertol = NumCompConstants::change_temporary(
           10. * krims::NumCompConstants::default_tolerance_factor);
 
-    testlib tl{random_matrix_generator, model_generator, invertible_generator{},
+    testlib tl{random_matrix_generator, model_generator, InvertibleGenerator{},
                "make_invertible(): "};
     tl.enable_inverse_apply();
     tl.run_checks();
   }
 
-}  // inverse
-}  // tests
-}  // linalgwrap
+}  // namespace inverse
+}  // namespace tests
+}  // namespace linalgwrap

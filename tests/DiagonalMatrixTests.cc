@@ -57,7 +57,7 @@ TEST_CASE("DiagonalMatrix class", "[DiagonalMatrix]") {
   };
 
   // Generator for the sut
-  class diagonal_generator {
+  class DiagonalGenerator {
    public:
     DiagonalMatrix<stored_matrix_type> operator()(vector_type diag) {
       m_diag_ptr.reset(new vector_type{std::move(diag)});
@@ -77,7 +77,7 @@ TEST_CASE("DiagonalMatrix class", "[DiagonalMatrix]") {
     auto lowertol = NumCompConstants::change_temporary(
           0.01 * krims::NumCompConstants::default_tolerance_factor);
 
-    testlib tl{args_generator, model_generator, diagonal_generator{}, "DiagonalMatrix: "};
+    testlib tl{args_generator, model_generator, DiagonalGenerator{}, "DiagonalMatrix: "};
 
     // Only enable the inverse tests if this predicate is true:
     auto enable_inverse_predicate = [](const vector_type& d) {
@@ -91,5 +91,5 @@ TEST_CASE("DiagonalMatrix class", "[DiagonalMatrix]") {
   }
 }
 
-}  // tests
-}  // linalgwrap
+}  // namespace tests
+}  // namespace linalgwrap

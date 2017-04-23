@@ -42,11 +42,11 @@ TEST_CASE("LapackEigensolver", "[LapackEigensolver]") {
 
   SECTION("Test LapackPackedMatrix") {
     SECTION("Simple hard-coded test") {
-      matrix_type M{{1, 2, 3}, {2, 4, 5}, {3, 5, 6}};
-      LazyMatrixWrapper<matrix_type> Mwrap(M);
+      matrix_type mat{{1, 2, 3}, {2, 4, 5}, {3, 5, 6}};
+      LazyMatrixWrapper<matrix_type> mat_wrap(mat);
 
-      detail::LapackPackedMatrix<double> pack(M);
-      detail::LapackPackedMatrix<double> packwrap(Mwrap);
+      detail::LapackPackedMatrix<double> pack(mat);
+      detail::LapackPackedMatrix<double> packwrap(mat_wrap);
 
       CHECK(pack.elements.size() == 6);
       CHECK(pack.elements[0] == 1);
@@ -66,23 +66,23 @@ TEST_CASE("LapackEigensolver", "[LapackEigensolver]") {
 
       matrix_type Mback(3, 3);
       pack.copy_symmetric_to(Mback);
-      CHECK(Mback == M);
+      CHECK(Mback == mat);
     }  // Simple hard-coded test
 
     auto test = []() {
       const size_t size = *gen::numeric_size<2>().as("Symmetric matrix size");
-      matrix_type M(size, size, false);
+      matrix_type mat(size, size, false);
       vector_type comp(size * (size + 1) / 2, false);
       for (size_t j = 0, c = 0; j < size; ++j) {
         for (size_t i = j; i < size; ++i, ++c) {
           const auto val = *gen::numeric<scalar_type>().as(
                 "Element " + std::to_string(i) + "," + std::to_string(j));
-          comp[c] = M(i, j) = M(j, i) = val;
+          comp[c] = mat(i, j) = mat(j, i) = val;
         }
       }
-      LazyMatrixWrapper<matrix_type> Mwrap(M);
-      detail::LapackPackedMatrix<scalar_type> pack(M);
-      detail::LapackPackedMatrix<scalar_type> packwrap(Mwrap);
+      LazyMatrixWrapper<matrix_type> mat_wrap(mat);
+      detail::LapackPackedMatrix<scalar_type> pack(mat);
+      detail::LapackPackedMatrix<scalar_type> packwrap(mat_wrap);
 
       // Check sizes and content:
       RC_ASSERT(pack.elements.size() == comp.size());
@@ -93,7 +93,7 @@ TEST_CASE("LapackEigensolver", "[LapackEigensolver]") {
       // Transform back and check identity
       matrix_type Mback(size, size, false);
       pack.copy_symmetric_to(Mback);
-      RC_ASSERT(Mback == M);
+      RC_ASSERT(Mback == mat);
     };
 
     REQUIRE(rc::check("LapackPackedMatrix generation and unpacking", test));
@@ -152,7 +152,7 @@ TEST_CASE("LapackEigensolver", "[LapackEigensolver]") {
   //  }  // real hermitian generalised problems
 
 }  // LapackEigensolver
-}  // tests
-}  // linalgwrap
+}  // namespace tests
+}  // namespace linalgwrap
 
 #endif  // LINALGWRAP_HAVE_LAPACK

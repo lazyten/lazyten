@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -81,21 +81,22 @@ TEST_CASE("MultiVector class", "[MultiVector]") {
     MultiVector<vector_type> mv1{v};
     REQUIRE(mv1.n_vectors() == 1u);
     REQUIRE(mv1.n_elem() == 4u);
-    REQUIRE(mv1.at_ptr(0).is_shared_ptr() == false);
+    REQUIRE(!mv1.at_ptr(0).is_shared_ptr());
     REQUIRE(mv1.at_ptr(0).get() == &v);
     REQUIRE(mv1[0] == v);
 
     MultiVector<vector_type> mv2{std::move(ucopy)};
     REQUIRE(mv2.n_vectors() == 1u);
     REQUIRE(mv2.n_elem() == 3u);
-    REQUIRE(mv2.at_ptr(0).is_shared_ptr() == true);
+    REQUIRE(mv2.at_ptr(0).is_shared_ptr());
     REQUIRE(mv2[0] == u);
 
     MultiVector<vector_type> mv3(3, 4, true);
     REQUIRE(mv3.n_vectors() == 4);
     REQUIRE(mv3.n_elem() == 3);
     for (size_type i = 0; i < 4; ++i) {
-      REQUIRE(mv3.at_ptr(i).is_shared_ptr() == true);
+      REQUIRE(mv3.at_ptr(i).is_shared_ptr());
+
       for (size_type j = 0; j < 3; ++j) {
         REQUIRE((mv3[i])[j] == 0);
       }
@@ -104,7 +105,7 @@ TEST_CASE("MultiVector class", "[MultiVector]") {
     MultiVector<const vector_type> mvconst(v);
     REQUIRE(mvconst.n_vectors() == 1u);
     REQUIRE(mvconst.n_elem() == 4u);
-    REQUIRE(mvconst.at_ptr(0).is_shared_ptr() == false);
+    REQUIRE(!mvconst.at_ptr(0).is_shared_ptr());
     REQUIRE(mvconst[0] == v);
 
     MultiVector<vector_type> mv4{{1, 2},   // elem 0
@@ -123,14 +124,14 @@ TEST_CASE("MultiVector class", "[MultiVector]") {
     auto mv1 = as_multivector(v);
     REQUIRE(mv1.n_vectors() == 1u);
     REQUIRE(mv1.n_elem() == 4u);
-    REQUIRE(mv1.at_ptr(0).is_shared_ptr() == false);
+    REQUIRE(!mv1.at_ptr(0).is_shared_ptr());
     REQUIRE(mv1.at_ptr(0).get() == &v);
     REQUIRE(mv1[0] == v);
 
     auto mv2 = as_multivector(std::move(ucopy));
     REQUIRE(mv2.n_vectors() == 1u);
     REQUIRE(mv2.n_elem() == 3u);
-    REQUIRE(mv2.at_ptr(0).is_shared_ptr() == true);
+    REQUIRE(mv2.at_ptr(0).is_shared_ptr());
     REQUIRE(mv2[0] == u);
   }  // As multivec
 
@@ -144,7 +145,7 @@ TEST_CASE("MultiVector class", "[MultiVector]") {
     REQUIRE(mv.n_vectors() == 2);
     REQUIRE(mv[0] == v);
     REQUIRE(mv[1] == vmatch);
-    REQUIRE(mv.at_ptr(1).is_shared_ptr() == false);
+    REQUIRE(!mv.at_ptr(1).is_shared_ptr());
 
     vector_type vmove{6, 5, 4, 3, 2, 1};
     mv.push_back(std::move(vmove));
@@ -152,7 +153,7 @@ TEST_CASE("MultiVector class", "[MultiVector]") {
     REQUIRE(mv[0] == v);
     REQUIRE(mv[1] == vmatch);
     REQUIRE((mv[2] == vector_type{6, 5, 4, 3, 2, 1}));
-    REQUIRE(mv.at_ptr(2).is_shared_ptr() == true);
+    REQUIRE(mv.at_ptr(2).is_shared_ptr());
 
 #ifdef DEBUG
     REQUIRE_THROWS_AS(mv.push_back(vsmall), krims::ExcSizeMismatch);
@@ -168,7 +169,7 @@ TEST_CASE("MultiVector class", "[MultiVector]") {
       auto mv = gen_multivector(vecs);
 
       RC_ASSERT(mv.n_vectors() == vecs.size());
-      if (vecs.size() > 0) {
+      if (!vecs.empty()) {
         RC_ASSERT(mv.n_elem() == vecs[0].size());
         RC_ASSERT(mv.front() == vecs.front());
         RC_ASSERT(mv.back() == vecs.back());
@@ -229,7 +230,7 @@ TEST_CASE("MultiVector class", "[MultiVector]") {
         }
       }
 
-      RC_ASSERT(mv.empty() == (vecs.size() == 0));
+      RC_ASSERT(mv.empty() == vecs.empty());
       mv.clear();
       RC_ASSERT(mv.empty());
     };
