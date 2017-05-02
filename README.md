@@ -37,8 +37,7 @@ more below)
 ## Building
 All compilers starting from ``clang-3.5`` and ``gcc-4.8`` should be able to build the code.
 ``C++11`` support is required and enables all basic functionality of the library.
-Some things (most notably block-diagonal matrices with more than 4 blocks)
-require ``C++14``, however.
+Some things require ``C++14``, however.
 
 If you choose to build with the flag ``AUTOCHECKOUT_MISSING_REPOS`` set to ``ON``
 all required dependencies (**except** armadillo) will be automatically downloaded
