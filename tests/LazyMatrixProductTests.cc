@@ -36,6 +36,57 @@ TEST_CASE("LazyMatrixProduct", "[LazyMatrixProduct]") {
   typedef SmallMatrix<scalar_type> stored_matrix_type;
   typedef stored_matrix_type model_matrix_type;
 
+  SECTION("Test access into empty LazyMatrixProduct objects") {
+    LazyMatrixProduct<stored_matrix_type> prod;
+    CHECK(prod.n_rows() == 0);
+    CHECK(prod.n_cols() == 0);
+
+    auto random_access = [&]() {
+
+      auto col = *rc::gen::arbitrary<size_t>().as("Column index");
+      auto row = *rc::gen::arbitrary<size_t>().as("Row index");
+      auto fac = *rc::gen::arbitrary<scalar_type>().as("Factor");
+
+      LazyMatrixProduct<stored_matrix_type> copy(prod);
+      copy *= fac;
+      RC_ASSERT(fac == copy(col, col));
+      RC_ASSERT(fac == copy(row, row));
+      if (col != row) RC_ASSERT(0 == copy(row, col));
+    };
+    REQUIRE(rc::check("Random access into empty product", random_access));
+  }
+
+  SECTION("Test empty LazyMatrixProduct objects behave as diagonal matrices") {
+    typedef lazy_matrix_tests::FunctionalityTests<stored_matrix_type,
+                                                  LazyMatrixProduct<stored_matrix_type>>
+          testing_lib;
+
+    auto test_mult_with_empty = [](stored_matrix_type tomult) {
+      LazyMatrixWrapper<stored_matrix_type> lazy{stored_matrix_type(tomult)};
+      LazyMatrixProduct<stored_matrix_type> empty;
+
+      LazyMatrixProduct<stored_matrix_type> res;
+      res = res * lazy;
+      testing_lib::run_all_tests(tomult, res);
+
+      auto mult1 = empty * lazy;
+      testing_lib::run_all_tests(tomult, mult1);
+
+      auto mult2 = lazy * empty;
+      testing_lib::run_all_tests(tomult, mult2);
+    };
+
+    // Enable hard tests in the testing library
+    testing_lib::skip_easy_cases();
+
+    // Increase numeric tolerance for this scope,
+    // ie results need to be less exact for passing
+    auto highertol = NumCompConstants::change_temporary(
+          10. * krims::NumCompConstants::default_tolerance_factor);
+
+    REQUIRE(rc::check("Test multiplying terms with empty product", test_mult_with_empty));
+  }
+
   SECTION("Default lazy matrix tests") {
     typedef double scalar_type;
     typedef SmallMatrix<scalar_type> stored_matrix_type;

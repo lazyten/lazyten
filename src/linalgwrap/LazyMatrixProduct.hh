@@ -61,6 +61,20 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
   /** \name Constructors, desctructors and assignment
    */
   ///@{
+  /** \brief Create an empty matrix sum object
+   *
+   * An empty matrix product object has size 0 times 0.
+   * It behaves as a multiplicative factor of value
+   * m_coefficient, i.e. when retrieving elements or applying
+   * it to a vector it will behave as a diagonal matrix
+   * with diagonal value m_coefficient
+   * of the appropriate size.
+   *
+   * When the first factor is pushed, it inherits
+   * the size of this factor.
+   */
+  LazyMatrixProduct() : m_coefficient(1) {}
+
   /** \brief Create a matrix product object:
    *
    * @param expr   The first matrix expression factor
@@ -103,8 +117,10 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
    * the current object.
    */
   void push_factor(const LazyMatrixExpression<StoredMatrix>& e) {
-    // Check fitting dimensionality of matrix expressions:
-    assert_size(n_cols(), e.n_rows());
+    if (!empty()) {
+      // Check fitting dimensionality of matrix expressions:
+      assert_size(n_cols(), e.n_rows());
+    }
 
     // Place into m_factors by moving a copy there
     m_factors.push_back(std::move(e.clone()));
@@ -113,8 +129,10 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
   /** \brief Push back all factors of a product onto another product
    */
   void push_factor(LazyMatrixProduct prod) {
-    // Check fitting dimensionality of matrix expressions:
-    assert_size(n_cols(), prod.n_rows());
+    if (!empty() && !prod.empty()) {
+      // Check fitting dimensionality of matrix expressions:
+      assert_size(n_cols(), prod.n_rows());
+    }
 
     // Move all factors of m to the very end:
     std::move(std::begin(prod.m_factors), std::end(prod.m_factors),
@@ -139,6 +157,7 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
   //
   /** \brief Number of rows of the matrix */
   size_type n_rows() const override {
+    if (empty()) return 0;
     // The number of rows of the product
     // equals the number of rows of the first element in the product.
     return m_factors.front()->n_rows();
@@ -146,6 +165,7 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
 
   /** \brief Number of columns of the matrix  */
   size_type n_cols() const override {
+    if (empty()) return 0;
     // The number of columns of the product
     // equals the nuber of columns of the last element in the product.
     return m_factors.back()->n_cols();
@@ -248,6 +268,9 @@ class LazyMatrixProduct : public LazyMatrixExpression<StoredMatrix> {
     // return a copy enwrapped in the pointer type
     return lazy_matrix_expression_ptr_type(new LazyMatrixProduct(*this));
   }
+
+  /** \brief Is this object empty? */
+  bool empty() const { return m_factors.empty(); }
 
   //
   // In-place scalar operators:
@@ -423,6 +446,8 @@ LazyMatrixProduct<StoredMatrix> operator-(LazyMatrixProduct<StoredMatrix> mat) {
 template <typename StoredMatrix>
 typename LazyMatrixProduct<StoredMatrix>::scalar_type LazyMatrixProduct<StoredMatrix>::
 operator()(size_type row, size_type col) const {
+  if (empty()) return row == col ? m_coefficient : 0;
+
   assert_range(0u, row, n_rows());
   assert_range(0u, col, n_cols());
   stored_matrix_type block(1, 1, false);
@@ -434,6 +459,10 @@ template <typename StoredMatrix>
 void LazyMatrixProduct<StoredMatrix>::extract_block(
       stored_matrix_type& M, const size_type start_row, const size_type start_col,
       const Transposed mode, const scalar_type c_this, const scalar_type c_M) const {
+  // Not yet implemented for empty products ... they should behave
+  // as a diagonal matrix with value m_coefficient
+  assert_dbg(!empty(), krims::ExcNotImplemented());
+
   // For empty matrices there is nothing to do
   if (M.n_rows() == 0 || M.n_cols() == 0) return;
 
@@ -527,6 +556,10 @@ void LazyMatrixProduct<StoredMatrix>::apply(
       const MultiVector<const MutableMemoryVector_i<scalar_type>>& x,
       MultiVector<MutableMemoryVector_i<scalar_type>>& y, const Transposed mode,
       const scalar_type c_this, const scalar_type c_y) const {
+  // Not yet implemented for empty products ... they should behave
+  // as a diagonal matrix with value m_coefficient
+  assert_dbg(!empty(), krims::ExcNotImplemented());
+
   assert_dbg(mode == Transposed::None || has_transpose_operation_mode(),
              ExcUnsupportedOperationMode(mode));
   assert_finite(c_this);
@@ -603,6 +636,10 @@ void LazyMatrixProduct<StoredMatrix>::mmult(const stored_matrix_type& in,
                                             const Transposed mode,
                                             const scalar_type c_this,
                                             const scalar_type c_out) const {
+  // Not yet implemented for empty products ... they should behave
+  // as a diagonal matrix with value m_coefficient
+  assert_dbg(!empty(), krims::ExcNotImplemented());
+
   assert_dbg(mode == Transposed::None || has_transpose_operation_mode(),
              ExcUnsupportedOperationMode(mode));
   assert_finite(c_this);
