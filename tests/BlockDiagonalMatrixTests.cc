@@ -163,10 +163,10 @@ TEST_CASE("BlockDiagonalMatrix class", "[BlockDiagonalMatrix]") {
     lazy_matrix_type lazy2{stored_matrix_type(stored2)};
     lazy2.add_properties(OperatorProperties::Real);
 
-    BlockDiagonalMatrix<lazy_matrix_type, 2> diag1({{lazy1, lazy2}});
+    BlockDiagonalMatrix<lazy_matrix_type, 2> diag1{{{lazy1, lazy2}}};
 
     lazy1.add_properties(OperatorProperties::Real);
-    BlockDiagonalMatrix<lazy_matrix_type, 2> diag2({{lazy2, lazy1}});
+    BlockDiagonalMatrix<lazy_matrix_type, 2> diag2{{{lazy2, lazy1}}};
 
     CHECK(diag1.properties() == OperatorProperties::None);
     CHECK(diag2.properties() == OperatorProperties::Real);
