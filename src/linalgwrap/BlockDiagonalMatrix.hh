@@ -248,22 +248,22 @@ BlockDiagonalMatrix<Matrix, N> make_block_diagonal(std::array<Matrix, N> ms) {
   }
 
 //! Add two block diagonal matrices
-BLOCK_DIAGONAL_BINARY_OP(+);
+BLOCK_DIAGONAL_BINARY_OP(+)
 
 //! Subtract two block diagonal matrices
-BLOCK_DIAGONAL_BINARY_OP(-);
+BLOCK_DIAGONAL_BINARY_OP(-)
 
 //! Multiply two block diagonal matrices
-BLOCK_DIAGONAL_BINARY_OP(*);
+BLOCK_DIAGONAL_BINARY_OP(*)
 
 //! Unary minus on a block diagonal matrix
-BLOCK_DIAGONAL_UNARY_OP(-);
+BLOCK_DIAGONAL_UNARY_OP(-)
 
 //! Scale a block diagonal matrix
-BLOCK_DIAGONAL_SCALAR_OP(*);
+BLOCK_DIAGONAL_SCALAR_OP(*)
 
 //! Divide block diagonal matrix elementwise by a scalar:
-BLOCK_DIAGONAL_SCALAR_OP(/);
+BLOCK_DIAGONAL_SCALAR_OP(/)
 
 //! Scale a block diagonal matrix
 template <typename M, size_t N>
