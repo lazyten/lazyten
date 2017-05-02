@@ -21,29 +21,21 @@
 
 namespace linalgwrap {
 
+#define CASENAME(prop)           \
+  case OperatorProperties::prop: \
+    o << #prop;                  \
+    return o;
+
 std::ostream& operator<<(std::ostream& o, OperatorProperties prop) {
   switch (prop) {
-    case OperatorProperties::PositiveDefinite:
-      o << "PositiveDefinite";
-      return o;
-    case OperatorProperties::PositiveSemiDefinite:
-      o << "PositiveSemiDefinite";
-      return o;
-    case OperatorProperties::RealSymmetric:
-      o << "RealSymmetric";
-      return o;
-    case OperatorProperties::Real:
-      o << "Real";
-      return o;
-    case OperatorProperties::Hermitian:
-      o << "Hermitian";
-      return o;
-    case OperatorProperties::AntiHermitian:
-      o << "AntiHermitian";
-      return o;
-    case OperatorProperties::None:
-      o << "None";
-      return o;
+    CASENAME(PositiveDefinite);
+    CASENAME(PositiveSemiDefinite);
+    CASENAME(RealSymmetric);
+    CASENAME(Real);
+    CASENAME(Hermitian);
+    CASENAME(AntiHermitian);
+    CASENAME(None);
+
     default:
       o << "<Unknown property>";
       return o;
