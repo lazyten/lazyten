@@ -126,21 +126,21 @@ int main() {
   // Do a rotation, i.e. call the above "algorithm"
   //
   // Define a rotation matrix
-  stored_matrix_type R{{0., 1., 0.},   // 1st row
-                       {1., 0., 0.},   // 2nd row
-                       {0., 0., 1.}};  // 3rd row
+  stored_matrix_type rot{{0., 1., 0.},   // 1st row
+                         {1., 0., 0.},   // 2nd row
+                         {0., 0., 1.}};  // 3rd row
 
-  std::cout << "The rotation matrix is" << std::endl << R << std::endl << std::endl;
+  std::cout << "The rotation matrix is" << std::endl << rot << std::endl << std::endl;
 
   // Perform rotation:
   std::cout << "Rotation of matrix+diag = " << std::endl
-            << rotate(matrix_diag, R) << std::endl
+            << rotate(matrix_diag, rot) << std::endl
             << std::endl;
   std::cout << "Rotation of matrix = " << std::endl
-            << rotate(matrix, R) << std::endl
+            << rotate(matrix, rot) << std::endl
             << std::endl;
   std::cout << "Rotation of diag = " << std::endl
-            << rotate(diag, R) << std::endl
+            << rotate(diag, rot) << std::endl
             << std::endl;
 
   std::cout << "------------------------------------------" << std::endl;

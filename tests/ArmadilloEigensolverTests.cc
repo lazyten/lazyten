@@ -66,7 +66,7 @@ TEST_CASE("ArmadilloEigensolver", "[ArmadilloEigensolver]") {
   }  // real hermitian generalised problems
 
 }  // ArmadilloEigensolver
-}  // tests
-}  // linalgwrap
+}  // namespace tests
+}  // namespace linalgwrap
 
 #endif

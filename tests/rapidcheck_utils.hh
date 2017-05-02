@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -75,6 +75,6 @@ void state_check_scaled(const Model& initialState, Sut& sut, double scale,
   runAll(commandsGenScaled, initialState, sut);
 }
 
-}  // matrix_test_utils
-}  // tests
-}  // linalgwrap
+}  // namespace matrix_test_utils
+}  // namespace tests
+}  // namespace linalgwrap

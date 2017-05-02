@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -39,7 +39,7 @@ class SimpleLazyMatrix : public LazyMatrix_i<StoredMatrix> {
   typedef typename base_type::lazy_matrix_expression_ptr_type
         lazy_matrix_expression_ptr_type;
 
-  SimpleLazyMatrix(stored_matrix_type m) : m_stored{m} {}
+  SimpleLazyMatrix(stored_matrix_type m) : m_stored{std::move(m)} {}
 
   // Also test the transpose stuff
   bool has_transpose_operation_mode() const override { return true; }
@@ -57,7 +57,7 @@ class SimpleLazyMatrix : public LazyMatrix_i<StoredMatrix> {
  private:
   stored_matrix_type m_stored;
 };
-}
+}  // namespace lazymatrix_i_tests
 
 TEST_CASE("LazyMatrix_i abstract class", "[LazyMatrix_i]") {
   using namespace lazymatrix_i_tests;
@@ -96,5 +96,5 @@ TEST_CASE("LazyMatrix_i abstract class", "[LazyMatrix_i]") {
   }
 }
 
-}  // tests
-}  // linalgwrap
+}  // namespace tests
+}  // namespace linalgwrap

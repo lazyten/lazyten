@@ -179,7 +179,7 @@ class Matrix_i : public Indexable_i<Scalar> {
 
  private:
   // TODO tmp: Remove once we have property forwarding in products and sums
-  OperatorProperties m_properties;
+  OperatorProperties m_properties = OperatorProperties::None;
 };
 
 //@{

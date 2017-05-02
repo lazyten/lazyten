@@ -129,6 +129,6 @@ TEST_CASE("VectorMemoryWrapper class", "[VectorMemoryWrapper]") {
   }
 }
 
-}  // builtin_vector_tests
-}  // tests
-}  // linalgwrap
+}  // namespace builtin_vector_tests
+}  // namespace tests
+}  // namespace linalgwrap

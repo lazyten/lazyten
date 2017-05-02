@@ -57,9 +57,7 @@ TEST_CASE("eigensystem", "[eigensystem]") {
   auto filter = [](const EigensolverTestProblemBase<matrix_type>& problem) {
     // We cannot deal with cases where diag is different from A
     // from the eigensystem.hh framework
-    if (problem.have_Diag()) return false;
-
-    return true;
+    return !problem.have_Diag();
   };
 
   SECTION("Real hermitian problems") {
@@ -73,5 +71,5 @@ TEST_CASE("eigensystem", "[eigensystem]") {
   }  // real hermitian normal problems
 }  // eigensystem
 
-}  // tests
-}  // linalgwrap
+}  // namespace tests
+}  // namespace linalgwrap

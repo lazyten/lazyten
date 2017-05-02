@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -155,14 +155,14 @@ TEST_CASE("LazyMatrixSum", "[LazyMatrixSum]") {
             test_library;
 
       // The commands we check
-      auto genCommands = state::gen::execOneOfWithArgs<
+      auto gen_commands = state::gen::execOneOfWithArgs<
             typename test_library::op_AddStored, typename test_library::op_AddLazy,
             typename test_library::op_SubtractStored,
             typename test_library::op_SubtractLazy, typename test_library::op_UnaryMinus,
             typename test_library::op_MultScalar, typename test_library::op_DivideScalar>;
 
       // Run the check:
-      test_library().run_check(in, genCommands(), 0.6);
+      test_library().run_check(in, gen_commands(), 0.6);
     };
 
     REQUIRE(rc::check("Random function test of LazyMatrixSum.", random_test));
@@ -170,4 +170,4 @@ TEST_CASE("LazyMatrixSum", "[LazyMatrixSum]") {
 }
 
 }  // namespace tests
-}  // namescpace linalgwrap
+}  // namespace linalgwrap

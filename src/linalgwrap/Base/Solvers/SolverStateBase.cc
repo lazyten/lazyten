@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -22,7 +22,7 @@ namespace linalgwrap {
 
 void SolverStateBase::fail(std::string reason) {
   m_failed = true;
-  m_fail_reason = reason;
+  m_fail_reason = std::move(reason);
 }
 
 void SolverStateBase::clear_failed() {

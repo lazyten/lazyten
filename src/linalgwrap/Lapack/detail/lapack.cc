@@ -29,17 +29,17 @@ namespace detail {
 extern "C" void dspev_(char* jobz, char* uplo, int* n, double* ap, double* w, double* z,
                        int* ldz, double* work, int* info);
 
-void run_dspev(LapackPackedMatrix<double> Ap, std::vector<double>& evals,
+void run_dspev(LapackPackedMatrix<double> ap, std::vector<double>& evals,
                std::vector<double>& evecs, int& info) {
-  assert_size(Ap.n * (Ap.n + 1) / 2, Ap.elements.size());
-  evecs.resize(Ap.n * Ap.n);
-  evals.resize(Ap.n);
+  assert_size(ap.n * (ap.n + 1) / 2, ap.elements.size());
+  evecs.resize(ap.n * ap.n);
+  evals.resize(ap.n);
 
-  int n = static_cast<int>(Ap.n);
-  std::vector<double> work(3 * Ap.n);  //< The work type
+  int n = static_cast<int>(ap.n);
+  std::vector<double> work(3 * ap.n);  //< The work type
   char jobz = 'V';                     //< Compute eigenvalues and eigenvectors
-  char uplo = 'L';                     //< Ap and Bp contain the lower triangles
-  dspev_(&jobz, &uplo, &n, Ap.elements.data(), evals.data(), evecs.data(), &n,
+  char uplo = 'L';                     //< ap contain the lower triangles
+  dspev_(&jobz, &uplo, &n, ap.elements.data(), evals.data(), evecs.data(), &n,
          work.data(), &info);
 }
 
@@ -49,12 +49,12 @@ void run_dspev(LapackPackedMatrix<double> Ap, std::vector<double>& evals,
 extern "C" void dsyev_(char* jobz, char* uplo, int* n, double* a, int* lda, double* w,
                        double* work, int* lwork, int* info);
 
-void run_dsyev(LapackSymmetricMatrix<double> A, std::vector<double>& evals,
+void run_dsyev(LapackSymmetricMatrix<double> a, std::vector<double>& evals,
                std::vector<double>& evecs, int& info) {
-  assert_size(A.n * A.n, A.elements.size());
-  evals.resize(A.n);
+  assert_size(a.n * a.n, a.elements.size());
+  evals.resize(a.n);
 
-  int n = static_cast<int>(A.n);
+  int n = static_cast<int>(a.n);
   char jobz = 'V';  //< Compute eigenvalues and eigenvectors
   char uplo = 'L';  //< Use the lower triangles of A and B
 
@@ -67,17 +67,17 @@ void run_dsyev(LapackSymmetricMatrix<double> A, std::vector<double>& evals,
   // Allocate work array:
   // check that we don't get a wrongfully large size and allocate work array
   const auto wksize = static_cast<size_t>(wkopt);
-  assert_dbg(wksize > 0 && wksize <= std::max<size_t>(A.n * A.n, 1000),
+  assert_dbg(wksize > 0 && wksize <= std::max<size_t>(a.n * a.n, 1000),
              krims::ExcInternalError());
   std::vector<double> work(wksize);
   lwork = static_cast<int>(wksize);
 
   // Call to solve ...
-  dsyev_(&jobz, &uplo, &n, A.elements.data(), &n, evals.data(), work.data(), &lwork,
+  dsyev_(&jobz, &uplo, &n, a.elements.data(), &n, evals.data(), work.data(), &lwork,
          &info);
 
   // Copy eigenvectors (which are returned inside the A-array)
-  evecs = std::move(A.elements);
+  evecs = std::move(a.elements);
 }
 
 //
@@ -86,27 +86,27 @@ void run_dsyev(LapackSymmetricMatrix<double> A, std::vector<double>& evals,
 extern "C" void dspgv_(int* itype, char* jobz, char* uplo, int* n, double* ap, double* bp,
                        double* w, double* z, int* ldz, double* work, int* info);
 
-LapackPackedMatrix<double> run_dspgv(LapackPackedMatrix<double> Ap,
-                                     LapackPackedMatrix<double> Bp,
+LapackPackedMatrix<double> run_dspgv(LapackPackedMatrix<double> ap,
+                                     LapackPackedMatrix<double> bp,
                                      std::vector<double>& evals,
                                      std::vector<double>& evecs, int& info) {
-  assert_size(Ap.n, Bp.n);
-  assert_size(Ap.elements.size(), Bp.elements.size());
-  assert_size(Ap.n * (Ap.n + 1) / 2, Ap.elements.size());
-  evecs.resize(Ap.n * Ap.n);
-  evals.resize(Ap.n);
+  assert_size(ap.n, bp.n);
+  assert_size(ap.elements.size(), bp.elements.size());
+  assert_size(ap.n * (ap.n + 1) / 2, ap.elements.size());
+  evecs.resize(ap.n * ap.n);
+  evals.resize(ap.n);
 
-  int n = static_cast<int>(Ap.n);
-  std::vector<double> work(3 * Ap.n);  //< The work type
+  int n = static_cast<int>(ap.n);
+  std::vector<double> work(3 * ap.n);  //< The work type
   int itype = 1;                       //< Jobtype to do (here: A*v = \lambda*B*v
   char jobz = 'V';                     //< Compute eigenvalues and eigenvectors
-  char uplo = 'L';                     //< Ap and Bp contain the lower triangles
-  dspgv_(&itype, &jobz, &uplo, &n, Ap.elements.data(), Bp.elements.data(), evals.data(),
+  char uplo = 'L';                     //< ap and bp contain the lower triangles
+  dspgv_(&itype, &jobz, &uplo, &n, ap.elements.data(), bp.elements.data(), evals.data(),
          evecs.data(), &n, work.data(), &info);
 
-  // After the dspgv run Bp actually contains the choleski factorisation of Bp, which
+  // After the dspgv run bp actually contains the choleski factorisation of bp, which
   // might be of use for later.
-  return Bp;
+  return bp;
 }
 
 //
@@ -116,16 +116,16 @@ extern "C" void dsygv_(int* itype, char* jobz, char* uplo, int* n, double* a, in
                        double* b, int* ldb, double* w, double* work, int* lwork,
                        int* info);
 
-LapackPackedMatrix<double> run_dsygv(LapackSymmetricMatrix<double> A,
-                                     LapackSymmetricMatrix<double> B,
+LapackPackedMatrix<double> run_dsygv(LapackSymmetricMatrix<double> a,
+                                     LapackSymmetricMatrix<double> b,
                                      std::vector<double>& evals,
                                      std::vector<double>& evecs, int& info) {
-  assert_size(A.n, B.n);
-  assert_size(A.elements.size(), B.elements.size());
-  assert_size(A.n * A.n, A.elements.size());
-  evals.resize(A.n);
+  assert_size(a.n, b.n);
+  assert_size(a.elements.size(), b.elements.size());
+  assert_size(a.n * a.n, a.elements.size());
+  evals.resize(a.n);
 
-  int n = static_cast<int>(A.n);
+  int n = static_cast<int>(a.n);
   int itype = 1;    //< Jobtype to do (here: A*v = \lambda*B*v
   char jobz = 'V';  //< Compute eigenvalues and eigenvectors
   char uplo = 'L';  //< Use the lower triangles of A and B
@@ -139,26 +139,26 @@ LapackPackedMatrix<double> run_dsygv(LapackSymmetricMatrix<double> A,
 
   // check that we don't get a wrongfully large size and allocate work array
   const auto wksize = static_cast<size_t>(wkopt);
-  assert_dbg(wksize > 0 && wksize <= std::max<size_t>(A.n * A.n, 1000),
+  assert_dbg(wksize > 0 && wksize <= std::max<size_t>(a.n * a.n, 1000),
              krims::ExcInternalError());
   std::vector<double> work(wksize);
   lwork = static_cast<int>(wksize);
 
   // Call to solve ...
-  dsygv_(&itype, &jobz, &uplo, &n, A.elements.data(), &n, B.elements.data(), &n,
+  dsygv_(&itype, &jobz, &uplo, &n, a.elements.data(), &n, b.elements.data(), &n,
          evals.data(), work.data(), &lwork, &info);
 
   // Copy eigenvectors (which are returned inside the A-array)
-  evecs = std::move(A.elements);
+  evecs = std::move(a.elements);
 
   // Build the matrix to return with the choleski decomposition of the B matrix
   // (This is stored in the first n_chol elements of the B.elements array)
   LapackPackedMatrix<double> ret;
-  ret.n = B.n;
-  const size_t n_chol = B.n * (B.n + 1) / 2;
+  ret.n = b.n;
+  const size_t n_chol = b.n * (b.n + 1) / 2;
   ret.elements.resize(n_chol);
-  std::move(std::begin(B.elements),
-            std::begin(B.elements) + static_cast<ptrdiff_t>(n_chol),
+  std::move(std::begin(b.elements),
+            std::begin(b.elements) + static_cast<ptrdiff_t>(n_chol),
             std::begin(ret.elements));
   return ret;
 }
