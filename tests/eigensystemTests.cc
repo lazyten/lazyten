@@ -86,27 +86,53 @@ TEST_CASE("eigensystem", "[eigensystem]") {
       auto evals2 = *gen::map(gen::numeric_container<std::vector<double>>(), addone)
                            .as("The second diagonal block");
 
+      auto ones1 = std::vector<double>(evals1.size(), 1);
+      auto ones2 = std::vector<double>(evals2.size(), 1);
+
       matrix_type mm1(evals1.size(), evals1.size());
       matrix_type mm2(evals2.size(), evals2.size());
+      matrix_type bb1(ones1.size(), ones1.size());
+      matrix_type bb2(ones2.size(), ones2.size());
 
       for (size_t i = 0; i < evals1.size(); ++i) mm1(i, i) = evals1[i];
       for (size_t i = 0; i < evals2.size(); ++i) mm2(i, i) = evals2[i];
+      for (size_t i = 0; i < ones1.size(); ++i) bb1(i, i) = ones1[i];
+      for (size_t i = 0; i < ones2.size(); ++i) bb2(i, i) = ones2[i];
 
       BlockDiagonalMatrix<lazy_type, 2> diag{
             {{lazy_type(std::move(mm1)), lazy_type(std::move(mm2))}}};
+      BlockDiagonalMatrix<lazy_type, 2> bdiag{
+            {{lazy_type(std::move(bb1)), lazy_type(std::move(bb2))}}};
 
       const size_t n_ep = std::min(evals1.size(), evals2.size());
+      const size_t n_ep2 = n_ep / 2;
+      const size_t n_ep1 = n_ep - n_ep2;
+
       krims::GenMap params{{EigensystemSolverKeys::method, "lapack"},
                            {EigensystemSolverKeys::which, "SR"}};
-      auto sol = eigensystem_hermitian(diag, n_ep, params);
+
+      const bool explict_n_per_blocks =
+            *rc::gen::arbitrary<bool>().as("Explict n_ep_per_blocks");
+      RC_CLASSIFY(explict_n_per_blocks, "Use explicit n per blocks");
+      if (explict_n_per_blocks) {
+        std::array<size_t, 2> npb{{n_ep1, n_ep2}};
+        params.update("n_ep_per_block", std::move(npb));
+      }
+
+      typedef decltype(eigensystem_hermitian(diag, n_ep, params)) sol_type;
+      sol_type sol;
+      if (*gen::arbitrary<bool>().as("Solve pseudo-generalised problem")) {
+        sol = eigensystem_hermitian(diag, bdiag, n_ep, params);
+        RC_CLASSIFY(true, "Solve pseudo-general eigenproblem");
+      } else {
+        sol = eigensystem_hermitian(diag, n_ep, params);
+        RC_CLASSIFY(true, "Solve non-general eigenproblem");
+      }
       RC_ASSERT(sol.evalues().size() == n_ep);
 
       // Sort by size:
       std::vector<size_t> idcs1 = krims::argsort(evals1.begin(), evals1.end());
       std::vector<size_t> idcs2 = krims::argsort(evals2.begin(), evals2.end());
-
-      const size_t n_ep2 = n_ep / 2;
-      const size_t n_ep1 = n_ep - n_ep2;
 
       std::stringstream ss;
       ss << "Got eigenvalues " << std::endl;
@@ -180,7 +206,11 @@ TEST_CASE("eigensystem", "[eigensystem]") {
         // degenerate eigenspaces might be interchanged
         RC_ASSERT(evals2[idcs2[i - n_ep1]] == evals2[idx]);
       }
+
+      // TODO Better test for generalised version of these problems, too
     };
+
+    // TODO Test version where n_ep_per_block is specified
 
     // TODO Test general block-diagonal problems
     //      (e.g. by combining two library problems together)

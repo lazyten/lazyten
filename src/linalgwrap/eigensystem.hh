@@ -55,6 +55,11 @@ EigensolutionTypeFor<true, Matrix> eigensystem_hermitian(
  *             the blocks with earlier blocks getting a larger
  *             part of the share to break the tie.
  *
+ * \note The key n_ep_per_block in the parametermap can be used
+ *       to supply an array<size_t, N>, where N is the number
+ *       of blocks. This array shall contain the number of
+ *        eigenpairs to be seeked in each block.
+ *
  * \note The interface of this function is very likely to change
  *       again in the near future. Especially the meaning
  *       of n_ep could change.
@@ -105,6 +110,11 @@ EigensolutionTypeFor<true, MatrixA> eigensystem_hermitian(
  *             The number will be evenly spread between
  *             the blocks with earlier blocks getting a larger
  *             part of the share to break the tie.
+ *
+ * \note The key n_ep_per_block in the parametermap can be used
+ *       to supply an array<size_t, N>, where N is the number
+ *       of blocks. This array shall contain the number of
+ *        eigenpairs to be seeked in each block.
  *
  * \note The interface of this function is very likely to change
  *       again in the near future. Especially the meaning
@@ -188,23 +198,30 @@ EigensolutionTypeFor<true, BlockMatrix> eigensystem_hermitian(
             n_ep,
       const krims::GenMap& map) {
   typedef typename EigensolutionTypeFor<true, BlockMatrix>::evector_type evector_type;
-  //  typedef typename EigensolutionTypeFor<true, BlockMatrix>::evalue_type evalue_type;
 
   // How many eigenpairs to compute per block
   const size_t n_ep_per_block = n_ep / A.diag_blocks().size();
   const size_t n_ep_rest = n_ep - n_ep_per_block * A.diag_blocks().size();
 
+  std::array<size_t, BlockMatrix::n_blocks> n_ep_block;
+  if (map.exists("n_ep_per_block")) {
+    n_ep_block = map.at<std::array<size_t, BlockMatrix::n_blocks>>("n_ep_per_block");
+  } else {
+    for (auto it = std::begin(n_ep_block); it < std::end(n_ep_block); ++it) {
+      const size_t b_idx = it - std::begin(n_ep_block);
+      *it = n_ep_per_block + (b_idx < n_ep_rest ? 1 : 0);
+    }
+  }
+
   EigensolutionTypeFor<true, BlockMatrix> ret;
 
   // Solve individual problems:
+  auto it_nep = std::begin(n_ep_block);
   size_t begin_index = 0;  // of the current block
-  for (auto it = std::begin(A.diag_blocks()); it != std::end(A.diag_blocks()); ++it) {
-    // How many eigenpairs should we solve for in this block?
-    const size_t b_idx = it - std::begin(A.diag_blocks());
-    const size_t n_ep_block = n_ep_per_block + (b_idx < n_ep_rest ? 1 : 0);
-
-    auto block_soln = eigensystem_hermitian(*it, n_ep_block, map);
-    assert_dbg(block_soln.n_ep() == n_ep_block, krims::ExcInternalError());
+  for (auto it = std::begin(A.diag_blocks()); it != std::end(A.diag_blocks());
+       ++it, ++it_nep) {
+    auto block_soln = eigensystem_hermitian(*it, *it_nep, map);
+    assert_dbg(block_soln.n_ep() == *it_nep, krims::ExcInternalError());
 
     // Lambda to pad the vector with zeros at beginning and end
     auto pad_with_zeros = [&begin_index, &A](const evector_type& v) {
@@ -246,34 +263,41 @@ EigensolutionTypeFor<true, BlockMatrixA> eigensystem_hermitian(
                                     IsBlockDiagonalMatrix<BlockMatrixB>::value,
                               size_t>::type n_ep,
       const krims::GenMap& map) {
-  assert_size(A.diag_blocks().size(), B.diag_blocks().size());
-
-  typedef typename EigensolutionTypeFor<true, BlockMatrixA>::evector_type evector_type;
-  //  typedef typename EigensolutionTypeFor<true, BlockMatrixA>::evalue_type evalue_type;
+  static_assert(BlockMatrixA::n_blocks == BlockMatrixB::n_blocks,
+                "The number of blocks has to agree.");
 
   // How many eigenpairs to compute per block
   const size_t n_ep_per_block = n_ep / A.diag_blocks().size();
   const size_t n_ep_rest = n_ep - n_ep_per_block * A.diag_blocks().size();
 
+  std::array<size_t, BlockMatrixA::n_blocks> n_ep_block;
+  if (map.exists("n_ep_block")) {
+    n_ep_block = map.at<std::array<size_t, BlockMatrixA::n_blocks>>("n_ep_block");
+  } else {
+    for (auto it = std::begin(n_ep_block); it < std::end(n_ep_block); ++it) {
+      const size_t b_idx = it - std::begin(n_ep_block);
+      *it = n_ep_per_block + (b_idx < n_ep_rest ? 1 : 0);
+    }
+  }
+
+  typedef typename EigensolutionTypeFor<true, BlockMatrixA>::evector_type evector_type;
   EigensolutionTypeFor<true, BlockMatrixA> ret;
 
   // Solve individual problems:
-  size_t begin_index = 0;  // of the current block
+  auto it_nep = std::begin(n_ep_block);
   auto itb = std::begin(B.diag_blocks());
+  size_t begin_index = 0;  // of the current block
   for (auto ita = std::begin(A.diag_blocks()); ita != std::end(A.diag_blocks());
-       ++ita, ++itb) {
-    assert_size(ita->size(), itb->size());
+       ++itb, ++ita, ++it_nep) {
+    assert_size(ita->n_cols(), itb->n_cols());
+    assert_size(ita->n_rows(), itb->n_rows());
 
-    // How many eigenpairs should we solve for in this block?
-    const size_t b_idx = ita - std::begin(A.diag_blocks());
-    const size_t n_ep_block = n_ep_per_block + (b_idx < n_ep_rest ? 1 : 0);
-
-    auto block_soln = eigensystem_hermitian(*ita, *itb, n_ep_block, map);
-    assert_dbg(block_soln.n_ep() == n_ep_block, krims::ExcInternalError());
+    auto block_soln = eigensystem_hermitian(*ita, *itb, *it_nep, map);
+    assert_dbg(block_soln.n_ep() == *it_nep, krims::ExcInternalError());
 
     // Lambda to pad the vector with zeros at beginning and end
     auto pad_with_zeros = [&begin_index, &A](const evector_type& v) {
-      evector_type padded(A.size());
+      evector_type padded(A.n_cols());
       std::copy(v.begin(), v.end(), padded.begin() + begin_index);
       return padded;
     };
@@ -284,9 +308,9 @@ EigensolutionTypeFor<true, BlockMatrixA> eigensystem_hermitian(
     std::transform(block_soln.evectors().begin(), block_soln.evectors().end(),
                    std::back_inserter(ret.evectors()), pad_with_zeros);
 
-    begin_index += ita->size();
+    begin_index += ita->n_cols();
   }
-  assert_dbg(begin_index == A.size(), krims::ExcInternalError());
+  assert_dbg(begin_index == A.n_cols(), krims::ExcInternalError());
 
   return ret;
 }
