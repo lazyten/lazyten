@@ -50,6 +50,9 @@ class MultiVectorReadonly : public krims::Subscribable {
   typedef typename vector_type::real_type real_type;
   //@}
 
+  // To allow acting on it like a std container
+  typedef InnerVector value_type;
+
   /** Reference-counted pointer type used to point to vectors*/
   typedef krims::RCPWrapper<vector_type> vector_rcptr_type;
 

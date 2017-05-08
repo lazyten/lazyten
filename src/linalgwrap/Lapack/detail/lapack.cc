@@ -67,7 +67,7 @@ void run_dsyev(LapackSymmetricMatrix<double> a, std::vector<double>& evals,
   // Allocate work array:
   // check that we don't get a wrongfully large size and allocate work array
   const auto wksize = static_cast<size_t>(wkopt);
-  assert_dbg(wksize > 0 && wksize <= std::max<size_t>(a.n * a.n, 1000),
+  assert_dbg(wksize > 0 && wksize <= std::max<size_t>(a.n * a.n, 10000),
              krims::ExcInternalError());
   std::vector<double> work(wksize);
   lwork = static_cast<int>(wksize);
@@ -139,7 +139,7 @@ LapackPackedMatrix<double> run_dsygv(LapackSymmetricMatrix<double> a,
 
   // check that we don't get a wrongfully large size and allocate work array
   const auto wksize = static_cast<size_t>(wkopt);
-  assert_dbg(wksize > 0 && wksize <= std::max<size_t>(a.n * a.n, 1000),
+  assert_dbg(wksize > 0 && wksize <= std::max<size_t>(a.n * a.n, 10000),
              krims::ExcInternalError());
   std::vector<double> work(wksize);
   lwork = static_cast<int>(wksize);
