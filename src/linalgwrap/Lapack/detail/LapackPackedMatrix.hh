@@ -122,7 +122,7 @@ LapackPackedMatrix<Scalar>::LapackPackedMatrix(const LazyMatrixExpression<Stored
 
   // If something is missing => deal with it.
   if (roff < n) {
-    assert_dbg(n - roff > 0 && n - roff < bs, krims::ExcInternalError());
+    assert_internal(n - roff > 0 && n - roff < bs);
     Stored slice(n - roff, n);
     m.extract_block(slice, roff, 0);
     for (size_t i = 0; i < slice.n_rows(); ++i) {

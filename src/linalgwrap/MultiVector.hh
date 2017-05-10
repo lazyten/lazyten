@@ -243,6 +243,28 @@ std::vector<typename Vector::real_type> norm_l2(const MultiVector<Vector>& mv) {
   return res;
 }
 
+template <typename Vector, typename Vector2,
+          typename = krims::enable_if_t<
+                std::is_same<typename std::remove_const<Vector>::type,
+                             typename std::remove_const<Vector2>::type>::value>>
+typename Vector::type_family::template matrix<typename Vector::scalar_type> dot(
+      const MultiVector<Vector>& u, const linalgwrap::MultiVector<Vector2>& v) {
+  typedef typename Vector::type_family::template matrix<typename Vector::scalar_type>
+        matrix_type;
+  if (u.n_vectors() == 0 || v.n_vectors() == 0) {
+    return matrix_type(u.n_vectors(), v.n_vectors());
+  }
+  assert_size(u.n_elem(), v.n_elem());
+
+  matrix_type ret(u.n_vectors(), v.n_vectors(), false);
+  for (size_t ui = 0; ui < u.n_vectors(); ++ui) {
+    for (size_t vi = 0; vi < v.n_vectors(); ++vi) {
+      ret(ui, vi) = dot(v[vi], u[ui]);
+    }
+  }
+  return ret;
+}
+
 // TODO later return a lazy expression here
 /** Compute the sum of all outer products between the vectors,
  *  i.e. computes
@@ -335,10 +357,10 @@ MultiVector<InnerVector>::MultiVector(
       ((*this)[j])(i) = elem;
       ++j;
     }
-    assert_dbg(j == n_vectors, krims::ExcInternalError());
+    assert_internal(j == n_vectors);
     ++i;
   }
-  assert_dbg(i == n_elem, krims::ExcInternalError());
+  assert_internal(i == n_elem);
 }
 
 template <typename InnerVector>

@@ -492,10 +492,10 @@ ArmadilloMatrix<Scalar>::ArmadilloMatrix(
       (*this)(i, j) = elem;
       ++j;
     }
-    assert_dbg(j == n_cols, krims::ExcInternalError());
+    assert_internal(j == n_cols);
     ++i;
   }
-  assert_dbg(i == n_rows, krims::ExcInternalError());
+  assert_internal(i == n_rows);
 }
 
 // Matrix-Vector multiplication

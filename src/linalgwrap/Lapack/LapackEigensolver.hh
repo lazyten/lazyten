@@ -29,7 +29,7 @@ namespace linalgwrap {
 DefSolverException2(ExcLapackInfo, std::string, function, int, info,
                     << "Lapack function " << function << " returned with info value "
                     << info
-                    << ". Check Arpack documentation for the meaning of this value.");
+                    << ". Check Lapack documentation for the meaning of this value.");
 
 template <typename Eigenproblem>
 struct LapackEigensolverState : public EigensolverStateBase<Eigenproblem> {
@@ -295,8 +295,8 @@ void LapackEigensolver<Eigenproblem, State>::solve_state(state_type& state) cons
   }
 
   // Check that we get the solution in the expected format.
-  assert_dbg(evals.size() * evals.size() == evecs.size(), krims::ExcInternalError());
-  assert_dbg(evals.size() >= state.eigenproblem().n_ep(), krims::ExcInternalError());
+  assert_internal(evals.size() * evals.size() == evecs.size());
+  assert_internal(evals.size() >= state.eigenproblem().n_ep());
 
   // Copy the results over to solution data structure:
   copy_to_solution(state.eigenproblem().n_ep(), evals, evecs, state.eigensolution());

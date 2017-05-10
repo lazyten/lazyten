@@ -282,7 +282,7 @@ krims::RCPWrapper<InnerVector> MultiVectorReadonly<InnerVector>::at_ptr(size_typ
   // Assert that the range is fine and we do not dereference null
   assert_valid_state();
   assert_range(0, i, n_vectors());
-  assert_dbg(m_vs[i] != nullptr, krims::ExcInternalError());
+  assert_internal(m_vs[i] != nullptr);
   return m_vs[i];
 }
 
@@ -292,7 +292,7 @@ krims::RCPWrapper<const InnerVector> MultiVectorReadonly<InnerVector>::at_ptr(
   // Assert that the range is fine and we do not dereference null
   assert_valid_state();
   assert_range(0, i, n_vectors());
-  assert_dbg(m_vs[i] != nullptr, krims::ExcInternalError());
+  assert_internal(m_vs[i] != nullptr);
   return m_vs[i];
 }
 

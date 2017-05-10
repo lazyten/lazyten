@@ -439,7 +439,7 @@ void ArpackEigensolver<Eigenproblem, State>::arpack_ido_step(
       } else if (mode == 3) {
         // This has already been dealt with above, we should
         // never get here:
-        assert_dbg(state.ido == 1, krims::ExcInternalError());
+        assert_internal(state.ido == 1);
 
         // special, since our definition of Diag differs
         // from ARPACK's (see above)
@@ -585,7 +585,7 @@ void ArpackEigensolver<Eigenproblem, State>::solve_state(state_type& state) cons
     soln.evalues().resize(converged_ep);
   }
 
-  assert_dbg(converged_ep * problem.dim() <= evectors.size(), krims::ExcInternalError());
+  assert_internal(converged_ep * problem.dim() <= evectors.size());
 
   soln.evectors().reserve(converged_ep);
   for (double* begin = evectors.data();

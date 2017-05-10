@@ -146,7 +146,7 @@ std::vector<size_t> select_eigenvalues(Iterator eval_begin, Iterator eval_end,
     }
     idcs = idcs_new;
   }
-  assert_dbg(idcs.size() == n_ep, krims::ExcInternalError());
+  assert_internal(idcs.size() == n_ep);
   return idcs;
 }
 
