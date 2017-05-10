@@ -227,10 +227,10 @@ void ArmadilloEigensolver<Eigenproblem, State>::solve_state(state_type& state) c
   solver_assert(res, state, ExcArmadilloEigensolverFailed());
 
   // Check that we get the solution in the expected format.
-  assert_dbg(eval_arma.n_cols == 1, krims::ExcInternalError());
-  assert_dbg(eval_arma.n_rows == evec_arma.n_rows, krims::ExcInternalError());
-  assert_dbg(eval_arma.n_rows == evec_arma.n_cols, krims::ExcInternalError());
-  assert_dbg(eval_arma.n_rows >= problem.n_ep(), krims::ExcInternalError());
+  assert_internal(eval_arma.n_cols == 1);
+  assert_internal(eval_arma.n_rows == evec_arma.n_rows);
+  assert_internal(eval_arma.n_rows == evec_arma.n_cols);
+  assert_internal(eval_arma.n_rows >= problem.n_ep());
 
   // Copy the results over to solution data structure
   copy_to_solution(problem.n_ep(), eval_arma, evec_arma, soln);

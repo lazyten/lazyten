@@ -486,7 +486,7 @@ void LazyMatrixProduct<StoredMatrix>::extract_block(
   }  // c_this == 0
 
   // TODO Here we assume that m_factors.size() > 0
-  assert_dbg(m_factors.size() > 0, krims::ExcInternalError());
+  assert_internal(m_factors.size() > 0);
 
   if (m_factors.size() == 1) {
     // Forward to the one factor
@@ -515,9 +515,9 @@ void LazyMatrixProduct<StoredMatrix>::extract_block_inner(
       BidirectIterator begin, BidirectIterator end, stored_matrix_type& M,
       const size_type start_row, const size_type start_col, const Transposed mode,
       const scalar_type c_this, const scalar_type c_M) const {
-  assert_dbg(end != begin, krims::ExcInternalError());
-  assert_dbg((end - 1) != begin, krims::ExcInternalError());
-  assert_dbg(end != (begin + 1), krims::ExcInternalError());
+  assert_internal(end != begin);
+  assert_internal((end - 1) != begin);
+  assert_internal(end != (begin + 1));
 
   // Do the first factor. On it we call extract_block
   // with the full number of rows
@@ -535,9 +535,9 @@ void LazyMatrixProduct<StoredMatrix>::extract_block_inner(
   stored_matrix_type last_vals(M.n_rows(), cols, false);
   (*last)->extract_block(last_vals, start_row, 0, mode);
 
-  assert_dbg(last_vals.n_rows() == M.n_rows(), krims::ExcInternalError());
-  assert_dbg(last_vals.n_cols() == tmp.n_rows(), krims::ExcInternalError());
-  assert_dbg(tmp.n_cols() == M.n_cols(), krims::ExcInternalError());
+  assert_internal(last_vals.n_rows() == M.n_rows());
+  assert_internal(last_vals.n_cols() == tmp.n_rows());
+  assert_internal(tmp.n_cols() == M.n_cols());
 
   // Perform final multiplication
   last_vals.mmult(tmp, M, Transposed::None, c_this * m_coefficient, c_M);
@@ -580,7 +580,7 @@ void LazyMatrixProduct<StoredMatrix>::apply(
   }  // c_this == 0
 
   // TODO Here we assume that m_factors.size() > 0
-  assert_dbg(m_factors.size() > 0, krims::ExcInternalError());
+  assert_internal(m_factors.size() > 0);
 
   if (m_factors.size() == 1) {
     // Forward to the one factor:
@@ -606,9 +606,9 @@ void LazyMatrixProduct<StoredMatrix>::apply_inner(
       const MultiVector<const MutableMemoryVector_i<scalar_type>>& x,
       MultiVector<MutableMemoryVector_i<scalar_type>>& y, const Transposed mode,
       const scalar_type c_this, const scalar_type c_y) const {
-  assert_dbg(end != begin, krims::ExcInternalError());
-  assert_dbg((end - 1) != begin, krims::ExcInternalError());
-  assert_dbg(end != (begin + 1), krims::ExcInternalError());
+  assert_internal(end != begin);
+  assert_internal((end - 1) != begin);
+  assert_internal(end != (begin + 1));
 
   // Deal with first factor:
   const size_type rows =
@@ -623,9 +623,9 @@ void LazyMatrixProduct<StoredMatrix>::apply_inner(
   // Deal with last factor:
   const auto last = end - 1;
   if (mode == Transposed::None) {
-    assert_dbg(tmp.n_elem() == (*last)->n_cols(), krims::ExcInternalError());
+    assert_internal(tmp.n_elem() == (*last)->n_cols());
   } else {
-    assert_dbg(tmp.n_elem() == (*last)->n_rows(), krims::ExcInternalError());
+    assert_internal(tmp.n_elem() == (*last)->n_rows());
   }
   (*last)->apply(tmp, y, mode, c_this * m_coefficient, c_y);
 }
@@ -660,7 +660,7 @@ void LazyMatrixProduct<StoredMatrix>::mmult(const stored_matrix_type& in,
   }
 
   // TODO Here we assume that m_factors.size() > 0
-  assert_dbg(m_factors.size() > 0, krims::ExcInternalError());
+  assert_internal(m_factors.size() > 0);
 
   if (m_factors.size() == 1) {
     // Forward to the one factor:
@@ -685,9 +685,9 @@ void LazyMatrixProduct<StoredMatrix>::mmult_inner(
       BidirectIterator begin, BidirectIterator end, const stored_matrix_type& in,
       stored_matrix_type& out, const Transposed mode, const scalar_type c_this,
       const scalar_type c_out) const {
-  assert_dbg(end != begin, krims::ExcInternalError());
-  assert_dbg((end - 1) != begin, krims::ExcInternalError());
-  assert_dbg(end != (begin + 1), krims::ExcInternalError());
+  assert_internal(end != begin);
+  assert_internal((end - 1) != begin);
+  assert_internal(end != (begin + 1));
 
   // Deal with first factor:
   const size_type rows =
@@ -702,9 +702,9 @@ void LazyMatrixProduct<StoredMatrix>::mmult_inner(
   // Deal with the last factor
   const auto last = end - 1;
   if (mode == Transposed::None) {
-    assert_dbg(tmp.n_rows() == (*last)->n_cols(), krims::ExcInternalError());
+    assert_internal(tmp.n_rows() == (*last)->n_cols());
   } else {
-    assert_dbg(tmp.n_rows() == (*last)->n_rows(), krims::ExcInternalError());
+    assert_internal(tmp.n_rows() == (*last)->n_rows());
   }
   (*last)->mmult(tmp, out, mode, c_this * m_coefficient, c_out);
 }

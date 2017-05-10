@@ -307,7 +307,7 @@ BlockDiagonalMatrix<Matrix, N, Stored>::block_containing_index(size_t idx) const
   // which contains this index
   const auto it_sizes =
         std::upper_bound(std::begin(m_accu_sizes), std::end(m_accu_sizes), idx);
-  assert_dbg(it_sizes != std::end(m_accu_sizes), krims::ExcInternalError());
+  assert_internal(it_sizes != std::end(m_accu_sizes));
 
   return m_blocks.cbegin() + (it_sizes - std::begin(m_accu_sizes));
 }
@@ -414,9 +414,9 @@ void BlockDiagonalMatrix<Matrix, N, Stored>::extract_block(
         std::min(block_containing_index(start_row), block_containing_index(start_col));
   const auto itend =
         1 + std::max(block_containing_index(last_row), block_containing_index(last_col));
-  assert_dbg(itbegin < itend, krims::ExcInternalError());
-  assert_dbg(itend <= std::end(m_blocks), krims::ExcInternalError());
-  assert_dbg(itbegin < itend, krims::ExcInternalError());
+  assert_internal(itbegin < itend);
+  assert_internal(itend <= std::end(m_blocks));
+  assert_internal(itbegin < itend);
 
   for (auto it = itbegin; it != itend; ++it) {
     // Ranges of actual indices for row and column to extract
@@ -431,8 +431,8 @@ void BlockDiagonalMatrix<Matrix, N, Stored>::extract_block(
           std::min(last_col + 1, block_range.upper_bound())};
     if (row_range.empty() || col_range.empty()) continue;
 
-    assert_dbg(block_range.front() <= row_range.front(), krims::ExcInternalError());
-    assert_dbg(block_range.front() <= col_range.front(), krims::ExcInternalError());
+    assert_internal(block_range.front() <= row_range.front());
+    assert_internal(block_range.front() <= col_range.front());
 
     // Shift indices such that we are relative to the start of the current block
     const size_t block_row_start = row_range.front() - block_range.front();

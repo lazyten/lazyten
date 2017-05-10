@@ -91,10 +91,10 @@ LapackSymmetricMatrix<Scalar>::LapackSymmetricMatrix(
   constexpr bool copy_into_arma = false;    // Do not copy the memory
   constexpr bool fixed_vector_size = true;  // No memory reallocation
   arma::Mat<Scalar> m_arma(elements.data(), n, n, copy_into_arma, fixed_vector_size);
-  assert_dbg(m_arma.memptr() == elements.data(), krims::ExcInternalError());
+  assert_internal(m_arma.memptr() == elements.data());
 
   ArmadilloMatrix<Scalar> block(std::move(m_arma));
-  assert_dbg(block.data().memptr() == elements.data(), krims::ExcInternalError());
+  assert_internal(block.data().memptr() == elements.data());
 
   // Extract the block and write into this->elements
   m.extract_block(block, 0, 0);

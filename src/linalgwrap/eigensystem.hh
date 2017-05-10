@@ -221,7 +221,7 @@ EigensolutionTypeFor<true, BlockMatrix> eigensystem_hermitian(
   for (auto it = std::begin(A.diag_blocks()); it != std::end(A.diag_blocks());
        ++it, ++it_nep) {
     auto block_soln = eigensystem_hermitian(*it, *it_nep, map);
-    assert_dbg(block_soln.n_ep() == *it_nep, krims::ExcInternalError());
+    assert_internal(block_soln.n_ep() == *it_nep);
 
     // Lambda to pad the vector with zeros at beginning and end
     auto pad_with_zeros = [&begin_index, &A](const evector_type& v) {
@@ -238,7 +238,7 @@ EigensolutionTypeFor<true, BlockMatrix> eigensystem_hermitian(
 
     begin_index += it->n_rows();
   }
-  assert_dbg(begin_index == A.n_rows(), krims::ExcInternalError());
+  assert_internal(begin_index == A.n_rows());
 
   return ret;
 }
@@ -293,7 +293,7 @@ EigensolutionTypeFor<true, BlockMatrixA> eigensystem_hermitian(
     assert_size(ita->n_rows(), itb->n_rows());
 
     auto block_soln = eigensystem_hermitian(*ita, *itb, *it_nep, map);
-    assert_dbg(block_soln.n_ep() == *it_nep, krims::ExcInternalError());
+    assert_internal(block_soln.n_ep() == *it_nep);
 
     // Lambda to pad the vector with zeros at beginning and end
     auto pad_with_zeros = [&begin_index, &A](const evector_type& v) {
@@ -310,7 +310,7 @@ EigensolutionTypeFor<true, BlockMatrixA> eigensystem_hermitian(
 
     begin_index += ita->n_cols();
   }
-  assert_dbg(begin_index == A.n_cols(), krims::ExcInternalError());
+  assert_internal(begin_index == A.n_cols());
 
   return ret;
 }

@@ -335,10 +335,10 @@ MultiVector<InnerVector>::MultiVector(
       ((*this)[j])(i) = elem;
       ++j;
     }
-    assert_dbg(j == n_vectors, krims::ExcInternalError());
+    assert_internal(j == n_vectors);
     ++i;
   }
-  assert_dbg(i == n_elem, krims::ExcInternalError());
+  assert_internal(i == n_elem);
 }
 
 template <typename InnerVector>
