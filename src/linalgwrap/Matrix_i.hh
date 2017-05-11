@@ -304,12 +304,10 @@ bool Matrix_i<Scalar>::check_properties_satisfied(OperatorProperties prop,
   // The two above routines check RealSymmetric as well implicitly.
 
   // TODO quick check for positive semi-definiteness and positive definiteness
-  assert_dbg(!props_contained_in(OperatorProperties::PositiveSemiDefinite, prop),
-             krims::ExcNotImplemented());
+  assert_implemented(!props_contained_in(OperatorProperties::PositiveSemiDefinite, prop));
 
   // TODO check for anti-Hermitian
-  assert_dbg(!props_contained_in(OperatorProperties::AntiHermitian, prop),
-             krims::ExcNotImplemented());
+  assert_implemented(!props_contained_in(OperatorProperties::AntiHermitian, prop));
 
   return ret;
 }

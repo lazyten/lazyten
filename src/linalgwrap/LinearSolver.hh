@@ -168,9 +168,8 @@ void LinearSolver<LinearProblem>::solve_state(state_type& state) const {
                      LinearSolverKeys::method + ") is unknown. Did you spell it wrong?"));
 
   // TODO only real symmetric problems implemented atm
-  assert_dbg(
-        props_contained_in(OperatorProperties::RealSymmetric, problem.A().properties()),
-        krims::ExcNotImplemented());
+  assert_implemented(
+        props_contained_in(OperatorProperties::RealSymmetric, problem.A().properties()));
 
   for (size_t i = 0; i < problem.n_systems(); ++i) {
     solve_hermitian_problem_armadillo(problem.A(), state.solution()[i], problem.rhs()[i]);

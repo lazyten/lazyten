@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -40,21 +40,21 @@ Matrix trans(TransposeProxy<Matrix>&& mt) {
   }
 
   // TODO This is not yet implemented ... we need matrix views for that
-  assert_dbg(false, krims::ExcNotImplemented());
+  assert_implemented(false);
   return Matrix(mt.inner_matrix());
 }
 
 template <typename Matrix, krims::enable_if_t<IsMatrix<Matrix>::value>...>
 Matrix& trans(TransposeProxy<Matrix>& mt) {
   // TODO This is not yet implemented ... we need matrix views for that
-  assert_dbg(false, krims::ExcNotImplemented());
+  assert_implemented(false);
   return mt.inner_matrix();
 }
 
 template <typename Matrix, krims::enable_if_t<IsMatrix<Matrix>::value>...>
 const Matrix& trans(const TransposeProxy<Matrix>& mt) {
   // TODO This is not yet implemented ... we need matrix views for that
-  assert_dbg(false, krims::ExcNotImplemented());
+  assert_implemented(false);
   return mt.inner_matrix();
 }
 //@}

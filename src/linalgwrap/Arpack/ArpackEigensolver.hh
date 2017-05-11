@@ -454,7 +454,7 @@ void ArpackEigensolver<Eigenproblem, State>::arpack_ido_step(
       break;
     case 3:
       // TODO ido==3 exists, but we do not have it implemented
-      assert_dbg(false, krims::ExcNotImplemented());
+      assert_implemented(false);
       break;
     default:
       // Check that we have a sensible ido
@@ -504,7 +504,7 @@ void ArpackEigensolver<Eigenproblem, State>::setup_state(state_type& state) cons
 template <typename Eigenproblem, typename State>
 void ArpackEigensolver<Eigenproblem, State>::solve_state(state_type& state) const {
   // TODO Remove assertions and generalise.
-  assert_dbg(mode == 2 || mode == 1, krims::ExcNotImplemented());
+  assert_implemented(mode == 2 || mode == 1);
 
   static_assert(std::is_same<typename Eigenproblem::scalar_type, double>::value,
                 "Arpack can only solve real problems at double precision at "

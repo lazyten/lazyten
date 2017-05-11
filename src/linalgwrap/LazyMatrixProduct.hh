@@ -461,7 +461,7 @@ void LazyMatrixProduct<StoredMatrix>::extract_block(
       const Transposed mode, const scalar_type c_this, const scalar_type c_M) const {
   // Not yet implemented for empty products ... they should behave
   // as a diagonal matrix with value m_coefficient
-  assert_dbg(!empty(), krims::ExcNotImplemented());
+  assert_implemented(!empty());
 
   // For empty matrices there is nothing to do
   if (M.n_rows() == 0 || M.n_cols() == 0) return;
@@ -558,7 +558,7 @@ void LazyMatrixProduct<StoredMatrix>::apply(
       const scalar_type c_this, const scalar_type c_y) const {
   // Not yet implemented for empty products ... they should behave
   // as a diagonal matrix with value m_coefficient
-  assert_dbg(!empty(), krims::ExcNotImplemented());
+  assert_implemented(!empty());
 
   assert_dbg(mode == Transposed::None || has_transpose_operation_mode(),
              ExcUnsupportedOperationMode(mode));
@@ -638,7 +638,7 @@ void LazyMatrixProduct<StoredMatrix>::mmult(const stored_matrix_type& in,
                                             const scalar_type c_out) const {
   // Not yet implemented for empty products ... they should behave
   // as a diagonal matrix with value m_coefficient
-  assert_dbg(!empty(), krims::ExcNotImplemented());
+  assert_implemented(!empty());
 
   assert_dbg(mode == Transposed::None || has_transpose_operation_mode(),
              ExcUnsupportedOperationMode(mode));

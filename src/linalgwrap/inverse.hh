@@ -54,21 +54,21 @@ Matrix inverse(InverseProxy<Matrix>&& mt) {
   }
 
   // TODO This is not yet implemented ... we need matrix views for that
-  assert_dbg(false, krims::ExcNotImplemented());
+  assert_implemented(false);
   return Matrix(mt.inner_matrix());
 }
 
 template <typename Matrix, krims::enable_if_t<IsMatrix<Matrix>::value>...>
 Matrix& inverse(InverseProxy<Matrix>& mt) {
   // TODO This is not yet implemented ... we need matrix views for that
-  assert_dbg(false, krims::ExcNotImplemented());
+  assert_implemented(false);
   return mt.inner_matrix();
 }
 
 template <typename Matrix, krims::enable_if_t<IsMatrix<Matrix>::value>...>
 const Matrix& inverse(const InverseProxy<Matrix>& mt) {
   // TODO This is not yet implemented ... we need matrix views for that
-  assert_dbg(false, krims::ExcNotImplemented());
+  assert_implemented(false);
   return mt.inner_matrix();
 }
 //@}

@@ -60,14 +60,14 @@ class FileType_i {
    *  Use the provided label string to indicate the matrix */
   template <typename Scalar>
   void write(std::ostream&, const std::string&, const Matrix_i<Scalar>&) const {
-    assert_dbg(false, krims::ExcNotImplemented());
+    assert_implemented(false);
   }
 
   /** Write a non-labelled matrix to the ostream under the format represented
    * by this class. */
   template <typename Scalar>
   void write(std::ostream&, const Matrix_i<Scalar>&) const {
-    assert_dbg(false, krims::ExcNotImplemented());
+    assert_implemented(false);
   }
 
   /** Write a labelled multivector to the ostream under the format represented
@@ -77,14 +77,14 @@ class FileType_i {
   template <typename Scalar>
   void write(std::ostream&, const std::string&,
              const MultiVector<Vector_i<Scalar>>&) const {
-    assert_dbg(false, krims::ExcNotImplemented());
+    assert_implemented(false);
   }
 
   /** Write a non-labelled multivector to the stream represented by this class
    * under the format represented by this class */
   template <typename Scalar>
   void write(std::ostream&, const MultiVector<Vector_i<Scalar>>&) const {
-    assert_dbg(false, krims::ExcNotImplemented());
+    assert_implemented(false);
   }
 
   /** Write a labelled scalar under the format represented by this class
@@ -92,7 +92,7 @@ class FileType_i {
    * */
   template <typename Scalar>
   void write(std::ostream&, const std::string&, Scalar) const {
-    assert_dbg(false, krims::ExcNotImplemented());
+    assert_implemented(false);
   }
 
   /** Write a non-labelled scalar under the format represented by this class
@@ -100,7 +100,7 @@ class FileType_i {
    * */
   template <typename Scalar>
   void write(std::ostream&, const std::string&) const {
-    assert_dbg(false, krims::ExcNotImplemented());
+    assert_implemented(false);
   }
 
   /** Write a comment string **/
