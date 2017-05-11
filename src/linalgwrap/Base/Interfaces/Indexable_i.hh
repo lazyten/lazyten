@@ -131,7 +131,7 @@ std::ostream& operator<<(std::ostream& o, const Indexable_i<Scalar>& ible) {
   }
 
   // TODO extend
-  // assert_dbg(false, krims::ExcNotImplemented());
+  // assert_implemented(false);
   // io::MatrixPrinter().print(m, o);
   return o;
 }

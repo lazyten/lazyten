@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -90,7 +90,7 @@ std::ostream& operator<<(std::ostream& o, const Vector_i<Scalar>& v) {
   }
 
   // TODO extend
-  // assert_dbg(false, krims::ExcNotImplemented());
+  // assert_implemented(false);
   // io::MatrixPrinter().print(m, o);
   return o;
 }

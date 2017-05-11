@@ -176,7 +176,7 @@ std::ostream& operator<<(std::ostream& o, const MultiVector<Vector>& mv) {
   }
 
   // TODO extend
-  // assert_dbg(false, krims::ExcNotImplemented());
+  // assert implemented(false);
   // io::MatrixPrinter().print(m, o);
   return o;
 }

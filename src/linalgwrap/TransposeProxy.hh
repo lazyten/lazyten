@@ -214,7 +214,7 @@ void TransposeProxy<Matrix>::extract_block(
       break;
     case Transposed::ConjTrans:
       // TODO Implement
-      assert_dbg(false, krims::ExcNotImplemented());
+      assert_implemented(false);
       break;
   }  // mode
 }
@@ -246,7 +246,7 @@ void TransposeProxy<Matrix>::apply(const MultiVector<VectorIn>& x,
       break;
     case Transposed::ConjTrans:
       // TODO Implement
-      assert_dbg(false, krims::ExcNotImplemented());
+      assert_implemented(false);
       break;
   }  // mode
 }
@@ -276,7 +276,7 @@ void TransposeProxy<Matrix>::apply(
       break;
     case Transposed::ConjTrans:
       // TODO Implement
-      assert_dbg(false, krims::ExcNotImplemented());
+      assert_implemented(false);
       break;
   }  // mode
 }
@@ -312,7 +312,7 @@ void TransposeProxy<Matrix>::apply_inverse(const MultiVector<VectorIn>& x,
       break;
     case Transposed::ConjTrans:
       // TODO Implement
-      assert_dbg(false, krims::ExcNotImplemented());
+      assert_implemented(false);
       break;
   }  // mode
 }
@@ -345,7 +345,7 @@ void TransposeProxy<Matrix>::apply_inverse(
       break;
     case Transposed::ConjTrans:
       // TODO Implement
-      assert_dbg(false, krims::ExcNotImplemented());
+      assert_implemented(false);
       break;
   }  // mode
 }
@@ -374,7 +374,7 @@ void TransposeProxy<Matrix>::mmult(const stored_matrix_type& in, stored_matrix_t
       break;
     case Transposed::ConjTrans:
       // TODO Implement
-      assert_dbg(false, krims::ExcNotImplemented());
+      assert_implemented(false);
       break;
   }  // mode
 }

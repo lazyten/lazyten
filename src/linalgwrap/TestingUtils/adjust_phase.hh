@@ -1,3 +1,22 @@
+//
+// Copyright (C) 2016-17 by the linalgwrap authors
+//
+// This file is part of linalgwrap.
+//
+// linalgwrap is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// linalgwrap is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
+//
+
 #pragma once
 #include "krims_NumComp.hh"
 #include <krims/TypeUtils.hh>
@@ -33,7 +52,7 @@ void adjust_phase(const Object1& from, Object2& to) {
     // through when it comes to sign normalisation: It seems that one could
     // perform any rotation of real and imaginary part on the unit circle,
     // but I am not sure whether this is correct ... mfh
-    assert_dbg(!IsComplexNumber<scalar_type>::value, ExcNotImplemented());
+    assert_implemented(!IsComplexNumber<scalar_type>::value);
 
     // The sign of the first important element is different:
     if ((std::real(*itfrom) < 0. && std::real(*itto) > 0.) ||

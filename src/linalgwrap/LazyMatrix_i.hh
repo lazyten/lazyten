@@ -181,9 +181,7 @@ class LazyMatrix_i : public LazyMatrixExpression<StoredMatrix> {
    *
    *   This function raises an ExcNotImplemented exception.
    * */
-  virtual void update(const krims::GenMap&) override {
-    assert_dbg(false, krims::ExcNotImplemented());
-  }
+  virtual void update(const krims::GenMap&) override { assert_implemented(false); }
 };
 
 //
