@@ -221,9 +221,29 @@ TEST_CASE("BlockDiagonalMatrix class", "[BlockDiagonalMatrix]") {
   //   - has_transpose()
   //   - update()
 
-  SECTION("Default lazy matrix tests for 1 block") { Testfunctions<1>::run_checks(); }
-  SECTION("Default lazy matrix tests for 2 blocks") { Testfunctions<2>::run_checks(); }
-  SECTION("Default lazy matrix tests for 4 blocks") { Testfunctions<4>::run_checks(); }
+  SECTION("Default lazy matrix tests for 1 block") {
+    // Increase numeric tolerance for this scope,
+    // ie results need to be less exact for passing
+    auto highertol = NumCompConstants::change_temporary(
+          10. * krims::NumCompConstants::default_tolerance_factor);
+    Testfunctions<1>::run_checks();
+  }
+
+  SECTION("Default lazy matrix tests for 2 blocks") {
+    // Increase numeric tolerance for this scope,
+    // ie results need to be less exact for passing
+    auto highertol = NumCompConstants::change_temporary(
+          10. * krims::NumCompConstants::default_tolerance_factor);
+    Testfunctions<2>::run_checks();
+  }
+
+  SECTION("Default lazy matrix tests for 4 blocks") {
+    // Increase numeric tolerance for this scope,
+    // ie results need to be less exact for passing
+    auto highertol = NumCompConstants::change_temporary(
+          10. * krims::NumCompConstants::default_tolerance_factor);
+    Testfunctions<4>::run_checks();
+  }
 }  // BlockDiagonal tests
 
 }  // namespace tests
