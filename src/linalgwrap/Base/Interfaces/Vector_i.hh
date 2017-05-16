@@ -42,12 +42,6 @@ class Vector_i : public Indexable_i<Scalar> {
   typedef typename base_type::size_type size_type;
   typedef typename base_type::scalar_type scalar_type;
 
-  /** The value type of the vectors (for compatibility with STL vectors */
-  typedef scalar_type value_type;
-
-  /** Size of the vector */
-  virtual size_type size() const { return this->n_elem(); }
-
   /** \name Data access
    *        Access to vector data
    */

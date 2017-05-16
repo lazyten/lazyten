@@ -28,7 +28,7 @@
 
 using namespace linalgwrap;
 
-/** A genenaric rotation function, which works for all kind of
+/** A generic rotation function, which works for all kind of
  *  stored or lazy rotation matrices or subject matrices
  *
  * Our dummy "algorithm" in this example.
@@ -48,7 +48,7 @@ int main() {
   // -------------------------
   //
 
-  // Print the linalgwrap version we run on:
+  // Print the versions we run on:
   std::cout << "Running with linalgwrap " << linalgwrap::version::version_string()
             << " and krims " << krims::version::version_string() << std::endl
             << std::endl;
@@ -95,7 +95,7 @@ int main() {
   // Here we use a SubscriptionPointer, which is implicitly constructed using
   // the make_subscription function from linalgwrap.
   diagonal = SmallVector<scalar_type>{-1., 2., 3.};
-  diag.update(krims::GenMap{{"diagonal", diagonal}});
+  diag.update({{"diagonal", diagonal}});
 
   // The output of the diag should change
   std::cout << "diag (updated diag) = " << std::endl << diag << std::endl << std::endl;
