@@ -53,6 +53,15 @@ class Indexable_i : public krims::Subscribable {
    * type */
   typedef Scalar scalar_type;
 
+  //@{
+  /** For compatibility with the STL (We can use Indexables like STL containers */
+  typedef scalar_type value_type;
+  typedef scalar_type& reference;
+  typedef const scalar_type& const_reference;
+  typedef scalar_type* pointer;
+  typedef const scalar_type* const_pointer;
+  //@}
+
   /** The real type to use. All norms and similar are returned in terms of the
    * real type */
   typedef typename krims::RealTypeOf<Scalar>::type real_type;
@@ -79,6 +88,9 @@ class Indexable_i : public krims::Subscribable {
 
   /** \brief Return the number of elements of the indexable memory */
   virtual size_type n_elem() const = 0;
+
+  /** Size of the indexable, i.e. how many elements are present */
+  virtual size_type size() const { return n_elem(); }
 
   /** \brief return an element of the indexable memory */
   virtual scalar_type operator[](size_type i) const = 0;
