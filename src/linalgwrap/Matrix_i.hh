@@ -32,6 +32,7 @@
 #include <iomanip>
 #include <ios>
 #include <iostream>
+#include <krims/NumComp/numerical_error.hh>
 #include <krims/TypeUtils.hh>
 #include <numeric>
 #include <string>
@@ -264,13 +265,17 @@ typename Matrix_i<Scalar>::scalar_type Matrix_i<Scalar>::operator[](size_type i)
 
 template <typename Scalar>
 bool Matrix_i<Scalar>::is_symmetric(real_type tolerance) const {
+  using krims::numerical_error;
+  const auto& A(*this);
+
   // Check that the matrix is quadratic:
   if (n_rows() != n_cols()) return false;
 
   // Check if lower and upper triangle agree:
   for (size_type i = 0; i < n_rows(); ++i) {
     for (size_type j = 0; j < n_cols(); ++j) {
-      if (std::abs((*this)(i, j) - (*this)(j, i)) > tolerance) return false;
+      const Scalar error = numerical_error<Scalar>(A(i, j) - A(j, i), 0);
+      if (error > tolerance) return false;
     }
   }
   return true;
@@ -278,13 +283,17 @@ bool Matrix_i<Scalar>::is_symmetric(real_type tolerance) const {
 
 template <typename Scalar>
 bool Matrix_i<Scalar>::is_hermitian(real_type tolerance) const {
+  using krims::numerical_error;
+  const auto& A(*this);
+
   // Check that the matrix is quadratic:
   if (n_rows() != n_cols()) return false;
 
   // Check if lower and upper triangle agree:
   for (size_type i = 0; i < n_rows(); ++i) {
     for (size_type j = 0; j < n_cols(); ++j) {
-      if (std::abs(std::conj((*this)(i, j)) - (*this)(j, i)) > tolerance) return false;
+      const Scalar error = numerical_error<Scalar>(std::conj(A(i, j)) - A(j, i), 0);
+      if (error > tolerance) return false;
     }
   }
   return true;
