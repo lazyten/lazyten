@@ -62,3 +62,4 @@ endfunction()
 # Include subdirectories:
 add_subdirectory(diagonal)
 add_subdirectory(eigenproblem_demo)
+add_subdirectory(lazy_demo)
