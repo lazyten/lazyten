@@ -68,8 +68,6 @@ TEST_CASE("Test ortho function", "[ortho]") {
           *gen::numeric_tensor<MultiVector<vector_type>>(
                  n_vecs, gen::with_l2_norm_in_range(0.2, 100, gen_non_zero_vec))
                  .as("Vectors to orthogonalise.");
-    std::cout << vecs.n_vectors() << " " << vecs.n_elem() << std::endl;
-    std::cout << vecs << std::endl << std::endl;
 
     // Orthogonalise
     const auto res = is_id ? ortho(vecs) : ortho(vecs, m);
