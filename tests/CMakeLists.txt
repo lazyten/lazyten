@@ -38,6 +38,7 @@ set(LINALGWRAP_TESTS_SOURCES
 	# Helper classes
 	TypeUtilsTests.cc
 	RandomTests.cc
+	orthoTests.cc
 
 	# Lazy matrices
 	LazyMatrix_i_Tests.cc
