@@ -35,9 +35,10 @@ if you choose to do so (set ``AUTOCHECKOUT_MISSING_REPOS`` to ``ON``,
 more below)
 
 ## Building
+For configuring the build we need at least ``cmake`` ``3.0.0``.  
 All compilers starting from ``clang-3.5`` and ``gcc-4.8`` should be able to build the code.
 ``C++11`` support is required and enables all basic functionality of the library.
-Some things require ``C++14``, however.
+A couple of things require ``C++14``, however.
 
 If you choose to build with the flag ``AUTOCHECKOUT_MISSING_REPOS`` set to ``ON``
 all required dependencies (**except** armadillo) will be automatically downloaded
