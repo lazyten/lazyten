@@ -23,6 +23,7 @@
 #include "rapidcheck_utils.hh"
 #include <catch.hpp>
 #include <functional>
+#include <krims/Functionals.hh>
 #include <linalgwrap/Base/Interfaces.hh>
 #include <linalgwrap/TestingUtils.hh>
 
@@ -245,15 +246,16 @@ linalgwrap_define_comptest_tmpl(test_dot, OtherIndexable) {
   auto cres = cdot(sut, ind);
 
   // Test identities:
+  krims::ConjFctr conj;
   RC_ASSERT_NC(dot(ind, sut) == numcomp(res).tolerance(tolerance));
-  RC_ASSERT_NC(cdot(ind, sut) == numcomp(std::conj(cres)).tolerance(tolerance));
+  RC_ASSERT_NC(cdot(ind, sut) == numcomp(conj(cres)).tolerance(tolerance));
 
   // Compare with reference:
   decltype(model[0] * ind[0]) accu{0};
-  decltype(std::conj(model[0]) * ind[0]) caccu{0};
+  decltype(conj(model[0]) * ind[0]) caccu{0};
   for (size_t i = 0; i < model.n_elem(); ++i) {
     accu += model[i] * ind[i];
-    caccu += std::conj(model[i]) * ind[i];
+    caccu += conj(model[i]) * ind[i];
   }
   RC_ASSERT_NC(accu == numcomp(res).tolerance(tolerance));
   RC_ASSERT_NC(caccu == numcomp(cres).tolerance(tolerance));
@@ -292,13 +294,15 @@ linalgwrap_define_comptest(test_elementwise) {
   RC_ASSERT_NC(abs(square(sut)) == numcomp(square(abs(sut))).tolerance(tolerance));
   RC_ASSERT_NC(abs(conj(sut)) == numcomp(abs(sut)).tolerance(tolerance));
 
+  krims::ConjFctr conj;
+
   // Test results:
   for (size_type i = 0; i < model.n_elem(); ++i) {
     RC_ASSERT_NC(numcomp(rabs[i]).tolerance(tolerance) == std::abs(model[i]));
     RC_ASSERT_NC(numcomp(rabssqrt[i]).tolerance(tolerance) ==
                  std::sqrt(std::abs(model[i])));
     RC_ASSERT_NC(numcomp(rsquare[i]).tolerance(tolerance) == model[i] * model[i]);
-    RC_ASSERT_NC(numcomp(rconj[i]).tolerance(tolerance) == std::conj(model[i]));
+    RC_ASSERT_NC(numcomp(rconj[i]).tolerance(tolerance) == conj(model[i]));
   }
 }
 

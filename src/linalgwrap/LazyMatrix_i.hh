@@ -19,7 +19,7 @@
 
 #pragma once
 #include "linalgwrap/LazyMatrixExpression.hh"
-#include "linalgwrap/detail/GenericFunctionals.hh"
+#include <krims/Functionals.hh>
 
 namespace linalgwrap {
 /** \brief Interface of lazy matrices
@@ -250,7 +250,7 @@ void LazyMatrix_i<StoredMatrix>::extract_block(
         case Transposed::ConjTrans:
           // A variant of std::conj, which does not return a complex
           // data type if scalar is real only.
-          detail::ConjFctr mconj;
+          krims::ConjFctr mconj;
           M(row, col) = c_this * mconj((*this)(start_col + col, start_row + row)) +
                         c_M * M(row, col);
           break;
@@ -304,8 +304,8 @@ void LazyMatrix_i<StoredMatrix>::apply(
           case Transposed::ConjTrans:
             // A variant of std::conj, which does not return a
             // complex data type if scalar is real only.
-            detail::ConjFctr mconj;
-            sum += mconj((*this)(k, row)) * vec(k);
+            krims::ConjFctr conj;
+            sum += conj((*this)(k, row)) * vec(k);
             break;
         }  // mode
       }    // k
@@ -361,8 +361,8 @@ void LazyMatrix_i<StoredMatrix>::mmult(const stored_matrix_type& in,
           case Transposed::ConjTrans:
             // A variant of std::conj, which does not return a
             // complex data type if scalar is real only.
-            detail::ConjFctr mconj;
-            out(row, col) += c_this * mconj((*this)(k, row)) * in(k, col);
+            krims::ConjFctr conj;
+            out(row, col) += c_this * conj((*this)(k, row)) * in(k, col);
             break;
         }  // mode
       }    // col

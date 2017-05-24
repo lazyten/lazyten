@@ -236,8 +236,8 @@ void DiagonalMatrix<StoredMatrix>::extract_block(
       case Transposed::ConjTrans:
         // A variant of std::conj, which does not return a complex
         // data type if scalar is real only.
-        detail::ConjFctr mconj;
-        M(i - start_row, i - start_col) += c_this * mconj((*m_diagonal_ptr)[i]);
+        krims::ConjFctr conj;
+        M(i - start_row, i - start_col) += c_this * conj((*m_diagonal_ptr)[i]);
         break;
     }  // mode
   }    // i
@@ -280,8 +280,8 @@ void DiagonalMatrix<StoredMatrix>::apply(
         case Transposed::ConjTrans:
           // A variant of std::conj, which does not return a complex
           // data type if scalar is real only.
-          detail::ConjFctr mconj;
-          vecout[ei] += c_this * vecin[ei] * mconj((*m_diagonal_ptr)[ei]);
+          krims::ConjFctr conj;
+          vecout[ei] += c_this * vecin[ei] * conj((*m_diagonal_ptr)[ei]);
           break;
       }  // mode
     }    // ei
@@ -321,8 +321,8 @@ void DiagonalMatrix<StoredMatrix>::apply_inverse(
         case Transposed::ConjTrans:
           // A variant of std::conj, which does not return a complex
           // data type if scalar is real only.
-          detail::ConjFctr mconj;
-          vecout[ei] += c_this * vecin[ei] / mconj((*m_diagonal_ptr)[ei]);
+          krims::ConjFctr conj;
+          vecout[ei] += c_this * vecin[ei] / conj((*m_diagonal_ptr)[ei]);
           break;
       }  // mode
     }    // ei
@@ -362,8 +362,8 @@ void DiagonalMatrix<StoredMatrix>::mmult(const stored_matrix_type& in,
       case Transposed::ConjTrans:
         // A variant of std::conj, which does not return a complex
         // data type if scalar is real only.
-        detail::ConjFctr mconj;
-        out(it.row(), it.col()) += c_this * *it * mconj((*m_diagonal_ptr)[it.row()]);
+        krims::ConjFctr conj;
+        out(it.row(), it.col()) += c_this * *it * conj((*m_diagonal_ptr)[it.row()]);
         break;
     }  // mode
   }    // it

@@ -20,7 +20,6 @@
 #pragma once
 #include "LazyMatrixExpression.hh"
 #include "TypeUtils.hh"
-#include "detail/GenericFunctionals.hh"
 #include <array>
 
 namespace linalgwrap {

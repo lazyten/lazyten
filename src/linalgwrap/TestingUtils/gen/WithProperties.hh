@@ -20,7 +20,6 @@
 #pragma once
 #include "NumericTensor.hh"
 #include "linalgwrap/Base/Interfaces/OperatorProperties.hh"
-#include "linalgwrap/detail/GenericFunctionals.hh"
 
 namespace linalgwrap {
 namespace gen {
