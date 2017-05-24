@@ -20,7 +20,7 @@
 #pragma once
 #include "Numeric.hh"
 #include "NumericSize.hh"
-#include "linalgwrap/detail/GenericFunctionals.hh"
+#include <krims/Functionals.hh>
 
 namespace linalgwrap {
 namespace gen {
@@ -35,7 +35,7 @@ rc::Gen<Container> numeric_container(size_t count) {
         rc::gen::container<Container>(count, numeric<typename Container::value_type>());
   auto fix_container_norm = [](Container c) {
     long double norm = 0.0;
-    linalgwrap::detail::ConjFctr conj;
+    krims::ConjFctr conj;
     for (const auto& elem : c) norm += std::real(conj(elem) * elem);
 
     if (norm > max_norm * max_norm) {

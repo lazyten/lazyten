@@ -21,43 +21,43 @@
 #include "detail/ApplyElementwise.hh"
 #include "linalgwrap/Base/Interfaces/Indexable_i.hh"
 #include "linalgwrap/Base/Interfaces/Vector_i.hh"
-#include "linalgwrap/detail/GenericFunctionals.hh"
 #include "macro_defs.hh"
+#include <krims/Functionals.hh>
 
 namespace linalgwrap {
 
 /** Return an indexable object which represents the elementwise absolute value
  * of an indexable object */
 template <typename Indexable>
-detail::ApplyElementwise<ValidIndexableT<Indexable>, detail::AbsFctr> abs(
+detail::ApplyElementwise<ValidIndexableT<Indexable>, krims::AbsFctr> abs(
       const Indexable& i) {
   linalgwrap_called_fallback();
-  return detail::ApplyElementwise<Indexable, detail::AbsFctr>{i, detail::AbsFctr{}};
+  return detail::ApplyElementwise<Indexable, krims::AbsFctr>{i, krims::AbsFctr{}};
 }
 
 /** Return an indexable object which represents the elementwise complex
  * conjugate of an indexable object. */
 template <typename Indexable>
-detail::ApplyElementwise<ValidIndexableT<Indexable>, detail::ConjFctr> conj(
+detail::ApplyElementwise<ValidIndexableT<Indexable>, krims::ConjFctr> conj(
       const Indexable& i) {
   linalgwrap_called_fallback();
-  return detail::ApplyElementwise<Indexable, detail::ConjFctr>{i, detail::ConjFctr{}};
+  return detail::ApplyElementwise<Indexable, krims::ConjFctr>{i, krims::ConjFctr{}};
 }
 
 /** Return an indexable object which represents the elementwise square root */
 template <typename Indexable>
-detail::ApplyElementwise<ValidIndexableT<Indexable>, detail::SqrtFctr> sqrt(
+detail::ApplyElementwise<ValidIndexableT<Indexable>, krims::SqrtFctr> sqrt(
       const Indexable& i) {
   linalgwrap_called_fallback();
-  return detail::ApplyElementwise<Indexable, detail::SqrtFctr>{i, detail::SqrtFctr{}};
+  return detail::ApplyElementwise<Indexable, krims::SqrtFctr>{i, krims::SqrtFctr{}};
 }
 
 /** Return an indexable object which represents the elementwise square */
 template <typename Indexable>
-detail::ApplyElementwise<ValidIndexableT<Indexable>, detail::SquareFctr> square(
+detail::ApplyElementwise<ValidIndexableT<Indexable>, krims::SquareFctr> square(
       const Indexable& i) {
   linalgwrap_called_fallback();
-  return detail::ApplyElementwise<Indexable, detail::SquareFctr>{i, detail::SquareFctr{}};
+  return detail::ApplyElementwise<Indexable, krims::SquareFctr>{i, krims::SquareFctr{}};
 }
 
 }  // namespace linalgwrap

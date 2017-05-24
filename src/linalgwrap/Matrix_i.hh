@@ -32,6 +32,7 @@
 #include <iomanip>
 #include <ios>
 #include <iostream>
+#include <krims/Functionals.hh>
 #include <krims/NumComp/numerical_error.hh>
 #include <krims/TypeUtils.hh>
 #include <numeric>
@@ -290,9 +291,10 @@ bool Matrix_i<Scalar>::is_hermitian(real_type tolerance) const {
   if (n_rows() != n_cols()) return false;
 
   // Check if lower and upper triangle agree:
+  krims::ConjFctr conj{};
   for (size_type i = 0; i < n_rows(); ++i) {
     for (size_type j = 0; j < n_cols(); ++j) {
-      const Scalar error = numerical_error<Scalar>(std::conj(A(i, j)) - A(j, i), 0);
+      const Scalar error = numerical_error<Scalar>(conj(A(i, j)) - A(j, i), 0);
       if (error > tolerance) return false;
     }
   }
