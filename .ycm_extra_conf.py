@@ -20,15 +20,18 @@
 ## ---------------------------------------------------------------------
 
 import os
+import yaml
+
+# The builddir (relative to the path of this file),
+# which we use to find some generated files:
+builddir = "build"
 
 # This file is loosely based upon the file
 # cpp/ycm/.ycm_extra_conf.py from the youcompleteme daemon process
 # available on github:
 # https://github.com/Valloric/ycmd/blob/master/cpp/ycm/.ycm_extra_conf.py
 
-
-# These are the compilation flags that will be used in case there's no
-# compilation database set (by default, one is not set).
+# Static flags:
 flags = [
     # Warnings: For a very detailed discussion about this
     # see the following stackexchange post:
@@ -46,30 +49,42 @@ flags = [
     # Generate unwind information
     '-fexceptions',
     # Compile debug code as well
-    '-DDEBUG',
+    '-DDEBUG=DEBUG',
     # Compile as c++14
     '-std=c++14',
     # Treat .h header files as c++:
     '-x', 'c++',
-    # Include other libraries and show errors and 
+    # C++14 code blocks in krims
+    '-DKRIMS_HAVE_CXX14',
+    # Include other libraries and show errors and
     # warnings within them
-    # To suppress errors shown here, use "-isystem" 
+    # To suppress errors shown here, use "-isystem"
     # instead of "-I"
     '-I', 'src',
-    '-I', 'build/src',
+    '-I', builddir + '/src',
+    #
+    '-isystem', 'external/krims/src',
+    '-isystem', builddir+'/external/krims/src',
+    '-isystem', '../krims/src',
+    '-isystem', '../krims/'+builddir+'/src',
+    #
     '-isystem', 'external/rapidcheck/include',
     '-isystem', 'external/rapidcheck/ext/catch/include',
-    '-isystem', 'external/krims/src',
-    '-isystem', '../krims/src',
     '-isystem', '../rapidcheck/ext/catch/include',
     '-isystem', '../rapidcheck/include',
+    #
     '-isystem', '/usr/lib/ycmd/clang_includes',
 ]
 
-def DirectoryOfThisScript():
-  return os.path.dirname( os.path.abspath( __file__ ) )
-
-SOURCE_EXTENSIONS = [ '.cpp', '.cxx', '.cc', '.c', '.C' ]
+def ParseExtraIncludes():
+  thisdir = os.path.dirname( os.path.abspath( __file__ ) )
+  extrafile = thisdir + "/"+builddir+"/ycm_extra_includes.yaml"
+  if os.path.exists(extrafile):
+    with open(extrafile,"r") as f:
+      paths = yaml.safe_load(f)
+      return [ f for path in paths
+               for f in [ "-isystem", path ] ]
+  return []
 
 def MakeRelativePathsInFlagsAbsolute( flags, working_directory ):
   if not working_directory:
@@ -100,13 +115,15 @@ def MakeRelativePathsInFlagsAbsolute( flags, working_directory ):
   return new_flags
 
 
-def IsHeaderFile( filename ):
-  extension = os.path.splitext( filename )[ 1 ]
-  return extension in [ '.h', '.hxx', '.hpp', '.hh' ]
+#SOURCE_EXTENSIONS = [ '.cpp', '.cxx', '.cc', '.c', '.C' ]
+#def IsHeaderFile( filename ):
+#  extension = os.path.splitext( filename )[ 1 ]
+#  return extension in [ '.h', '.hxx', '.hpp', '.hh' ]
 
 def FlagsForFile( filename, **kwargs ):
-  relative_to = DirectoryOfThisScript()
-  final_flags = MakeRelativePathsInFlagsAbsolute( flags, relative_to )
+  relative_to = os.path.dirname( os.path.abspath( __file__ ) )
+  flags_in = flags + ParseExtraIncludes()
+  final_flags = MakeRelativePathsInFlagsAbsolute( flags_in, relative_to )
 
   return {
     'flags': final_flags,
