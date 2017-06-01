@@ -65,6 +65,24 @@ foreach (build ${DRB_BUILD_TYPES})
 	set(LINALGWRAP_DEPENDENCIES_${build} ${LINALGWRAP_DEPENDENCIES_${build}} ${krims_${build}_TARGET})
 endforeach()
 
+#########################
+#--  LAPACK and BLAS  --#
+#########################
+set(BLAS_VENDOR "All" CACHE STRING "The BLAS and LAPACK vendor to use \
+(e.g. Intel, ATLAS, OpenBLAS, ACML, Apple)")
+set(BLA_VENDOR ${BLAS_VENDOR})
+
+find_package(LAPACK REQUIRED)
+
+# add to general dependencies
+set(LINALGWRAP_DEPENDENCIES ${LINALGWRAP_DEPENDENCIES} ${LAPACK_LIBRARIES})
+
+# enable lapack-dependant code:
+LIST(APPEND LINALGWRAP_DEFINITIONS "LINALGWRAP_HAVE_LAPACK")
+set(LINALGWRAP_HAVE_LAPACK ON)
+
+unset(BLA_VENDOR)
+
 #################
 #-- armadillo --#
 #################
@@ -76,3 +94,4 @@ include_directories(${ARMADILLO_INCLUDE_DIRS})
 
 # enable armadillo-dependant code:
 LIST(APPEND LINALGWRAP_DEFINITIONS "LINALGWRAP_HAVE_ARMADILLO")
+set(LINALGWRAP_HAVE_ARMADILLO ON)
