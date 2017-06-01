@@ -1,0 +1,56 @@
+//
+// Copyright (C) 2017 by the linalgwrap authors
+//
+// This file is part of linalgwrap.
+//
+// linalgwrap is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// linalgwrap is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
+//
+
+#pragma once
+#include <map>
+#include <string>
+
+namespace linalgwrap {
+/* clang-format off */
+
+struct version {
+  static int constexpr major{@PROJECT_VERSION_MAJOR@};
+  static int constexpr minor{@PROJECT_VERSION_MINOR@};
+  static int constexpr patch{@PROJECT_VERSION_PATCH@};
+
+  /**  Return the version as a string */
+  static std::string version_string();
+
+  /** A std::map<string,bool> which determines which features
+   *  of linalgwrap (given by the key stringr are available. */
+  static const std::map<std::string, bool> feature_availability;
+
+  /** Return whether the feature given by the string is available.
+   *
+   * A feature is available if it is contained in the feature_availabiliy
+   * map and the corresponding boolean flag is true.  */
+  static bool has_feature(const std::string& feature);
+
+  /** Return the features as a string "+enabled -disabled" */
+  static std::string feature_string();
+};
+
+namespace detail {
+  inline std::map<std::string, bool> build_features_map() {
+    return @PROJECT_FEATURE_LIST@;
+  }
+}
+
+/* clang-format on */
+}  // namespace linalgwrap

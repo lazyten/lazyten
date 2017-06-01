@@ -17,13 +17,13 @@
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifdef LINALGWRAP_HAVE_LAPACK
 #include "eigensolver_tests.hh"
 #include <linalgwrap/Lapack/LapackEigensolver.hh>
 #include <linalgwrap/LazyMatrixWrapper.hh>
 #include <linalgwrap/TestingUtils.hh>
 #include <rapidcheck.h>
 
+#ifdef LINALGWRAP_HAVE_LAPACK
 namespace linalgwrap {
 namespace tests {
 using namespace rc;

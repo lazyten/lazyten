@@ -18,7 +18,9 @@
 //
 
 #pragma once
+#include "linalgwrap/config.hh"
 #ifdef LINALGWRAP_HAVE_ARMADILLO
+
 #include <armadillo>
 #include <krims/ExceptionSystem.hh>
 #include <krims/TypeUtils.hh>

@@ -49,8 +49,9 @@ int main() {
   //
 
   // Print the versions we run on:
-  std::cout << "Running with linalgwrap " << linalgwrap::version::version_string()
-            << " and krims " << krims::version::version_string() << std::endl
+  std::cout << "Running with linalgwrap " << linalgwrap::version::version_string() << '\n'
+            << "compiled with " << linalgwrap::version::feature_string() << " and krims "
+            << krims::version::version_string() << std::endl
             << std::endl;
 
   //

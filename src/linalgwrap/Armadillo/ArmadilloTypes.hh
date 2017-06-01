@@ -18,7 +18,9 @@
 //
 
 #pragma once
+#include "linalgwrap/config.hh"
 #ifdef LINALGWRAP_HAVE_ARMADILLO
+
 namespace linalgwrap {
 
 // Forward-declare

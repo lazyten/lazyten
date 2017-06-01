@@ -18,7 +18,9 @@
 //
 
 #pragma once
+#include "linalgwrap/config.hh"
 #ifdef LINALGWRAP_HAVE_ARPACK
+
 #include <array>
 #include <cstring>
 #include <krims/ExceptionSystem.hh>

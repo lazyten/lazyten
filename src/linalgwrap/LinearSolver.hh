@@ -18,6 +18,8 @@
 //
 
 #pragma once
+#include "linalgwrap/config.hh"
+
 #include "Armadillo/ArmadilloMatrix.hh"
 #include "Base/Solvers.hh"
 #include <krims/GenMap.hh>
@@ -26,7 +28,7 @@
 namespace linalgwrap {
 
 #ifndef LINALGWRAP_HAVE_ARMADILLO
-static_assert(false, "We need armadillo for this at the moment.");
+#error "We need armadillo for this at the moment."
 #endif
 
 template <typename LinearProblem>

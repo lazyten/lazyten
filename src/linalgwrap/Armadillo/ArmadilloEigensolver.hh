@@ -18,7 +18,9 @@
 //
 
 #pragma once
+#include "linalgwrap/config.hh"
 #ifdef LINALGWRAP_HAVE_ARMADILLO
+
 #include "ArmadilloMatrix.hh"
 #include "detail.hh"
 #include "linalgwrap/Base/Solvers.hh"

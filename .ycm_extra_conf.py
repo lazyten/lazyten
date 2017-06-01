@@ -47,12 +47,7 @@ flags = [
     '-fexceptions',
     # Compile debug code as well
     '-DDEBUG',
-    # Compile extra code blocks:
-    '-DLINALGWRAP_HAVE_ARMADILLO',
-    '-DLINALGWRAP_HAVE_ARPACK',
-    '-DLINALGWRAP_HAVE_LAPACK',
     # C++14 code blocks:
-    '-DLINALGWRAP_HAVE_CXX14',
     '-DKRIMS_HAVE_CXX14',
     # Compile as c++14
     '-std=c++14',
@@ -63,6 +58,7 @@ flags = [
     # To suppress errors shown here, use "-isystem" 
     # instead of "-I"
     '-I', 'src',
+    '-I', 'build/src',
     '-isystem', 'external/rapidcheck/include',
     '-isystem', 'external/rapidcheck/ext/catch/include',
     '-isystem', 'external/krims/src',

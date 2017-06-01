@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2017 by the linalgwrap authors
 //
 // This file is part of linalgwrap.
 //
@@ -18,22 +18,29 @@
 //
 
 #pragma once
-#include "linalgwrap/version_defs.hh"  // will be created by cmake
-#include <string>
-
-// The file linalgwrap/version_defs.hh will be created by cmake from
-// the interal project version and will contain definitions of the
-// macros VERSION_MINOR VERSION_MAJOR VERSION_PATCH
-
 namespace linalgwrap {
 
-struct version {
-  static int constexpr major{detail::__version_var_major};
-  static int constexpr minor{detail::__version_var_minor};
-  static int constexpr patch{detail::__version_var_patch};
+#ifndef LINALGWRAP_HAVE_ARMADILLO
+// TODO The above guard is for compatiblity with downstream code.
+//      One should remove it once all have moved to use config.hh
+//      instead of the commandline flags.
 
-  // Return the version as a string
-  static std::string version_string();
-};
+//
+// Definitions of features
+//
+/* clang-format off */
+#ifndef CXX_STANDARD
+#define CXX_STANDARD @CMAKE_CXX_STANDARD@
+#endif
+#cmakedefine LINALGWRAP_HAVE_CXX14
+#cmakedefine LINALGWRAP_HAVE_CXX17
+/* clang-format on */
+
+#cmakedefine LINALGWRAP_HAVE_ARMADILLO
+#cmakedefine LINALGWRAP_HAVE_BOHRIUM
+#cmakedefine LINALGWRAP_HAVE_LAPACK
+#cmakedefine LINALGWRAP_HAVE_ARPACK
+
+#endif  // LINALGWRAP_HAVE_ARMADILLO
 
 }  // namespace linalgwrap

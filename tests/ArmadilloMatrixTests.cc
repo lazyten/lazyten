@@ -17,7 +17,6 @@
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifdef LINALGWRAP_HAVE_ARMADILLO
 #include "stored_matrix_tests.hh"
 #include <catch.hpp>
 #include <linalgwrap/Armadillo/ArmadilloMatrix.hh>
@@ -27,6 +26,7 @@
 // Generators for necessary matrices
 #include "generators.hh"
 
+#ifdef LINALGWRAP_HAVE_ARMADILLO
 namespace linalgwrap {
 namespace tests {
 using namespace rc;

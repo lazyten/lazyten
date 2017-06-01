@@ -18,6 +18,8 @@
 //
 
 #pragma once
+#include "linalgwrap/config.hh"
+
 #ifdef LINALGWRAP_HAVE_LAPACK
 #include "linalgwrap/LazyMatrixExpression.hh"
 #include "linalgwrap/StoredMatrix_i.hh"

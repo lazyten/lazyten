@@ -36,34 +36,19 @@
 ####################
 if (NOT CMAKE_CXX_STANDARD VERSION_LESS 14)
 	message(STATUS "Detected C++14 support: Setting LINALGWRAP_HAVE_CXX14")
-	LIST(APPEND LINALGWRAP_DEFINITIONS "LINALGWRAP_HAVE_CXX14")
+	set(LINALGWRAP_HAVE_CXX14 ON)
 endif()
 if (NOT CMAKE_CXX_STANDARD VERSION_LESS 17)
 	message(STATUS "Detected C++17 support: Setting LINALGWRAP_HAVE_CXX17")
-	LIST(APPEND LINALGWRAP_DEFINITIONS "LINALGWRAP_HAVE_CXX17")
+	set(LINALGWRAP_HAVE_CXX17 ON)
 endif()
-
-#########################
-#--  LAPACK and BLAS  --#
-#########################
-set(BLAS_VENDOR "All" CACHE STRING "The BLAS and LAPACK vendor to use \
-(e.g. Intel, ATLAS, OpenBLAS, ACML, Apple)")
-set(BLA_VENDOR ${BLAS_VENDOR})
-
-find_package(LAPACK REQUIRED)
-
-# add to general dependencies
-set(LINALGWRAP_DEPENDENCIES ${LINALGWRAP_DEPENDENCIES} ${LAPACK_LIBRARIES})
-
-# enable lapack-dependant code:
-LIST(APPEND LINALGWRAP_DEFINITIONS "LINALGWRAP_HAVE_LAPACK")
-
-unset(BLA_VENDOR)
 
 ################
 #--  ARPACK  --#
 ################
 SET(ARPACK_DIR "" CACHE PATH "An optional hint to an ARPACK installation")
+disable_feature(arpack)
+
 find_library(
 	ARPACK_LIBRARY
 	NAMES arpack
@@ -72,7 +57,7 @@ find_library(
 )
 if(NOT ${ARPACK_LIBRARY} MATCHES "-NOTFOUND")
 	message(STATUS "Found ARPACK at ${ARPACK_LIBRARY}")
-	LIST(APPEND LINALGWRAP_DEFINITIONS "LINALGWRAP_HAVE_ARPACK")
 	set(LINALGWRAP_DEPENDENCIES ${LINALGWRAP_DEPENDENCIES} ${ARPACK_LIBRARY})
+	enable_feature(arpack)
 endif()
 

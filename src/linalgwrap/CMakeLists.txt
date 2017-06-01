@@ -39,9 +39,10 @@ set(LINALGWRAP_SOURCES
 	rescue.cc
 )
 
-# Dump the current version as an include file.
-include_krims_cmake_module(WriteVersionHeader)
-WRITE_VERSION_HEADER("${linalgwrap_BINARY_DIR}/src/linalgwrap/version_defs.hh")
+# Write the config file config.hh and the version header (into the binary dir)
+configure_file("config.hh.in"  "config.hh")
+feature_list_cxx(PROJECT_FEATURE_LIST)
+configure_file("version.hh.in" "version.hh")
 
 # add the libraries for Debug and Release:
 drb_add_library(linalgwrap
@@ -81,7 +82,7 @@ install(DIRECTORY .
 	COMPONENT devel
 	FILES_MATCHING PATTERN "*.hh"
 )
-install(FILES "${linalgwrap_BINARY_DIR}/src/linalgwrap/version_defs.hh"
+install(FILES "${linalgwrap_BINARY_DIR}/src/linalgwrap/config.hh"
 	DESTINATION "include/linalgwrap"
 	COMPONENT devel
 )

@@ -21,15 +21,15 @@
 
 # sets these things
 #
-# 	LINALGWRAP_DEPENDENCIES			everyone needs these libraries
-# 	LINALGWRAP_DEPENDENCIES_DEBUG		debug mode needs these extras
-# 	LINALGWRAP_DEPENDENCIES_RELEASE		release mode needs these extras
-# 	LINALGWRAP_DEPENDENCIES_TEST		tests need these extra libraries
+#       LINALGWRAP_DEPENDENCIES			everyone needs these libraries
+#       LINALGWRAP_DEPENDENCIES_DEBUG		debug mode needs these extras
+#       LINALGWRAP_DEPENDENCIES_RELEASE		release mode needs these extras
+#       LINALGWRAP_DEPENDENCIES_TEST		tests need these extra libraries
 #
 #       LINALGWRAP_DEFINITIONS			definitions for all compilation
 #       LINALGWRAP_DEFINITIONS_DEBUG		definitions for debug mode
 #       LINALGWRAP_DEFINITIONS_RELEASE		definitions for release mode
-#       
+#
 
 ####################
 #-- Empty it all --#
@@ -41,6 +41,7 @@ set(LINALGWRAP_DEPENDENCIES_TEST "")
 set(LINALGWRAP_DEFINITIONS "")
 set(LINALGWRAP_DEFINITIONS_DEBUG "")
 set(LINALGWRAP_DEFINITIONS_RELEASE "")
+include_krims_cmake_module(ProjectFeatures)
 
 ############################
 #-- rapidcheck and catch --#
@@ -65,14 +66,23 @@ foreach (build ${DRB_BUILD_TYPES})
 	set(LINALGWRAP_DEPENDENCIES_${build} ${LINALGWRAP_DEPENDENCIES_${build}} ${krims_${build}_TARGET})
 endforeach()
 
+#########################
+#--  LAPACK and BLAS  --#
+#########################
+set(BLAS_VENDOR "All" CACHE STRING "The BLAS and LAPACK vendor to use \
+(e.g. Intel, ATLAS, OpenBLAS, ACML, Apple)")
+set(BLA_VENDOR ${BLAS_VENDOR})
+
+find_package(LAPACK REQUIRED)
+set(LINALGWRAP_DEPENDENCIES ${LINALGWRAP_DEPENDENCIES} ${LAPACK_LIBRARIES})
+enable_feature(lapack)
+
+unset(BLA_VENDOR)
+
 #################
 #-- armadillo --#
 #################
 find_package(Armadillo 4.000 REQUIRED)
-
-# add to general dependencies and include string
 set(LINALGWRAP_DEPENDENCIES ${LINALGWRAP_DEPENDENCIES} ${ARMADILLO_LIBRARIES})
 include_directories(${ARMADILLO_INCLUDE_DIRS})
-
-# enable armadillo-dependant code:
-LIST(APPEND LINALGWRAP_DEFINITIONS "LINALGWRAP_HAVE_ARMADILLO")
+enable_feature(armadillo)

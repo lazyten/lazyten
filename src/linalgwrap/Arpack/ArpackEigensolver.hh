@@ -18,6 +18,8 @@
 //
 
 #pragma once
+#include "linalgwrap/config.hh"
+
 #ifdef LINALGWRAP_HAVE_ARPACK
 #include "detail.hh"
 #include "linalgwrap/Base/Solvers.hh"

@@ -18,7 +18,9 @@
 //
 
 #pragma once
+#include "linalgwrap/config.hh"
 #ifdef LINALGWRAP_HAVE_LAPACK
+
 #include "detail/lapack.hh"
 #include "linalgwrap/Base/Solvers.hh"
 #include "linalgwrap/Exceptions.hh"
