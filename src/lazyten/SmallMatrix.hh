@@ -29,6 +29,12 @@ class ArmadilloMatrix;
 
 template <typename Scalar>
 using SmallMatrix = ArmadilloMatrix<Scalar>;
+#elif defined LINALGWRAP_HAVE_BOHRIUM
+template <typename Scalar>
+class BohriumMatrix;
+
+template <typename Scalar>
+using SmallMatrix = BohriumMatrix<Scalar>;
 #else
 template <typename Scalar>
 class SmallMatrix {

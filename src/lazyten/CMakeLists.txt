@@ -31,6 +31,10 @@ set(LAZYTEN_SOURCES
 	Base/Solvers/IterativeWrapperKeys.cc
 	Base/Solvers/LinearSolverBaseKeys.cc
 	Base/Solvers/SolverStateBase.cc
+
+	Bohrium/BohriumMatrix.cc
+	Bohrium/BohriumVector.cc
+
 	Arpack/ArpackEigensolver.cc
 	Lapack/LapackEigensolver.cc
 	Lapack/detail/lapack.cc

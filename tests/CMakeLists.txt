@@ -36,6 +36,10 @@ set(LAZYTEN_TESTS_SOURCES
 	ArmadilloMatrixTests.cc
 	ArmadilloVectorTests.cc
 
+	# Bohrium classes
+	BohriumVectorTests.cc
+	BohriumMatrixTests.cc
+
 	# Helper classes
 	TypeUtilsTests.cc
 	RandomTests.cc
