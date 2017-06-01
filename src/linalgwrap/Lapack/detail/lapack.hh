@@ -18,7 +18,9 @@
 //
 
 #pragma once
+#include "linalgwrap/config.hh"
 #ifdef LINALGWRAP_HAVE_LAPACK
+
 #include "LapackPackedMatrix.hh"
 #include "LapackSymmetricMatrix.hh"
 

@@ -22,6 +22,7 @@
 #include "linalgwrap/Arpack/ArpackEigensolver.hh"
 #include "linalgwrap/Base/Solvers.hh"
 #include "linalgwrap/Lapack/LapackEigensolver.hh"
+#include "linalgwrap/config.hh"
 
 namespace linalgwrap {
 

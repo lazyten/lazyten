@@ -17,10 +17,10 @@
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifdef LINALGWRAP_HAVE_ARMADILLO
 #include "eigensolver_tests.hh"
 #include <linalgwrap/Armadillo/ArmadilloEigensolver.hh>
 
+#ifdef LINALGWRAP_HAVE_ARMADILLO
 namespace linalgwrap {
 namespace tests {
 using namespace rc;

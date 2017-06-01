@@ -18,6 +18,7 @@
 //
 
 #pragma once
+#include "linalgwrap/config.hh"
 #ifdef LINALGWRAP_HAVE_ARMADILLO
 
 #include "ArmadilloTypes.hh"
