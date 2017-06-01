@@ -159,6 +159,8 @@ class ArmadilloMatrix : public StoredMatrix_i<Scalar> {
   // Relational operatiors
   //
   bool operator==(const ArmadilloMatrix& other) const {
+    if (other.n_rows() != n_rows()) return false;
+    if (other.n_cols() != n_cols()) return false;
     // does not work for some crazy arma reason
     // return (m_arma == other.m_arma);
 
