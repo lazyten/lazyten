@@ -25,6 +25,7 @@
 set(LINALGWRAP_TESTS_SOURCES
 	# Low-level interface classes
 	OperatorPropertiesTests.cc
+	versionTest.cc
 
 	# Vector and Matrix LA interfaces
 # TODO	IteratorVectorTests.cc
