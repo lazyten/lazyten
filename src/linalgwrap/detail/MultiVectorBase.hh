@@ -22,6 +22,7 @@
 #include <krims/IteratorUtils.hh>
 #include <krims/RCPWrapper.hh>
 #include <krims/TypeUtils.hh>
+#include <vector>
 
 namespace linalgwrap {
 // Forward-declare
