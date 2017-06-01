@@ -47,6 +47,8 @@ endif()
 #--  ARPACK  --#
 ################
 SET(ARPACK_DIR "" CACHE PATH "An optional hint to an ARPACK installation")
+disable_feature(arpack)
+
 find_library(
 	ARPACK_LIBRARY
 	NAMES arpack
@@ -56,6 +58,6 @@ find_library(
 if(NOT ${ARPACK_LIBRARY} MATCHES "-NOTFOUND")
 	message(STATUS "Found ARPACK at ${ARPACK_LIBRARY}")
 	set(LINALGWRAP_DEPENDENCIES ${LINALGWRAP_DEPENDENCIES} ${ARPACK_LIBRARY})
-	set(LINALGWRAP_HAVE_ARPACK ON)
+	enable_feature(arpack)
 endif()
 

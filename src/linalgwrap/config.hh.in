@@ -19,7 +19,6 @@
 
 #pragma once
 namespace linalgwrap {
-/* clang-format off */
 
 #ifndef LINALGWRAP_HAVE_ARMADILLO
 // TODO The above guard is for compatiblity with downstream code.
@@ -29,11 +28,13 @@ namespace linalgwrap {
 //
 // Definitions of features
 //
+/* clang-format off */
 #ifndef CXX_STANDARD
 #define CXX_STANDARD @CMAKE_CXX_STANDARD@
 #endif
 #cmakedefine LINALGWRAP_HAVE_CXX14
 #cmakedefine LINALGWRAP_HAVE_CXX17
+/* clang-format on */
 
 #cmakedefine LINALGWRAP_HAVE_ARMADILLO
 #cmakedefine LINALGWRAP_HAVE_BOHRIUM
@@ -42,15 +43,4 @@ namespace linalgwrap {
 
 #endif  // LINALGWRAP_HAVE_ARMADILLO
 
-//
-// Detail namespace
-//
-namespace detail {
-// Version:
-constexpr int version_major {@PROJECT_VERSION_MAJOR@};
-constexpr int version_minor {@PROJECT_VERSION_MINOR@};
-constexpr int version_patch {@PROJECT_VERSION_PATCH@};
-}  // namespace detail
-
-/* clang-format on */
 }  // namespace linalgwrap

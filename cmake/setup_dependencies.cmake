@@ -41,6 +41,7 @@ set(LINALGWRAP_DEPENDENCIES_TEST "")
 set(LINALGWRAP_DEFINITIONS "")
 set(LINALGWRAP_DEFINITIONS_DEBUG "")
 set(LINALGWRAP_DEFINITIONS_RELEASE "")
+include_krims_cmake_module(ProjectFeatures)
 
 ############################
 #-- rapidcheck and catch --#
@@ -74,7 +75,7 @@ set(BLA_VENDOR ${BLAS_VENDOR})
 
 find_package(LAPACK REQUIRED)
 set(LINALGWRAP_DEPENDENCIES ${LINALGWRAP_DEPENDENCIES} ${LAPACK_LIBRARIES})
-set(LINALGWRAP_HAVE_LAPACK ON)
+enable_feature(lapack)
 
 unset(BLA_VENDOR)
 
@@ -84,4 +85,4 @@ unset(BLA_VENDOR)
 find_package(Armadillo 4.000 REQUIRED)
 set(LINALGWRAP_DEPENDENCIES ${LINALGWRAP_DEPENDENCIES} ${ARMADILLO_LIBRARIES})
 include_directories(${ARMADILLO_INCLUDE_DIRS})
-set(LINALGWRAP_HAVE_ARMADILLO ON)
+enable_feature(armadillo)

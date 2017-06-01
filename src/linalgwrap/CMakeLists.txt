@@ -39,8 +39,10 @@ set(LINALGWRAP_SOURCES
 	rescue.cc
 )
 
-# Write the config file config.hh (into the binary dir)
-configure_file("config.hh.in" "config.hh")
+# Write the config file config.hh and the version header (into the binary dir)
+configure_file("config.hh.in"  "config.hh")
+feature_list_cxx(PROJECT_FEATURE_LIST)
+configure_file("version.hh.in" "version.hh")
 
 # add the libraries for Debug and Release:
 drb_add_library(linalgwrap
