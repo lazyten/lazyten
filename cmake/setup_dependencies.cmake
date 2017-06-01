@@ -21,15 +21,15 @@
 
 # sets these things
 #
-# 	LINALGWRAP_DEPENDENCIES			everyone needs these libraries
-# 	LINALGWRAP_DEPENDENCIES_DEBUG		debug mode needs these extras
-# 	LINALGWRAP_DEPENDENCIES_RELEASE		release mode needs these extras
-# 	LINALGWRAP_DEPENDENCIES_TEST		tests need these extra libraries
+#       LINALGWRAP_DEPENDENCIES			everyone needs these libraries
+#       LINALGWRAP_DEPENDENCIES_DEBUG		debug mode needs these extras
+#       LINALGWRAP_DEPENDENCIES_RELEASE		release mode needs these extras
+#       LINALGWRAP_DEPENDENCIES_TEST		tests need these extra libraries
 #
 #       LINALGWRAP_DEFINITIONS			definitions for all compilation
 #       LINALGWRAP_DEFINITIONS_DEBUG		definitions for debug mode
 #       LINALGWRAP_DEFINITIONS_RELEASE		definitions for release mode
-#       
+#
 
 ####################
 #-- Empty it all --#
@@ -73,12 +73,7 @@ set(BLAS_VENDOR "All" CACHE STRING "The BLAS and LAPACK vendor to use \
 set(BLA_VENDOR ${BLAS_VENDOR})
 
 find_package(LAPACK REQUIRED)
-
-# add to general dependencies
 set(LINALGWRAP_DEPENDENCIES ${LINALGWRAP_DEPENDENCIES} ${LAPACK_LIBRARIES})
-
-# enable lapack-dependant code:
-LIST(APPEND LINALGWRAP_DEFINITIONS "LINALGWRAP_HAVE_LAPACK")
 set(LINALGWRAP_HAVE_LAPACK ON)
 
 unset(BLA_VENDOR)
@@ -87,11 +82,6 @@ unset(BLA_VENDOR)
 #-- armadillo --#
 #################
 find_package(Armadillo 4.000 REQUIRED)
-
-# add to general dependencies and include string
 set(LINALGWRAP_DEPENDENCIES ${LINALGWRAP_DEPENDENCIES} ${ARMADILLO_LIBRARIES})
 include_directories(${ARMADILLO_INCLUDE_DIRS})
-
-# enable armadillo-dependant code:
-LIST(APPEND LINALGWRAP_DEFINITIONS "LINALGWRAP_HAVE_ARMADILLO")
 set(LINALGWRAP_HAVE_ARMADILLO ON)

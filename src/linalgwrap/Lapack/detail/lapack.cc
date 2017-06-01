@@ -17,6 +17,7 @@
 // along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "linalgwrap/config.hh"
 #ifdef LINALGWRAP_HAVE_LAPACK
 #include "lapack.hh"
 
