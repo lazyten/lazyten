@@ -36,7 +36,11 @@ TEST_CASE("Version informaton", "[version]") {
     for (auto kv : version::feature_availability) {
       const std::string prefix = kv.second ? "+" : "-";
       CHECK(feature_string.find(prefix + kv.first) != std::string::npos);
+
+      CHECK(version::has_feature(kv.first) == kv.second);
     }
+
+    CHECK_FALSE(version::has_feature("blabbel"));
   }
 }  // version TEST_CASE
 }  // namespace tests
