@@ -21,6 +21,7 @@
 #include <catch.hpp>
 #include <linalgwrap/LazyMatrixWrapper.hh>
 #include <linalgwrap/LazyMatrix_i.hh>
+#include <linalgwrap/SmallMatrix.hh>
 #include <rapidcheck.h>
 
 namespace linalgwrap {

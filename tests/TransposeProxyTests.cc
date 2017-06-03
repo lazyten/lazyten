@@ -19,6 +19,7 @@
 
 #include "lazy_matrix_tests.hh"
 #include <catch.hpp>
+#include <linalgwrap/SmallMatrix.hh>
 #include <linalgwrap/TransposeProxy.hh>
 #include <rapidcheck.h>
 

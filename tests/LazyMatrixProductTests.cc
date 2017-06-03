@@ -22,6 +22,7 @@
 #include "rapidcheck_utils.hh"
 #include <catch.hpp>
 #include <linalgwrap/LazyMatrixProduct.hh>
+#include <linalgwrap/SmallMatrix.hh>
 #include <rapidcheck.h>
 
 namespace linalgwrap {
