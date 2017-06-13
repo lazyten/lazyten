@@ -171,6 +171,9 @@ struct CommandBase : rc::state::Command<typename TestingTraits::model_type,
     // running these random tests
     statetest_type::skip_easy_cases();
     statetest_type::run_all_tests(model_copy, sut.matrix());
+
+    // Switch easy cases back on
+    statetest_type::allow_easy_problems = true;
   }
 };
 

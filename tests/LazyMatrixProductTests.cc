@@ -86,6 +86,9 @@ TEST_CASE("LazyMatrixProduct", "[LazyMatrixProduct]") {
           10. * krims::NumCompConstants::default_tolerance_factor);
 
     REQUIRE(rc::check("Test multiplying terms with empty product", test_mult_with_empty));
+
+    // Switch easy cases back on
+    testing_lib::allow_easy_problems = true;
   }
 
   SECTION("Default lazy matrix tests") {

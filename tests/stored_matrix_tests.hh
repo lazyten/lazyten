@@ -46,7 +46,10 @@ class TestingLibrary {
    *  - Copying a stored matrix
    *  - Setting and getting elements via [], () or iterator
    */
-  TestingLibrary(std::string prefix = "") : m_prefix{prefix}, m_gen{argsgen} {}
+  TestingLibrary(std::string prefix = "", bool allow_empty_matrices = true)
+        : m_prefix{prefix}, m_gen{allow_empty_matrices ? argsgen : argsgen_nonempty} {
+    m_allow_empty_matrices = allow_empty_matrices;
+  }
 
   void run_checks() const;
 
@@ -65,10 +68,17 @@ class TestingLibrary {
     return *gen::numeric_tensor<matrix_type>().as("Matrix");
   };
 
+  static constexpr matrix_type argsgen_nonempty() {
+    const size_t rows = *gen::numeric_size<2>().as("Number of rows");
+    const size_t cols = *gen::numeric_size<2>().as("Number of columns");
+    return *gen::numeric_tensor<matrix_type>(rows, cols).as("Matrix");
+  }
+
   void once_test_initialiser_list_constructor() const;
 
   std::string m_prefix;
   gen_type m_gen;
+  bool m_allow_empty_matrices = true;
 };
 
 //
@@ -105,6 +115,9 @@ void TestingLibrary<Matrix>::run_checks() const {
 
   // Test construction from initialiser list
   once_test_initialiser_list_constructor();
+
+  // Set the flag we have stored locally
+  comptests::allow_empty_matrices = m_allow_empty_matrices;
 
   // Test copying stored matrices
   // TODO change all calls to
@@ -169,6 +182,9 @@ void TestingLibrary<Matrix>::run_checks() const {
                        comptests::test_transposed_mmult, low));
   CHECK(m_gen.run_test(m_prefix + "Matrix multiplication",
                        comptests::template test_multiply_by<Matrix>, supersloppy));
+
+  // Set the flag back to default:
+  comptests::allow_empty_matrices = true;
 }
 
 }  // namespace stored_matrix_tests

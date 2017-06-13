@@ -77,6 +77,9 @@ TEST_CASE("LazyMatrixSum", "[LazyMatrixSum]") {
           10. * krims::NumCompConstants::default_tolerance_factor);
 
     REQUIRE(rc::check("Test adding terms to empty sum", test_add_to_empty));
+
+    // Switch easy cases back on
+    testing_lib::allow_easy_problems = true;
   }
 
   SECTION("Default lazy matrix tests") {

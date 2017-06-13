@@ -77,3 +77,8 @@ find_package(Armadillo 4.000 REQUIRED)
 set(LAZYTEN_DEPENDENCIES ${LAZYTEN_DEPENDENCIES} ${ARMADILLO_LIBRARIES})
 include_directories(SYSTEM ${ARMADILLO_INCLUDE_DIRS})
 enable_feature(armadillo)
+
+# TODO Make this configurable
+# For now always use armadillo as the backend and never Bohrium
+set(SMALL_MATRIX_ARMADILLO ON)
+set(SMALL_MATRIX_BOHRIUM OFF)

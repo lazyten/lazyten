@@ -35,4 +35,10 @@ namespace lazyten {
 #cmakedefine LAZYTEN_HAVE_LAPACK
 #cmakedefine LAZYTEN_HAVE_ARPACK
 
+//
+// Small matrix selection
+//
+#cmakedefine SMALL_MATRIX_ARMADILLO
+#cmakedefine SMALL_MATRIX_BOHRIUM
+
 }  // namespace lazyten

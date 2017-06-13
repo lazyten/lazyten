@@ -234,6 +234,9 @@ struct ComparativeTests {
   /** Switch to hard problems */
   static void skip_easy_cases() { allow_easy_problems = false; }
 
+  /** Allow the generation of empty matrices */
+  static bool allow_empty_matrices;
+
  private:
   /** Generator for the extractor ranges in extract_block
    *
@@ -243,10 +246,12 @@ struct ComparativeTests {
    *   - For hard problems: Always return values larger than 0
    * */
   static Gen<size_type> gen_range_length(size_type numelements) {
+    RC_PRE(numelements > 1ul || allow_empty_matrices);
+
     if (numelements == 1) {
       return gen::just<size_type>(0);
     } else {
-      if (allow_easy_problems) {
+      if (allow_easy_problems && allow_empty_matrices) {
         return gen::weightedOneOf<size_type>(
               {{1, gen::just<size_type>(0)},
                {4, gen::inRange<size_type>(1, numelements)}});
@@ -306,6 +311,10 @@ struct ComparativeTests {
 // Define default value to true
 template <typename Model, typename Sut>
 bool ComparativeTests<Model, Sut>::allow_easy_problems = true;
+
+// Define default value to true
+template <typename Model, typename Sut>
+bool ComparativeTests<Model, Sut>::allow_empty_matrices = true;
 
 //
 // -------------------------------------------------------
@@ -526,6 +535,7 @@ lazyten_define_comptest(test_extract_block) {
 lazyten_define_comptest(test_extract_transpose_block) {
   typedef typename StoredTypeOf<Sut>::type stored_matrix_type;
 
+  const bool allow_empty = false;
   size_type nrows =
         *gen_range_length(model.n_cols()).as("Number of rows of the extracted matrix");
   size_type ncols =

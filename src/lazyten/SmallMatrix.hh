@@ -20,26 +20,27 @@
 #pragma once
 #include "lazyten/config.hh"
 
+// Macro to insert the required code
+#define SMALL_MATRIX_CODE(MATRIX)     \
+  namespace lazyten {                 \
+  template <typename Scalar>          \
+  class MATRIX;                       \
+  template <typename Scalar>          \
+  using SmallMatrix = MATRIX<Scalar>; \
+  }  // end namespace linalgwrap
+
+#if defined SMALL_MATRIX_ARMADILLO
 #include "lazyten/Armadillo/ArmadilloMatrix.hh"
+SMALL_MATRIX_CODE(ArmadilloMatrix)
 
-namespace lazyten {
-#if defined LAZYTEN_HAVE_ARMADILLO
-template <typename Scalar>
-class ArmadilloMatrix;
+//
+#elif defined SMALL_MATRIX_BOHRIUM
+#include "lazyten/Bohrium/BohriumMatrix.hh"
+SMALL_MATRIX_CODE(BohriumMatrix)
 
-template <typename Scalar>
-using SmallMatrix = ArmadilloMatrix<Scalar>;
-#elif defined LINALGWRAP_HAVE_BOHRIUM
-template <typename Scalar>
-class BohriumMatrix;
-
-template <typename Scalar>
-using SmallMatrix = BohriumMatrix<Scalar>;
+//
 #else
-template <typename Scalar>
-class SmallMatrix {
-  static_assert(false, "No default implementation for SmallMatrix.");
-};
+#error "No alias for SmallMatrix defined"
 #endif
 
-}  // namespace lazyten
+#undef SMALL_MATRIX_CODE
