@@ -293,7 +293,7 @@ EigensolutionTypeFor<true, BlockMatrixA> eigensystem_hermitian(
     assert_size(ita->n_rows(), itb->n_rows());
 
     auto block_soln = eigensystem_hermitian(*ita, *itb, *it_nep, map);
-    assert_internal(block_soln.n_ep() == *it_nep);
+    assert_internal(block_soln.n_ep() == std::min(*it_nep, ita->n_rows()));
 
     // Lambda to pad the vector with zeros at beginning and end
     auto pad_with_zeros = [&begin_index, &A](const evector_type& v) {
