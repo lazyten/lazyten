@@ -309,7 +309,14 @@ MatrixIteratorDefaultCore<Matrix, Constness>::MatrixIteratorDefaultCore(matrix_t
 template <typename Matrix, bool Constness>
 MatrixIteratorDefaultCore<Matrix, Constness>::MatrixIteratorDefaultCore(
       matrix_type& mat, index_type start_index)
-      : m_index{start_index}, m_matrix_ptr{"MatrixIteratorDefaultCore", mat} {}
+      : m_index{start_index}, m_matrix_ptr{"MatrixIteratorDefaultCore", mat} {
+  if (start_index.first >= mat.n_rows() || start_index.second >= mat.n_cols()) {
+    // Already at the start we are past the end
+    m_index = base_type::invalid_pos;
+  } else {
+    assert_valid_state();
+  }
+}
 
 template <typename Matrix, bool Constness>
 typename MatrixIteratorDefaultCore<Matrix, Constness>::size_type

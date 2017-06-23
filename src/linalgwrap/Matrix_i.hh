@@ -25,7 +25,6 @@
 #include "Exceptions.hh"
 #include "MultiVector.hh"
 #include "PtrVector.hh"
-#include "SmallMatrix.hh"
 #include "io/MatrixPrinter.hh"
 #include <complex>
 #include <cstddef>

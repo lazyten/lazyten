@@ -19,6 +19,7 @@
 
 #include "rapidcheck_utils.hh"
 #include <catch.hpp>
+#include <linalgwrap/SmallMatrix.hh>
 #include <linalgwrap/TestingUtils.hh>
 #include <linalgwrap/trans.hh>
 

@@ -20,6 +20,7 @@
 #include "lazy_matrix_tests.hh"
 #include <catch.hpp>
 #include <linalgwrap/LazyMatrixWrapper.hh>
+#include <linalgwrap/SmallMatrix.hh>
 #include <rapidcheck.h>
 
 namespace linalgwrap {

@@ -129,9 +129,7 @@ MatrixIterator<IteratorCore>::MatrixIterator(matrix_type& mat) : base_type{mat} 
 
 template <typename IteratorCore>
 MatrixIterator<IteratorCore>::MatrixIterator(matrix_type& mat, index_type start_index)
-      : base_type{mat, start_index} {
-  base_type::assert_valid_state();
-}
+      : base_type{mat, start_index} {}
 
 template <typename IteratorCore>
 typename MatrixIterator<IteratorCore>::size_type MatrixIterator<IteratorCore>::row()
