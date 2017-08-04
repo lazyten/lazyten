@@ -1,7 +1,6 @@
-#!/bin/bash
 ## ---------------------------------------------------------------------
 ##
-## Copyright (C) 2016-17 by the linalgwrap authors
+## Copyright (C) 2017 by the linalgwrap authors
 ##
 ## This file is part of linalgwrap.
 ##
@@ -20,13 +19,19 @@
 ##
 ## ---------------------------------------------------------------------
 
-. update_from_sisters.lib.sh || exit 1
+include_krims_cmake_module(Documentation)
 
-update_file "krims" ".clang-format" || exit 1
-update_file "krims" ".clang-tidy" || exit 1
-update_file "krims" "cmake/findCatch.cmake" || exit 1
-update_file "krims" "cmake/findRapidcheck.cmake" || exit 1
-update_file "krims" "doc/Doxyfile.in" || exit 1
-update_file "krims" "external/get.lib.sh" || exit 1
-update_file "krims" "external/get_rapidcheck.sh" || exit 1
-update_file "krims" "templates/README.md" || exit 1
+# Exclude patterns for the actual Doxyfile generated with configure_file
+set(DOXY_EXCLUDE_PATTERNS "")
+set(DOXY_LATEX "OFF")
+if (DOCUMENTATION_DOXYGEN_LATEX)
+	set(DOXY_LATEX "ON")
+endif()
+
+configure_file("Doxyfile.in" "Doxyfile" @ONLY)
+setup_doxygen(doc-linalgwrap-doxygen "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile"
+	      "${CMAKE_CURRENT_BINARY_DIR}/codedoc"
+	      "share/doc/linalgwrap")
+
+add_custom_target(doc-linalgwrap ALL)
+add_dependencies(doc-linalgwrap doc-linalgwrap-doxygen)

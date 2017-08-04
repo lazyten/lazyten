@@ -29,16 +29,6 @@ include_krims_cmake_module(DebugReleaseBuild)
 drb_init()
 
 ##########################################################################
-# Global options
-
-# Path where cmake wants the modules and config packages:
-set(PackageModuleLocation share/cmake)
-
-# setup global options (needs to be done before call to project())
-option(LINALGWRAP_ENABLE_TESTS "Build linalgwrap tests" ON)
-option(LINALGWRAP_ENABLE_EXAMPLES "Build linalgwrap examples" ON)
-
-##########################################################################
 # Project setup
 
 project(linalgwrap VERSION 0.2.0)
@@ -50,6 +40,18 @@ include_directories("${PROJECT_BINARY_DIR}/src")  # for generated sources
 
 # enable testing of this project
 enable_testing()
+
+##########################################################################
+# Global options
+
+# Path where cmake wants the modules and config packages:
+set(PackageModuleLocation share/cmake)
+
+# setup global options
+include_krims_cmake_module(GlobalOption)
+global_option(ENABLE_DOCUMENTATION "Build documentation"         OFF )
+global_option(ENABLE_EXAMPLES      "Build example exectables"    ON  )
+global_option(ENABLE_TESTS         "Build unit test executables" ON  )
 
 ##########################################################################
 # Setup hard and optional dependencies and find components
@@ -86,6 +88,10 @@ endif()
 if(LINALGWRAP_ENABLE_EXAMPLES)
 	add_subdirectory(examples)
 	set(LAW_SUBDIRS ${LAW_SUBDIRS} examples)
+endif()
+
+if(LINALGWRAP_ENABLE_DOCUMENTATION)
+	add_subdirectory(doc)
 endif()
 
 ##########################################################################
