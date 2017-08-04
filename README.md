@@ -16,8 +16,7 @@ and only a fraction of the planned features are currently implemented.
   (GenMap, Exception handling, Subscription pointers)
 - A BLAS implementation, e.g. [OpenBLAS](https://github.com/xianyi/OpenBLAS/)
 - A LAPACK compatible library, e.g.
-  [LAPACK](http://netlib.org/lapack) in order to use ``linalgwrap`` the
-  LAPACK eigensolvers
+  [LAPACK](http://netlib.org/lapack) in order to use the LAPACK eigensolvers
 - [armadillo](http://arma.sourceforge.net/) for the armadillo eigensolvers
   and linear solvers as well as the only linear-algebra backend (so far)
 - *(optional)* [ARPACK](http://www.caam.rice.edu/software/ARPACK/) in order to use
