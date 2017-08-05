@@ -529,9 +529,11 @@ void ArpackEigensolver<Eigenproblem, State>::solve_state(state_type& state) cons
   // Number of arnoldi vectors (0 == autodetermined)
   size_t n_arnoldi_actual = n_arnoldi_vectors;
   if (n_arnoldi_actual == 0) {
-    // Auto-determine number of arnoldi vectors:
-    n_arnoldi_actual = std::min(problem.dim(), 3 * problem.n_ep() / 2);
-    if (n_arnoldi_actual < 2) n_arnoldi_actual = 2;
+
+    // Auto-determine number of arnoldi vectors
+    // Note: This is exactly the algorithm used by scipy.
+    n_arnoldi_actual =
+          std::min(problem.dim(), std::max<size_t>(2 * problem.n_ep() + 1, 20));
   }
 
   // Info parameter for ARPACK:
