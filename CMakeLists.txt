@@ -50,7 +50,7 @@ set(PackageModuleLocation share/cmake)
 # setup global options
 include_krims_cmake_module(GlobalOption)
 global_option(ENABLE_DOCUMENTATION "Build documentation"         OFF )
-global_option(ENABLE_EXAMPLES      "Build example exectables"    ON  )
+global_option(ENABLE_EXAMPLES      "Build example executables"   ON  )
 global_option(ENABLE_TESTS         "Build unit test executables" ON  )
 
 ##########################################################################
