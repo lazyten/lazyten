@@ -82,7 +82,9 @@ install(DIRECTORY .
 	COMPONENT devel
 	FILES_MATCHING PATTERN "*.hh"
 )
-install(FILES "${linalgwrap_BINARY_DIR}/src/linalgwrap/config.hh"
+install(FILES
+	"${linalgwrap_BINARY_DIR}/src/linalgwrap/config.hh"
+	"${linalgwrap_BINARY_DIR}/src/linalgwrap/version.hh"
 	DESTINATION "include/linalgwrap"
 	COMPONENT devel
 )

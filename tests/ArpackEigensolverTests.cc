@@ -48,10 +48,6 @@ TEST_CASE("ArpackEigensolver", "[ArpackEigensolver]") {
         std::string("SM")) {
       return false;
     }
-    if (problem.params.at<std::string>(EigensolverBaseKeys::which, "SR") ==
-        std::string("SR")) {
-      return false;
-    }
 
     return true;
   };

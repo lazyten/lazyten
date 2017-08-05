@@ -19,12 +19,6 @@
 
 #pragma once
 namespace linalgwrap {
-
-#ifndef LINALGWRAP_HAVE_ARMADILLO
-// TODO The above guard is for compatiblity with downstream code.
-//      One should remove it once all have moved to use config.hh
-//      instead of the commandline flags.
-
 //
 // Definitions of features
 //
@@ -40,7 +34,5 @@ namespace linalgwrap {
 #cmakedefine LINALGWRAP_HAVE_BOHRIUM
 #cmakedefine LINALGWRAP_HAVE_LAPACK
 #cmakedefine LINALGWRAP_HAVE_ARPACK
-
-#endif  // LINALGWRAP_HAVE_ARMADILLO
 
 }  // namespace linalgwrap
