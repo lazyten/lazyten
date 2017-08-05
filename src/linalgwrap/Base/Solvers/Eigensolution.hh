@@ -20,6 +20,7 @@
 #pragma once
 #include "linalgwrap/MultiVector.hh"
 #include "linalgwrap/TypeUtils.hh"
+#include <krims/TypeUtils/CheaplyCopyable_i.hh>
 #include <memory>
 
 namespace linalgwrap {
@@ -29,7 +30,7 @@ namespace linalgwrap {
  * \tparam Evalue   The type used for the eigenvalues.
  */
 template <typename Evalue, typename Evector>
-struct Eigensolution {
+struct Eigensolution : public krims::CheaplyCopyable_i {
   /** \name Type definitions */
   ///@{
   /** The size type used in this class */
