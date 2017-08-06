@@ -5,10 +5,16 @@
 
 A lightweight linear algebra wrapper library adding support for [lazy-matrices](#lazy matrices)
 and lazy matrix evaluation to existing linear algebra libraries.
+This library used to be called `linalgwrap` and was just recently renamed to `lazyten`
+(for **lazy** **ten**sor library).
+Right now we are only able to deal with lazy matrices,
+but we intend to add support for lazy tensor evaluation as well in the future.
 
-Note that this library is at a *very early stage* at the moment.
-This means that interfaces will very likely change in the future
-and only a fraction of the planned features are currently implemented.
+Note that we are still at a *very early* development stage.
+In other words interfaces will very likely change in the future
+in incompatible ways to what is currently implemented.
+We try to make sure that this does, however,
+not go unnoticed, i.e. that existing code breaks at compile time.
 
 ## Dependencies
 ``lazyten`` depends on the following libraries:
