@@ -1,21 +1,21 @@
 ## ---------------------------------------------------------------------
 ##
-## Copyright (C) 2016 by the linalgwrap authors
+## Copyright (C) 2016-17 by the lazyten authors
 ##
-## This file is part of linalgwrap.
+## This file is part of lazyten.
 ##
-## linalgwrap is free software: you can redistribute it and/or modify
+## lazyten is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published
 ## by the Free Software Foundation, either version 3 of the License, or
 ## (at your option) any later version.
 ##
-## linalgwrap is distributed in the hope that it will be useful,
+## lazyten is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
+## along with lazyten. If not, see <http://www.gnu.org/licenses/>.
 ##
 ## ---------------------------------------------------------------------
 
@@ -49,13 +49,13 @@ function(setup_example_target TARGET)
 	)
 
 	# setup definitions.
-	target_compile_definitions(${TARGET} PRIVATE "${LINALGWRAP_DEFINITIONS};${LINALGWRAP_DEFINITIONS_${EXAMPLE_BUILD_TYPE}}")
+	target_compile_definitions(${TARGET} PRIVATE "${LAZYTEN_DEFINITIONS};${LAZYTEN_DEFINITIONS_${EXAMPLE_BUILD_TYPE}}")
 
-	# link it with the appropriate linalgwrap library target
+	# link it with the appropriate lazyten library target
 	target_link_libraries(${TARGET}
-		${linalgwrap_${EXAMPLE_BUILD_TYPE}_TARGET}
-		${LINALGWRAP_DEPENDENCIES}
-		${LINALGWRAP_DEPENDENCIES_${EXAMPLE_BUILD_TYPE}}
+		${lazyten_${EXAMPLE_BUILD_TYPE}_TARGET}
+		${LAZYTEN_DEPENDENCIES}
+		${LAZYTEN_DEPENDENCIES_${EXAMPLE_BUILD_TYPE}}
 	)
 endfunction()
 

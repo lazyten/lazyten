@@ -1,28 +1,28 @@
 //
-// Copyright (C) 2017 by the linalgwrap authors
+// Copyright (C) 2017 by the lazyten authors
 //
-// This file is part of linalgwrap.
+// This file is part of lazyten.
 //
-// linalgwrap is free software: you can redistribute it and/or modify
+// lazyten is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
 // by the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// linalgwrap is distributed in the hope that it will be useful,
+// lazyten is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
+// along with lazyten. If not, see <http://www.gnu.org/licenses/>.
 //
 
 #pragma once
-#include <linalgwrap/SmallMatrix.hh>
+#include <lazyten/SmallMatrix.hh>
 
 // Define types
 typedef double scalar_type;
-typedef linalgwrap::SmallMatrix<scalar_type> matrix_type;
+typedef lazyten::SmallMatrix<scalar_type> matrix_type;
 
 // A hermitian test matrix
 matrix_type mat_a{{76.52963291652406, -25.666510871673864, 34.43577632850656,

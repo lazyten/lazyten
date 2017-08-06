@@ -1,26 +1,26 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the lazyten authors
 //
-// This file is part of linalgwrap.
+// This file is part of lazyten.
 //
-// linalgwrap is free software: you can redistribute it and/or modify
+// lazyten is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
 // by the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// linalgwrap is distributed in the hope that it will be useful,
+// lazyten is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
+// along with lazyten. If not, see <http://www.gnu.org/licenses/>.
 //
 
 #pragma once
 #include "indexable_tests.hh"
 
-namespace linalgwrap {
+namespace lazyten {
 namespace tests {
 using namespace rc;
 using namespace krims;
@@ -92,17 +92,17 @@ struct ComparativeTests : public indexable_tests::ComparativeTests<Model, Sut> {
   // TODO test swap function!
 
   /** Test read-only element access via () at random places */
-  linalgwrap_declare_comptest(test_element_access);
+  lazyten_declare_comptest(test_element_access);
 
   /** Test the l1 norm function */
-  linalgwrap_declare_comptest(test_norm_l1);
+  lazyten_declare_comptest(test_norm_l1);
 
   /** Test the linf norm function */
-  linalgwrap_declare_comptest(test_norm_linf);
+  lazyten_declare_comptest(test_norm_linf);
 
   /** Test the frobenius norm functions (norm_frobenius and
    * norm_frobenius_squared) */
-  linalgwrap_declare_comptest(test_norm_l2);
+  lazyten_declare_comptest(test_norm_l2);
 
   /** Run all comparative tests (including the ones from indexable_tests) */
   template <typename Args>
@@ -114,12 +114,12 @@ struct ComparativeTests : public indexable_tests::ComparativeTests<Model, Sut> {
 // -------------------------------------------------------
 //
 
-linalgwrap_define_comptest(test_element_access) {
+lazyten_define_comptest(test_element_access) {
   size_type i = *gen::inRange<size_type>(0u, model.size()).as("index");
   RC_ASSERT_NC(model(i) == numcomp(sut(i)).tolerance(tolerance));
 }
 
-linalgwrap_define_comptest(test_norm_l1) {
+lazyten_define_comptest(test_norm_l1) {
   real_type norm{0};
   for (size_type i = 0; i < model.n_elem(); ++i) {
     norm += std::abs(model[i]);
@@ -127,7 +127,7 @@ linalgwrap_define_comptest(test_norm_l1) {
   RC_ASSERT_NC(norm_l1(sut) == numcomp(norm).tolerance(tolerance));
 }
 
-linalgwrap_define_comptest(test_norm_linf) {
+lazyten_define_comptest(test_norm_linf) {
   real_type norm{0};
   for (size_type i = 0; i < model.n_elem(); ++i) {
     norm = std::max(norm, std::abs(model[i]));
@@ -135,7 +135,7 @@ linalgwrap_define_comptest(test_norm_linf) {
   RC_ASSERT_NC(norm_linf(sut) == numcomp(norm).tolerance(tolerance));
 }
 
-linalgwrap_define_comptest(test_norm_l2) {
+lazyten_define_comptest(test_norm_l2) {
   real_type norm_squared{0};
   for (size_type i = 0; i < model.n_elem(); ++i) {
     norm_squared += std::abs(model[i]) * std::abs(model[i]);
@@ -164,4 +164,4 @@ void ComparativeTests<Model, Sut>::run_all(
 
 }  // vector_tests
 }  // namespace tests
-}  // namespace linalgwrap
+}  // namespace lazyten

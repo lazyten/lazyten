@@ -1,1 +1,1 @@
-let g:tmpl_project="linalgwrap"
+let g:tmpl_project="lazyten"

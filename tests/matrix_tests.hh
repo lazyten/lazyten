@@ -1,20 +1,20 @@
 //
-// Copyright (C) 2016-17 by the linalgwrap authors
+// Copyright (C) 2016-17 by the lazyten authors
 //
-// This file is part of linalgwrap.
+// This file is part of lazyten.
 //
-// linalgwrap is free software: you can redistribute it and/or modify
+// lazyten is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
 // by the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// linalgwrap is distributed in the hope that it will be useful,
+// lazyten is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
+// along with lazyten. If not, see <http://www.gnu.org/licenses/>.
 //
 
 #pragma once
@@ -25,10 +25,10 @@
 #include "rapidcheck_utils.hh"
 #include "vector_tests.hh"
 #include <functional>
-#include <linalgwrap/TestingUtils.hh>
-#include <linalgwrap/TypeUtils.hh>
+#include <lazyten/TestingUtils.hh>
+#include <lazyten/TypeUtils.hh>
 
-namespace linalgwrap {
+namespace lazyten {
 namespace tests {
 using namespace rc;
 using namespace krims;
@@ -88,7 +88,7 @@ struct ComparativeTests {
         const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
 
   /** Test copying the sut */
-  linalgwrap_declare_comptest(test_copy);
+  lazyten_declare_comptest(test_copy);
 
   /** Test read-only element access via () and [] at
    *  random places. Compare resulting values of the
@@ -119,7 +119,7 @@ struct ComparativeTests {
    * \note if sut and model are the same object this function compares
    *       the values yielded against values of the matrix itself.
    *  */
-  linalgwrap_declare_comptest(test_extract_block);
+  lazyten_declare_comptest(test_extract_block);
 
   /** Test whether extracting a random block in the sut yields the data
    *  of that same block in the model i
@@ -128,7 +128,7 @@ struct ComparativeTests {
    * \note if sut and model are the same object this function compares
    *       the values yielded against values of the matrix itself.
    *  */
-  linalgwrap_declare_comptest(test_extract_transpose_block);
+  lazyten_declare_comptest(test_extract_transpose_block);
 
   // TODO override version of indexable_tests.hh
   /** Test whether using an iterator yields the same values as
@@ -149,26 +149,26 @@ struct ComparativeTests {
         const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default);
 
   /** Test the l1 norm function */
-  linalgwrap_declare_comptest(test_norm_l1);
+  lazyten_declare_comptest(test_norm_l1);
 
   /** Test the linf norm function */
-  linalgwrap_declare_comptest(test_norm_linf);
+  lazyten_declare_comptest(test_norm_linf);
 
   /** Test the frobenius norm functions (norm_frobenius and
    * norm_frobenius_squared) */
-  linalgwrap_declare_comptest(test_norm_frobenius);
+  lazyten_declare_comptest(test_norm_frobenius);
 
   /** Test the trace function */
-  linalgwrap_declare_comptest(test_trace);
+  lazyten_declare_comptest(test_trace);
 
   /** Test the functions min and max*/
-  linalgwrap_declare_comptest(test_minmax);
+  lazyten_declare_comptest(test_minmax);
 
   /** Test the elementwise functions abs, conj, sqrt and square */
-  linalgwrap_declare_comptest(test_elementwise);
+  lazyten_declare_comptest(test_elementwise);
 
   /** Test the accumulate function */
-  linalgwrap_declare_comptest(test_accumulate);
+  lazyten_declare_comptest(test_accumulate);
 
   /** Test whether multiplication by a scalar yields the same
    *  values in model and sut */
@@ -202,31 +202,31 @@ struct ComparativeTests {
    *  gives rise to the same result in model and sut.
    */
   template <typename OtherMatrix>
-  linalgwrap_declare_comptest(test_multiply_by);
+  lazyten_declare_comptest(test_multiply_by);
 
   /** Test whether the mmult function gives rise to the
    *  expected result for normal application mode
    */
-  linalgwrap_declare_comptest(test_mmult);
+  lazyten_declare_comptest(test_mmult);
 
   /** Test whether the mmult function gives rise to the
    *  expected result for transposed application mode.
    */
-  linalgwrap_declare_comptest(test_transposed_mmult);
+  lazyten_declare_comptest(test_transposed_mmult);
 
   /** Test whether applying an arbitrary multivector to the matrix
    *  yields the same result in both model and sut */
   template <typename Vector>
-  linalgwrap_declare_comptest(test_apply_to);
+  lazyten_declare_comptest(test_apply_to);
 
   /** Test whether applying an arbitrary multivector to the transpose of the
    *  matrix yields the same result in both model and sut */
   template <typename Vector>
-  linalgwrap_declare_comptest(test_transpose_apply_to);
+  lazyten_declare_comptest(test_transpose_apply_to);
 
   /** Test inverse application */
   template <typename Vector>
-  linalgwrap_declare_comptest(test_inv_apply_to);
+  lazyten_declare_comptest(test_inv_apply_to);
 
   /** Are easy problems allowed (by default yes) */
   static bool allow_easy_problems;
@@ -410,7 +410,7 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_equivalence(
   RC_ASSERT_NC(model == numcomp(sut).tolerance(tolerance));
 }
 
-linalgwrap_define_comptest(test_copy) {
+lazyten_define_comptest(test_copy) {
   // TODO exists in indexable_tests
   idx_cmptests::test_copy(model, sut, tolerance);
 }
@@ -478,7 +478,7 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_setting_elements_vectorised(
   }
 }
 
-linalgwrap_define_comptest(test_extract_block) {
+lazyten_define_comptest(test_extract_block) {
   typedef typename StoredTypeOf<Sut>::type stored_matrix_type;
 
   size_type nrows =
@@ -495,7 +495,7 @@ linalgwrap_define_comptest(test_extract_block) {
 
   // allow c_M only to be zero if out does not have a small norm.
   auto c_M = *gen_c_out(norm_frobenius(out) >= 1e-12).as("Coefficient for out matrix");
-#ifdef LINALGWRAP_TESTS_VERBOSE
+#ifdef LAZYTEN_TESTS_VERBOSE
   RC_CLASSIFY(c_this == 0.0, "extract_block: Matrix coefficient is zero (c_this==0)");
   RC_CLASSIFY(c_M == 0.0, "extract_block: Output coefficient is zero(c_M == 0)");
   RC_CLASSIFY(nrows == 0 || ncols == 0, "extract_block: Empty extractor range");
@@ -523,7 +523,7 @@ linalgwrap_define_comptest(test_extract_block) {
   }    // i
 }
 
-linalgwrap_define_comptest(test_extract_transpose_block) {
+lazyten_define_comptest(test_extract_transpose_block) {
   typedef typename StoredTypeOf<Sut>::type stored_matrix_type;
 
   size_type nrows =
@@ -543,7 +543,7 @@ linalgwrap_define_comptest(test_extract_transpose_block) {
 
 // TODO bool conjtransp = *gen::arbitrary<bool>().as("Apply complex
 // conjugation");
-#ifdef LINALGWRAP_TESTS_VERBOSE
+#ifdef LAZYTEN_TESTS_VERBOSE
   RC_CLASSIFY(c_this == 0.0, "extract_tr_block: Matrix coefficient is zero (c_this==0)");
   RC_CLASSIFY(c_M == 0.0, "extract_tr_block: Output coefficient is zero (c_M == 0)");
   RC_CLASSIFY(nrows == 0 || ncols == 0, "extract_tr_block: Empty extractor range");
@@ -635,7 +635,7 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_readwrite_iterator(
   }
 }
 
-linalgwrap_define_comptest(test_norm_l1) {
+lazyten_define_comptest(test_norm_l1) {
   scalar_type norm{0};
   for (size_type col = 0; col < model.n_cols(); ++col) {
     scalar_type accu{0};
@@ -647,7 +647,7 @@ linalgwrap_define_comptest(test_norm_l1) {
   RC_ASSERT_NC(norm_l1(sut) == numcomp(norm).tolerance(tolerance));
 }
 
-linalgwrap_define_comptest(test_norm_linf) {
+lazyten_define_comptest(test_norm_linf) {
   scalar_type norm{0};
   for (size_type row = 0; row < model.n_rows(); ++row) {
     scalar_type accu{0};
@@ -659,7 +659,7 @@ linalgwrap_define_comptest(test_norm_linf) {
   RC_ASSERT_NC(norm_linf(sut) == numcomp(norm).tolerance(tolerance));
 }
 
-linalgwrap_define_comptest(test_norm_frobenius) {
+lazyten_define_comptest(test_norm_frobenius) {
   scalar_type frobenius_squared{0};
   for (size_type i = 0; i < model.n_rows(); ++i) {
     for (size_type j = 0; j < model.n_cols(); ++j) {
@@ -673,7 +673,7 @@ linalgwrap_define_comptest(test_norm_frobenius) {
   RC_ASSERT_NC(norm_frobenius(sut) == numcomp(frobenius).tolerance(tolerance));
 }
 
-linalgwrap_define_comptest(test_trace) {
+lazyten_define_comptest(test_trace) {
   RC_PRE(model.n_rows() == model.n_cols());
 
   scalar_type res{0};
@@ -684,17 +684,17 @@ linalgwrap_define_comptest(test_trace) {
   RC_ASSERT_NC(trace(sut) == numcomp(res).tolerance(tolerance));
 }
 
-linalgwrap_define_comptest(test_minmax) {
+lazyten_define_comptest(test_minmax) {
   // TODO exists in indexable_tests.hh
   idx_cmptests::test_minmax(model, sut, tolerance);
 }
 
-linalgwrap_define_comptest(test_elementwise) {
+lazyten_define_comptest(test_elementwise) {
   // TODO exists in indexable_tests.hh
   idx_cmptests::test_elementwise(model, sut, tolerance);
 }
 
-linalgwrap_define_comptest(test_accumulate) {
+lazyten_define_comptest(test_accumulate) {
   // TODO exists in indexable_tests.hh
   idx_cmptests::test_accumulate(model, sut, tolerance);
 }
@@ -740,11 +740,11 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_divide_scalar(
   RC_ASSERT_NC(res_model == numcomp(res).tolerance(tolerance));
 }
 
-linalgwrap_define_comptest_tmpl(test_multiply_by, OtherMatrix) {
+lazyten_define_comptest_tmpl(test_multiply_by, OtherMatrix) {
   // The size of the other matrix to multiply mlhs with:
   // Note: the RHS of inRange is exclusive
   auto othersize = *gen::numeric_size<2>().as("Number of columns of the rhs matrix");
-#ifdef LINALGWRAP_TESTS_VERBOSE
+#ifdef LAZYTEN_TESTS_VERBOSE
   RC_CLASSIFY(othersize == 0, "test_mult_by: Empty rhs matrix");
 #endif
 
@@ -753,7 +753,7 @@ linalgwrap_define_comptest_tmpl(test_multiply_by, OtherMatrix) {
         0.95,
         gen::fixed_size<OtherMatrix>(model.n_cols(), othersize).as("Multiplication rhs"));
 
-#ifdef LINALGWRAP_TESTS_VERBOSE
+#ifdef LAZYTEN_TESTS_VERBOSE
   RC_CLASSIFY(norm_frobenius(mrhs) == 0, "test_mult_by: Zero matrix multiplied");
 #endif
 
@@ -768,7 +768,7 @@ linalgwrap_define_comptest_tmpl(test_multiply_by, OtherMatrix) {
   RC_ASSERT_NC(result_model == numcomp(result).tolerance(tolerance));
 }
 
-linalgwrap_define_comptest(test_mmult) {
+lazyten_define_comptest(test_mmult) {
   typedef typename StoredTypeOf<Sut>::type stored_matrix_type;
 
   auto col = *gen::numeric_size<2>().as("Number of columns of the rhs matrix");
@@ -782,7 +782,7 @@ linalgwrap_define_comptest(test_mmult) {
 
   // allow c_M only to be zero if out does not have a small norm.
   auto coeff = *gen_c_out(norm_frobenius(res) >= 1e-12).as("Coefficient for out matrix");
-#ifdef LINALGWRAP_TESTS_VERBOSE
+#ifdef LAZYTEN_TESTS_VERBOSE
   RC_CLASSIFY(c_this == 0.0, "mmult: Matrix coefficient is zero (c_this==0)");
   RC_CLASSIFY(coeff == 0.0, "mmult: Output coefficient is zero (c_M == 0)");
   RC_CLASSIFY(col == 0, "mmult: Empty output matrix");
@@ -813,7 +813,7 @@ linalgwrap_define_comptest(test_mmult) {
   RC_ASSERT_NC(res == numcomp(model_res).tolerance(tolerance));
 }
 
-linalgwrap_define_comptest(test_transposed_mmult) {
+lazyten_define_comptest(test_transposed_mmult) {
   typedef typename StoredTypeOf<Sut>::type stored_matrix_type;
 
   auto col = *gen::numeric_size<2>().as("Number of columns of the rhs matrix");
@@ -827,7 +827,7 @@ linalgwrap_define_comptest(test_transposed_mmult) {
 
   // allow c_M only to be zero if out does not have a small norm.
   auto coeff = *gen_c_out(norm_frobenius(res) >= 1e-12).as("Coefficient for out matrix");
-#ifdef LINALGWRAP_TESTS_VERBOSE
+#ifdef LAZYTEN_TESTS_VERBOSE
   RC_CLASSIFY(c_this == 0.0, "mmult_trans: Matrix coefficient is zero (c_this==0)");
   RC_CLASSIFY(coeff == 0.0, "mmult_trans: Output coefficient is zero (c_M == 0)");
   RC_CLASSIFY(col == 0, "mmult_trans: Empty output matrix");
@@ -859,7 +859,7 @@ linalgwrap_define_comptest(test_transposed_mmult) {
   RC_ASSERT_NC(res == numcomp(model_res).tolerance(tolerance));
 }
 
-linalgwrap_define_comptest_tmpl(test_apply_to, Vector) {
+lazyten_define_comptest_tmpl(test_apply_to, Vector) {
   auto n_vectors = *gen::inRange<size_type>(1, 6).as("Number of vectors to apply to");
   auto mvin = *gen_problem_matrix<MultiVector<Vector>>(model.n_cols(), n_vectors)
                      .as("Vectors to apply to");
@@ -879,7 +879,7 @@ linalgwrap_define_comptest_tmpl(test_apply_to, Vector) {
         std::sqrt(std::accumulate(std::begin(l2norms_in), std::end(l2norms_in), 0));
 
   auto coeff = *gen_c_out(norm_out >= 1e-12).as("Coefficient for out vectors");
-#ifdef LINALGWRAP_TESTS_VERBOSE
+#ifdef LAZYTEN_TESTS_VERBOSE
   RC_CLASSIFY(c_this == 0.0, "apply: Matrix coefficient is zero (c_this==0)");
   RC_CLASSIFY(coeff == 0.0, "apply: Output coefficient is zero (c_y == 0)");
   if (norm_in == 0) {
@@ -911,7 +911,7 @@ linalgwrap_define_comptest_tmpl(test_apply_to, Vector) {
   RC_ASSERT_NC(model_out == numcomp(mvout).tolerance(tolerance));
 }
 
-linalgwrap_define_comptest_tmpl(test_transpose_apply_to, Vector) {
+lazyten_define_comptest_tmpl(test_transpose_apply_to, Vector) {
   auto n_vectors = *gen::inRange<size_type>(1, 6).as("Number of vectors to apply to");
   auto mvin = *gen_problem_matrix<MultiVector<Vector>>(model.n_rows(), n_vectors)
                      .as("Vectors to apply to");
@@ -931,7 +931,7 @@ linalgwrap_define_comptest_tmpl(test_transpose_apply_to, Vector) {
         std::sqrt(std::accumulate(std::begin(l2norms_in), std::end(l2norms_in), 0));
 
   auto coeff = *gen_c_out(norm_out >= 1e-12).as("Coefficient for out vectors");
-#ifdef LINALGWRAP_TESTS_VERBOSE
+#ifdef LAZYTEN_TESTS_VERBOSE
   RC_CLASSIFY(c_this == 0.0, "apply_trans: Matrix coefficient is zero (c_this==0)");
   RC_CLASSIFY(coeff == 0.0, "apply_trans: Output coefficient is zero (c_y == 0)");
   if (norm_in == 0) {
@@ -964,7 +964,7 @@ linalgwrap_define_comptest_tmpl(test_transpose_apply_to, Vector) {
   RC_ASSERT_NC(model_out == numcomp(mvout).tolerance(tolerance));
 }
 
-linalgwrap_define_comptest_tmpl(test_inv_apply_to, Vector) {
+lazyten_define_comptest_tmpl(test_inv_apply_to, Vector) {
   auto n_vectors = *gen::inRange<size_type>(1, 6).as("Number of vectors to apply to");
   auto ivec_gen =
         gen::with_l2_norm_in_range(0, 1e2, gen::numeric_tensor<Vector>(model.n_cols()));
@@ -1033,7 +1033,7 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_add(
   auto madd =
         *gen::fixed_size<OtherMatrix>(model.n_rows(), model.n_cols()).as("Matrix to add");
 
-#ifdef LINALGWRAP_TESTS_VERBOSE
+#ifdef LAZYTEN_TESTS_VERBOSE
   RC_CLASSIFY(norm_frobenius(madd) == 0, "add: Zero matrix added");
 #endif
 
@@ -1065,7 +1065,7 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_subtract(
   auto msub = *gen::fixed_size<OtherMatrix>(model.n_rows(), model.n_cols())
                      .as("Matrix to subtract");
 
-#ifdef LINALGWRAP_TESTS_VERBOSE
+#ifdef LAZYTEN_TESTS_VERBOSE
   RC_CLASSIFY(norm_frobenius(msub) == 0, "sub: Zero matrix subtracted");
 #endif
 
@@ -1086,4 +1086,4 @@ void ComparativeTests<CompMatrix, SutMatrix>::test_subtract(
 
 }  // matrix_tests
 }  // namespace tests
-}  // namespace linalgwrap
+}  // namespace lazyten
