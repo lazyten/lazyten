@@ -3,7 +3,8 @@
 [![Coverage Status](https://coveralls.io/repos/github/lazyten/lazyten/badge.svg?branch=master)](https://coveralls.io/github/lazyten/lazyten)
 [![Licence](https://img.shields.io/github/license/lazyten/lazyten.svg)](LICENCE)
 
-A lightweight linear algebra wrapper library adding support for [lazy-matrices](#lazy matrices)
+A lightweight linear algebra wrapper library adding support for
+[lazy matrices](#lazy-matrices)
 and lazy matrix evaluation to existing linear algebra libraries.
 This library used to be called `linalgwrap` and was just recently renamed to `lazyten`
 (for **lazy** **ten**sor library).
