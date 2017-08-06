@@ -1,26 +1,26 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the lazyten authors
 //
-// This file is part of linalgwrap.
+// This file is part of lazyten.
 //
-// linalgwrap is free software: you can redistribute it and/or modify
+// lazyten is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
 // by the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// linalgwrap is distributed in the hope that it will be useful,
+// lazyten is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
+// along with lazyten. If not, see <http://www.gnu.org/licenses/>.
 //
 
 #pragma once
 #include "vector_tests.hh"
 
-namespace linalgwrap {
+namespace lazyten {
 namespace tests {
 namespace mutable_vector_tests {
 using namespace rc;
@@ -47,44 +47,44 @@ struct ComparativeTests : public vector_tests::ComparativeTests<Model, Sut> {
   typedef typename base_type::real_type real_type;
 
   /** Test setting all elements to zero */
-  linalgwrap_declare_comptest(test_setzero);
+  lazyten_declare_comptest(test_setzero);
 
   /** Test read-write element access via () at a random place.
    *  compare result against a model at all places except the
    *  changed entry.
    */
-  linalgwrap_declare_comptest(test_setting_elements);
+  lazyten_declare_comptest(test_setting_elements);
 
   /** Test read-write element access via [] at a random place.
    *  compare result against a model at all places except the
    *  changed entry.
    */
-  linalgwrap_declare_comptest(test_setting_elements_vectorised);
+  lazyten_declare_comptest(test_setting_elements_vectorised);
 
   /** Test whether modifying element entries using an iterator
    *  works.
    **/
-  linalgwrap_declare_comptest(test_readwrite_iterator);
+  lazyten_declare_comptest(test_readwrite_iterator);
 
   /** Test whether multiplication by a scalar yields the same
    *  values in model and sut */
-  linalgwrap_declare_comptest(test_multiply_scalar);
+  lazyten_declare_comptest(test_multiply_scalar);
 
   /** Test whether division by a scalar yields the same
    *  values in model and sut */
-  linalgwrap_declare_comptest(test_divide_scalar);
+  lazyten_declare_comptest(test_divide_scalar);
 
   /** Test whether addition of another arbitrary vector gives
    *  rise to the same results in model and sut.
    */
   template <typename OtherVector>
-  linalgwrap_declare_comptest(test_add);
+  lazyten_declare_comptest(test_add);
 
   /** Test whether subtraction of another arbitrary vector gives
    *  rise to the same results in model and sut.
    */
   template <typename OtherVector>
-  linalgwrap_declare_comptest(test_subtract);
+  lazyten_declare_comptest(test_subtract);
 
   /** Test set_zero() function */
   static void test_initialiser_setzero();
@@ -106,7 +106,7 @@ void run_with_generator(const RCTestableGenerator<Model, Sut, Args>& gen,
 // -------------------------------------------------------
 //
 
-linalgwrap_define_comptest(test_setzero) {
+lazyten_define_comptest(test_setzero) {
   sut_type sut_copy{sut};
   sut_copy.set_zero();
   RC_ASSERT_NC(model == numcomp(sut).tolerance(tolerance));
@@ -119,7 +119,7 @@ linalgwrap_define_comptest(test_setzero) {
   RC_ASSERT_NC(model_copy == numcomp(sut_copy).tolerance(tolerance));
 }
 
-linalgwrap_define_comptest(test_setting_elements) {
+lazyten_define_comptest(test_setting_elements) {
   auto modify_index = *gen::inRange<size_type>(0, model.n_elem()).as("Element to modify");
   auto value = *gen::arbitrary<scalar_type>().as("New value");
 
@@ -139,7 +139,7 @@ linalgwrap_define_comptest(test_setting_elements) {
   }
 }
 
-linalgwrap_define_comptest(test_setting_elements_vectorised) {
+lazyten_define_comptest(test_setting_elements_vectorised) {
   auto modify_index = *gen::inRange<size_type>(0, model.n_elem()).as("Element to modify");
   auto value = *gen::arbitrary<scalar_type>().as("New value");
 
@@ -159,7 +159,7 @@ linalgwrap_define_comptest(test_setting_elements_vectorised) {
   }
 }
 
-linalgwrap_define_comptest(test_readwrite_iterator) {
+lazyten_define_comptest(test_readwrite_iterator) {
   auto modify_index = *gen::inRange<size_type>(0, model.n_elem()).as("Element to modify");
   auto value = *gen::arbitrary<scalar_type>().as("New value");
 
@@ -178,7 +178,7 @@ linalgwrap_define_comptest(test_readwrite_iterator) {
   }
 }
 
-linalgwrap_define_comptest(test_multiply_scalar) {
+lazyten_define_comptest(test_multiply_scalar) {
   // Generate an arbitrary factor, but not too large
   auto c = *gen::numeric<scalar_type>().as("Coefficient");
 
@@ -195,7 +195,7 @@ linalgwrap_define_comptest(test_multiply_scalar) {
   RC_ASSERT_NC(res_model == numcomp(res2).tolerance(tolerance));
 }
 
-linalgwrap_define_comptest(test_divide_scalar) {
+lazyten_define_comptest(test_divide_scalar) {
   // Generate an arbitrary factor, but not too large
   auto c = *gen::numeric_around<scalar_type>(1.0).as("Coefficient");
 
@@ -210,7 +210,7 @@ linalgwrap_define_comptest(test_divide_scalar) {
   RC_ASSERT_NC(res_model == numcomp(res).tolerance(tolerance));
 }
 
-linalgwrap_define_comptest_tmpl(test_add, OtherVector) {
+lazyten_define_comptest_tmpl(test_add, OtherVector) {
   auto madd = *gen::numeric_tensor<OtherVector>(model.size()).as("Vector to add");
 
   // Perform the operation
@@ -226,7 +226,7 @@ linalgwrap_define_comptest_tmpl(test_add, OtherVector) {
   RC_ASSERT_NC(res_model == numcomp(res).tolerance(tolerance));
 }
 
-linalgwrap_define_comptest_tmpl(test_subtract, OtherVector) {
+lazyten_define_comptest_tmpl(test_subtract, OtherVector) {
   auto msub = *gen::numeric_tensor<OtherVector>(model.size()).as("Vector to substract");
 
   // Perform the operation
@@ -270,4 +270,4 @@ void ComparativeTests<Model, Sut>::run_all(
 
 }  // namespace mutable_vector_tests
 }  // namespace tests
-}  // namespace linalgwrap
+}  // namespace lazyten

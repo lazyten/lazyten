@@ -1,4 +1,4 @@
-# linalgwrap authors
+# lazyten authors
 
 Please either report bugs or suggestions on [github](https://github.com/lazyten/lazyten)
 or send them directly to the principle authors.

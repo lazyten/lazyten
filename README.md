@@ -3,12 +3,19 @@
 [![Coverage Status](https://coveralls.io/repos/github/lazyten/lazyten/badge.svg?branch=master)](https://coveralls.io/github/lazyten/lazyten)
 [![Licence](https://img.shields.io/github/license/lazyten/lazyten.svg)](LICENCE)
 
-A lightweight linear algebra wrapper library adding support for [lazy-matrices](#lazy matrices)
+A lightweight linear algebra wrapper library adding support for
+[lazy matrices](#lazy-matrices)
 and lazy matrix evaluation to existing linear algebra libraries.
+This library used to be called `linalgwrap` and was just recently renamed to `lazyten`
+(for **lazy** **ten**sor library).
+Right now we are only able to deal with lazy matrices,
+but we intend to add support for lazy tensor evaluation as well in the future.
 
-Note that this library is at a *very early stage* at the moment.
-This means that interfaces will very likely change in the future
-and only a fraction of the planned features are currently implemented.
+Note that we are still at a *very early* development stage.
+In other words interfaces will very likely change in the future
+in incompatible ways to what is currently implemented.
+We try to make sure that this does, however,
+not go unnoticed, i.e. that existing code breaks at compile time.
 
 ## Dependencies
 ``lazyten`` depends on the following libraries:
@@ -54,7 +61,7 @@ ctest
 In order to build without tests run
 ```
 mkdir build && cd build
-cmake -DAUTOCHECKOUT_MISSING_REPOS=ON -DLINALGWRAP_ENABLE_TESTS=OFF -DKRIMS_ENABLE_TESTS=OFF ..
+cmake -DAUTOCHECKOUT_MISSING_REPOS=ON -DLAZYTEN_ENABLE_TESTS=OFF -DKRIMS_ENABLE_TESTS=OFF ..
 cmake --build .
 ```
 
@@ -72,13 +79,13 @@ as well as parts of the [Design of ``molsturm``](http://docs.mfhs.eu/phd/invited
 talk.
 
 ### BaseInterfaces
-- The classes in [BaseInterfaces](src/linalgwrap/BaseInterfaces)
-  define the vector interface which is used inside ``linalgwrap``.
+- The classes in [BaseInterfaces](src/lazyten/BaseInterfaces)
+  define the vector interface which is used inside ``lazyten``.
 - Fallback implementations for many important operations are provided
   in case a particular linear-algebra backend does not support these.
   This also minimises the effort to get a first working link to a new
   linear algebra backend.
-- Implementations of backends (e.g. [Armadillo](src/linalgwrap/Armadillo))
+- Implementations of backends (e.g. [Armadillo](src/lazyten/Armadillo))
   use this interface and specialise the default implementations
   such that the backend library performs the actual work.
 - Our goal is to forward as much of the performance optimisations of the
@@ -86,7 +93,7 @@ talk.
   one backend.
 
 ### Builtin
-- [Builtin](src/linalgwrap/Builtin) contains a builtin vector class,
+- [Builtin](src/lazyten/Builtin) contains a builtin vector class,
   which is used as fallback.
 
 ### Lazy matrices
@@ -106,12 +113,12 @@ talk.
   Lazy matrix expressions are only evaluated if a
   vector-apply is performed or if the
   user explicitly asks for it.
-- Currently the [DiagonalMatrix](src/linalgwrap/DiagonalMatrix.hh)
+- Currently the [DiagonalMatrix](src/lazyten/DiagonalMatrix.hh)
   is available as an example of a builtin lazy matrix.
 - Another example is the class [DiagonalUpdatable](examples/diagonal/DiagonalUpdatable.hh)
   of the [diagonal](examples/diagonal) example program.
   This class also shows that custom lazy matrices can be created
-  by simply inheriting from [LazyMatrix_i](src/linalgwrap/LazyMatrix_i.hh).
+  by simply inheriting from [LazyMatrix_i](src/lazyten/LazyMatrix_i.hh).
 
 ### Matrix operations
 #### As Matrix member functions
@@ -136,18 +143,18 @@ On global scope we have:
 
 ### Solvers
 - In order to solve an eigenproblem the methods ``eigensystem`` and ``eigensystem_hermitian``
-  in the file [eigensystem.hh](src/linalgwrap/eigensystem.hh) are available as
+  in the file [eigensystem.hh](src/lazyten/eigensystem.hh) are available as
   high-level routines. These are the recommended routines to solve eigenproblems,
   since their interface is designed to be easy to use and it easy to enforce
   a particular eigensolver explicitly (using the parameter key ``method``).
-- For linear problems the file [solve.hh](src/linalgwrap/solve.hh) similarly
+- For linear problems the file [solve.hh](src/lazyten/solve.hh) similarly
   contains the method  ``solve``.
-- The folder [Base/Solvers](src/linalgwrap/Base/Solvers) holds all the lower
+- The folder [Base/Solvers](src/lazyten/Base/Solvers) holds all the lower
   interfaces and some utilities the actual solvers use.
-- Currently only [ArpackEigensolver](src/linalgwrap/Arpack/ArpackEigensolver.hh)
+- Currently only [ArpackEigensolver](src/lazyten/Arpack/ArpackEigensolver.hh)
   and some eigensolvers from Lapack (either indirectly via
-  [ArmadilloEigensolver](src/linalgwrap/Armadillo/ArmadilloEigensolver.hh)
-  or directy via [LapackEigensolver](src/linalgwrap/Lapack/LapackEigensolver.hh))
+  [ArmadilloEigensolver](src/lazyten/Armadillo/ArmadilloEigensolver.hh)
+  or directy via [LapackEigensolver](src/lazyten/Lapack/LapackEigensolver.hh))
   are implemented as eigensolver backends.
 - ARPACK is enabled if it is found on the system.
 - Linear problems are always solved with ``LAPACK`` via  ``armadillo`` right now.
@@ -156,8 +163,8 @@ On global scope we have:
 This class contains utilities for performing numerics-aware
 property-based testing. This includes:
 - An extension of [``krims::NumComp``](https://lazyten.org/krims/#performing-floating-point-comparisons)
-  for comparing Matrices within error bounds (in file [TestingUtils/krims_NumComp.hh](src/linalgwrap/TestingUtils/krims_NumComp.hh))
+  for comparing Matrices within error bounds (in file [TestingUtils/krims_NumComp.hh](src/lazyten/TestingUtils/krims_NumComp.hh))
 - Generators for scalar values, vectors and matrices which are
   not too difficult to deal with,
   such that tests do not fail due to accumulation of numeric errors
-  (in folder [TestingUtils/gen](src/linalgwrap/TestingUtils/gen))
+  (in folder [TestingUtils/gen](src/lazyten/TestingUtils/gen))

@@ -1,46 +1,46 @@
 ## ---------------------------------------------------------------------
 ##
-## Copyright (C) 2016 by the linalgwrap authors
+## Copyright (C) 2016 by the layzten authors
 ##
-## This file is part of linalgwrap.
+## This file is part of layzten.
 ##
-## linalgwrap is free software: you can redistribute it and/or modify
+## layzten is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published
 ## by the Free Software Foundation, either version 3 of the License, or
 ## (at your option) any later version.
 ##
-## linalgwrap is distributed in the hope that it will be useful,
+## layzten is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
+## along with layzten. If not, see <http://www.gnu.org/licenses/>.
 ##
 ## ---------------------------------------------------------------------
 
 # adds entries to these things
 #
-#       LINALGWRAP_DEPENDENCIES			everyone needs these libraries
-#       LINALGWRAP_DEPENDENCIES_DEBUG		debug mode needs these extras
-#       LINALGWRAP_DEPENDENCIES_RELEASE		release mode needs these extras
-#       LINALGWRAP_DEPENDENCIES_TEST		tests need these extra libraries
+#       LAZYTEN_DEPENDENCIES			everyone needs these libraries
+#       LAZYTEN_DEPENDENCIES_DEBUG		debug mode needs these extras
+#       LAZYTEN_DEPENDENCIES_RELEASE		release mode needs these extras
+#       LAZYTEN_DEPENDENCIES_TEST		tests need these extra libraries
 #
-#       LINALGWRAP_DEFINITIONS			definitions for all compilation
-#       LINALGWRAP_DEFINITIONS_DEBUG		definitions for debug mode
-#       LINALGWRAP_DEFINITIONS_RELEASE		definitions for release mode
+#       LAZYTEN_DEFINITIONS			definitions for all compilation
+#       LAZYTEN_DEFINITIONS_DEBUG		definitions for debug mode
+#       LAZYTEN_DEFINITIONS_RELEASE		definitions for release mode
 #
 
 ####################
 #-- C++ standard --#
 ####################
 if (NOT CMAKE_CXX_STANDARD VERSION_LESS 14)
-	message(STATUS "Detected C++14 support: Setting LINALGWRAP_HAVE_CXX14")
-	set(LINALGWRAP_HAVE_CXX14 ON)
+	message(STATUS "Detected C++14 support: Setting LAZYTEN_HAVE_CXX14")
+	set(LAZYTEN_HAVE_CXX14 ON)
 endif()
 if (NOT CMAKE_CXX_STANDARD VERSION_LESS 17)
-	message(STATUS "Detected C++17 support: Setting LINALGWRAP_HAVE_CXX17")
-	set(LINALGWRAP_HAVE_CXX17 ON)
+	message(STATUS "Detected C++17 support: Setting LAZYTEN_HAVE_CXX17")
+	set(LAZYTEN_HAVE_CXX17 ON)
 endif()
 
 ################
@@ -57,7 +57,7 @@ find_library(
 )
 if(NOT ${ARPACK_LIBRARY} MATCHES "-NOTFOUND")
 	message(STATUS "Found ARPACK at ${ARPACK_LIBRARY}")
-	set(LINALGWRAP_DEPENDENCIES ${LINALGWRAP_DEPENDENCIES} ${ARPACK_LIBRARY})
+	set(LAZYTEN_DEPENDENCIES ${LAZYTEN_DEPENDENCIES} ${ARPACK_LIBRARY})
 	enable_feature(arpack)
 endif()
 

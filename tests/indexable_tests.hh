@@ -1,20 +1,20 @@
 //
-// Copyright (C) 2016 by the linalgwrap authors
+// Copyright (C) 2016-17 by the lazyten authors
 //
-// This file is part of linalgwrap.
+// This file is part of lazyten.
 //
-// linalgwrap is free software: you can redistribute it and/or modify
+// lazyten is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
 // by the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// linalgwrap is distributed in the hope that it will be useful,
+// lazyten is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
+// along with lazyten. If not, see <http://www.gnu.org/licenses/>.
 //
 
 #pragma once
@@ -24,21 +24,21 @@
 #include <catch.hpp>
 #include <functional>
 #include <krims/Functionals.hh>
-#include <linalgwrap/Base/Interfaces.hh>
-#include <linalgwrap/TestingUtils.hh>
+#include <lazyten/Base/Interfaces.hh>
+#include <lazyten/TestingUtils.hh>
 
-namespace linalgwrap {
+namespace lazyten {
 namespace tests {
 
 // Macro to declare a test
-#define linalgwrap_declare_comptest(__testname)       \
+#define lazyten_declare_comptest(__testname)          \
   static void __testname(                             \
         const model_type& model, const sut_type& sut, \
         const NumCompAccuracyLevel tolerance = NumCompAccuracyLevel::Default)
 
 // Macro to define a test, which was declared inside a ComparativeTests
 // class
-#define linalgwrap_define_comptest(__testname)                           \
+#define lazyten_define_comptest(__testname)                              \
   template <typename Model, typename Sut>                                \
   void ComparativeTests<Model, Sut>::__testname(const model_type& model, \
                                                 const sut_type& sut,     \
@@ -46,7 +46,7 @@ namespace tests {
 
 // Macro to define a test, which was declared inside a ComparativeTests
 // class with an extra template argument
-#define linalgwrap_define_comptest_tmpl(__testname, __extratemplate)     \
+#define lazyten_define_comptest_tmpl(__testname, __extratemplate)        \
   template <typename Model, typename Sut>                                \
   template <typename __extratemplate>                                    \
   void ComparativeTests<Model, Sut>::__testname(const model_type& model, \
@@ -128,15 +128,15 @@ struct ComparativeTests {
                 "The size types of Sut and Model have to agree");
 
   /** Test whether the two matrices are identical */
-  linalgwrap_declare_comptest(test_equivalence);
+  lazyten_declare_comptest(test_equivalence);
 
   /** Test copying the sut */
-  linalgwrap_declare_comptest(test_copy);
+  lazyten_declare_comptest(test_copy);
 
   /** Test read-only element access via [] at
    *  random places. Compare resulting values of the
    *  sut with the model */
-  linalgwrap_declare_comptest(test_element_access_vectorised);
+  lazyten_declare_comptest(test_element_access_vectorised);
 
   /** Test whether using an iterator yields the same values as
    *  the entries in the model
@@ -144,20 +144,20 @@ struct ComparativeTests {
    * \note if sut and model are the same object this function compares
    *       the values yielded against the entries of the matrix.
    *  */
-  linalgwrap_declare_comptest(test_readonly_iterator);
+  lazyten_declare_comptest(test_readonly_iterator);
 
   /** Test the accumulate function */
-  linalgwrap_declare_comptest(test_accumulate);
+  lazyten_declare_comptest(test_accumulate);
 
   /** Test the functions dot and cdot*/
   template <typename OtherIndexable>
-  linalgwrap_declare_comptest(test_dot);
+  lazyten_declare_comptest(test_dot);
 
   /** Test the functions min and max*/
-  linalgwrap_declare_comptest(test_minmax);
+  lazyten_declare_comptest(test_minmax);
 
   /** Test the elementwise functions abs, conj, sqrt and square */
-  linalgwrap_declare_comptest(test_elementwise);
+  lazyten_declare_comptest(test_elementwise);
 
   /** Run all comparative tests */
   template <typename Args>
@@ -185,18 +185,18 @@ struct ComparativeTests {
 // ---------------------------------------------------------------
 //
 
-linalgwrap_define_comptest(test_equivalence) {
+lazyten_define_comptest(test_equivalence) {
   (void)tolerance;  // fake-use tolerance
   RC_ASSERT_NC(model == sut);
 
   size_type i = *gen::inRange<size_type>(0, model.n_elem())
                        .as("index where change is introduced");
   model_type modelcopy(model);
-  modelcopy[i] = modelcopy[i] + linalgwrap::Constants<scalar_type>::one;
+  modelcopy[i] = modelcopy[i] + lazyten::Constants<scalar_type>::one;
   RC_ASSERT_NC(modelcopy != sut);
 }
 
-linalgwrap_define_comptest(test_copy) {
+lazyten_define_comptest(test_copy) {
   sut_type copy{sut};
 
   sut_type copy2{sut};
@@ -207,12 +207,12 @@ linalgwrap_define_comptest(test_copy) {
   RC_ASSERT_NC(model == numcomp(copy2).tolerance(tolerance));
 }
 
-linalgwrap_define_comptest(test_element_access_vectorised) {
+lazyten_define_comptest(test_element_access_vectorised) {
   size_type i = *gen::inRange<size_type>(0, model.n_elem()).as("vectorised index");
   RC_ASSERT_NC(model[i] == numcomp(sut[i]).tolerance(tolerance));
 }
 
-linalgwrap_define_comptest(test_readonly_iterator) {
+lazyten_define_comptest(test_readonly_iterator) {
   auto it_const = sut.cbegin();
   auto it = sut.begin();
 
@@ -229,7 +229,7 @@ linalgwrap_define_comptest(test_readonly_iterator) {
   }
 }
 
-linalgwrap_define_comptest(test_accumulate) {
+lazyten_define_comptest(test_accumulate) {
   scalar_type res{0};
   for (size_type i = 0; i < model.n_elem(); ++i) {
     res += model[i];
@@ -238,7 +238,7 @@ linalgwrap_define_comptest(test_accumulate) {
   RC_ASSERT_NC(accumulate(sut) == numcomp(res).tolerance(tolerance));
 }
 
-linalgwrap_define_comptest_tmpl(test_dot, OtherIndexable) {
+lazyten_define_comptest_tmpl(test_dot, OtherIndexable) {
   OtherIndexable ind =
         *gen::numeric_tensor<OtherIndexable>(model.n_elem()).as("Indexable to dot with");
 
@@ -261,7 +261,7 @@ linalgwrap_define_comptest_tmpl(test_dot, OtherIndexable) {
   RC_ASSERT_NC(caccu == numcomp(cres).tolerance(tolerance));
 }
 
-linalgwrap_define_comptest(test_minmax) {
+lazyten_define_comptest(test_minmax) {
   MinMaxTest<scalar_type>::run(model, sut, tolerance);
 }
 
@@ -284,7 +284,7 @@ void ComparativeTests<Model, Sut>::MinMaxTest<Scalar>::run(
   RC_ASSERT_NC(*min_max.second == numcomp(maxi).tolerance(tolerance));
 }
 
-linalgwrap_define_comptest(test_elementwise) {
+lazyten_define_comptest(test_elementwise) {
   auto rabs = abs(sut);
   auto rabssqrt = sqrt(rabs);
   auto rsquare = square(sut);
@@ -343,4 +343,4 @@ void ComparativeTests<Model, Sut>::run_all(
 
 }  // namespace indexable_tests
 }  // namespace tests
-}  // namespace linalgwrap
+}  // namespace lazyten
