@@ -1,7 +1,7 @@
-# linalgwrap
-[![Build Status](https://travis-ci.org/linalgwrap/linalgwrap.svg?branch=master)](https://travis-ci.org/linalgwrap/linalgwrap)
-[![Coverage Status](https://coveralls.io/repos/github/linalgwrap/linalgwrap/badge.svg?branch=master)](https://coveralls.io/github/linalgwrap/linalgwrap)
-[![Licence](https://img.shields.io/github/license/linalgwrap/linalgwrap.svg)](LICENCE)
+# lazyten
+[![Build Status](https://travis-ci.org/lazyten/lazyten.svg?branch=master)](https://travis-ci.org/lazyten/lazyten)
+[![Coverage Status](https://coveralls.io/repos/github/lazyten/lazyten/badge.svg?branch=master)](https://coveralls.io/github/lazyten/lazyten)
+[![Licence](https://img.shields.io/github/license/lazyten/lazyten.svg)](LICENCE)
 
 A lightweight linear algebra wrapper library adding support for [lazy-matrices](#lazy matrices)
 and lazy matrix evaluation to existing linear algebra libraries.
@@ -11,8 +11,8 @@ This means that interfaces will very likely change in the future
 and only a fraction of the planned features are currently implemented.
 
 ## Dependencies
-``linalgwrap`` depends on the following libraries:
-- [krims](https://linalgwrap.org/krims) for many basic utilities
+``lazyten`` depends on the following libraries:
+- [krims](https://lazyten.org/krims) for many basic utilities
   (GenMap, Exception handling, Subscription pointers)
 - A BLAS implementation, e.g. [OpenBLAS](https://github.com/xianyi/OpenBLAS/)
 - A LAPACK compatible library, e.g.
@@ -20,13 +20,13 @@ and only a fraction of the planned features are currently implemented.
 - [armadillo](http://arma.sourceforge.net/) for the armadillo eigensolvers
   and linear solvers as well as the only linear-algebra backend (so far)
 - *(optional)* [ARPACK](http://www.caam.rice.edu/software/ARPACK/) in order to use
-  ``linalgwrap`` with the ARPACK eigensolver.
+  ``lazyten`` with the ARPACK eigensolver.
 
-Testing ``linalgwrap`` further requires
+Testing ``lazyten`` further requires
 - [Catch](https://github.com/philsquared/Catch/) for the testing environment
 - [rapidcheck](https://github.com/emil-e/rapidcheck) for property-based testing
 
-Note, that for building ``linalgwrap`` (see [below](#building)) you really only need to have
+Note, that for building ``lazyten`` (see [below](#building)) you really only need to have
 [armadillo](http://arma.sourceforge.net/), [LAPACK](http://netlib.org/lapack) and a BLAS
 installed on your system.
 All other dependencies can be automatically downloaded during the build process
@@ -41,9 +41,9 @@ A couple of things require ``C++14``, however.
 
 If you choose to build with the flag ``AUTOCHECKOUT_MISSING_REPOS`` set to ``ON``
 all required dependencies (**except** armadillo) will be automatically downloaded
-and compiled alongside ``linalgwrap``.
+and compiled alongside ``lazyten``.
 
-In order to build ``linalgwrap`` with tests (recommended) run
+In order to build ``lazyten`` with tests (recommended) run
 ```
 mkdir build && cd build
 cmake -DAUTOCHECKOUT_MISSING_REPOS=ON ..
@@ -58,13 +58,13 @@ cmake -DAUTOCHECKOUT_MISSING_REPOS=ON -DLINALGWRAP_ENABLE_TESTS=OFF -DKRIMS_ENAB
 cmake --build .
 ```
 
-## Short description of ``linalgwrap``
+## Short description of ``lazyten``
 This section gives a very short description of the features of
-``linalgwrap``.
+``lazyten``.
 We hope to produce some more detailed documentation at some point.
 
 Some of the design concepts and ideas that lead to the development
-of the present version of ``linalgwrap`` can also be found in the material on
+of the present version of ``lazyten`` can also be found in the material on
 [michael-herbst.com](https://michael-herbst.com/tag/lazy-matrices.html),
 most notably the presentation at the Niels Bohr Institute
 [HPC Day 2017](https://michael-herbst.com/talks/2017.05.19_HPC_Day_NBI.pdf)
@@ -155,7 +155,7 @@ On global scope we have:
 ### TestingUtils
 This class contains utilities for performing numerics-aware
 property-based testing. This includes:
-- An extension of [``krims::NumComp``](https://linalgwrap.org/krims/#performing-floating-point-comparisons)
+- An extension of [``krims::NumComp``](https://lazyten.org/krims/#performing-floating-point-comparisons)
   for comparing Matrices within error bounds (in file [TestingUtils/krims_NumComp.hh](src/linalgwrap/TestingUtils/krims_NumComp.hh))
 - Generators for scalar values, vectors and matrices which are
   not too difficult to deal with,
