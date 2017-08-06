@@ -31,7 +31,7 @@ drb_init()
 ##########################################################################
 # Project setup
 
-project(lazyten VERSION 0.2.0)
+project(lazyten VERSION 0.3.0)
 message("\n# Configuring ${PROJECT_NAME}\n#")
 
 # Global include directories for this project:
