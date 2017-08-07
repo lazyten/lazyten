@@ -26,10 +26,6 @@
 #       LAZYTEN_DEPENDENCIES_RELEASE		release mode needs these extras
 #       LAZYTEN_DEPENDENCIES_TEST		tests need these extra libraries
 #
-#       LAZYTEN_DEFINITIONS			definitions for all compilation
-#       LAZYTEN_DEFINITIONS_DEBUG		definitions for debug mode
-#       LAZYTEN_DEFINITIONS_RELEASE		definitions for release mode
-#
 
 ####################
 #-- Empty it all --#
@@ -38,9 +34,6 @@ set(LAZYTEN_DEPENDENCIES "")
 set(LAZYTEN_DEPENDENCIES_DEBUG "")
 set(LAZYTEN_DEPENDENCIES_RELEASE "")
 set(LAZYTEN_DEPENDENCIES_TEST "")
-set(LAZYTEN_DEFINITIONS "")
-set(LAZYTEN_DEFINITIONS_DEBUG "")
-set(LAZYTEN_DEFINITIONS_RELEASE "")
 include_krims_cmake_module(ProjectFeatures)
 
 ############################

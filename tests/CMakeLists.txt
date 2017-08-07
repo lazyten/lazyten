@@ -77,13 +77,6 @@ drb_add_executable(lazyten_tests
 	FILES ${LAZYTEN_TESTS_SOURCES}
 )
 
-drb_target_compile_definitions(ALL     lazyten_tests
-	PRIVATE ${LAZYTEN_DEFINITIONS})
-drb_target_compile_definitions(DEBUG   lazyten_tests
-	PRIVATE ${LAZYTEN_DEFINITIONS_DEBUG})
-drb_target_compile_definitions(RELEASE lazyten_tests
-	PRIVATE ${LAZYTEN_DEFINITIONS_RELEASE})
-
 drb_target_link_libraries(ALL     lazyten_tests
 	${LAZYTEN_DEPENDENCIES}   ${LAZYTEN_DEPENDENCIES_TEST})
 drb_target_link_libraries(DEBUG   lazyten_tests
