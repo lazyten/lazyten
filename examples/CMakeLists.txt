@@ -49,11 +49,7 @@ function(setup_example_target TARGET)
 	)
 
 	# link it with the appropriate lazyten library target
-	target_link_libraries(${TARGET}
-		${lazyten_${EXAMPLE_BUILD_TYPE}_TARGET}
-		${LAZYTEN_DEPENDENCIES}
-		${LAZYTEN_DEPENDENCIES_${EXAMPLE_BUILD_TYPE}}
-	)
+	target_link_libraries(${TARGET} ${lazyten_${EXAMPLE_BUILD_TYPE}_TARGET})
 endfunction()
 
 # Include subdirectories:
