@@ -28,6 +28,11 @@
 # It is just for convenience of downstream libraries, such that they can
 # find krims during their install process.
 #
+# This module is closely related to the krims cmake module
+# FindPackageAutocheckoutFallback in the sense that the two use largely the same
+# options and the mechanism of finding the krims module are extremly similar.
+# This should be taken into account when updating one of the two modules.
+#
 
 option(AUTOCHECKOUT_MISSING_REPOS "Automatically checkout missing repositories" OFF)
 option(AUTOCHECKOUT_FORCED
@@ -79,15 +84,20 @@ macro(include_krims_cmake_module MODULE)
 	# Determine FIRST_TRY_LOCATION, i.e the place where we first try to find
 	# the module
 	set(FIRST_TRY_LOCATION "")
-	if (NOT "$ENV{krims_DIR}" MATCHES "NOTFOUND"
+	if (NOT "$ENV{krims_DIR}" STREQUAL ""
+			AND NOT "$ENV{krims_DIR}" MATCHES "NOTFOUND"
 			AND NOT "$ENV{krims_DIR}" MATCHES "AUTOCHECKOUT")
 		set(FIRST_TRY_LOCATION
 			"$ENV{krims_DIR}/share/cmake/modules/${MODULE}.cmake")
 	endif()
 
-	if (NOT "${krims_DIR}" MATCHES "NOTFOUND"
+	# krims_DIR points to the directory containing the package config
+	# this is a sister directory to the modules directory containing
+	# the module files we are after.
+	if (NOT "${krims_DIR}" STREQUAL ""
+			AND NOT "${krims_DIR}" MATCHES "NOTFOUND"
 			AND NOT "${krims_DIR}" MATCHES "AUTOCHECKOUT")
-		set(FIRST_TRY_LOCATION "${krims_DIR}/share/cmake/modules/${MODULE}.cmake")
+		set(FIRST_TRY_LOCATION "${krims_DIR}/../modules/${MODULE}.cmake")
 	endif()
 
 	if ("${krims_DIR}" STREQUAL "krims_DIR-AUTOCHECKOUT"
@@ -100,6 +110,7 @@ macro(include_krims_cmake_module MODULE)
 	endif()
 
 	# Try the first try location
+	set(RES "NOTFOUND")
 	if (NOT "${FIRST_TRY_LOCATION}" STREQUAL "")
 		include("${FIRST_TRY_LOCATION}" OPTIONAL RESULT_VARIABLE RES)
 	endif()
