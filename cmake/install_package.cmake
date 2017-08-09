@@ -40,7 +40,7 @@ configure_file(cmake/lazytenConfig.cmake.in
 install(FILES
 	"${lazyten_BINARY_DIR}/lazytenConfig.cmake"
 	"${lazyten_BINARY_DIR}/lazytenConfigVersion.cmake"
-	DESTINATION "${PackageModuleLocation}/lazyten"
+	DESTINATION "share/cmake/lazyten"
 	COMPONENT devel
 )
 

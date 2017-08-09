@@ -26,10 +26,6 @@
 #       LAZYTEN_DEPENDENCIES_RELEASE		release mode needs these extras
 #       LAZYTEN_DEPENDENCIES_TEST		tests need these extra libraries
 #
-#       LAZYTEN_DEFINITIONS			definitions for all compilation
-#       LAZYTEN_DEFINITIONS_DEBUG		definitions for debug mode
-#       LAZYTEN_DEFINITIONS_RELEASE		definitions for release mode
-#
 
 ####################
 #-- C++ standard --#

@@ -55,13 +55,6 @@ drb_set_target_properties(ALL lazyten
 	VERSION "${PROJECT_VERSION}"
 )
 
-drb_target_compile_definitions(ALL     lazyten
-	PUBLIC ${LAZYTEN_DEFINITIONS})
-drb_target_compile_definitions(DEBUG   lazyten
-	PUBLIC ${LAZYTEN_DEFINITIONS_DEBUG})
-drb_target_compile_definitions(RELEASE lazyten
-	PUBLIC ${LAZYTEN_DEFINITIONS_RELEASE})
-
 drb_target_link_libraries(ALL     lazyten ${LAZYTEN_DEPENDENCIES})
 drb_target_link_libraries(DEBUG   lazyten ${LAZYTEN_DEPENDENCIES_DEBUG})
 drb_target_link_libraries(RELEASE lazyten ${LAZYTEN_DEPENDENCIES_RELEASE})
@@ -99,6 +92,6 @@ export(EXPORT LazytenTargets
 install(EXPORT LazytenTargets
 	FILE "lazytenTargets.cmake"
 	NAMESPACE Upstream::
-	DESTINATION "${PackageModuleLocation}/lazyten"
+	DESTINATION "share/cmake/lazyten"
 )
 

@@ -26,10 +26,6 @@
 #       LAZYTEN_DEPENDENCIES_RELEASE		release mode needs these extras
 #       LAZYTEN_DEPENDENCIES_TEST		tests need these extra libraries
 #
-#       LAZYTEN_DEFINITIONS			definitions for all compilation
-#       LAZYTEN_DEFINITIONS_DEBUG		definitions for debug mode
-#       LAZYTEN_DEFINITIONS_RELEASE		definitions for release mode
-#
 
 ####################
 #-- Empty it all --#
@@ -38,9 +34,6 @@ set(LAZYTEN_DEPENDENCIES "")
 set(LAZYTEN_DEPENDENCIES_DEBUG "")
 set(LAZYTEN_DEPENDENCIES_RELEASE "")
 set(LAZYTEN_DEPENDENCIES_TEST "")
-set(LAZYTEN_DEFINITIONS "")
-set(LAZYTEN_DEFINITIONS_DEBUG "")
-set(LAZYTEN_DEFINITIONS_RELEASE "")
 include_krims_cmake_module(ProjectFeatures)
 
 ############################
@@ -58,10 +51,8 @@ endif()
 #############
 #-- krims --#
 #############
-# Find at least version 0.0.0
-set(KRIMS_VERSION 0.0.0)
-include(cmake/findKrims.cmake)
-
+include_krims_cmake_module(FindPackageAutocheckoutFallback)
+find_package_autocheckout_fallback(krims 0.1.0)
 foreach (build ${DRB_BUILD_TYPES})
 	set(LAZYTEN_DEPENDENCIES_${build} ${LAZYTEN_DEPENDENCIES_${build}} ${krims_${build}_TARGET})
 endforeach()
