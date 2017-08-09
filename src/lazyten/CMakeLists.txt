@@ -92,6 +92,6 @@ export(EXPORT LazytenTargets
 install(EXPORT LazytenTargets
 	FILE "lazytenTargets.cmake"
 	NAMESPACE Upstream::
-	DESTINATION "${PackageModuleLocation}/lazyten"
+	DESTINATION "share/cmake/lazyten"
 )
 
