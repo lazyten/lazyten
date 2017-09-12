@@ -80,5 +80,5 @@ enable_feature(armadillo)
 
 # TODO Make this configurable
 # For now always use armadillo as the backend and never Bohrium
-set(SMALL_MATRIX_ARMADILLO ON)
-set(SMALL_MATRIX_BOHRIUM OFF)
+set(LAZYTEN_SMALL_MATRIX_ARMADILLO ON)
+set(LAZYTEN_SMALL_MATRIX_BOHRIUM OFF)

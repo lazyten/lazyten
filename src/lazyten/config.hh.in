@@ -38,7 +38,7 @@ namespace lazyten {
 //
 // Small matrix selection
 //
-#cmakedefine SMALL_MATRIX_ARMADILLO
-#cmakedefine SMALL_MATRIX_BOHRIUM
+#cmakedefine LAZYTEN_SMALL_MATRIX_ARMADILLO
+#cmakedefine LAZYTEN_SMALL_MATRIX_BOHRIUM
 
 }  // namespace lazyten

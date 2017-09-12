@@ -60,19 +60,16 @@ endif()
 #################
 #--  Bohrium  --#
 #################
-option(LINALGWRAP_ENABLE_BOHRIUM "Enable bohrium as a computational backend." OFF)
+option(LAZYTEN_ENABLE_BOHRIUM "Enable bohrium as a computational backend." OFF)
 disable_feature(bohrium)
 
 # TODO Provide way to search for Bohrium and enable it only if found
-if (LINALGWRAP_ENABLE_BOHRIUM)
+if (LAZYTEN_ENABLE_BOHRIUM)
 	# Forward parameters to included module
 	set(BOHRIUM_VERSION 0.8.3) # We need at least this version
 	include(cmake/findBohrium.cmake)
 	unset(BOHRIUM_VERSION)
 
-	set(LINALGWRAP_DEPENDENCIES ${LINALGWRAP_DEPENDENCIES} ${bohrium_TARGET})
+	set(LAZYTEN_DEPENDENCIES ${LAZYTEN_DEPENDENCIES} ${bohrium_TARGET})
 	enable_feature(bohrium)
 endif()
-
-
-

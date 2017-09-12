@@ -27,14 +27,14 @@
   class MATRIX;                       \
   template <typename Scalar>          \
   using SmallMatrix = MATRIX<Scalar>; \
-  }  // end namespace linalgwrap
+  }  // end namespace lazyten
 
-#if defined SMALL_MATRIX_ARMADILLO
+#if defined LAZYTEN_SMALL_MATRIX_ARMADILLO
 #include "lazyten/Armadillo/ArmadilloMatrix.hh"
 SMALL_MATRIX_CODE(ArmadilloMatrix)
 
 //
-#elif defined SMALL_MATRIX_BOHRIUM
+#elif defined LAZYTEN_SMALL_MATRIX_BOHRIUM
 #include "lazyten/Bohrium/BohriumMatrix.hh"
 SMALL_MATRIX_CODE(BohriumMatrix)
 

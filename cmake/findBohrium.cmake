@@ -1,21 +1,21 @@
 ## ---------------------------------------------------------------------
 ##
-## Copyright (C) 2017 by the linalgwrap authors
+## Copyright (C) 2017 by the lazyten authors
 ##
-## This file is part of linalgwrap.
+## This file is part of lazyten.
 ##
-## linalgwrap is free software: you can redistribute it and/or modify
+## lazyten is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published
 ## by the Free Software Foundation, either version 3 of the License, or
 ## (at your option) any later version.
 ##
-## linalgwrap is distributed in the hope that it will be useful,
+## lazyten is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
+## along with lazyten. If not, see <http://www.gnu.org/licenses/>.
 ##
 ## ---------------------------------------------------------------------
 
@@ -34,6 +34,7 @@
 #
 #option(AUTOCHECKOUT_MISSING_REPOS "Automatically checkout missing repositories" OFF)
 
+MESSAGE(WARNING "TODO findBohrium is in general a bit of a hack.")
 # TODO This file is pretty much only a stub
 # 
 # TODO Improve search and use external repos
@@ -83,7 +84,6 @@ set_target_properties(${bohrium_TARGET} PROPERTIES
 	INTERFACE_LINK_LIBRARIES "${BOHRIUM_LIBRARY};${BOHRIUM_LIBDIR}/libbhxx.so"
 	INTERFACE_INCLUDE_DIRECTORIES "${BOHRIUM_INCLUDE}/bohrium;${BOHRIUM_INCLUDE}"
 )
-MESSAGE(WARNING "This is a bit of a hack.")
 
 # TODO Dummy for now ... better do this via a module
 file(WRITE "${PROJECT_BINARY_DIR}/ycm_extra_includes.yaml"

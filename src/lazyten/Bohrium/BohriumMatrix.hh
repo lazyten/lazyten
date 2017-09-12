@@ -1,36 +1,36 @@
 //
-// Copyright (C) 2016-17 by the linalgwrap authors
+// Copyright (C) 2016-17 by the lazyten authors
 //
-// This file is part of linalgwrap.
+// This file is part of lazyten.
 //
-// linalgwrap is free software: you can redistribute it and/or modify
+// lazyten is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
 // by the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// linalgwrap is distributed in the hope that it will be useful,
+// lazyten is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with linalgwrap. If not, see <http://www.gnu.org/licenses/>.
+// along with lazyten. If not, see <http://www.gnu.org/licenses/>.
 //
 
 #pragma once
-#include "linalgwrap/config.hh"
-#ifdef LINALGWRAP_HAVE_BOHRIUM
+#include "lazyten/config.hh"
+#ifdef LAZYTEN_HAVE_BOHRIUM
 
 #include "BohriumTypes.hh"
 #include "BohriumVector.hh"
 #include "common.hh"
-#include "linalgwrap/Base/Interfaces/Transposed.hh"
-#include "linalgwrap/StoredMatrix_i.hh"
-#include "linalgwrap/TypeUtils/mat_vec_apply_enabled_t.hh"
-#include "linalgwrap/detail/scale_or_set.hh"
+#include "lazyten/Base/Interfaces/Transposed.hh"
+#include "lazyten/StoredMatrix_i.hh"
+#include "lazyten/TypeUtils/mat_vec_apply_enabled_t.hh"
+#include "lazyten/detail/scale_or_set.hh"
 #include <bhxx/bhxx.hpp>
 
-namespace linalgwrap {
+namespace lazyten {
 
 // Forward-declare the interface class
 template <typename Scalar>
@@ -198,11 +198,12 @@ class BohriumMatrix : public StoredMatrix_i<Scalar> {
 
   /** \brief Compute the application of the inverse of the matrix
    *  (or the inverse of the transpose of the matrix) to a MultiVector
-    * For details see LazyMatrixExpression
-    */
+   * For details see LazyMatrixExpression
+   */
   template <typename VectorIn, typename VectorOut,
             mat_vec_apply_enabled_t<BohriumMatrix, VectorIn, VectorOut>...>
-  void apply_inverse(const MultiVector<VectorIn>& /*x*/, MultiVector<VectorOut>&
+  void apply_inverse(const MultiVector<VectorIn>& /*x*/,
+                     MultiVector<VectorOut>&
                      /*y*/,
                      const Transposed /*mode */ = Transposed::None,
                      const scalar_type /*c_this */ = 1,
@@ -235,9 +236,9 @@ class BohriumMatrix : public StoredMatrix_i<Scalar> {
   }
 
   /** \brief Compute the Matrix-Matrix product
-    *
-    * For more details see the docstring of the corresponding method
-    * in LazyMatrixExpression */
+   *
+   * For more details see the docstring of the corresponding method
+   * in LazyMatrixExpression */
   void mmult(const BohriumMatrix& in, BohriumMatrix& out,
              const Transposed mode = Transposed::None, const scalar_type c_this = 1,
              const scalar_type c_out = 0) const;
@@ -547,5 +548,5 @@ Scalar norm_linf(const BohriumMatrix<Scalar>& m) {
   return bhxx::as_scalar(result);
 }
 
-}  // namespace linalgwrap
-#endif  // LINALGWRAP_HAVE_BOHRIUM
+}  // namespace lazyten
+#endif  // LAZYTEN_HAVE_BOHRIUM
