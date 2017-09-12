@@ -28,6 +28,8 @@ not go unnoticed, i.e. that existing code breaks loudly at compile time.
   and linear solvers as well as the only linear-algebra backend (so far)
 - *(optional)* [ARPACK](http://www.caam.rice.edu/software/ARPACK/) in order to use
   ``lazyten`` with the ARPACK eigensolver.
+- *(optional)* [Bohrium](https://github.com/bh107/bohrium) in order to use the
+  Bohrium linear algebra backend with `lazyten`.
 
 Testing ``lazyten`` further requires
 - [Catch](https://github.com/philsquared/Catch/) for the testing environment
