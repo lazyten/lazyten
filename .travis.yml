@@ -40,21 +40,24 @@ env:
     # The regex for tests to run (disable running tests by TESTS=0)
     - TESTS=1  TESTS_REGEX="lazyten_tests_"
 
-before_install:
-    - travis_retry pip install --user cpp-coveralls
-
 addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test     # libstdc++-4.9-dev (gcc 4.8's libstdc++ is buggy)
       - llvm-toolchain-trusty-4.0   # clang-4.0
     packages:
+      - python3-pip
       - ninja-build
       #
       - libarmadillo-dev
       - libboost-dev
       - liblapack-dev
       - libblas-dev
+
+before_install:
+  # Note: Using pip, i.e. python2 is on purpose, becase there were problems
+  #       with python3
+  - travis_retry pip install --user cpp-coveralls
 
 matrix:
   include:
