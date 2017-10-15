@@ -15,7 +15,7 @@ Note that we are still at a *very early* development stage.
 In other words interfaces will very likely change in the future
 in incompatible ways to what is currently implemented.
 We try to make sure that this does, however,
-not go unnoticed, i.e. that existing code breaks at compile time.
+not go unnoticed, i.e. that existing code breaks loudly at compile time.
 
 ## Dependencies
 ``lazyten`` depends on the following libraries:
@@ -33,22 +33,57 @@ Testing ``lazyten`` further requires
 - [Catch](https://github.com/philsquared/Catch/) for the testing environment
 - [rapidcheck](https://github.com/emil-e/rapidcheck) for property-based testing
 
-Note, that for building ``lazyten`` (see [below](#building)) you really only need to have
-[armadillo](http://arma.sourceforge.net/), [LAPACK](http://netlib.org/lapack) and a BLAS
-installed on your system.
-All other dependencies can be automatically downloaded during the build process
-if you choose to do so (set ``AUTOCHECKOUT_MISSING_REPOS`` to ``ON``,
-more below)
+`lazyten` comes with a couple of tools to automatically download and build
+some of these dependencies during the
+[manual build process](#building-manually-without-spack).
+To avoid the potential hassle all together we do, however,
+recommend [using `Spack` to build `lazyten`](#building-via-spack-recommended).
 
-## Building
+
+## Building via Spack (recommended)
+The [Spack](https://spack.io) package manager allows to easily install scientific software.
+Both `lazyten` as well as `krims` are available in `spack`.
+Installing `lazyten` via `spack` is therefore as simple as
+```sh
+# Clone and setup spack
+git clone https://github.com/llnl/spack.git
+export SPACK_ROOT="$PWD/spack"
+. $SPACK_ROOT/share/spack/setup-env.sh
+
+# Install lazyten (and all required dependencies)
+spack install lazyten
+```
+Once this has happened you can add all relevant environment variables
+(`LD_LIBRARY_PATH`, `PATH`, `CPATH`, ...) to the current shell
+via the command
+```sh
+spack load lazyten
+```
+and are thereafter ready to go for linking `lazyten` to your project.
+
+Other than that Spack makes it very easy to customise the installation, too.
+For example to influence which features of `lazyten` are to be built,
+one can add specifiers to the `spack install` command.  
+If you prefer to build `lazyten` without `ARPACK` for example, run
+```sh
+spack install lazyten~arpack
+```
+instead of the command mentioned initially.
+
+For more information about how to use Spack see
+the great [Spack documentation](https://spack.readthedocs.io).
+
+
+## Building manually (without Spack)
 For configuring the build we need at least ``cmake`` ``3.0.0``.  
 All compilers starting from ``clang-3.5`` and ``gcc-4.8`` should be able to build the code.
 ``C++11`` support is required and enables all basic functionality of the library.
 A couple of things require ``C++14``, however.
 
 If you choose to build with the flag ``AUTOCHECKOUT_MISSING_REPOS`` set to ``ON``
-all required dependencies (**except** armadillo) will be automatically downloaded
-and compiled alongside ``lazyten``.
+most required dependencies (*except* armadillo, LAPACK and BLAS) will be automatically
+downloaded and compiled alongside ``lazyten``,
+so you really need to have only armadillo, LAPACK and BLAS on your system at build time.
 
 In order to build ``lazyten`` with tests (recommended) run
 ```
