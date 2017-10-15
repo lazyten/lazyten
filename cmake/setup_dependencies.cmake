@@ -52,7 +52,7 @@ endif()
 #-- krims --#
 #############
 include_krims_cmake_module(FindPackageAutocheckoutFallback)
-find_package_autocheckout_fallback(krims 0.1.0)
+find_package_autocheckout_fallback(krims 0.2.1)
 foreach (build ${DRB_BUILD_TYPES})
 	set(LAZYTEN_DEPENDENCIES_${build} ${LAZYTEN_DEPENDENCIES_${build}} ${krims_${build}_TARGET})
 endforeach()
