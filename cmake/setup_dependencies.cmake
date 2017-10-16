@@ -75,5 +75,5 @@ unset(BLA_VENDOR)
 #################
 find_package(Armadillo 4.000 REQUIRED)
 set(LAZYTEN_DEPENDENCIES ${LAZYTEN_DEPENDENCIES} ${ARMADILLO_LIBRARIES})
-include_directories(${ARMADILLO_INCLUDE_DIRS})
+include_directories(SYSTEM ${ARMADILLO_INCLUDE_DIRS})
 enable_feature(armadillo)
