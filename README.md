@@ -55,11 +55,15 @@ spack install lazyten
 ```
 Once this has happened you can add all relevant environment variables
 (`LD_LIBRARY_PATH`, `PATH`, `CPATH`, ...) to the current shell
-via the command
+via the commands
 ```sh
-spack load lazyten
+spack module loads -r lazyten > /tmp/lazyten.modules
+. /tmp/lazyten.modules
 ```
-and are thereafter ready to go for linking `lazyten` to your project.
+which will generate a list of all spack modules `lazyten` needs
+and loades them thereafter.
+Running the above two lines of code gets you ready for
+linking `lazyten` to your project.
 
 Other than that Spack makes it very easy to customise the installation, too.
 For example to influence which features of `lazyten` are to be built,
